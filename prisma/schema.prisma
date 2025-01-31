@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+//---------------------------------------------------------------------------------------------------
+
+model Categorie {
+  id_categorie Int     @id @default(autoincrement())
+  nom          String
+  description  String?
+  image        String
+  produits     Produit[]
+}
+
+model Produit {
+  id_produit          Int       @id @default(autoincrement())
+  nom                 String
+  description        String?
+  caracteristiques_techniques String?
+  prix_unitaire       Float
+  disponible          Boolean
+  ordre_priorite     Int
+  date_maj           DateTime
+  id_categorie       Int
+  categorie          Categorie @relation(fields: [id_categorie], references: [id_categorie])
+  image              String
+  produitsCommandes  Produit_Commande[]
+}
+
+model Produit_Commande {
+  id_produit_commande Int       @id @default(autoincrement())
+  id_produit          Int
+  id_commande         Int
+  produit             Produit  @relation(fields: [id_produit], references: [id_produit])
+  commande            Commande @relation(fields: [id_commande], references: [id_commande])
+}
+
+model Commande {
+  id_commande         Int       @id @default(autoincrement())
+  date_commande       DateTime
+  type_abonnement     String
+  duree_abonnement    Int
+  montant_total       Float
+  statut_commande     String
+  mode_paiement      String
+  dernier_chiffre_cb  String
+  facture_pdf_url     String
+  date_renouvellement DateTime
+  id_client           Int
+  client              Client   @relation(fields: [id_client], references: [id_client])
+  produitsCommandes   Produit_Commande[]
+}
+
+model Client {
+  id_client        Int              @id @default(autoincrement())
+  nom              String
+  prenom           String
+  email            String           @unique
+  mot_de_passe     String
+  commandes        Commande[]
+  infoPaiement     Info_Paiement[]
+  adresses         Adresse_Client[]
+  chatbotConversations Chatbot_Conversation[]
+}
+
+model Info_Paiement {
+  id_info_paiement Int    @id @default(autoincrement())
+  nom_carte        String
+  numero_carte     String
+  date_expiration  DateTime
+  CVV              String
+  est_paiement_defaut Boolean
+  id_client        Int
+  client           Client @relation(fields: [id_client], references: [id_client])
+}
+
+model Adresse_Client {
+  id_adresse        Int     @id @default(autoincrement())
+  prenom            String
+  nom               String
+  rue               String
+  complement        String?
+  cp                String
+  ville             String
+  region            String
+  pays              String
+  telephone_mobile  String
+  est_facturation_defaut Boolean
+  est_livraison_defaut Boolean
+  id_client         Int
+  client            Client @relation(fields: [id_client], references: [id_client])
+}
+
+model Chatbot_Conversation {
+  id_chatbot_conversation Int       @id @default(autoincrement())
+  statut_conversation     String
+  date_demarrage          DateTime
+  date_terminaison        DateTime?
+  utilisateur_email       String
+  id_client               Int
+  client                  Client  @relation(fields: [id_client], references: [id_client])
+  messages                Chatbot_Message[]
+  escalades               Chatbot_Escalade[]
+}
+
+model Chatbot_Message {
+  id_chatbot_message     Int       @id @default(autoincrement())
+  message                String
+  type_message           String
+  date_message           DateTime
+  id_chatbot_conversation Int
+  chatbotConversation    Chatbot_Conversation @relation(fields: [id_chatbot_conversation], references: [id_chatbot_conversation])
+}
+
+model Chatbot_Escalade {
+  id_chatbot_escalade    Int       @id @default(autoincrement())
+  date_escalade          DateTime
+  statut_escalade        String
+  id_chatbot_conversation Int
+  chatbotConversation    Chatbot_Conversation @relation(fields: [id_chatbot_conversation], references: [id_chatbot_conversation])
+}
