@@ -11,6 +11,7 @@ import ListItemDecorator from '@mui/joy/ListItemDecorator';
 import Typography from '@mui/joy/Typography';
 import Check from '@mui/icons-material/Check';
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight';
+import { X } from 'lucide-react';
 
 export default function PricingCards() {
   return (
@@ -24,40 +25,189 @@ export default function PricingCards() {
     >
       <Card size="lg" variant="outlined">
         <Chip size="sm" variant="outlined" color="neutral">
-          BASIC
+          Mensuel
         </Chip>
-        <Typography level="h2">Professional</Typography>
+        <Typography level="h2">Accès de base</Typography>
         <Divider inset="none" />
         <List size="sm" sx={{ mx: 'calc(-1 * var(--ListItem-paddingX))' }}>
           <ListItem>
             <ListItemDecorator>
               <Check />
             </ListItemDecorator>
-            Virtual Credit Cards
+            Support Standard
           </ListItem>
           <ListItem>
             <ListItemDecorator>
               <Check />
             </ListItemDecorator>
-            Financial Analytics
+            Essai gratuit de 14 jours
           </ListItem>
           <ListItem>
             <ListItemDecorator>
               <Check />
             </ListItemDecorator>
-            Checking Account
+            Fonctionnalités basiques
           </ListItem>
           <ListItem>
             <ListItemDecorator>
-              <Check />
+              <X />
             </ListItemDecorator>
-            API Integration
+            Personnalisation
           </ListItem>
         </List>
         <Divider inset="none" />
         <CardActions>
           <Typography level="title-lg" sx={{ mr: 'auto' }}>
-            3.990€{' '}
+            15,00€{' '}
+            <Typography textColor="text.tertiary" sx={{ fontSize: 'sm' }}>
+              / mois
+            </Typography>
+          </Typography>
+          <Button
+            variant="soft"
+            color="neutral"
+            endDecorator={<KeyboardArrowRight />}
+          >
+            S'abonner
+          </Button>
+        </CardActions>
+      </Card>
+      
+      <Card size="lg" variant="outlined">
+        <Chip size="sm" variant="outlined" color="neutral">
+          Annuel
+        </Chip>
+        <Typography level="h2">Accès complet</Typography>
+        <Divider inset="none" />
+        <List size="sm" sx={{ mx: 'calc(-1 * var(--ListItem-paddingX))' }}>
+          <ListItem>
+            <ListItemDecorator>
+              <Check />
+            </ListItemDecorator>
+            Support Premium
+          </ListItem>
+          <ListItem>
+            <ListItemDecorator>
+              <Check />
+            </ListItemDecorator>
+            Essai gratuit de 30 jours
+          </ListItem>
+          <ListItem>
+            <ListItemDecorator>
+              <Check />
+            </ListItemDecorator>
+            Fonctionnalités complètes
+          </ListItem>
+          <ListItem>
+            <ListItemDecorator>
+              <Check />
+            </ListItemDecorator>
+            Personnalisation
+          </ListItem>
+        </List>
+        <Divider inset="none" />
+        <CardActions>
+          <Typography level="title-lg" sx={{ mr: 'auto' }}>
+            144,00€{' '}
+            <Typography textColor="text.tertiary" sx={{ fontSize: 'sm' }}>
+              / année
+            </Typography>
+          </Typography>
+          <Button
+            variant="soft"
+            color="neutral"
+            endDecorator={<KeyboardArrowRight />}
+          >
+            S'abonner
+          </Button>
+        </CardActions>
+      </Card>
+      
+      <Card size="lg" variant="outlined">
+        <Chip size="sm" variant="outlined" color="neutral">
+          Par utilisateur
+        </Chip>
+        <Typography level="h2">Accès limité</Typography>
+        <Divider inset="none" />
+        <List size="sm" sx={{ mx: 'calc(-1 * var(--ListItem-paddingX))' }}>
+          <ListItem>
+            <ListItemDecorator>
+              <Check />
+            </ListItemDecorator>
+            Support Standard
+          </ListItem>
+          <ListItem>
+            <ListItemDecorator>
+              <Check />
+            </ListItemDecorator>
+            Essai gratuit de 7 jours
+          </ListItem>
+          <ListItem>
+            <ListItemDecorator>
+              <Check />
+            </ListItemDecorator>
+            Fonctionnalités limitées
+          </ListItem>
+          <ListItem>
+            <ListItemDecorator>
+              <Check />
+            </ListItemDecorator>
+            Personnalisation
+          </ListItem>
+        </List>
+        <Divider inset="none" />
+        <CardActions>
+          <Typography level="title-lg" sx={{ mr: 'auto' }}>
+            10,00€{' '}
+            <Typography textColor="text.tertiary" sx={{ fontSize: 'sm' }}>
+              / mois
+            </Typography>
+          </Typography>
+          <Button
+            variant="soft"
+            color="neutral"
+            endDecorator={<KeyboardArrowRight />}
+          >
+            S'abonner
+          </Button>
+        </CardActions>
+      </Card>
+      <Card size="lg" variant="outlined">
+        <Chip size="sm" variant="outlined" color="neutral">
+          Par appareil
+        </Chip>
+        <Typography level="h2">Accès de base</Typography>
+        <Divider inset="none" />
+        <List size="sm" sx={{ mx: 'calc(-1 * var(--ListItem-paddingX))' }}>
+          <ListItem>
+            <ListItemDecorator>
+              <Check />
+            </ListItemDecorator>
+            Support Standard
+          </ListItem>
+          <ListItem>
+            <ListItemDecorator>
+              <Check />
+            </ListItemDecorator>
+            Essai gratuit de 14 jours
+          </ListItem>
+          <ListItem>
+            <ListItemDecorator>
+              <Check />
+            </ListItemDecorator>
+            Fonctionnalités complètes
+          </ListItem>
+          <ListItem>
+            <ListItemDecorator>
+              <Check />
+            </ListItemDecorator>
+            Personnalisation
+          </ListItem>
+        </List>
+        <Divider inset="none" />
+        <CardActions>
+          <Typography level="title-lg" sx={{ mr: 'auto' }}>
+            15,00€{' '}
             <Typography textColor="text.tertiary" sx={{ fontSize: 'sm' }}>
               / month
             </Typography>
@@ -67,70 +217,8 @@ export default function PricingCards() {
             color="neutral"
             endDecorator={<KeyboardArrowRight />}
           >
-            Start now
+            S'abonner
           </Button>
-        </CardActions>
-      </Card>
-      <Card
-        size="lg"
-        variant="solid"
-        color="neutral"
-        invertedColors
-        sx={{ bgcolor: 'neutral.900' }}
-      >
-        <Chip size="sm" variant="outlined">
-          MOST POPULAR
-        </Chip>
-        <Typography level="h2">Unlimited</Typography>
-        <Divider inset="none" />
-        <List
-          size="sm"
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            mx: 'calc(-1 * var(--ListItem-paddingX))',
-          }}
-        >
-          <ListItem>
-            <ListItemDecorator>
-              <Check />
-            </ListItemDecorator>
-            Virtual Credit Cards
-          </ListItem>
-          <ListItem>
-            <ListItemDecorator>
-              <Check />
-            </ListItemDecorator>
-            Financial Analytics
-          </ListItem>
-          <ListItem>
-            <ListItemDecorator>
-              <Check />
-            </ListItemDecorator>
-            Checking Account
-          </ListItem>
-          <ListItem>
-            <ListItemDecorator>
-              <Check />
-            </ListItemDecorator>
-            API Integration
-          </ListItem>
-          <ListItem>
-            <ListItemDecorator>
-              <Check />
-            </ListItemDecorator>
-            Cancel Anytime
-          </ListItem>
-        </List>
-        <Divider inset="none" />
-        <CardActions>
-          <Typography level="title-lg" sx={{ mr: 'auto' }}>
-            5.990€{' '}
-            <Typography textColor="text.tertiary" sx={{ fontSize: 'sm' }}>
-              / month
-            </Typography>
-          </Typography>
-          <Button endDecorator={<KeyboardArrowRight />}>Start now</Button>
         </CardActions>
       </Card>
     </Box>
