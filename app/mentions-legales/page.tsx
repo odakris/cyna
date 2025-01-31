@@ -1,11 +1,11 @@
 "use client"
 
-import MentionLegales from "@/components/Footer/MentionLegales"
+import MentionsLegales from "@/components/Footer/MentionsLegales"
 
 export default function MentionLegalesPage() {
   return (
     <div className="flex justify-center items-center h-[100%]">
-      <MentionLegales />
+      <MentionsLegales />
     </div>
   )
 }
