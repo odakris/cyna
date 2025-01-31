@@ -1,7 +1,9 @@
-import { Button } from "../components/ui/button";
+import { Button } from "../components/ui/button"
 
 export default function Home() {
   return (
-    <div><Button variant={"destructive"}>HOME</Button></div>
-  );
+    <div className="flex justify-center items-center h-[100%]">
+      <Button className="cyna-font">HOME</Button>
+    </div>
+  )
 }

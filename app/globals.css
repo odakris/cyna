@@ -2,9 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: Arial, Helvetica, sans-serif;
+* {
+  /* border: 1px solid black; */
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
+
+html,
+body {
+  width: 100vw;
+  height: 100vh;
+}
+
+/* body {
+  font-family: "Avenir Black",
+    Arial,
+    Helvetica,
+    'Roboto';
+} */
+
+/* CYNA COLORS */
+.cyna-bg-primary-color {
+  background-color: #302082;
+}
+
+.cyna-bg-secondary-color {
+  background-color: #F2F2F2;
+}
+
+.cyna-text-color {
+  color: #FFFFFF;
+}
+
+.cyna-btn-color {
+  background-color: #FF6B00;
+}
+
+/* CYNA TYPO */
+/* .cyna-font {
+  font-family: 'wfont_2cec0a_225ccd98f9cc45bc98b17e5c09f24492', 'wf_225ccd98f9cc45bc98b17e5c0', 'orig_avenir_lt_std_95_black';
+} */
+
+/* @font-face {
+  font-family: "Avenir Black";
+  src: url("/fonts/Avenir LT Std 95 Black.otf") format("opentype");
+  font-weight: 900;
+  font-style: normal;
+} */
 
 @layer base {
   :root {
@@ -34,6 +79,7 @@ body {
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
@@ -66,6 +112,7 @@ body {
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
