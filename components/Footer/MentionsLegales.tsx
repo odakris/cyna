@@ -2,7 +2,7 @@ import React from "react"
 
 export default function MentionsLegales() {
   return (
-    <div className="mentions-legales">
+    <div className="mentions-legales text-justify">
       <h1 className="font-bold cyna-title cyna-text-primary-color">
         Mentions Légales
       </h1>
