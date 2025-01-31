@@ -27,9 +27,9 @@ export function Navbar() {
   const navLinks = ["Acceuil", "Categories", "Recherche Avancée"]
 
   return (
-    <header className="w-full p-4 lg:p-3 cyna-bg-primary-color">
+    <header className="w-full fixed top-0 left-0 z-50 cyna-bg-primary-color shadow-xl">
       {/* MOBILE NAVIGATION */}
-      <div className="lg:hidden flex items-center justify-between w-full">
+      <div className="lg:hidden flex items-center justify-between px-6 py-4">
         {/* Left: Menu Drawer */}
         <Sheet>
           <SheetTrigger className="mx-2">
@@ -44,7 +44,10 @@ export function Navbar() {
                 <NavigationMenuLink
                   key={item}
                   href="/"
-                  className={cn(navigationMenuTriggerStyle(), "w-full")}
+                  className={cn(
+                    navigationMenuTriggerStyle(),
+                    "w-full cyna-subtitle"
+                  )}
                 >
                   {item}
                 </NavigationMenuLink>
@@ -62,7 +65,7 @@ export function Navbar() {
       </div>
 
       {/* DESKTOP NAVIGATION */}
-      <nav className="hidden lg:flex items-center justify-between w-[90%] mx-auto">
+      <nav className="hidden lg:flex items-center justify-between max-w-7xl mx-auto px-6 py-3 w-full">
         {/* Left: Logo & Links */}
         <div className="flex items-center space-x-6">
           <Link href="/">
@@ -83,7 +86,7 @@ export function Navbar() {
                     href="/"
                     className={cn(
                       navigationMenuTriggerStyle(),
-                      "cyna-bg-primary-color cyna-text-color hover:bg-opacity-80 transition"
+                      "cyna-bg-primary-color cyna-text-color hover:cyna-text-primary-color hover:bg-opacity-80 transition"
                     )}
                   >
                     {item}

@@ -9,6 +9,7 @@
   padding: 0;
 }
 
+
 html,
 body {
   width: 100vw;
@@ -27,6 +28,10 @@ body {
   background-color: #302082;
 }
 
+.cyna-text-primary-color {
+  color: #302082;
+}
+
 .cyna-bg-secondary-color {
   background-color: #F2F2F2;
 }
@@ -37,6 +42,26 @@ body {
 
 .cyna-btn-color {
   background-color: #FF6B00;
+}
+
+.cyna-title {
+  font-size: 40px;
+  /*Titres principaux 36px - 48px Majuscules*/
+}
+
+.cyna-subtitle {
+  font-size: 26px;
+  /*Sous-titres 24px - 30px Première lettre en majuscule*/
+}
+
+.cyna-text {
+  font-size: 16px;
+  /*Corps de texte 16px - 18px Normal*/
+}
+
+.cyna-btn {
+  font-size: 20px;
+  /*Boutons et CTA 18px - 24px Majuscules ou première lettre en majuscule*/
 }
 
 /* CYNA TYPO */
