@@ -36,16 +36,14 @@ export default function RootLayout({
           </div>
 
           {/* Main Content */}
-          <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-4 mt-20">
+          <main className="flex-1 max-w-7xl w-full mx-auto py-4 px-10 mt-20">
             {children}
           </main>
 
           {/* Footer */}
-          {/* <footer className="w-full"> */}
           <div className="w-full">
             <Footer />
           </div>
-          {/* </footer> */}
         </div>
       </body>
     </html>
