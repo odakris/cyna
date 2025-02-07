@@ -46,7 +46,7 @@ export default function Contact() {
       message: data.message,
     }
 
-    emailjs.send("formulaire-contact", "template_6vb978r", templateParams, "qKSPTT_1bii3Yniqd") // changer le template id après en avoir crée un, leur site bug pour l'instant
+    emailjs.send("formulaire-contact", "template_pfg17bm", templateParams, "qKSPTT_1bii3Yniqd") // changer le template id après en avoir crée un, leur site bug pour l'instant
       .then(() => {
         alert("Message envoyé avec succès ! ✅")
         form.reset() // Réinitialise le formulaire après envoi
