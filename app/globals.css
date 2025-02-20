@@ -42,6 +42,15 @@ body {
 
 .cyna-btn-color {
   background-color: #FF6B00;
+  color: #FFFFFF;
+  border: 2px solid transparent;
+  transition: all 0.3s ease-in-out;
+}
+
+.cyna-btn-color:hover {
+  background-color: #FFFFFF;
+  color: #FF6B00;
+  border-color: #FF6B00;
 }
 
 .cyna-title {
