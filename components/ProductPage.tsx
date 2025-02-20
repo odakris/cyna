@@ -2,50 +2,47 @@ import React from "react"
 import Carousel from "./HeroCarousel"
 import { Button } from "./ui/button"
 import PricingCards from "./PricingCard"
-import {ProductCard }from "@/components/ProductCard/ProductCard"
+import { ProductCard } from "@/components/ProductCard/ProductCard"
 
 const ProductPage = () => {
-
-
-    const products = [
-  {
-    id: 1,
-    title: "PC Gamer RTX 4090",
-    name: "PC Gamer",
-    description: "Un PC ultra puissant avec une RTX 4090 et un i9-13900K.",
-    image: "/images/cyber1.jpg",
-    price: "3,499",
-    stock: 4,
-  },
-  {
-    id: 2,
-    title: "Clavier Mécanique RGB",
-    name: "Clavier Gaming",
-    description: "Un clavier mécanique RGB avec switches personnalisables.",
-    image: "/images/cyber2.jpg",
-    price: "129",
-    stock: 10,
-  },
-  {
-    id: 3,
-    title: "Souris Gaming Pro",
-    name: "Souris Gamer",
-    description: "Une souris gaming ultra précise avec 16 000 DPI.",
-    image: "/images/cyber3.jpg",
-    price: "89",
-    stock: 7,
-  },
-  {
-    id: 4,
-    title: "Casque Audio Surround 7.1",
-    name: "Casque Gaming",
-    description: "Un casque immersif avec son surround 7.1 et microphone.",
-    image: "/images/cyber4.jpg",
-    price: "159",
-    stock: 3,
-  }
-]
-
+  const products = [
+    {
+      id: 1,
+      title: "PC Gamer RTX 4090",
+      name: "PC Gamer",
+      description: "Un PC ultra puissant avec une RTX 4090 et un i9-13900K.",
+      image: "/images/cyber1.jpg",
+      price: "3,499",
+      stock: 4,
+    },
+    {
+      id: 2,
+      title: "Clavier Mécanique RGB",
+      name: "Clavier Gaming",
+      description: "Un clavier mécanique RGB avec switches personnalisables.",
+      image: "/images/cyber2.jpg",
+      price: "129",
+      stock: 10,
+    },
+    {
+      id: 3,
+      title: "Souris Gaming Pro",
+      name: "Souris Gamer",
+      description: "Une souris gaming ultra précise avec 16 000 DPI.",
+      image: "/images/cyber3.jpg",
+      price: "89",
+      stock: 7,
+    },
+    {
+      id: 4,
+      title: "Casque Audio Surround 7.1",
+      name: "Casque Gaming",
+      description: "Un casque immersif avec son surround 7.1 et microphone.",
+      image: "/images/cyber4.jpg",
+      price: "159",
+      stock: 3,
+    },
+  ]
 
   return (
     <>
@@ -106,8 +103,8 @@ const ProductPage = () => {
         </p>
         <div className="mx-10 mt-6 flex flex-row">
           {products.map(product => (
-                 <ProductCard key={product.id} {...product} />
-               ))}
+            <ProductCard key={product.id} {...product} />
+          ))}
         </div>
       </div>
     </>
