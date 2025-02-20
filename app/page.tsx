@@ -34,7 +34,7 @@ export default function Home() {
       description: "Un PC ultra puissant avec une RTX 4090 et un i9-13900K.",
       image: "/images/cyber1.jpg",
       price: "3,499",
-      stock: 4,
+      stock: 0,
     },
     {
       id: 2,
@@ -69,18 +69,31 @@ export default function Home() {
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen px-4">
-      <CarouselPlugin />
-      <Message message={message} />
+      {/* CAROUSEL */}
+      <div className="w-full my-8">
+        <CarouselPlugin />
+      </div>
 
-      <h1 className="text-2xl font-bold mb-4 w-full text-left">
-        Nos Catégories
-      </h1>
-      <CategoryGrid categories={categories} />
+      {/* MAIN MESSAGE */}
+      <div className="w-full my-8">
+        <Message message={message} />
+      </div>
 
-      <h1 className="text-2xl font-bold mb-4 w-full text-left">
-        Les Top Produits du moment
-      </h1>
-      <TopProducts products={products} />
+      {/* CATEGORY GRID */}
+      <div className="w-full my-8">
+        <h1 className="text-2xl font-bold mb-4 w-full text-left">
+          Nos Catégories
+        </h1>
+        <CategoryGrid categories={categories} />
+      </div>
+
+      {/* TOP PRODUCTS */}
+      <div className="w-full my-8">
+        <h1 className="text-2xl font-bold mb-4 w-full text-left">
+          Les Top Produits du moment
+        </h1>
+        <TopProducts products={products} />
+      </div>
     </div>
   )
 }

@@ -11,7 +11,7 @@ interface Category {
   name: string
   image: string
   order: number
-  featured?: boolean
+  // featured?: boolean
 }
 
 interface CategoryGridProps {
@@ -23,29 +23,36 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
   const sortedCategories = [...categories].sort((a, b) => a.order - b.order)
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {sortedCategories.map(category => (
         <Card
           key={category.id}
-          className={`relative overflow-hidden cursor-pointer ${
-            category.featured ? "border-2 border-primary shadow-lg" : ""
-          }`}
+          className={
+            "relative overflow-hidden cursor-pointer rounded-lg transition-all duration-300 hover:scale-[1.03] hover:shadow-xl"
+          }
         >
           <CardContent className="p-0">
+            {/* Image */}
             <Image
               src={category.image}
               alt={category.name}
-              className="w-full h-40 object-cover"
+              className="w-full h-48 object-cover rounded-t-lg"
               width={400}
-              height={200}
+              height={240}
             />
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-              <h2 className="text-white text-lg font-bold">{category.name}</h2>
+
+            {/* Overlay avec le titre */}
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <h2 className="text-white text-lg font-bold drop-shadow-lg">
+                {category.name}
+              </h2>
             </div>
           </CardContent>
+
+          {/* Bouton d'édition */}
           <Button
             variant="ghost"
-            className="absolute top-2 right-2"
+            className="absolute top-3 right-3 bg-white/10 hover:bg-white/20 p-2 rounded-full"
             onClick={() => console.log(`Editing ${category.name}`)}
           >
             <GripVertical className="h-5 w-5 text-white" />

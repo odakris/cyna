@@ -31,7 +31,7 @@ const ProductPage = () => {
       description: "Une souris gaming ultra précise avec 16 000 DPI.",
       image: "/images/cyber3.jpg",
       price: "89",
-      stock: 7,
+      stock: 0,
     },
     {
       id: 4,
@@ -89,7 +89,7 @@ const ProductPage = () => {
             Disponible immédiatement
           </p>
           <Button className="w-full h-full mt-6 text-2xl text-white font-semibold">
-            S'abonner maintenant !
+            S&apos;abonner maintenant !
           </Button>
         </div>
       </div>
@@ -97,11 +97,11 @@ const ProductPage = () => {
         <PricingCards />
       </div>
 
-      <div className="width-full mx-10">
-        <p className="text-2xl font-bold mx-10 mt-6 relative text-center">
+      <div className="w-full my-8">
+        <h1 className="text-2xl font-bold mb-4 w-full text-left">
           Services SaaS similaires
-        </p>
-        <div className="mx-10 mt-6 flex flex-row">
+        </h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 w-full">
           {products.map(product => (
             <ProductCard key={product.id} {...product} />
           ))}

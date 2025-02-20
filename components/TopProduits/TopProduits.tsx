@@ -9,7 +9,7 @@ interface Product {
   name: string
   description: string
   image: string
-  stock: number 
+  stock: number
   price: string
 }
 
@@ -19,7 +19,7 @@ interface TopProductsProps {
 
 export function TopProducts({ products }: TopProductsProps) {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 w-full">
       {products.map(product => (
         <ProductCard key={product.id} {...product} />
       ))}
