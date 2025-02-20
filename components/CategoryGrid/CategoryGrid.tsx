@@ -16,16 +16,11 @@ interface Category {
 
 interface CategoryGridProps {
   categories: Category[]
-  //   onReorder: (updatedCategories: Category[]) => void
 }
 
 export function CategoryGrid({ categories }: CategoryGridProps) {
-  const [sortedCategories, setSortedCategories] = React.useState<Category[]>([])
-
-  // Trier les catégories par ordre croissant
-  React.useEffect(() => {
-    setSortedCategories([...categories].sort((a, b) => a.order - b.order))
-  }, [categories])
+  // Trier les catégories directement lors du rendu
+  const sortedCategories = [...categories].sort((a, b) => a.order - b.order)
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

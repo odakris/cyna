@@ -6,16 +6,16 @@ import { CategoryGrid } from "../components/CategoryGrid/CategoryGrid"
 import { Message } from "../components/Message/Message"
 
 export default function Home() {
-  const [categories, setCategories] = React.useState([
+  const categories = [
     {
       id: 1,
       name: "Cat1",
       image: "/images/cyber1.jpg",
-      order: 1,
+      order: 6,
       featured: true,
     },
     { id: 2, name: "Cat2", order: 2, image: "/images/cyber2.jpg" },
-    { id: 3, name: "Cat3", order: 5, image: "/images/cyber3.jpg" },
+    { id: 3, name: "Cat3", order: 3, image: "/images/cyber3.jpg" },
     {
       id: 4,
       name: "Cat4",
@@ -23,7 +23,7 @@ export default function Home() {
       image: "/images/cyber4.jpg",
       featured: true,
     },
-  ])
+  ]
 
   const message = "Message très très important sur les promotions et actualités"
 
