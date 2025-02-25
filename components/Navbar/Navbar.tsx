@@ -24,7 +24,11 @@ import {
 } from "@/components/ui/sheet"
 
 export function Navbar() {
-  const navLinks = ["Acceuil", "Categories", "Recherche Avancée"]
+  const navLinks = [
+    { name: "Acceuil", href: "/" },
+    { name: "Categories", href: "/categories" },
+    { name: "Recherche Avancée", href: "/recherche" },
+  ]
 
   return (
     <header className="w-full fixed top-0 left-0 z-50 cyna-bg-primary-color shadow-xl">
@@ -42,14 +46,14 @@ export function Navbar() {
             <NavigationMenu className="flex flex-col justify-start mt-4 space-y-3 w-full">
               {navLinks.map(item => (
                 <NavigationMenuLink
-                  key={item}
-                  href="/"
+                  key={item.name} // Utiliser item.name pour la clé unique
+                  href={item.href}
                   className={cn(
                     navigationMenuTriggerStyle(),
                     "w-full cyna-subtitle"
                   )}
                 >
-                  {item}
+                  {item.name} {/* Afficher l'attribut name ici */}
                 </NavigationMenuLink>
               ))}
             </NavigationMenu>
@@ -81,15 +85,17 @@ export function Navbar() {
           <NavigationMenu>
             <NavigationMenuList className="flex space-x-6">
               {navLinks.map(item => (
-                <NavigationMenuItem key={item}>
+                <NavigationMenuItem key={item.name}>
+                  {" "}
+                  {/* Utiliser item.name pour la clé unique */}
                   <NavigationMenuLink
-                    href="/"
+                    href={item.href} // Utiliser href dynamique
                     className={cn(
                       navigationMenuTriggerStyle(),
                       "cyna-bg-primary-color cyna-text-color hover:cyna-text-primary-color hover:bg-opacity-80 transition"
                     )}
                   >
-                    {item}
+                    {item.name} {/* Afficher le nom de la catégorie */}
                   </NavigationMenuLink>
                 </NavigationMenuItem>
               ))}
