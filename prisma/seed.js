@@ -1,144 +1,166 @@
-import { PrismaClient } from "@prisma/client"
-import { faker } from "@faker-js/faker"
+import { PrismaClient } from "@prisma/client";
+const prisma = new PrismaClient();
 
-const prisma = new PrismaClient()
+// Liste de prénoms et noms génériques
+const firstNames = [
+  "Alice", "Bob", "Charlie", "David", "Eve", 
+  "Frank", "Grace", "Hannah", "Isaac", "Jack",
+];
 
-// Utilise une image d'une API comme Lorem Picsum
-function generateRandomImageUrl() {
-  const width = 200
-  const height = 200
-  return `https://picsum.photos/${width}/${height}`
-}
+const lastNames = [
+  "Dupont", "Lemoine", "Martin", "Bernard", "Petit", 
+  "Robert", "Dufresne", "Lopez", "Tanguy", "Lemoine",
+];
 
 async function main() {
-  // Insertion des 10 catégories
-  for (let i = 0; i < 10; i++) {
-    const categorie = await prisma.categorie.create({
+  // Création des catégories
+  const prevention = await prisma.categorie.create({
+    data: {
+      nom: "Prévention",
+      description: "Services dédiés à la prévention des cyber-risques.",
+      image: "image_prevention.jpg",
+    },
+  });
+
+  const protection = await prisma.categorie.create({
+    data: {
+      nom: "Protection",
+      description: "Services dédiés à la protection contre les menaces cyber.",
+      image: "image_protection.jpg",
+    },
+  });
+
+  const reponse = await prisma.categorie.create({
+    data: {
+      nom: "Réponse",
+      description: "Services dédiés à la réponse aux incidents de sécurité.",
+      image: "image_reponse.jpg",
+    },
+  });
+
+  // Création des produits
+  const produits = [
+    { nom: "Diagnostic Cyber", prix_unitaire: 4500, description: "Diagnostic des cyber-risques", image: "image_diagnostic_cyber.jpg", id_categorie: prevention.id_categorie },
+    { nom: "Test d'intrusion", prix_unitaire: 4000, description: "Test d'intrusion pour évaluer la sécurité", image: "image_test_intrusion.jpg", id_categorie: prevention.id_categorie },
+    { nom: "Micro SOC", prix_unitaire: 5000, description: "Surveillance continue de la sécurité", image: "image_micro_soc.jpg", id_categorie: protection.id_categorie },
+    { nom: "SOC Managé", prix_unitaire: 7000, description: "SOC avec gestion managée", image: "image_soc_manage.jpg", id_categorie: protection.id_categorie },
+    { nom: "Investigation, éradication, remédiation", prix_unitaire: 8500, description: "Réponse complète aux incidents de sécurité", image: "image_investigation.jpg", id_categorie: reponse.id_categorie }
+  ];
+
+  // Insertion des produits et récupération de leurs IDs
+  const createdProduits = [];
+  for (const produit of produits) {
+    const createdProduit = await prisma.produit.create({
       data: {
-        nom: faker.commerce.department(),
-        description: faker.commerce.productDescription(),
-        image: generateRandomImageUrl(), // Génère une URL d'image aléatoire
+        nom: produit.nom,
+        description: produit.description,
+        caracteristiques_techniques: "Caractéristiques techniques à définir",
+        prix_unitaire: produit.prix_unitaire,
+        disponible: true,
+        ordre_priorite: 1,
+        date_maj: new Date(),
+        id_categorie: produit.id_categorie,
+        image: produit.image,
       },
-    })
-    console.log(`Catégorie créée: ${categorie.nom}`)
+    });
+    createdProduits.push(createdProduit); // Stocker les produits créés
   }
 
-  // Insertion des 10 produits
+  // Création de 10 clients
   for (let i = 0; i < 10; i++) {
-    const produit = await prisma.produit.create({
-      data: {
-        nom: faker.commerce.productName(),
-        description: faker.commerce.productDescription(),
-        caracteristiques_techniques: faker.commerce.productMaterial(),
-        prix_unitaire: parseFloat(faker.commerce.price()),
-        disponible: faker.datatype.boolean(),
-        ordre_priorite: faker.number.int({ min: 1, max: 5 }), // Correction ici
-        date_maj: faker.date.past(),
-        id_categorie: faker.number.int({ min: 1, max: 10 }), // Correction ici
-        image: generateRandomImageUrl(), // Utilisation de la fonction d'image aléatoire
-      },
-    })
-    console.log(`Produit créé: ${produit.nom}`)
-  }
+    const firstName = firstNames[i];
+    const lastName = lastNames[i];
+    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i + 1}@example.com`;
 
-  // Insertion des 10 clients
-  for (let i = 0; i < 10; i++) {
     const client = await prisma.client.create({
       data: {
-        nom: faker.person.lastName(),
-        prenom: faker.person.firstName(),
-        email: faker.internet.email(),
-        mot_de_passe: faker.internet.password(),
+        nom: firstName,
+        prenom: lastName,
+        email: email,
+        mot_de_passe: "hashedpassword",
       },
-    })
-    console.log(`Client créé: ${client.nom} ${client.prenom}`)
+    });
+
+    // Création de 3 adresses pour chaque client
+    for (let j = 0; j < 3; j++) {
+      await prisma.adresse_Client.create({
+        data: {
+          prenom: firstName,
+          nom: lastName,
+          rue: `${i + 1} Rue de Paris`,
+          cp: `7500${i + 1}`,
+          ville: "Paris",
+          region: "Île-de-France",
+          pays: "France",
+          telephone_mobile: `01234567${i + 1}`,
+          est_facturation_defaut: j === 0,
+          est_livraison_defaut: j === 0,
+          id_client: client.id_client,
+        },
+      });
+    }
+
+    // Création de 3 infos de paiement pour chaque client
+    for (let k = 0; k < 3; k++) {
+      await prisma.info_Paiement.create({
+        data: {
+          nom_carte: `Carte ${firstName} ${lastName} - ${k + 1}`,
+          numero_carte: `411111111111111${k + 1}`,
+          date_expiration: new Date(2025, 12, 31),
+          CVV: `${Math.floor(Math.random() * 900) + 100}`,
+          est_paiement_defaut: k === 0,
+          id_client: client.id_client,
+        },
+      });
+    }
+
+    // Création de 3 commandes pour chaque client
+    for (let j = 0; j < 3; j++) {
+      const commande = await prisma.commande.create({
+        data: {
+          date_commande: new Date(),
+          type_abonnement: "Annuel",
+          duree_abonnement: 12,
+          montant_total: 4500 + j * 100,
+          statut_commande: "En attente",
+          mode_paiement: "Carte bancaire",
+          dernier_chiffre_cb: "1234",
+          facture_pdf_url: `https://example.com/facture${i + 1}_${j + 1}.pdf`,
+          date_renouvellement: new Date(),
+          id_client: client.id_client,
+        },
+      });
+
+      // Sélection aléatoire de 1 à 3 produits pour cette commande
+      const numberOfProducts = Math.floor(Math.random() * 3) + 1; // 1 à 3 produits
+      const randomProducts = getRandomProducts(createdProduits, numberOfProducts);
+
+      // Insertion des liens produits_commande
+      for (const produit of randomProducts) {
+        await prisma.produit_Commande.create({
+          data: {
+            id_produit: produit.id_produit, // Utilisation du bon id_produit
+            id_commande: commande.id_commande,
+          },
+        });
+      }
+    }
   }
 
-  // Insertion des 10 adresses pour chaque client
-  for (let i = 0; i < 10; i++) {
-    const adresse = await prisma.adresse_Client.create({
-      data: {
-        prenom: faker.person.firstName(),
-        nom: faker.person.lastName(),
-        rue: faker.location.streetAddress(), // Remplacé `address` par `location`
-        complement: faker.location.secondaryAddress(),
-        cp: faker.location.zipCode(),
-        ville: faker.location.city(),
-        region: faker.location.state(),
-        pays: faker.location.country(),
-        telephone_mobile: faker.phone.number(), // Utilisation de faker.phone.number()
-        est_facturation_defaut: faker.datatype.boolean(),
-        est_livraison_defaut: faker.datatype.boolean(),
-        id_client: i + 1, // Associer l'adresse à un client existant
-      },
-    })
-    console.log(
-      `Adresse créée pour le client: ${adresse.prenom} ${adresse.nom}`
-    )
-  }
+  console.log("Base de données peuplée avec succès.");
+}
 
-  // Insertion des 10 commandes pour chaque client (exemple simple)
-  for (let i = 0; i < 10; i++) {
-    const commande = await prisma.commande.create({
-      data: {
-        date_commande: faker.date.recent(),
-        type_abonnement: faker.helpers.arrayElement(["Mensuel", "Annuel"]),
-        duree_abonnement: faker.number.int({ min: 1, max: 12 }), // Durée en mois
-        montant_total: parseFloat(faker.commerce.price()),
-        statut_commande: faker.helpers.arrayElement([
-          "En cours",
-          "Livré",
-          "Annulé",
-        ]),
-        mode_paiement: faker.helpers.arrayElement([
-          "Carte bancaire",
-          "PayPal",
-          "Virement",
-        ]),
-        dernier_chiffre_cb: faker.finance.creditCardNumber().slice(-4), // Derniers chiffres de la carte
-        facture_pdf_url: faker.internet.url(),
-        date_renouvellement: faker.date.future(),
-        id_client: faker.number.int({ min: 1, max: 10 }),
-      },
-    })
-    console.log(`Commande créée: ${commande.id_commande}`)
-  }
-
-  // Associer des produits aux commandes (produit_commande)
-  for (let i = 0; i < 10; i++) {
-    const produitsCommandes = await prisma.produit_Commande.create({
-      data: {
-        id_produit: faker.number.int({ min: 1, max: 10 }), // Associe un produit existant
-        id_commande: i + 1, // Associe une commande existante
-      },
-    })
-    console.log(
-      `Produit ajouté à la commande: ${produitsCommandes.id_produit_commande}`
-    )
-  }
-
-  // Ajoute des infos de paiement pour les clients
-  for (let i = 0; i < 10; i++) {
-    const infoPaiement = await prisma.info_Paiement.create({
-      data: {
-        nom_carte: faker.finance.creditCardIssuer(), // Remplacer par la méthode correcte
-        numero_carte: faker.finance.creditCardNumber(),
-        date_expiration: faker.date.future(),
-        CVV: faker.finance.creditCardCVV(),
-        est_paiement_defaut: faker.datatype.boolean(),
-        id_client: faker.number.int({ min: 1, max: 10 }),
-      },
-    })
-    console.log(
-      `Information de paiement ajoutée pour le client: ${infoPaiement.id_info_paiement}`
-    )
-  }
+// Fonction pour obtenir des produits au hasard
+function getRandomProducts(produits, count) {
+  const shuffled = [...produits].sort(() => 0.5 - Math.random()); // Mélange des produits
+  return shuffled.slice(0, count); // Sélectionner les premiers produits
 }
 
 main()
   .catch(e => {
-    console.error(e)
+    console.error(e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });

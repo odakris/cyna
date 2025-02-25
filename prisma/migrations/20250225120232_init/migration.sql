@@ -6,7 +6,7 @@ CREATE TABLE `Categorie` (
     `image` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id_categorie`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Produit` (
@@ -22,7 +22,7 @@ CREATE TABLE `Produit` (
     `image` VARCHAR(191) NOT NULL,
 
     PRIMARY KEY (`id_produit`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Produit_Commande` (
@@ -31,7 +31,7 @@ CREATE TABLE `Produit_Commande` (
     `id_commande` INTEGER NOT NULL,
 
     PRIMARY KEY (`id_produit_commande`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Commande` (
@@ -48,7 +48,7 @@ CREATE TABLE `Commande` (
     `id_client` INTEGER NOT NULL,
 
     PRIMARY KEY (`id_commande`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Client` (
@@ -60,7 +60,7 @@ CREATE TABLE `Client` (
 
     UNIQUE INDEX `Client_email_key`(`email`),
     PRIMARY KEY (`id_client`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Info_Paiement` (
@@ -73,7 +73,7 @@ CREATE TABLE `Info_Paiement` (
     `id_client` INTEGER NOT NULL,
 
     PRIMARY KEY (`id_info_paiement`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Adresse_Client` (
@@ -92,7 +92,7 @@ CREATE TABLE `Adresse_Client` (
     `id_client` INTEGER NOT NULL,
 
     PRIMARY KEY (`id_adresse`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Chatbot_Conversation` (
@@ -104,7 +104,7 @@ CREATE TABLE `Chatbot_Conversation` (
     `id_client` INTEGER NOT NULL,
 
     PRIMARY KEY (`id_chatbot_conversation`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Chatbot_Message` (
@@ -115,7 +115,7 @@ CREATE TABLE `Chatbot_Message` (
     `id_chatbot_conversation` INTEGER NOT NULL,
 
     PRIMARY KEY (`id_chatbot_message`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Chatbot_Escalade` (
@@ -125,7 +125,7 @@ CREATE TABLE `Chatbot_Escalade` (
     `id_chatbot_conversation` INTEGER NOT NULL,
 
     PRIMARY KEY (`id_chatbot_escalade`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
 ALTER TABLE `Produit` ADD CONSTRAINT `Produit_id_categorie_fkey` FOREIGN KEY (`id_categorie`) REFERENCES `Categorie`(`id_categorie`) ON DELETE RESTRICT ON UPDATE CASCADE;
