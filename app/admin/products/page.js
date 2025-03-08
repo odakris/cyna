@@ -12,22 +12,48 @@ function ProductsContent() {
   const [products, setProducts] = useState([]);
   const [selected, setSelected] = useState([]);
   const [refresh, setRefresh] = useState(false);
+  const [error, setError] = useState(null);
+  const [sortColumn, setSortColumn] = useState("nom"); // Colonne par défaut
+  const [sortDirection, setSortDirection] = useState("asc"); // Direction par défaut
 
   const fetchProducts = async () => {
     try {
       const response = await fetch("/api/products");
-      if (!response.ok) throw new Error("Erreur lors de la récupération des produits");
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
       const data = await response.json();
       console.log("Produits reçus dans page:", data);
       setProducts(data);
+      setError(null);
     } catch (error) {
       console.error("Erreur fetchProducts:", error);
+      setError(error.message);
     }
   };
 
   useEffect(() => {
     fetchProducts();
   }, [refresh]);
+
+  // Gestion du tri
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  const sortedProducts = [...products].sort((a, b) => {
+    const aValue = a[sortColumn];
+    const bValue = b[sortColumn];
+    if (typeof aValue === "string" && typeof bValue === "string") {
+      return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+    }
+    return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+  });
 
   const handleSelect = (id) => {
     setSelected((prev) =>
@@ -36,16 +62,26 @@ function ProductsContent() {
   };
 
   const handleDelete = async () => {
-    const idsToDelete = selected;
-    for (const id of idsToDelete) {
-      await fetch("/api/products", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id }),
-      });
+    if (confirm(`Voulez-vous supprimer ${selected.length} produit(s) ?`)) {
+      const idsToDelete = selected;
+      for (const id of idsToDelete) {
+        await fetch("/api/products", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id }),
+        });
+      }
+      setSelected([]);
+      setRefresh(!refresh);
     }
-    setSelected([]);
-    setRefresh(!refresh);
+  };
+
+  // Fonction pour déterminer l'icône de tri à afficher
+  const getSortIcon = (column) => {
+    if (sortColumn === column) {
+      return sortDirection === "asc" ? "↑" : "↓"; // Flèche pour la colonne active
+    }
+    return "↕"; // Flèche neutre par défaut pour indiquer que la colonne est triable
   };
 
   return (
@@ -54,6 +90,7 @@ function ProductsContent() {
       <p className="mb-4">
         Bienvenue dans le back-office, {session?.user?.name} ! Rôle : {session?.user?.role}
       </p>
+      {error && <p className="text-red-500 mb-4">Erreur: {error}</p>}
       <div className="mb-6">
         <Link href="/admin/products/new" className="bg-blue-500 text-white p-2 rounded">
           Ajouter un produit
@@ -78,13 +115,30 @@ function ProductsContent() {
         <thead>
           <tr className="bg-gray-200">
             <th className="border p-2">Sélection</th>
-            <th className="border p-2">Nom</th>
-            <th className="border p-2">Prix (€)</th>
+            <th
+              className="border p-2 cursor-pointer"
+              onClick={() => handleSort("nom")}
+            >
+              Nom {getSortIcon("nom")}
+            </th>
+            <th
+              className="border p-2 cursor-pointer"
+              onClick={() => handleSort("prix_unitaire")}
+            >
+              Prix (€) {getSortIcon("prix_unitaire")}
+            </th>
             <th className="border p-2">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {products.map((product) => (
+          {sortedProducts.length === 0 && !error && (
+            <tr>
+              <td colSpan={4} className="border p-2 text-center">
+                Aucun produit trouvé
+              </td>
+            </tr>
+          )}
+          {sortedProducts.map((product) => (
             <tr key={product.id_produit} className="hover:bg-gray-100">
               <td className="border p-2">
                 <input
