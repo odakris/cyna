@@ -5,6 +5,7 @@ import { CarouselPlugin } from "../components/Carousel/CarouselPlugin"
 import { CategoryGrid } from "../components/CategoryGrid/CategoryGrid"
 import { Message } from "../components/Message/Message"
 import { TopProducts } from "@/components/TopProduits/TopProduits"
+import Link from "next/link"
 
 export default function Home() {
   const categories = [
@@ -85,6 +86,7 @@ export default function Home() {
           Nos Catégories
         </h1>
         <CategoryGrid categories={categories} />
+        <Link href="/admin/login">Connexion au Back-Office</Link>
       </div>
 
       {/* TOP PRODUCTS */}
