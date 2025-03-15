@@ -1,4 +1,3 @@
-// /app/admin/dashboard/page.js
 "use client";
 
 import AdminLayout from "@/components/AdminLayout/AdminLayout";
@@ -18,19 +17,31 @@ import {
   Cell,
 } from "recharts";
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
+// Définir les types pour les données de ventes
+interface DailySalesData {
+  day: string;
+  sales: number;
+}
+
+interface CategorySalesData {
+  name: string;
+  value: number;
+}
+
+// Couleurs pour les graphiques
+const COLORS: string[] = ["#0088FE", "#00C49F", "#FFBB28"];
 
 function DashboardContent() {
   const { data: session } = useSession();
-  const [period, setPeriod] = useState("7days");
-  const [dailySalesData, setDailySalesData] = useState([]);
-  const [categorySalesData, setCategorySalesData] = useState([]);
+  const [period, setPeriod] = useState<string>("7days");
+  const [dailySalesData, setDailySalesData] = useState<DailySalesData[]>([]);
+  const [categorySalesData, setCategorySalesData] = useState<CategorySalesData[]>([]);
 
   const fetchSalesData = async () => {
     try {
       const response = await fetch(`/api/sales?period=${period}`);
       if (!response.ok) throw new Error("Erreur lors de la récupération des ventes");
-      const { dailySalesData, categorySalesData } = await response.json();
+      const { dailySalesData, categorySalesData }: { dailySalesData: DailySalesData[], categorySalesData: CategorySalesData[] } = await response.json();
       console.log("Données récupérées:", { dailySalesData, categorySalesData });
       setDailySalesData(dailySalesData);
       setCategorySalesData(categorySalesData);
@@ -57,7 +68,7 @@ function DashboardContent() {
         <label className="mr-2">Période :</label>
         <select
           value={period}
-          onChange={(e) => setPeriod(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPeriod(e.target.value)}
           className="p-2 border rounded"
         >
           <option value="7days">7 derniers jours</option>
@@ -108,7 +119,9 @@ function DashboardContent() {
             cx={200}
             cy={200}
             labelLine={false}
-            label={({ name, percent }) => `${name} (${(percent * 100).toFixed(0)}%)`}
+            label={({ name, percent }: { name: string; percent: number }) =>
+              `${name} (${(percent * 100).toFixed(0)}%)`
+            }
             outerRadius={80}
             fill="#8884d8"
             dataKey="value"

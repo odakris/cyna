@@ -1,4 +1,3 @@
-// /app/admin/products/page.js
 "use client";
 
 import AdminLayout from "@/components/AdminLayout/AdminLayout";
@@ -7,14 +6,29 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-function ProductsContent() {
+// Définir l'interface pour les données du produit
+interface Product {
+  id_produit: number;
+  nom: string;
+  prix_unitaire: number;
+  description: string | null;
+  disponible: boolean;
+  ordre_priorite: number;
+  id_categorie: number;
+  image: string | null;
+}
+
+// Définir les props pour le composant ProductsContent (facultatif ici, car aucune prop n'est passée)
+interface ProductsContentProps {}
+
+const ProductsContent: React.FC<ProductsContentProps> = () => {
   const { data: session } = useSession();
-  const [products, setProducts] = useState([]);
-  const [selected, setSelected] = useState([]);
-  const [refresh, setRefresh] = useState(false);
-  const [error, setError] = useState(null);
-  const [sortColumn, setSortColumn] = useState("nom"); // Colonne par défaut
-  const [sortDirection, setSortDirection] = useState("asc"); // Direction par défaut
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selected, setSelected] = useState<number[]>([]);
+  const [refresh, setRefresh] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sortColumn, setSortColumn] = useState<keyof Product>("nom"); // Colonne par défaut
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc"); // Direction par défaut
 
   const fetchProducts = async () => {
     try {
@@ -22,13 +36,13 @@ function ProductsContent() {
       if (!response.ok) {
         throw new Error(`Erreur HTTP: ${response.status}`);
       }
-      const data = await response.json();
+      const data: Product[] = await response.json();
       console.log("Produits reçus dans page:", data);
       setProducts(data);
       setError(null);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Erreur fetchProducts:", error);
-      setError(error.message);
+      setError((error as Error).message || "Erreur inconnue");
     }
   };
 
@@ -37,7 +51,7 @@ function ProductsContent() {
   }, [refresh]);
 
   // Gestion du tri
-  const handleSort = (column) => {
+  const handleSort = (column: keyof Product) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -46,16 +60,16 @@ function ProductsContent() {
     }
   };
 
-  const sortedProducts = [...products].sort((a, b) => {
+  const sortedProducts = [...products].sort((a: Product, b: Product) => {
     const aValue = a[sortColumn];
     const bValue = b[sortColumn];
     if (typeof aValue === "string" && typeof bValue === "string") {
       return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
     }
-    return sortDirection === "asc" ? aValue - bValue : bValue - aValue;
+    return sortDirection === "asc" ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
   });
 
-  const handleSelect = (id) => {
+  const handleSelect = (id: number) => {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
@@ -77,7 +91,7 @@ function ProductsContent() {
   };
 
   // Fonction pour déterminer l'icône de tri à afficher
-  const getSortIcon = (column) => {
+  const getSortIcon = (column: keyof Product): string => {
     if (sortColumn === column) {
       return sortDirection === "asc" ? "↑" : "↓"; // Flèche pour la colonne active
     }
@@ -138,7 +152,7 @@ function ProductsContent() {
               </td>
             </tr>
           )}
-          {sortedProducts.map((product) => (
+          {sortedProducts.map((product: Product) => (
             <tr key={product.id_produit} className="hover:bg-gray-100">
               <td className="border p-2">
                 <input
@@ -163,12 +177,17 @@ function ProductsContent() {
       </table>
     </AdminLayout>
   );
-}
+};
 
-export default function Products() {
+// Définir les props pour le composant Products (facultatif ici, car aucune prop n'est passée)
+interface ProductsProps {}
+
+const Products: React.FC<ProductsProps> = () => {
   return (
     <ClientSessionProvider>
       <ProductsContent />
     </ClientSessionProvider>
   );
-}
+};
+
+export default Products;

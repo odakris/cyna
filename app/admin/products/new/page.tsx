@@ -1,4 +1,3 @@
-// /app/admin/products/new/page.js
 "use client";
 
 import AdminLayout from "@/components/AdminLayout/AdminLayout";
@@ -8,14 +7,37 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-function NewProductContent() {
+// Définir l'interface pour les données du formulaire
+interface FormData {
+  nom: string;
+  prix_unitaire: string;
+  description: string;
+}
+
+// Définir l'interface pour les données envoyées à l'API
+interface ProductData {
+  nom: string;
+  prix_unitaire: number;
+  description: string;
+  caracteristiques_techniques: string;
+  disponible: boolean;
+  ordre_priorite: number;
+  date_maj: string;
+  id_categorie: number;
+  image: string;
+}
+
+// Définir les props pour le composant NewProductContent (facultatif ici, car aucune prop n'est passée)
+interface NewProductContentProps {}
+
+const NewProductContent: React.FC<NewProductContentProps> = () => {
   const { data: session } = useSession();
   const router = useRouter();
-  const [formData, setFormData] = useState({ nom: "", prix_unitaire: "", description: "" });
+  const [formData, setFormData] = useState<FormData>({ nom: "", prix_unitaire: "", description: "" });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const productData = {
+    const productData: ProductData = {
       nom: formData.nom,
       prix_unitaire: parseFloat(formData.prix_unitaire),
       description: formData.description || "",
@@ -45,7 +67,7 @@ function NewProductContent() {
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -86,7 +108,7 @@ function NewProductContent() {
             value={formData.description}
             onChange={handleChange}
             className="w-full p-2 border rounded"
-            rows="4"
+            rows={4}
           />
         </div>
         <button type="submit" className="bg-blue-500 text-white p-2 rounded">
@@ -98,12 +120,17 @@ function NewProductContent() {
       </form>
     </AdminLayout>
   );
-}
+};
 
-export default function NewProduct() {
+// Définir les props pour le composant NewProduct (facultatif ici, car aucune prop n'est passée)
+interface NewProductProps {}
+
+const NewProduct: React.FC<NewProductProps> = () => {
   return (
     <ClientSessionProvider>
       <NewProductContent />
     </ClientSessionProvider>
   );
-}
+};
+
+export default NewProduct;

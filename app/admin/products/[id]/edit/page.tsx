@@ -1,4 +1,3 @@
-// /app/admin/products/[id]/edit/page.js
 "use client";
 
 import AdminLayout from "@/components/AdminLayout/AdminLayout";
@@ -8,11 +7,27 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-function EditProductContent() {
+// Définir l'interface pour les données du produit
+interface ProductData {
+  id_produit: number;
+  nom: string;
+  prix_unitaire: string;
+  description: string;
+  caracteristiques_techniques: string;
+  disponible: string;
+  ordre_priorite: string;
+  id_categorie: string;
+  image: string;
+}
+
+// Définir les props pour le composant EditProductContent (facultatif ici, car aucune prop n'est passée)
+interface EditProductContentProps {}
+
+const EditProductContent: React.FC<EditProductContentProps> = () => {
   const { data: session } = useSession();
-  const { id } = useParams();
+  const { id } = useParams() as { id: string };
   const router = useRouter();
-  const [formData, setFormData] = useState(null);
+  const [formData, setFormData] = useState<ProductData | null>(null);
 
   // Récupérer le produit depuis l’API
   useEffect(() => {
@@ -21,7 +36,8 @@ function EditProductContent() {
         const response = await fetch("/api/products");
         if (!response.ok) throw new Error("Erreur lors de la récupération des produits");
         const products = await response.json();
-        const product = products.find((p) => p.id_produit === parseInt(id));
+        console.log("Produits récupérés:", products); // Log pour débogage
+        const product = products.find((p: any) => p.id_produit === parseInt(id));
         if (product) {
           setFormData({
             id_produit: product.id_produit,
@@ -34,6 +50,8 @@ function EditProductContent() {
             id_categorie: product.id_categorie.toString(),
             image: product.image || "default_image.jpg",
           });
+        } else {
+          console.log("Aucun produit trouvé pour id:", id);
         }
       } catch (error) {
         console.error("Erreur fetchProduct:", error);
@@ -43,15 +61,19 @@ function EditProductContent() {
   }, [id]);
 
   // Mettre à jour le produit via l’API
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!formData) {
+      console.error("Erreur: formData est null, impossible de soumettre.");
+      return;
+    }
     console.log("Produit modifié:", formData);
     try {
       const response = await fetch("/api/products", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id_produit: parseInt(formData.id_produit),
+          id_produit: formData.id_produit, // Envoi comme number
           nom: formData.nom,
           prix_unitaire: parseFloat(formData.prix_unitaire),
           description: formData.description,
@@ -71,7 +93,8 @@ function EditProductContent() {
     }
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    if (!formData) return; // Éviter les mises à jour si formData est null
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -116,11 +139,10 @@ function EditProductContent() {
             value={formData.description}
             onChange={handleChange}
             className="w-full p-2 border rounded"
-            rows="4"
+            rows={4}
           />
         </div>
-        {/* Ajout de champs supplémentaires si nécessaire */}
-        <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+        <button type="submit" className="bg-blue-500 text-white p-2 rounded" disabled={!formData}>
           Enregistrer
         </button>
         <Link href="/admin/products" className="ml-4 text-blue-500">
@@ -129,13 +151,18 @@ function EditProductContent() {
       </form>
     </AdminLayout>
   );
-}
+};
 
-export default function EditProduct() {
+// Définition des props pour le composant EditProduct (facultatif ici, car aucune prop n'est passée)
+interface EditProductProps {}
+
+const EditProduct: React.FC<EditProductProps> = () => {
   console.log("EditProduct - Rendu principal");
   return (
     <ClientSessionProvider>
       <EditProductContent />
     </ClientSessionProvider>
   );
-}
+};
+
+export default EditProduct;
