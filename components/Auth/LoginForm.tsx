@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { z } from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
@@ -10,66 +10,75 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
 
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
-
+// Définir le schéma de validation avec zod
 const formSchema = z.object({
   email: z
     .string()
     .min(1, { message: "L'email est requis" })
     .email({ message: "Fournissez un email valide" }),
   password: z.string().min(1, { message: "Le mot de passe est requis" }),
-})
+});
 
-const LoginForm = () => {
-  const router = useRouter()
-  const [errorMessage, setErrorMessage] = useState("")
+// TypeScript : Interface pour les props du composant
+interface LoginFormProps {
+  redirectTo?: string; // Prop optionnelle pour la redirection
+  title?: string; // Nouvelle prop optionnelle pour le titre
+}
 
-  const form = useForm<z.infer<typeof formSchema>>({
+// TypeScript : Type pour les données du formulaire
+type FormData = z.infer<typeof formSchema>;
+
+const LoginForm: React.FC<LoginFormProps> = ({ redirectTo = "/", title = "Connexion" }) => {
+  const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       password: "",
     },
-  })
+  });
 
-  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-    console.log(data)
+  const handleSubmit = async (data: FormData) => {
+    setErrorMessage(null);
 
-    // Simuler une connexion
-    const isLoginSuccessful =
-      data.email === "test@example.com" && data.password === "password123"
+    const result = await signIn("credentials", {
+      redirect: false,
+      email: data.email,
+      password: data.password,
+    });
 
-    if (isLoginSuccessful) {
-      router.push("/")
+    if (result?.error) {
+      setErrorMessage("Email ou mot de passe incorrect");
     } else {
-      setErrorMessage("Email ou mot de passe incorrect")
+      router.push(redirectTo);
     }
-  }
+  };
 
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Connexion</CardTitle>
+        <CardTitle>{title}</CardTitle>
         <CardDescription>Connectez-vous avec vos identifiants</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
-          >
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             {errorMessage && (
               <p className="text-red-500 text-sm text-center">{errorMessage}</p>
             )}
@@ -115,14 +124,14 @@ const LoginForm = () => {
                 </FormItem>
               )}
             />
-            <Button className="w-full" variant={"cyna"}>
+            <Button className="w-full" variant="cyna">
               Connexion
             </Button>
           </form>
         </Form>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;

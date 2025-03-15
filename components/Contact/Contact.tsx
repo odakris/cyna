@@ -1,11 +1,15 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-import emailjs from "@emailjs/browser"
-
-import { Button } from "@/components/ui/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { useState } from "react";
+import Chatbot from "react-chatbot-kit";
+import "react-chatbot-kit/build/index.css";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { config, messageParser } from "./chatbotConfig";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,51 +17,72 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { TextareaAutosize } from "@mui/material"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { TextareaAutosize } from "@mui/material";
 
-// ✅ Schéma de validation Zod
+// Schéma de validation Zod
 const formSchema = z.object({
-  username: z.string().email({ message: "Email invalide" }),
+  email: z.string().email({ message: "Email invalide" }),
   sujet: z.string().min(2, { message: "Le sujet doit contenir au moins 2 caractères." }),
   message: z.string().min(10, { message: "Le message doit contenir au moins 10 caractères." }),
-})
+});
 
 export default function Contact() {
+  const [showChatbot, setShowChatbot] = useState(false);
+
   // Initialisation de react-hook-form avec validation Zod
   const form = useForm({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      username: "",
-      sujet: "",
-      message: "",
-    },
-  })
+    defaultValues: { email: "", sujet: "", message: "" },
+  });
 
   // Fonction de soumission du formulaire
-  const onSubmit = (data: any) => {
-    console.log("Formulaire soumis avec :", data) // 🔥 Vérifie dans la console
-
-    // ✅ Paramètres EmailJS
-    const templateParams = {
-      user_email: data.username,
-      sujet: data.sujet,
-      message: data.message,
+  const onSubmit = async (data) => {
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error("Erreur lors de l'envoi");
+      toast.success("Message envoyé avec succès ! ✅", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      form.reset();
+    } catch (error) {
+      console.error("Erreur d'envoi :", error);
+      toast.error("Erreur lors de l'envoi du message.", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
     }
-
-    emailjs.send("formulaire-contact", "template_pfg17bm", templateParams, "qKSPTT_1bii3Yniqd") // changer le template id après en avoir crée un, leur site bug pour l'instant
-      .then(() => {
-        alert("Message envoyé avec succès ! ✅")
-        form.reset() // Réinitialise le formulaire après envoi
-      })
-      .catch((error) => {
-        console.error("Erreur d'envoi :", error)
-      })
-  }
+  };
 
   return (
     <>
+      {/* Ajout du ToastContainer pour afficher les notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <div className="relative w-full max-w-lg mx-auto mb-6 text-center">
         <p className="text-2xl font-bold py-10">Formulaire de contact</p>
       </div>
@@ -66,7 +91,7 @@ export default function Contact() {
           {/* Champ Email */}
           <FormField
             control={form.control}
-            name="username"
+            name="email"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Email</FormLabel>
@@ -77,7 +102,6 @@ export default function Contact() {
               </FormItem>
             )}
           />
-
           {/* Champ Sujet */}
           <FormField
             control={form.control}
@@ -92,7 +116,6 @@ export default function Contact() {
               </FormItem>
             )}
           />
-
           {/* Champ Message */}
           <FormField
             control={form.control}
@@ -113,7 +136,6 @@ export default function Contact() {
               </FormItem>
             )}
           />
-
           {/* Bouton Submit */}
           <div className="flex justify-center mt-4">
             <Button
@@ -125,6 +147,17 @@ export default function Contact() {
           </div>
         </form>
       </Form>
+      <div className="flex justify-center mt-4">
+        <Button onClick={() => setShowChatbot(true)}>ContactMe (Chatbot)</Button>
+      </div>
+      {showChatbot && (
+        <div className="fixed bottom-0 right-0 p-4 bg-white border rounded-lg shadow-lg">
+          <Chatbot config={config} messageParser={messageParser} actionProvider={undefined} />
+          <Button onClick={() => setShowChatbot(false)} className="mt-2">
+            Fermer
+          </Button>
+        </div>
+      )}
     </>
-  )
+  );
 }
