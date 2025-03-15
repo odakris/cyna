@@ -1,29 +1,33 @@
 // /app/api/products/route.ts
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import type { NextRequest } from "next/server";
-import type { Produit, Categorie } from "@prisma/client";
+import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
+import type { NextRequest } from "next/server"
+import type { Produit, Categorie } from "@prisma/client"
 
 interface ProduitWithCategorie extends Produit {
-  categorie: Categorie;
+  categorie: Categorie
 }
 
-export async function GET(): Promise<NextResponse<ProduitWithCategorie[] | { error: string }>> {
+export async function GET(): Promise<
+  NextResponse<ProduitWithCategorie[] | { error: string }>
+> {
   try {
     const products = await prisma.produit.findMany({
       include: { categorie: true },
-    });
-    console.log("Produits renvoyés:", products);
-    return NextResponse.json(products);
+    })
+    console.log("Produits renvoyés:", products)
+    return NextResponse.json(products)
   } catch (error) {
-    console.error("Erreur GET products:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    console.error("Erreur GET products:", error)
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }
 
-export async function POST(request: NextRequest): Promise<NextResponse<Produit | { error: string }>> {
+export async function POST(
+  request: NextRequest
+): Promise<NextResponse<Produit | { error: string }>> {
   try {
-    const data = (await request.json()) as Partial<Produit>;
+    const data = (await request.json()) as Partial<Produit>
     const newProduct = await prisma.produit.create({
       data: {
         nom: data.nom || "",
@@ -36,17 +40,21 @@ export async function POST(request: NextRequest): Promise<NextResponse<Produit |
         id_categorie: data.id_categorie || 1,
         image: data.image || null,
       },
-    });
-    return NextResponse.json(newProduct, { status: 201 });
+    })
+    return NextResponse.json(newProduct, { status: 201 })
   } catch (error) {
-    console.error("Erreur POST product:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    console.error("Erreur POST product:", error)
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }
 
-export async function PUT(request: NextRequest): Promise<NextResponse<Produit | { error: string }>> {
+export async function PUT(
+  request: NextRequest
+): Promise<NextResponse<Produit | { error: string }>> {
   try {
-    const data = (await request.json()) as Partial<Produit> & { id_produit: number };
+    const data = (await request.json()) as Partial<Produit> & {
+      id_produit: number
+    }
     const updatedProduct = await prisma.produit.update({
       where: { id_produit: data.id_produit },
       data: {
@@ -60,23 +68,25 @@ export async function PUT(request: NextRequest): Promise<NextResponse<Produit | 
         id_categorie: data.id_categorie,
         image: data.image,
       },
-    });
-    return NextResponse.json(updatedProduct);
+    })
+    return NextResponse.json(updatedProduct)
   } catch (error) {
-    console.error("Erreur PUT product:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    console.error("Erreur PUT product:", error)
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }
 
-export async function DELETE(request: NextRequest): Promise<NextResponse<{ message: string } | { error: string }>> {
+export async function DELETE(
+  request: NextRequest
+): Promise<NextResponse<{ message: string } | { error: string }>> {
   try {
-    const { id } = (await request.json()) as { id: number };
+    const { id } = (await request.json()) as { id: number }
     await prisma.produit.delete({
       where: { id_produit: id },
-    });
-    return NextResponse.json({ message: "Produit supprimé" });
+    })
+    return NextResponse.json({ message: "Produit supprimé" })
   } catch (error) {
-    console.error("Erreur DELETE product:", error);
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    console.error("Erreur DELETE product:", error)
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }
