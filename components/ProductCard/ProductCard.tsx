@@ -24,6 +24,7 @@ export function ProductCard({
   date_maj,
   id_categorie,
   image,
+  stock,
 }: ProductType) {
   return (
     <Link href={`/produit/${id_produit}`} passHref>
@@ -54,6 +55,13 @@ export function ProductCard({
             className={`text-sm font-medium ${disponible ? "text-green-600" : "text-red-600"}`}
           >
             {disponible ? "Disponible" : "Rupture de stock"}
+          </p>
+          <p
+            className={`text-sm font-medium ${stock > 3 ? "text-green-600" : "text-red-600"}`}
+          >
+            {stock > 0
+              ? `Stock: ${stock} restant${stock > 1 ? "s" : ""}`
+              : "Rupture de stock"}
           </p>
         </CardContent>
 

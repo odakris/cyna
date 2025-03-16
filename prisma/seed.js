@@ -61,6 +61,7 @@ async function main() {
       prix_unitaire: 4500,
       description: "Diagnostic des cyber-risques",
       image: "image_diagnostic_cyber.jpg",
+      stock: 5,
       id_categorie: prevention.id_categorie,
     },
     {
@@ -68,6 +69,7 @@ async function main() {
       prix_unitaire: 4000,
       description: "Test d'intrusion pour évaluer la sécurité",
       image: "image_test_intrusion.jpg",
+      stock: 2,
       id_categorie: prevention.id_categorie,
     },
     {
@@ -75,6 +77,7 @@ async function main() {
       prix_unitaire: 5000,
       description: "Surveillance continue de la sécurité",
       image: "image_micro_soc.jpg",
+      stock: 0,
       id_categorie: protection.id_categorie,
     },
     {
@@ -82,6 +85,7 @@ async function main() {
       prix_unitaire: 7000,
       description: "SOC avec gestion managée",
       image: "image_soc_manage.jpg",
+      stock: 3,
       id_categorie: protection.id_categorie,
     },
     {
@@ -89,6 +93,7 @@ async function main() {
       prix_unitaire: 8500,
       description: "Réponse complète aux incidents de sécurité",
       image: "image_investigation.jpg",
+      stock: 5,
       id_categorie: reponse.id_categorie,
     },
   ]
@@ -107,6 +112,7 @@ async function main() {
         date_maj: new Date(),
         id_categorie: produit.id_categorie,
         image: produit.image,
+        stock: produit.stock,
       },
     })
     createdProduits.push(createdProduit) // Stocker les produits créés
