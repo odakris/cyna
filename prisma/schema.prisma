@@ -130,3 +130,11 @@ model Chatbot_Escalade {
   id_chatbot_conversation Int
   chatbotConversation    Chatbot_Conversation @relation(fields: [id_chatbot_conversation], references: [id_chatbot_conversation])
 }
+
+model Message_Contact {
+  id_message Int      @id @default(autoincrement())
+  email      String
+  subject    String
+  message    String
+  date_envoi DateTime @default(now())
+}
