@@ -10,6 +10,11 @@ export function ProductCard({
   nom,
   prix_unitaire,
   disponible,
+  ordre_priorite,
+  date_maj,
+  id_categorie,
+  image,
+  stock,
 }: ProductType) {
   return (
     <Card

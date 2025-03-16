@@ -127,6 +127,17 @@ CREATE TABLE `Chatbot_Escalade` (
     PRIMARY KEY (`id_chatbot_escalade`)
 ) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `Message_Contact` (
+    `id_message` INTEGER NOT NULL AUTO_INCREMENT,
+    `email` VARCHAR(191) NOT NULL,
+    `subject` VARCHAR(191) NOT NULL,
+    `message` VARCHAR(191) NOT NULL,
+    `date_envoi` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    PRIMARY KEY (`id_message`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `Produit` ADD CONSTRAINT `Produit_id_categorie_fkey` FOREIGN KEY (`id_categorie`) REFERENCES `Categorie`(`id_categorie`) ON DELETE RESTRICT ON UPDATE CASCADE;
 

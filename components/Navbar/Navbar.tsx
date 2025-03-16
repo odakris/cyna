@@ -29,6 +29,7 @@ export function Navbar() {
     { name: "Categories", href: "/categories" },
     { name: "Recherche Avancée", href: "/recherche" },
     { name: "Panier", href: "/panier" },
+    { name: "Contact", href: "/contact" },
   ]
 
   return (
