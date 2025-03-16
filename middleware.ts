@@ -1,4 +1,3 @@
-// middleware.ts
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
@@ -12,9 +11,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Récupérer le token
   const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
   console.log("Middleware - Chemin:", pathname, "Token:", token);
 
+  // Si aucun token ou si le rôle n'est pas admin, rediriger vers /admin/login
   if (!token || token.role !== "admin") {
     console.log("Middleware - Redirection vers /admin/login");
     return NextResponse.redirect(new URL("/admin/login", req.url));

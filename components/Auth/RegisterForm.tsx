@@ -58,10 +58,36 @@ const RegisterForm = () => {
     },
   })
 
-  const handleSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data)
-    router.push("/")
-  }
+  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+    try {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          password: data.password,
+        }),
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        console.log("Client créé avec succès:", result);
+        router.push("/"); // Redirige vers la page d'accueil après succès
+      } else {
+        console.error("Erreur lors de l'inscription:", result.error);
+        // Optionnel : afficher une erreur dans le formulaire
+        form.setError("email", { type: "manual", message: result.error });
+      }
+    } catch (error) {
+      console.error("Erreur lors de la requête:", error);
+      form.setError("email", { type: "manual", message: "Une erreur est survenue" });
+    }
+  };
 
   return (
     <Card className="max-w-md mx-auto">

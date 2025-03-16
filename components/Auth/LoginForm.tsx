@@ -22,9 +22,9 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, SignInResponse } from "next-auth/react";
 
-// Définir le schéma de validation avec zod
+// Définir le schéma de validation avec Zod
 const formSchema = z.object({
   email: z
     .string()
@@ -33,19 +33,24 @@ const formSchema = z.object({
   password: z.string().min(1, { message: "Le mot de passe est requis" }),
 });
 
-// TypeScript : Interface pour les props du composant
-interface LoginFormProps {
-  redirectTo?: string; // Prop optionnelle pour la redirection
-  title?: string; // Nouvelle prop optionnelle pour le titre
-}
-
-// TypeScript : Type pour les données du formulaire
+// Type pour les données du formulaire inféré à partir du schéma Zod
 type FormData = z.infer<typeof formSchema>;
 
-const LoginForm: React.FC<LoginFormProps> = ({ redirectTo = "/", title = "Connexion" }) => {
+// Interface pour les props du composant
+interface LoginFormProps {
+  redirectTo?: string; // URL de redirection après connexion (optionnel)
+  title?: string; // Titre personnalisé du formulaire (optionnel)
+}
+
+// Composant LoginForm avec typage explicite
+const LoginForm: React.FC<LoginFormProps> = ({
+  redirectTo = "/",
+  title = "Connexion",
+}) => {
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // Initialisation du formulaire avec typage explicite
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -54,19 +59,27 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectTo = "/", title = "Connex
     },
   });
 
-  const handleSubmit = async (data: FormData) => {
+  // Gestion de la soumission du formulaire avec typage explicite
+  const handleSubmit = async (data: FormData): Promise<void> => {
     setErrorMessage(null);
 
-    const result = await signIn("credentials", {
-      redirect: false,
-      email: data.email,
-      password: data.password,
-    });
+    try {
+      const result: SignInResponse | undefined = await signIn("credentials", {
+        redirect: false,
+        email: data.email,
+        password: data.password,
+      });
 
-    if (result?.error) {
-      setErrorMessage("Email ou mot de passe incorrect");
-    } else {
-      router.push(redirectTo);
+      if (result?.error) {
+        setErrorMessage("Email ou mot de passe incorrect");
+      } else if (result?.ok) {
+        router.push(redirectTo);
+      } else {
+        setErrorMessage("Une erreur inattendue est survenue");
+      }
+    } catch (error: unknown) {
+      console.error("Erreur lors de la connexion:", error);
+      setErrorMessage("Une erreur est survenue lors de la connexion");
     }
   };
 
@@ -78,11 +91,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectTo = "/", title = "Connex
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {errorMessage && (
               <p className="text-red-500 text-sm text-center">{errorMessage}</p>
             )}
-            {/* EMAIL */}
+            {/* Champ Email */}
             <FormField
               control={form.control}
               name="email"
@@ -103,7 +119,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ redirectTo = "/", title = "Connex
                 </FormItem>
               )}
             />
-            {/* PASSWORD */}
+            {/* Champ Mot de passe */}
             <FormField
               control={form.control}
               name="password"
