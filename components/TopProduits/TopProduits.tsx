@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { ProductCard } from "@/components/ProductCard/ProductCard"
+import { TopProductCard } from "@/components/TopProductCard.tsx/TopProductCard"
 import { ProductType } from "../../app/types"
 import { Skeleton } from "../ui/skeleton"
 
@@ -41,12 +41,12 @@ export function TopProducts() {
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
       {loadingProducts
         ? Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="w-full h-60 rounded-lg" />
+            <Skeleton key={index} className="w-full h-44 rounded-lg" />
           ))
         : allProducts
             .slice(0, 4)
             .map(product => (
-              <ProductCard
+              <TopProductCard
                 key={`${product.id_produit}-${product.nom}`}
                 {...product}
               />

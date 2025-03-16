@@ -1,18 +1,25 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useRef } from "react"
 import { useParams } from "next/navigation"
 import { CarouselPlugin } from "@/components/Carousel/CarouselPlugin"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ProductType } from "../../types"
 import { TopProducts } from "../../../components/TopProduits/TopProduits"
+import { useCart } from "@/app/context/CartContext"
 
 const ProductPage = () => {
   const { id } = useParams()
+  const { addToCart } = useCart()
   const [product, setProduct] = useState<ProductType>()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
+  const [selectedSubscription, setSelectedSubscription] =
+    useState<string>("mensuel") // Par défaut, sélection mensuelle
+
+  // Référence pour faire défiler vers le tableau tarifaire
+  const pricingTableRef = useRef<HTMLTableElement | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -41,6 +48,37 @@ const ProductPage = () => {
       </p>
     )
   }
+
+  // Fonction pour gérer l'ajout au panier avec l'abonnement sélectionné
+  const handleAddToCart = (subscriptionType: string) => {
+    if (!product) return
+
+    addToCart({
+      id: product.id_produit,
+      name: product.nom,
+      price:
+        subscriptionType === "mensuel"
+          ? 49.99
+          : subscriptionType === "annuel"
+            ? 499.9
+            : product.prix_unitaire,
+      quantity: 1,
+      subscription: subscriptionType,
+    })
+  }
+
+  // Fonction pour faire défiler vers le tableau tarifaire
+  const handleScrollToPricingTable = () => {
+    pricingTableRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+
+  // Prix fixe pour tous les produits
+  const prixMensuel = "49.99"
+  const prixAnnuel = "499.90"
+
+  // Prix par utilisateur et appareil
+  const prixUnitaire = product?.prix_unitaire
+  const prixParAppareil = 19.99 // Exemple de prix par appareil
 
   return (
     <>
@@ -79,24 +117,125 @@ const ProductPage = () => {
           )}
         </div>
 
-        <div className="w-full sm:w-1/2 p-4 flex items-center justify-center">
-          <div className="w-full h-full">
-            <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">
-              {loading ? (
-                <Skeleton className="w-1/2 h-6 mx-auto" />
-              ) : (
-                "Disponible immédiatement"
-              )}
-            </h2>
-
+        <div className="w-full sm:w-1/2 p-4 flex flex-col items-center justify-center">
+          <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">
             {loading ? (
-              <Skeleton className="w-full h-[60%] rounded-lg" />
+              <Skeleton className="w-1/2 h-6 mx-auto" />
             ) : (
-              <Button className="w-full h-[60%] text-2xl" variant="cyna">
-                Abonnement
-              </Button>
+              "Disponible immédiatement"
             )}
-          </div>
+          </h2>
+
+          {loading ? (
+            <Skeleton className="w-full h-[60%] rounded-lg" />
+          ) : (
+            <div className="flex justify-center w-full">
+              {" "}
+              {/* Assure que le bouton est bien centré */}
+              <Button
+                className="w-auto py-2 text-lg" // Réduit la taille du bouton ici
+                variant="cyna"
+                onClick={handleScrollToPricingTable} // Ajout du scroll ici
+              >
+                S&apos;ABONNER MAINTENANT
+              </Button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Section des informations tarifaires - Tableau simplifié */}
+      <section className="py-8 px-6 bg-white" ref={pricingTableRef}>
+        <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
+          Choisir une formule d&apos;abonnement
+        </h2>
+
+        <div className="overflow-x-auto">
+          <table className="w-full max-w-screen-lg mx-auto table-auto border-collapse border border-gray-300">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="px-4 py-2 text-center w-1/3">
+                  Modèle Tarifaire
+                </th>
+                <th className="px-4 py-2 text-center w-1/3">Prix</th>
+                <th className="px-4 py-2 text-center w-1/3">
+                  Ajouter au Panier
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td className="border px-4 py-2 text-center">Coût unitaire</td>
+                <td className="border px-4 py-2 text-center">
+                  {prixUnitaire} €
+                </td>
+                <td className="border px-4 py-2 text-center">
+                  <Button
+                    onClick={() => handleAddToCart("unitaire")}
+                    className="w-auto py-1 text-sm"
+                    variant="cyna"
+                  >
+                    Ajouter au panier
+                  </Button>
+                </td>
+              </tr>
+              <tr>
+                <td className="border px-4 py-2 text-center">
+                  Abonnement Mensuel
+                </td>
+                <td className="border px-4 py-2 text-center">
+                  {prixUnitaire} € puis
+                  <br /> {prixMensuel}€ / mois
+                </td>
+                <td className="border px-4 py-2 text-center">
+                  <Button
+                    onClick={() => handleAddToCart("mensuel")}
+                    className="w-auto py-1 text-sm"
+                    variant="cyna"
+                  >
+                    Ajouter au panier
+                  </Button>
+                </td>
+              </tr>
+              <tr>
+                <td className="border px-4 py-2 text-center">
+                  Abonnement Annuel
+                </td>
+                <td className="border px-4 py-2 text-center">
+                  {prixUnitaire} € puis <br /> {prixAnnuel}€ / an (dont 2 mois
+                  offerts)
+                </td>
+                <td className="border px-4 py-2 text-center">
+                  <Button
+                    onClick={() => handleAddToCart("annuel")}
+                    className="w-auto py-1 text-sm"
+                    variant="cyna"
+                  >
+                    Ajouter au panier
+                  </Button>
+                </td>
+              </tr>
+              {/* Prix par appareil */}
+              <tr>
+                <td className="border px-4 py-2 text-center">
+                  Coût par Appareil
+                </td>
+                <td className="border px-4 py-2 text-center">
+                  {prixUnitaire} € puis <br /> {prixParAppareil}€ / appareil
+                  supplémentaire
+                </td>
+                <td className="border px-4 py-2 text-center">
+                  <Button
+                   onClick={() => handleAddToCart("appareil")}
+                    className="w-auto py-1 text-sm"
+                    variant="cyna"
+                  >
+                    Ajouter au panier
+                  </Button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 

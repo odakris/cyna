@@ -1,5 +1,5 @@
 import { getCategories } from "../actions/categoryActions"
-import SearchForm from "../../components/SearchForm"
+import SearchForm from "../../components/SearchForm/SearchForm"
 
 export default async function Home() {
   const categories = await getCategories()

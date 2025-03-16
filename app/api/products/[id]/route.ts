@@ -17,10 +17,29 @@ export async function GET(
       include: { categorie: true },
     })
 
-    return new NextResponse(JSON.stringify(product ?? {}), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    })
+    // Si le produit existe, on prépare l'URL de l'image
+    if (product) {
+      // Construction du chemin d'accès à l'image stockée dans public/images/
+      const imageUrl = `/images/${product.image}`;
+      console.log("URL de l'image récupérée pour le produit : ", imageUrl);
+
+      // Renvoi du produit avec l'URL de l'image
+      return new NextResponse(
+        JSON.stringify({
+          ...product,
+          imageUrl,
+        }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      )
+    } else {
+      return new NextResponse(JSON.stringify({ message: "Produit non trouvé" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      })
+    }
   } catch (error) {
     console.error("Erreur lors de la recherche du produit :", error)
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 })

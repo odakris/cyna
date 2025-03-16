@@ -25,9 +25,10 @@ import {
 
 export function Navbar() {
   const navLinks = [
-    { name: "Acceuil", href: "/" },
+    { name: "Accueil", href: "/" },
     { name: "Categories", href: "/categories" },
     { name: "Recherche Avancée", href: "/recherche" },
+    { name: "Panier", href: "/panier" },
   ]
 
   return (
