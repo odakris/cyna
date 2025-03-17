@@ -12,16 +12,16 @@ export async function GET(
     const id = parseInt(params.id)
 
     // Récupérer le produit correspondant à l'ID
-    const product = await prisma.produit.findUnique({
-      where: { id_produit: id },
-      include: { categorie: true },
+    const product = await prisma.product.findUnique({
+      where: { id_product: id },
+      include: { category: true },
     })
 
     // Si le produit existe, on prépare l'URL de l'image
     if (product) {
       // Construction du chemin d'accès à l'image stockée dans public/images/
-      const imageUrl = `/images/${product.image}`;
-      console.log("URL de l'image récupérée pour le produit : ", imageUrl);
+      const imageUrl = `/images/${product.image}`
+      console.log("URL de l'image récupérée pour le produit : ", imageUrl)
 
       // Renvoi du produit avec l'URL de l'image
       return new NextResponse(
@@ -35,10 +35,13 @@ export async function GET(
         }
       )
     } else {
-      return new NextResponse(JSON.stringify({ message: "Produit non trouvé" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      })
+      return new NextResponse(
+        JSON.stringify({ message: "Produit non trouvé" }),
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        }
+      )
     }
   } catch (error) {
     console.error("Erreur lors de la recherche du produit :", error)

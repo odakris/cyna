@@ -54,14 +54,14 @@ const ProductPage = () => {
     if (!product) return
 
     addToCart({
-      id: product.id_produit,
-      name: product.nom,
+      id: product.id_product,
+      name: product.name,
       price:
         subscriptionType === "mensuel"
           ? 49.99
           : subscriptionType === "annuel"
             ? 499.9
-            : product.prix_unitaire,
+            : product.unit_price,
       quantity: 1,
       subscription: subscriptionType,
     })
@@ -77,7 +77,7 @@ const ProductPage = () => {
   const prixAnnuel = "499.90"
 
   // Prix par utilisateur et appareil
-  const prixUnitaire = product?.prix_unitaire
+  const prixUnitaire = product?.unit_price
   const prixParAppareil = 19.99 // Exemple de prix par appareil
 
   return (
@@ -87,7 +87,7 @@ const ProductPage = () => {
           <Skeleton className="w-1/2 h-10 mx-auto mb-4" />
         ) : (
           <h1 className="text-4xl font-extrabold text-gray-900">
-            {product?.nom}
+            {product?.name}
           </h1>
         )}
 
@@ -112,7 +112,7 @@ const ProductPage = () => {
             <Skeleton className="w-3/4 h-6 mx-auto" />
           ) : (
             <p className="text-sm text-gray-600 text-center">
-              {product?.caracteristiques_techniques}
+              {product?.technical_specs}
             </p>
           )}
         </div>
@@ -226,7 +226,7 @@ const ProductPage = () => {
                 </td>
                 <td className="border px-4 py-2 text-center">
                   <Button
-                   onClick={() => handleAddToCart("appareil")}
+                    onClick={() => handleAddToCart("appareil")}
                     className="w-auto py-1 text-sm"
                     variant="cyna"
                   >

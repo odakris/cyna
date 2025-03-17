@@ -17,14 +17,14 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get("category")
 
     // Construire la requête Prisma avec les bons noms de colonnes
-    const products = await prisma.produit.findMany({
+    const products = await prisma.product.findMany({
       where: {
-        nom: { contains: title },
+        name: { contains: title },
         description: { contains: description },
-        caracteristiques_techniques: { contains: features },
-        prix_unitaire: { gte: minPrice, lte: maxPrice },
-        disponible: onlyAvailable ? true : undefined,
-        id_categorie: category ? parseInt(category) : undefined,
+        technical_specs: { contains: features },
+        unit_price: { gte: minPrice, lte: maxPrice },
+        available: onlyAvailable ? true : undefined,
+        id_category: category ? parseInt(category) : undefined,
       },
     })
 

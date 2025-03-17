@@ -1,13 +1,13 @@
 export type ProductType = {
-  id_produit: number
-  nom: string
+  id_product?: number
+  name: string
   description?: string
-  caracteristiques_techniques?: string
-  prix_unitaire: number
-  disponible: boolean
-  ordre_priorite: number
-  date_maj: Date
-  id_categorie: number
+  technical_specs?: string
+  unit_price: number
+  available: boolean
+  priority_order: number
+  last_updated: Date | string
+  id_category: number
   image: string
   stock: number
 }

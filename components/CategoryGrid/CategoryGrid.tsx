@@ -43,20 +43,20 @@ export function CategoryGrid() {
           ))
         : categories.map(category => (
             <Card
-              key={category.id_categorie}
-              href={`/categorie/${category.id_categorie}`}
+              key={category.id_category}
+              href={`/categorie/${category.id_category}`}
             >
               <CardContent className="relative p-0">
                 <Image
-                  src={`/images/cyber${category.id_categorie}.jpg`}
-                  alt={category.nom}
+                  src={`/images/cyber${category.id_category}.jpg`}
+                  alt={category.name}
                   className="w-full h-48 object-cover rounded-t-lg"
                   width={400}
                   height={240}
                 />
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                   <h2 className="text-white text-lg font-bold drop-shadow-lg">
-                    {category.nom}
+                    {category.name}
                   </h2>
                 </div>
               </CardContent>

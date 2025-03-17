@@ -1,119 +1,129 @@
-"use client";
+"use client"
 
-import AdminLayout from "@/components/AdminLayout/AdminLayout";
-import ClientSessionProvider from "@/components/ClientSessionProvider/ClientSessionProvider";
-import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import AdminLayout from "@/components/AdminLayout/AdminLayout"
+import ClientSessionProvider from "@/components/ClientSessionProvider/ClientSessionProvider"
+import { useSession } from "next-auth/react"
+import { useState, useEffect } from "react"
+import Link from "next/link"
+import { ProductType } from "../../types"
 
 // Définir l'interface pour les données du produit
-interface Product {
-  id_produit: number;
-  nom: string;
-  prix_unitaire: number;
-  description: string | null;
-  disponible: boolean;
-  ordre_priorite: number;
-  id_categorie: number;
-  image: string | null;
-}
+// interface Product {
+//   id_product: number
+//   nom: string
+//   prix_unitaire: number
+//   description: string | null
+//   disponible: boolean
+//   ordre_priorite: number
+//   id_category: number
+//   image: string | null
+// }
 
-// Définir les props pour le composant ProductsContent (facultatif ici, car aucune prop n'est passée)
-interface ProductsContentProps {}
-
-const ProductsContent: React.FC<ProductsContentProps> = () => {
-  const { data: session } = useSession();
-  const [products, setProducts] = useState<Product[]>([]);
-  const [selected, setSelected] = useState<number[]>([]);
-  const [refresh, setRefresh] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [sortColumn, setSortColumn] = useState<keyof Product>("nom"); // Colonne par défaut
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc"); // Direction par défaut
+const ProductsContent = () => {
+  const { data: session } = useSession()
+  const [products, setProducts] = useState<ProductType[]>([])
+  const [selected, setSelected] = useState<number[]>([])
+  const [refresh, setRefresh] = useState<boolean>(false)
+  const [error, setError] = useState<string | null>(null)
+  const [sortColumn, setSortColumn] = useState<keyof ProductType>("name") // Colonne par défaut
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc") // Direction par défaut
 
   const fetchProducts = async () => {
     try {
-      const response = await fetch("/api/products");
+      const response = await fetch("/api/products")
       if (!response.ok) {
-        throw new Error(`Erreur HTTP: ${response.status}`);
+        throw new Error(`Erreur HTTP: ${response.status}`)
       }
-      const data: Product[] = await response.json();
-      console.log("Produits reçus dans page:", data);
-      setProducts(data);
-      setError(null);
+      const data: ProductType[] = await response.json()
+      console.log("Produits reçus dans page:", data)
+      setProducts(data)
+      setError(null)
     } catch (error: unknown) {
-      console.error("Erreur fetchProducts:", error);
-      setError((error as Error).message || "Erreur inconnue");
+      console.error("Erreur fetchProducts:", error)
+      setError((error as Error).message || "Erreur inconnue")
     }
-  };
+  }
 
   useEffect(() => {
-    fetchProducts();
-  }, [refresh]);
+    fetchProducts()
+  }, [refresh])
 
   // Gestion du tri
-  const handleSort = (column: keyof Product) => {
+  const handleSort = (column: keyof ProductType) => {
     if (sortColumn === column) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
     } else {
-      setSortColumn(column);
-      setSortDirection("asc");
+      setSortColumn(column)
+      setSortDirection("asc")
     }
-  };
+  }
 
-  const sortedProducts = [...products].sort((a: Product, b: Product) => {
-    const aValue = a[sortColumn];
-    const bValue = b[sortColumn];
-    if (typeof aValue === "string" && typeof bValue === "string") {
-      return sortDirection === "asc" ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
+  const sortedProducts = [...products].sort(
+    (a: ProductType, b: ProductType) => {
+      const aValue = a[sortColumn]
+      const bValue = b[sortColumn]
+      if (typeof aValue === "string" && typeof bValue === "string") {
+        return sortDirection === "asc"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue)
+      }
+      return sortDirection === "asc"
+        ? (aValue as number) - (bValue as number)
+        : (bValue as number) - (aValue as number)
     }
-    return sortDirection === "asc" ? (aValue as number) - (bValue as number) : (bValue as number) - (aValue as number);
-  });
+  )
 
   const handleSelect = (id: number) => {
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
+    setSelected(prev =>
+      prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+    )
+  }
 
   const handleDelete = async () => {
     if (confirm(`Voulez-vous supprimer ${selected.length} produit(s) ?`)) {
-      const idsToDelete = selected;
+      const idsToDelete = selected
       for (const id of idsToDelete) {
         await fetch("/api/products", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id }),
-        });
+        })
       }
-      setSelected([]);
-      setRefresh(!refresh);
+      setSelected([])
+      setRefresh(!refresh)
     }
-  };
+  }
 
   // Fonction pour déterminer l'icône de tri à afficher
-  const getSortIcon = (column: keyof Product): string => {
+  const getSortIcon = (column: keyof ProductType): string => {
     if (sortColumn === column) {
-      return sortDirection === "asc" ? "↑" : "↓"; // Flèche pour la colonne active
+      return sortDirection === "asc" ? "↑" : "↓" // Flèche pour la colonne active
     }
-    return "↕"; // Flèche neutre par défaut pour indiquer que la colonne est triable
-  };
+    return "↕" // Flèche neutre par défaut pour indiquer que la colonne est triable
+  }
 
   return (
     <AdminLayout>
       <h1 className="text-2xl font-bold mb-4">Gestion des produits</h1>
       <p className="mb-4">
-        Bienvenue dans le back-office, {session?.user?.name} ! Rôle : {session?.user?.role}
+        Bienvenue dans le back-office, {session?.user?.name} ! Rôle :{" "}
+        {session?.user?.role}
       </p>
       {error && <p className="text-red-500 mb-4">Erreur: {error}</p>}
       <div className="mb-6">
-        <Link href="/admin/products/new" className="bg-blue-500 text-white p-2 rounded">
+        <Link
+          href="/admin/products/new"
+          className="bg-blue-500 text-white p-2 rounded"
+        >
           Ajouter un produit
         </Link>
         <button
           onClick={handleDelete}
           disabled={selected.length === 0}
           className={`ml-4 p-2 rounded ${
-            selected.length > 0 ? "bg-red-500 text-white" : "bg-gray-300 text-gray-500"
+            selected.length > 0
+              ? "bg-red-500 text-white"
+              : "bg-gray-300 text-gray-500"
           }`}
         >
           Supprimer ({selected.length})
@@ -131,15 +141,15 @@ const ProductsContent: React.FC<ProductsContentProps> = () => {
             <th className="border p-2">Sélection</th>
             <th
               className="border p-2 cursor-pointer"
-              onClick={() => handleSort("nom")}
+              onClick={() => handleSort("name")}
             >
-              Nom {getSortIcon("nom")}
+              Nom {getSortIcon("name")}
             </th>
             <th
               className="border p-2 cursor-pointer"
-              onClick={() => handleSort("prix_unitaire")}
+              onClick={() => handleSort("unit_price")}
             >
-              Prix (€) {getSortIcon("prix_unitaire")}
+              Prix (€) {getSortIcon("unit_price")}
             </th>
             <th className="border p-2">Actions</th>
           </tr>
@@ -152,22 +162,28 @@ const ProductsContent: React.FC<ProductsContentProps> = () => {
               </td>
             </tr>
           )}
-          {sortedProducts.map((product: Product) => (
-            <tr key={product.id_produit} className="hover:bg-gray-100">
+          {sortedProducts.map((product: ProductType) => (
+            <tr key={product.id_product} className="hover:bg-gray-100">
               <td className="border p-2">
                 <input
                   type="checkbox"
-                  checked={selected.includes(product.id_produit)}
-                  onChange={() => handleSelect(product.id_produit)}
+                  checked={selected.includes(product.id_product!)}
+                  onChange={() => handleSelect(product.id_product!)}
                 />
               </td>
-              <td className="border p-2">{product.nom}</td>
-              <td className="border p-2">{product.prix_unitaire.toFixed(2)}</td>
+              <td className="border p-2">{product.name}</td>
+              <td className="border p-2">{product.unit_price.toFixed(2)}</td>
               <td className="border p-2">
-                <Link href={`/admin/products/${product.id_produit}`} className="text-blue-500 mr-2">
+                <Link
+                  href={`/admin/products/${product.id_product}`}
+                  className="text-blue-500 mr-2"
+                >
                   Détails
                 </Link>
-                <Link href={`/admin/products/${product.id_produit}/edit`} className="text-green-500">
+                <Link
+                  href={`/admin/products/${product.id_product}/edit`}
+                  className="text-green-500"
+                >
                   Modifier
                 </Link>
               </td>
@@ -176,18 +192,15 @@ const ProductsContent: React.FC<ProductsContentProps> = () => {
         </tbody>
       </table>
     </AdminLayout>
-  );
-};
+  )
+}
 
-// Définir les props pour le composant Products (facultatif ici, car aucune prop n'est passée)
-interface ProductsProps {}
-
-const Products: React.FC<ProductsProps> = () => {
+const Products = () => {
   return (
     <ClientSessionProvider>
       <ProductsContent />
     </ClientSessionProvider>
-  );
-};
+  )
+}
 
-export default Products;
+export default Products

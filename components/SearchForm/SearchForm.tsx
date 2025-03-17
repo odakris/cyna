@@ -56,9 +56,9 @@ export default function SearchForm({ categories }: SearchFormProps) {
   ) => {
     return [...products].sort((a, b) => {
       if (order === "asc") {
-        return a.prix_unitaire - b.prix_unitaire // Tri croissant
+        return a.unit_price - b.unit_price // Tri croissant
       } else {
-        return b.prix_unitaire - a.prix_unitaire // Tri décroissant
+        return b.unit_price - a.unit_price // Tri décroissant
       }
     })
   }
@@ -68,8 +68,8 @@ export default function SearchForm({ categories }: SearchFormProps) {
     order: "new" | "old"
   ) => {
     return [...products].sort((a, b) => {
-      const dateA = new Date(a.date_maj)
-      const dateB = new Date(b.date_maj)
+      const dateA = new Date(a.last_updated)
+      const dateB = new Date(b.last_updated)
 
       if (order === "new") {
         return dateB.getTime() - dateA.getTime() // Tri par date la plus récente
@@ -86,10 +86,10 @@ export default function SearchForm({ categories }: SearchFormProps) {
     return [...products].sort((a, b) => {
       if (order === "available") {
         // Les produits disponibles viennent en premier
-        return a.disponible === b.disponible ? 0 : a.disponible ? -1 : 1
+        return a.available === b.available ? 0 : a.available ? -1 : 1
       } else {
         // Les produits indisponibles viennent en premier
-        return a.disponible === b.disponible ? 0 : a.disponible ? 1 : -1
+        return a.available === b.available ? 0 : a.available ? 1 : -1
       }
     })
   }
@@ -234,12 +234,9 @@ export default function SearchForm({ categories }: SearchFormProps) {
             className="border border-gray-300 rounded-md p-2 w-full max-w-xs"
           >
             <option value="">Sélectionner une catégorie</option>
-            {categories.map(categorie => (
-              <option
-                key={categorie.id_categorie}
-                value={categorie.id_categorie}
-              >
-                {categorie.nom}
+            {categories.map(category => (
+              <option key={category.id_category} value={category.id_category}>
+                {category.name}
               </option>
             ))}
           </select>
@@ -327,18 +324,23 @@ export default function SearchForm({ categories }: SearchFormProps) {
         {products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
             {products.map(product => {
-              // Trouver la catégorie associée au produit en utilisant id_categorie
+              // Trouver la catégorie associée au produit en utilisant id_category
               const productCategory = categories.find(
-                category => category.id_categorie === product.id_categorie
+                category => category.id_category === product.id_category
               )
 
               return (
                 <ProductCard
-                  key={product.id_produit}
-                  id_produit={product.id_produit}
-                  nom={product.nom}
-                  prix_unitaire={product.prix_unitaire}
-                  disponible={product.disponible}
+                  key={product.id_product}
+                  id_product={product.id_product}
+                  name={product.name}
+                  unit_price={product.unit_price}
+                  available={product.available}
+                  priority_order={product.priority_order}
+                  last_updated={product.last_updated}
+                  id_category={product.id_category}
+                  image={product.image}
+                  stock={product.stock}
                 />
               )
             })}

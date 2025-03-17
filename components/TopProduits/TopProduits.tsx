@@ -47,7 +47,7 @@ export function TopProducts() {
             .slice(0, 4)
             .map(product => (
               <TopProductCard
-                key={`${product.id_produit}-${product.nom}`}
+                key={`${product.id_product}-${product.name}`}
                 {...product}
               />
             ))}

@@ -30,25 +30,25 @@ const lastNames = [
 
 async function main() {
   // Création des catégories
-  const prevention = await prisma.categorie.create({
+  const prevention = await prisma.category.create({
     data: {
-      nom: "Prévention",
+      name: "Prévention",
       description: "Services dédiés à la prévention des cyber-risques.",
       image: "image_prevention.jpg",
     },
   })
 
-  const protection = await prisma.categorie.create({
+  const protection = await prisma.category.create({
     data: {
-      nom: "Protection",
+      name: "Protection",
       description: "Services dédiés à la protection contre les menaces cyber.",
       image: "image_protection.jpg",
     },
   })
 
-  const reponse = await prisma.categorie.create({
+  const reponse = await prisma.category.create({
     data: {
-      nom: "Réponse",
+      name: "Réponse",
       description: "Services dédiés à la réponse aux incidents de sécurité.",
       image: "image_reponse.jpg",
     },
@@ -57,96 +57,106 @@ async function main() {
   // Création des produits
   const produits = [
     {
-      nom: "Diagnostic Cyber",
-      prix_unitaire: 4500,
+      name: "Diagnostic Cyber",
+      unit_price: 4500,
       description: "Diagnostic des cyber-risques",
       image: "image_diagnostic_cyber.jpg",
       stock: 5,
-      id_categorie: prevention.id_categorie,
+      id_category: prevention.id_category,
     },
     {
-      nom: "Test d'intrusion",
-      prix_unitaire: 4000,
+      name: "Test d'intrusion",
+      unit_price: 4000,
       description: "Test d'intrusion pour évaluer la sécurité",
       image: "image_test_intrusion.jpg",
       stock: 2,
-      id_categorie: prevention.id_categorie,
+      id_category: prevention.id_category,
     },
     {
-      nom: "Micro SOC",
-      prix_unitaire: 5000,
+      name: "Micro SOC",
+      unit_price: 5000,
       description: "Surveillance continue de la sécurité",
       image: "image_micro_soc.jpg",
       stock: 0,
-      id_categorie: protection.id_categorie,
+      id_category: protection.id_category,
     },
     {
-      nom: "SOC Managé",
-      prix_unitaire: 7000,
+      name: "SOC Managé",
+      unit_price: 7000,
       description: "SOC avec gestion managée",
       image: "image_soc_manage.jpg",
       stock: 3,
-      id_categorie: protection.id_categorie,
+      id_category: protection.id_category,
     },
     {
-      nom: "Investigation, éradication, remédiation",
-      prix_unitaire: 8500,
+      name: "Investigation, éradication, remédiation",
+      unit_price: 8500,
       description: "Réponse complète aux incidents de sécurité",
       image: "image_investigation.jpg",
       stock: 5,
-      id_categorie: reponse.id_categorie,
+      id_category: reponse.id_category,
     },
   ]
 
   // Insertion des produits et récupération de leurs IDs
   const createdProduits = []
   for (const produit of produits) {
-    const createdProduit = await prisma.produit.create({
+    const createdProduit = await prisma.product.create({
       data: {
-        nom: produit.nom,
+        name: produit.name,
         description: produit.description,
-        caracteristiques_techniques: "Caractéristiques techniques à définir",
-        prix_unitaire: produit.prix_unitaire,
-        disponible: true,
-        ordre_priorite: 1,
-        date_maj: new Date(),
-        id_categorie: produit.id_categorie,
+        technical_specs: "Caractéristiques techniques à définir",
+        unit_price: produit.unit_price,
+        available: true,
+        priority_order: 1,
+        last_updated: new Date(),
+        id_category: produit.id_category,
         image: produit.image,
         stock: produit.stock,
       },
     })
-    createdProduits.push(createdProduit) // Stocker les produits créés
+    createdProduits.push(createdProduit)
   }
 
-  // Création de 10 clients
+  // Création de 10 utilisateurs et leurs clients associés
   for (let i = 0; i < 10; i++) {
     const firstName = firstNames[i]
     const lastName = lastNames[i]
     const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i + 1}@example.com`
 
+    // Création d'un utilisateur avec rôle "client"
+    const user = await prisma.user.create({
+      data: {
+        email: email,
+        password: "hashedpassword", // À remplacer par un vrai hash dans un vrai projet
+        role: "client",
+      },
+    })
+
+    // Création du client lié à cet utilisateur
     const client = await prisma.client.create({
       data: {
-        nom: firstName,
-        prenom: lastName,
+        first_name: firstName,
+        last_name: lastName,
         email: email,
-        mot_de_passe: "hashedpassword",
+        id_user: user.id_user, // Liaison avec l'utilisateur
       },
     })
 
     // Création de 3 adresses pour chaque client
     for (let j = 0; j < 3; j++) {
-      await prisma.adresse_Client.create({
+      await prisma.clientAddress.create({
         data: {
-          prenom: firstName,
-          nom: lastName,
-          rue: `${i + 1} Rue de Paris`,
-          cp: `7500${i + 1}`,
-          ville: "Paris",
+          first_name: firstName,
+          last_name: lastName,
+          street: `${i + 1} Rue de Paris`,
+          postal_code: `7500${i + 1}`,
+          city: "Paris",
           region: "Île-de-France",
-          pays: "France",
-          telephone_mobile: `01234567${i + 1}`,
-          est_facturation_defaut: j === 0,
-          est_livraison_defaut: j === 0,
+          country: "France",
+          mobile_phone: `01234567${i + 1}`,
+          is_default_billing: j === 0,
+          is_default_shipping: j === 0,
           id_client: client.id_client,
         },
       })
@@ -154,13 +164,13 @@ async function main() {
 
     // Création de 3 infos de paiement pour chaque client
     for (let k = 0; k < 3; k++) {
-      await prisma.info_Paiement.create({
+      await prisma.paymentInfo.create({
         data: {
-          nom_carte: `Carte ${firstName} ${lastName} - ${k + 1}`,
-          numero_carte: `411111111111111${k + 1}`,
-          date_expiration: new Date(2025, 12, 31),
+          card_name: `Carte ${firstName} ${lastName} - ${k + 1}`,
+          card_number: `411111111111111${k + 1}`,
+          expiration_date: new Date(2025, 12, 31),
           CVV: `${Math.floor(Math.random() * 900) + 100}`,
-          est_paiement_defaut: k === 0,
+          is_default_payment: k === 0,
           id_client: client.id_client,
         },
       })
@@ -168,23 +178,23 @@ async function main() {
 
     // Création de 3 commandes pour chaque client
     for (let j = 0; j < 3; j++) {
-      const commande = await prisma.commande.create({
+      const order = await prisma.order.create({
         data: {
-          date_commande: new Date(),
-          type_abonnement: "Annuel",
-          duree_abonnement: 12,
-          montant_total: 4500 + j * 100,
-          statut_commande: "En attente",
-          mode_paiement: "Carte bancaire",
-          dernier_chiffre_cb: "1234",
-          facture_pdf_url: `https://example.com/facture${i + 1}_${j + 1}.pdf`,
-          date_renouvellement: new Date(),
+          order_date: new Date(),
+          subscription_type: "Annuel",
+          subscription_duration: 12,
+          total_amount: 4500 + j * 100,
+          order_status: "En attente",
+          payment_method: "Carte bancaire",
+          last_card_digits: "1234",
+          invoice_pdf_url: `https://example.com/facture${i + 1}_${j + 1}.pdf`,
+          renewal_date: new Date(),
           id_client: client.id_client,
         },
       })
 
       // Sélection aléatoire de 1 à 3 produits pour cette commande
-      const numberOfProducts = Math.floor(Math.random() * 3) + 1 // 1 à 3 produits
+      const numberOfProducts = Math.floor(Math.random() * 3) + 1
       const randomProducts = getRandomProducts(
         createdProduits,
         numberOfProducts
@@ -192,17 +202,17 @@ async function main() {
 
       // Insertion des liens produits_commande
       for (const produit of randomProducts) {
-        await prisma.produit_Commande.create({
+        await prisma.orderedProduct.create({
           data: {
-            id_produit: produit.id_produit, // Utilisation du bon id_produit
-            id_commande: commande.id_commande,
+            id_product: produit.id_product,
+            id_order: order.id_order,
           },
         })
       }
     }
   }
 
-  // Création de 10 messages dans la table Message_Contact
+  // Création de 10 messages dans la table ContactMessage
   for (let i = 0; i < 10; i++) {
     const firstName = firstNames[i]
     const lastName = lastNames[i]
@@ -210,8 +220,7 @@ async function main() {
     const subject = `Message de ${firstName} ${lastName}`
     const message = `Bonjour, je suis ${firstName} ${lastName}, et j'ai une question concernant vos services.`
 
-    // Insertion du message dans la table Message_Contact
-    await prisma.message_Contact.create({
+    await prisma.contactMessage.create({
       data: {
         email: email,
         subject: subject,
@@ -225,8 +234,8 @@ async function main() {
 
 // Fonction pour obtenir des produits au hasard
 function getRandomProducts(produits, count) {
-  const shuffled = [...produits].sort(() => 0.5 - Math.random()) // Mélange des produits
-  return shuffled.slice(0, count) // Sélectionner les premiers produits
+  const shuffled = [...produits].sort(() => 0.5 - Math.random())
+  return shuffled.slice(0, count)
 }
 
 main()
