@@ -118,6 +118,20 @@ async function main() {
     createdProduits.push(createdProduit)
   }
 
+  // Création d'un utilisateur admin pour le back-office
+  const adminUser = await prisma.user.create({
+    data: {
+      email: "admin@example.com",
+      password: "adminpassword123", // À hacher dans un environnement réel
+      role: "admin",
+    },
+  })
+  console.log("Utilisateur admin créé :", {
+    email: adminUser.email,
+    password: "adminpassword123", // À utiliser pour tester la connexion
+    role: adminUser.role,
+  })
+
   // Création de 10 utilisateurs et leurs clients associés
   for (let i = 0; i < 10; i++) {
     const firstName = firstNames[i]
