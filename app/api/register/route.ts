@@ -1,46 +1,57 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
+import { Role } from "../../types/Types"
 
 const prisma = new PrismaClient()
 
-export async function POST(request: Request) {
+export async function POST(req: NextRequest) {
   try {
-    const body = await request.json()
+    const body = await req.json()
     const { firstName, lastName, email, password } = body
 
-    // Vérifiez si l'email existe déjà
-    const existingClient = await prisma.client.findUnique({
+    // Vérifier si l'email existe déjà
+    const existingUser = await prisma.user.findUnique({
       where: { email },
     })
-    if (existingClient) {
+
+    if (existingUser) {
       return NextResponse.json(
         { error: "Cet email est déjà utilisé" },
         { status: 400 }
       )
     }
 
-    // Hachez le mot de passe
+    // Hacher le mot de passe
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Créez le client dans la base de données
-    const client = await prisma.client.create({
+    // Créer un utilisateur avec le rôle "client"
+    const user = await prisma.user.create({
       data: {
-        last_name: lastName,
-        first_name: firstName,
         email,
         password: hashedPassword,
+        role: Role.CLIENT,
+      },
+    })
+
+    // Créer un enregistrement dans la table Client lié à l'utilisateur
+    const client = await prisma.client.create({
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        id_user: user.id_user,
       },
     })
 
     return NextResponse.json(
-      { message: "Client créé avec succès", client },
+      { message: "Utilisateur créé avec succès", user, client },
       { status: 201 }
     )
   } catch (error) {
-    console.error("Erreur lors de l'inscription:", error)
+    console.error(error)
     return NextResponse.json(
-      { error: "Erreur lors de la création du client" },
+      { error: "Une erreur est survenue" },
       { status: 500 }
     )
   }

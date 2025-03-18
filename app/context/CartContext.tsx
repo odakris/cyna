@@ -50,7 +50,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
 
   // Fonction pour ajouter un produit au panier
   const addToCart = (product: CartItem) => {
-    console.log("Produit ajouté au panier : ", product);
+    // console.log("Produit ajouté au panier : ", product);
     setCart(prevCart => [...prevCart, product])
   }
 

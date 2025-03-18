@@ -3,7 +3,7 @@ CREATE TABLE `User` (
     `id_user` INTEGER NOT NULL AUTO_INCREMENT,
     `email` VARCHAR(191) NOT NULL,
     `password` VARCHAR(191) NOT NULL,
-    `role` VARCHAR(191) NOT NULL DEFAULT 'client',
+    `role` ENUM('CLIENT', 'ADMIN') NOT NULL DEFAULT 'CLIENT',
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
@@ -81,9 +81,9 @@ CREATE TABLE `Order` (
 CREATE TABLE `PaymentInfo` (
     `id_payment_info` INTEGER NOT NULL AUTO_INCREMENT,
     `card_name` VARCHAR(191) NOT NULL,
-    `card_number` VARCHAR(191) NOT NULL,
-    `expiration_date` DATETIME(3) NOT NULL,
-    `CVV` VARCHAR(191) NOT NULL,
+    `last_card_digits` VARCHAR(191) NOT NULL,
+    `expiration_month` INTEGER NOT NULL,
+    `expiration_year` INTEGER NOT NULL,
     `is_default_payment` BOOLEAN NOT NULL,
     `id_client` INTEGER NOT NULL,
 

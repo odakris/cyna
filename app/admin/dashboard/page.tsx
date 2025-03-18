@@ -1,70 +1,79 @@
-"use client";
+"use client"
 
-import AdminLayout from "@/components/AdminLayout/AdminLayout";
-import ClientSessionProvider from "@/components/ClientSessionProvider/ClientSessionProvider";
-import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
+import AdminLayout from "@/components/AdminLayout/AdminLayout"
+import { useSession } from "next-auth/react"
+// import { useState, useEffect } from "react"
+// import {
+//   BarChart,
+//   Bar,
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   Legend,
+//   PieChart,
+//   Pie,
+//   Cell,
+// } from "recharts"
 
 // Définir les types pour les données de ventes
-interface DailySalesData {
-  day: string;
-  sales: number;
-}
+// interface DailySalesData {
+//   day: string
+//   sales: number
+// }
 
-interface CategorySalesData {
-  name: string;
-  value: number;
-}
+// interface CategorySalesData {
+//   name: string
+//   value: number
+// }
 
 // Couleurs pour les graphiques
-const COLORS: string[] = ["#0088FE", "#00C49F", "#FFBB28"];
+// const COLORS: string[] = ["#0088FE", "#00C49F", "#FFBB28"]
 
-function DashboardContent() {
-  const { data: session } = useSession();
-  const [period, setPeriod] = useState<string>("7days");
-  const [dailySalesData, setDailySalesData] = useState<DailySalesData[]>([]);
-  const [categorySalesData, setCategorySalesData] = useState<CategorySalesData[]>([]);
+export default function DashboardContent() {
+  const { data: session } = useSession()
+  // const [period, setPeriod] = useState<string>("7days")
+  // const [dailySalesData, setDailySalesData] = useState<DailySalesData[]>([])
+  // const [categorySalesData, setCategorySalesData] = useState<
+  //   CategorySalesData[]
+  // >([])
 
-  const fetchSalesData = async () => {
-    try {
-      const response = await fetch(`/api/sales?period=${period}`);
-      if (!response.ok) throw new Error("Erreur lors de la récupération des ventes");
-      const { dailySalesData, categorySalesData }: { dailySalesData: DailySalesData[], categorySalesData: CategorySalesData[] } = await response.json();
-      console.log("Données récupérées:", { dailySalesData, categorySalesData });
-      setDailySalesData(dailySalesData);
-      setCategorySalesData(categorySalesData);
-    } catch (error) {
-      console.error("Erreur fetchSalesData:", error);
-    }
-  };
+  // const fetchSalesData = async () => {
+  //   try {
+  //     const response = await fetch(`/api/sales?period=${period}`)
+  //     if (!response.ok)
+  //       throw new Error("Erreur lors de la récupération des ventes")
+  //     const {
+  //       dailySalesData,
+  //       categorySalesData,
+  //     }: {
+  //       dailySalesData: DailySalesData[]
+  //       categorySalesData: CategorySalesData[]
+  //     } = await response.json()
+  //     console.log("Données récupérées:", { dailySalesData, categorySalesData })
+  //     setDailySalesData(dailySalesData)
+  //     setCategorySalesData(categorySalesData)
+  //   } catch (error) {
+  //     console.error("Erreur fetchSalesData:", error)
+  //   }
+  // }
 
-  useEffect(() => {
-    fetchSalesData();
-  }, [period]);
+  // useEffect(() => {
+  //   fetchSalesData()
+  // }, [period])
 
-  console.log("DashboardContent - Rendu avec session:", session);
+  // console.log("DashboardContent - Rendu avec session:", session)
 
   return (
     <AdminLayout>
       <h1 className="text-2xl font-bold mb-4">Tableau de bord</h1>
       <p className="mb-4">
-        Bienvenue dans le back-office, {session?.user?.name} ! Rôle : {session?.user?.role}
+        Bienvenue dans le back-office, {session?.user?.name} ! Rôle :{" "}
+        {session?.user?.role}
       </p>
 
       {/* Sélecteur de période */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <label className="mr-2">Période :</label>
         <select
           value={period}
@@ -74,10 +83,10 @@ function DashboardContent() {
           <option value="7days">7 derniers jours</option>
           <option value="5weeks">5 dernières semaines</option>
         </select>
-      </div>
+      </div> */}
 
       {/* Histogramme des ventes par jour */}
-      <div className="mb-8">
+      {/* <div className="mb-8">
         <h2 className="text-xl font-semibold mb-2">Ventes par jour</h2>
         <BarChart width={600} height={300} data={dailySalesData}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -87,11 +96,13 @@ function DashboardContent() {
           <Legend />
           <Bar dataKey="sales" fill="#8884d8" />
         </BarChart>
-      </div>
+      </div> */}
 
       {/* Histogramme multi-couches des paniers moyens */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-2">Paniers moyens par catégorie</h2>
+      {/* <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-2">
+          Paniers moyens par catégorie
+        </h2>
         <BarChart width={600} height={300} data={dailySalesData}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="day" />
@@ -108,11 +119,13 @@ function DashboardContent() {
             />
           ))}
         </BarChart>
-      </div>
+      </div> */}
 
       {/* Graphique camembert des ventes par catégorie */}
-      <div>
-        <h2 className="text-xl font-semibold mb-2">Répartition des ventes par catégorie</h2>
+      {/* <div>
+        <h2 className="text-xl font-semibold mb-2">
+          Répartition des ventes par catégorie
+        </h2>
         <PieChart width={400} height={400}>
           <Pie
             data={categorySalesData}
@@ -127,22 +140,16 @@ function DashboardContent() {
             dataKey="value"
           >
             {categorySalesData.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              <Cell
+                key={`cell-${index}`}
+                fill={COLORS[index % COLORS.length]}
+              />
             ))}
           </Pie>
           <Tooltip />
           <Legend />
         </PieChart>
-      </div>
+      </div> */}
     </AdminLayout>
-  );
-}
-
-export default function Dashboard() {
-  console.log("Dashboard - Rendu principal");
-  return (
-    <ClientSessionProvider>
-      <DashboardContent />
-    </ClientSessionProvider>
-  );
+  )
 }

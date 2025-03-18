@@ -122,8 +122,8 @@ async function main() {
   const adminUser = await prisma.user.create({
     data: {
       email: "admin@example.com",
-      password: "adminpassword123", // À hacher dans un environnement réel
-      role: "admin",
+      password: "adminpassword123", // À hacher dans un environnement réel ==> const hashedPassword = await bcrypt.hash("adminpassword123", 10);
+      role: "ADMIN",
     },
   })
   console.log("Utilisateur admin créé :", {
@@ -143,7 +143,7 @@ async function main() {
       data: {
         email: email,
         password: "hashedpassword", // À remplacer par un vrai hash dans un vrai projet
-        role: "client",
+        role: "CLIENT",
       },
     })
 
@@ -181,9 +181,9 @@ async function main() {
       await prisma.paymentInfo.create({
         data: {
           card_name: `Carte ${firstName} ${lastName} - ${k + 1}`,
-          card_number: `411111111111111${k + 1}`,
-          expiration_date: new Date(2025, 12, 31),
-          CVV: `${Math.floor(Math.random() * 900) + 100}`,
+          last_card_digits: `123${k + 1}`,
+          expiration_month: 12,
+          expiration_year: 2025,
           is_default_payment: k === 0,
           id_client: client.id_client,
         },

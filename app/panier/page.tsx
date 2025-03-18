@@ -44,7 +44,7 @@ export default function PanierPage() {
         <p className="text-center text-gray-500">Votre panier est vide.</p>
       ) : (
         cart.map(item => {
-          console.log("Item dans le panier : ", item.id) // Log pour vérifier les données
+          // console.log("Item dans le panier : ", item.id) // Log pour vérifier les données
           return (
             <CartItem
               key={item.id}

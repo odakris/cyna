@@ -3,20 +3,36 @@ import { prisma } from "@/lib/prisma"
 import type { NextRequest } from "next/server"
 import type { Product, Category } from "@prisma/client"
 
-// Définir une interface pour un produit avec sa catégorie
-interface ProduitWithcategory extends Product {
+interface ProductWithCategory extends Product {
   category: Category
 }
 
-// Méthode GET
+const validateProductData = (data: unknown): Partial<Product> => {
+  if (!data || typeof data !== "object" || Object.keys(data).length === 0) {
+    throw new Error("Les données du produit sont invalides ou absentes")
+  }
+  return data as Partial<Product>
+}
+
+const validateProductId = (id: unknown): number => {
+  if (id === undefined || id === null) {
+    throw new Error("L'ID du produit est requis")
+  }
+  const parsedId = Number(id)
+  if (isNaN(parsedId) || !Number.isInteger(parsedId) || parsedId <= 0) {
+    throw new Error("L'ID du produit doit être un nombre entier positif")
+  }
+  return parsedId
+}
+
 export async function GET(): Promise<
-  NextResponse<ProduitWithcategory[] | { error: string }>
+  NextResponse<ProductWithCategory[] | { error: string }>
 > {
   try {
     const products = await prisma.product.findMany({
       include: { category: true },
+      orderBy: { priority_order: "asc" },
     })
-    console.log("Produits renvoyés:", products)
     return NextResponse.json(products)
   } catch (error) {
     console.error("Erreur GET products:", error)
@@ -24,103 +40,55 @@ export async function GET(): Promise<
   }
 }
 
-// Méthode POST
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse<Product | { error: string }>> {
   try {
     const body = await request.json()
-    if (!body || typeof body !== "object" || Object.keys(body).length === 0) {
-      throw new Error("Le corps de la requête est invalide ou vide")
-    }
+    const data = validateProductData(body)
 
-    const data = body as Partial<Product>
-    const newProduct = await prisma.produit.create({
+    const newProduct = await prisma.product.create({
       data: {
-        nom: data.name || "",
-        prix_unitaire: data.unit_price || 0,
-        description: data.description || null,
-        caracteristiques_techniques: data.technical_specs || null,
-        disponible: data.available ?? true,
-        ordre_priorite: data.unit_price || 1,
-        date_maj: data.last_updated || new Date(),
+        name: data.name?.trim() || "",
+        unit_price: Number(data.unit_price) || 0,
+        description: data.description?.trim() || null,
+        technical_specs: data.technical_specs?.trim() || null,
+        available: data.available ?? true,
+        priority_order: data.priority_order || 1,
+        last_updated: new Date(),
         id_category: data.id_category || 1,
         image: data.image || null,
+        stock: Math.max(0, data.stock || 0),
       },
     })
+
     return NextResponse.json(newProduct, { status: 201 })
   } catch (error) {
     console.error("Erreur POST product:", error)
     return NextResponse.json(
-      { error: (error as Error).message || "Erreur serveur" },
-      { status: 500 }
-    )
-  }
-}
-
-// Méthode PUT
-export async function PUT(
-  request: NextRequest
-): Promise<NextResponse<Product | { error: string }>> {
-  try {
-    const body = await request.json()
-    if (!body || typeof body !== "object" || Object.keys(body).length === 0) {
-      throw new Error("Le corps de la requête est invalide ou null")
-    }
-
-    const data = body as Partial<Product> & { id_product: number }
-    if (typeof data.id_product !== "number") {
-      throw new Error("L'ID du produit doit être un nombre")
-    }
-
-    const updatedProduct = await prisma.produit.update({
-      where: { id_product: data.id_product },
-      data: {
-        nom: data.name || undefined,
-        prix_unitaire: data.unit_price || undefined,
-        description: data.description || undefined,
-        technical_specs: data.technical_specs || undefined,
-        disponible: data.available || undefined,
-        ordre_priorite: data.priority_order || undefined,
-        date_maj: data.last_updated || new Date(),
-        id_category: data.id_category || undefined,
-        image: data.image || undefined,
-      },
-    })
-    return NextResponse.json(updatedProduct)
-  } catch (error) {
-    console.error("Erreur PUT product:", error)
-    return NextResponse.json(
-      { error: (error as Error).message || "Erreur serveur" },
+      { error: (error as Error).message },
       { status: 400 }
     )
   }
 }
 
-// Méthode DELETE
 export async function DELETE(
   request: NextRequest
 ): Promise<NextResponse<{ message: string } | { error: string }>> {
   try {
     const body = await request.json()
-    if (!body || typeof body !== "object" || !body.id) {
-      throw new Error("L'ID du produit est requis")
-    }
+    const id = validateProductId(body.id)
 
-    const { id } = body as { id: number }
-    if (typeof id !== "number") {
-      throw new Error("L'ID doit être un nombre")
-    }
-
-    await prisma.produit.delete({
+    await prisma.product.delete({
       where: { id_product: id },
     })
-    return NextResponse.json({ message: "Produit supprimé" })
+
+    return NextResponse.json({ message: "Produit supprimé avec succès" })
   } catch (error) {
     console.error("Erreur DELETE product:", error)
     return NextResponse.json(
-      { error: (error as Error).message || "Erreur serveur" },
-      { status: 500 }
+      { error: (error as Error).message },
+      { status: 400 }
     )
   }
 }

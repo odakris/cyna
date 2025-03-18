@@ -1,26 +1,13 @@
 "use client"
 
 import AdminLayout from "@/components/AdminLayout/AdminLayout"
-import ClientSessionProvider from "@/components/ClientSessionProvider/ClientSessionProvider"
 import { useSession } from "next-auth/react"
 import { useParams } from "next/navigation"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ProductType } from "../../../types"
 
-// // Définir l'interface pour les données du produit
-// interface Product {
-//   id_product: number
-//   nom: string
-//   prix_unitaire: number
-//   description: string | null
-//   disponible: boolean
-//   ordre_priorite: number
-//   id_category: number
-//   image: string | null
-// }
-
-const ProductDetailsContent = () => {
+export default function ProductDetailsContent() {
   const { data: session } = useSession()
   const { id } = useParams() as { id: string }
   const [product, setProduct] = useState<ProductType | null>(null)
@@ -34,7 +21,7 @@ const ProductDetailsContent = () => {
           throw new Error("Erreur lors de la récupération des produits")
         const products: ProductType[] = await response.json()
         const foundProduct = products.find(p => p.id_product === parseInt(id))
-        console.log("Produit trouvé:", foundProduct)
+        // console.log("Produit trouvé:", foundProduct)
         setProduct(foundProduct || null)
       } catch (error) {
         console.error("Erreur fetchProduct:", error)
@@ -43,12 +30,12 @@ const ProductDetailsContent = () => {
     fetchProduct()
   }, [id])
 
-  console.log(
-    "ProductDetailsContent - Rendu avec session:",
-    session,
-    "Product:",
-    product
-  )
+  // console.log(
+  //   "ProductDetailsContent - Rendu avec session:",
+  //   session,
+  //   "Product:",
+  //   product
+  // )
 
   if (!product) return <p>Produit non trouvé</p>
 
@@ -82,14 +69,3 @@ const ProductDetailsContent = () => {
     </AdminLayout>
   )
 }
-
-const ProductDetails = () => {
-  console.log("ProductDetails - Rendu principal")
-  return (
-    <ClientSessionProvider>
-      <ProductDetailsContent />
-    </ClientSessionProvider>
-  )
-}
-
-export default ProductDetails

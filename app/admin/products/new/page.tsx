@@ -51,7 +51,7 @@ const NewProductContent = () => {
       image: "default_image.jpg",
       stock: 0,
     }
-    console.log("Données envoyées:", productData)
+    // console.log("Données envoyées:", productData)
     try {
       const response = await fetch("/api/products", {
         method: "POST",
@@ -59,7 +59,7 @@ const NewProductContent = () => {
         body: JSON.stringify(productData),
       })
       const result = await response.json()
-      console.log("Réponse API:", result)
+      // console.log("Réponse API:", result)
       if (response.ok) {
         router.push("/admin/products?refresh=true")
       } else {
@@ -91,7 +91,7 @@ const NewProductContent = () => {
           <label className="block">Nom</label>
           <input
             type="text"
-            name="nom"
+            name="name"
             value={formData.name}
             onChange={handleChange}
             className="w-full p-2 border rounded"
@@ -102,7 +102,7 @@ const NewProductContent = () => {
           <label className="block">Prix (€)</label>
           <input
             type="number"
-            name="prix_unitaire"
+            name="unit_price"
             value={formData.unit_price}
             onChange={handleChange}
             className="w-full p-2 border rounded"

@@ -36,7 +36,7 @@ export default function ContactForm() {
   const [errorMessage, setErrorMessage] = useState<string>("")
 
   const onSubmit = async (data: ContactFormValues) => {
-    console.log("Données envoyées au serveur :", data)
+    // console.log("Données envoyées au serveur :", data)
 
     try {
       const response = await fetch("/api/contact", {

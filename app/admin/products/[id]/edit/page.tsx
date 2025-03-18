@@ -1,44 +1,39 @@
 "use client"
 
 import AdminLayout from "@/components/AdminLayout/AdminLayout"
-import ClientSessionProvider from "@/components/ClientSessionProvider/ClientSessionProvider"
 import { useSession } from "next-auth/react"
 import { useParams, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ProductType } from "../../../../types/ProductType"
 
-// Définir l'interface pour les données du produit
-// interface ProductData {
-//   id_product: number
-//   nom: string
-//   prix_unitaire: string
-//   description: string
-//   caracteristiques_techniques: string
-//   disponible: string
-//   ordre_priorite: string
-//   id_category: string
-//   image: string
-// }
-
-const EditProductContent = () => {
+export default function EditProductContent() {
   const { data: session } = useSession()
   const { id } = useParams() as { id: string }
   const router = useRouter()
   const [formData, setFormData] = useState<ProductType | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  // Récupérer le produit depuis l’API
   useEffect(() => {
     async function fetchProduct() {
+      if (!id || isNaN(parseInt(id))) {
+        console.error("ID invalide:", id)
+        setLoading(false)
+        return
+      }
+
       try {
-        const response = await fetch("/api/products")
-        if (!response.ok)
-          throw new Error("Erreur lors de la récupération des produits")
-        const products = await response.json()
-        console.log("Produits récupérés:", products) // Log pour débogage
-        const product = products.find((p: any) => p.id_product === parseInt(id))
+        // console.log("Récupération du produit avec id:", id)
+        const response = await fetch(`/api/products/${id}`)
+        if (!response.ok) {
+          const errorData = await response.json()
+          console.error("Erreur API:", errorData.message)
+          throw new Error("Erreur lors de la récupération du produit")
+        }
+        const product = await response.json()
         if (product) {
           setFormData({
+            id_product: parseInt(id),
             name: product.name,
             unit_price: product.unit_price,
             description: product.description || "",
@@ -55,38 +50,46 @@ const EditProductContent = () => {
         }
       } catch (error) {
         console.error("Erreur fetchProduct:", error)
+      } finally {
+        setLoading(false)
       }
     }
     fetchProduct()
   }, [id])
 
-  // Mettre à jour le produit via l’API
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if (!formData) {
       console.error("Erreur: formData est null, impossible de soumettre.")
       return
     }
-    console.log("Produit modifié:", formData)
+    // console.log("Envoi des données pour mise à jour:", formData)
     try {
-      const response = await fetch("/api/products", {
+      const response = await fetch(`/api/products/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          id_product: formData.id_product, // Envoi comme number
+          id_product: parseInt(id),
           name: formData.name,
-          unit_price: formData.unit_price,
+          unit_price: Number(formData.unit_price),
           description: formData.description,
           technical_specs: formData.technical_specs,
-          disponible: formData.available === true,
-          ordre_priorite: formData.priority_order,
+          available: formData.available,
+          priority_order: formData.priority_order,
           id_category: formData.id_category,
           image: formData.image,
           stock: formData.stock,
-          last_updated: formData.last_updated.toString(),
+          last_updated: new Date().toISOString(),
         }),
       })
-      if (!response.ok) throw new Error("Erreur lors de la mise à jour")
+
+      // console.log("Statut de la réponse PUT:", response.status)
+      if (!response.ok) {
+        const errorData = await response.text() // Utiliser text() pour voir la réponse brute
+        console.error("Erreur API brute:", errorData)
+        throw new Error(`Erreur lors de la mise à jour: ${response.status}`)
+      }
+
       const updatedProduct = await response.json()
       console.log("Produit mis à jour:", updatedProduct)
       router.push("/admin/products?refresh=true")
@@ -98,17 +101,12 @@ const EditProductContent = () => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    if (!formData) return // Éviter les mises à jour si formData est null
+    if (!formData) return
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  console.log(
-    "EditProductContent - Rendu avec session:",
-    session,
-    "FormData:",
-    formData
-  )
-
+  if (!session) return <p>Veuillez vous connecter pour accéder à cette page</p>
+  if (loading) return <p>Chargement...</p>
   if (!formData) return <p>Produit non trouvé</p>
 
   return (
@@ -126,7 +124,7 @@ const EditProductContent = () => {
           <label className="block">Nom</label>
           <input
             type="text"
-            name="nom"
+            name="name"
             value={formData.name}
             onChange={handleChange}
             className="w-full p-2 border rounded"
@@ -137,7 +135,7 @@ const EditProductContent = () => {
           <label className="block">Prix (€)</label>
           <input
             type="number"
-            name="prix_unitaire"
+            name="unit_price"
             value={formData.unit_price}
             onChange={handleChange}
             className="w-full p-2 border rounded"
@@ -169,14 +167,3 @@ const EditProductContent = () => {
     </AdminLayout>
   )
 }
-
-const EditProduct = () => {
-  console.log("EditProduct - Rendu principal")
-  return (
-    <ClientSessionProvider>
-      <EditProductContent />
-    </ClientSessionProvider>
-  )
-}
-
-export default EditProduct

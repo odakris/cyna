@@ -7,15 +7,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Table User pour gérer les utilisateurs (clients et admins)
+enum Role {
+  CLIENT
+  ADMIN
+}
+
 model User {
   id_user     Int      @id @default(autoincrement())
   email       String   @unique
   password    String
-  role        String   @default("client") // "client" ou "admin"
+  role        Role     @default(CLIENT)
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
-  client      Client?  @relation("UserToClient") // Relation optionnelle vers Client
+  client      Client?  @relation("UserToClient")
 }
 
 // Table Client liée à User
@@ -24,7 +28,7 @@ model Client {
   last_name            String
   first_name           String
   email                String           @unique
-  id_user              Int?             @unique // Lien vers User (optionnel)
+  id_user              Int?             @unique
   user                 User?            @relation("UserToClient", fields: [id_user], references: [id_user])
   orders               Order[]
   paymentInfo          PaymentInfo[]
@@ -83,9 +87,9 @@ model Order {
 model PaymentInfo {
   id_payment_info    Int    @id @default(autoincrement())
   card_name          String
-  card_number        String
-  expiration_date    DateTime
-  CVV                String
+  last_card_digits   String
+  expiration_month   Int
+  expiration_year    Int
   is_default_payment Boolean
   id_client          Int
   client             Client @relation(fields: [id_client], references: [id_client])

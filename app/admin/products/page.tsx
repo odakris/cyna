@@ -1,32 +1,19 @@
 "use client"
 
 import AdminLayout from "@/components/AdminLayout/AdminLayout"
-import ClientSessionProvider from "@/components/ClientSessionProvider/ClientSessionProvider"
 import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ProductType } from "../../types"
 
-// Définir l'interface pour les données du produit
-// interface Product {
-//   id_product: number
-//   nom: string
-//   prix_unitaire: number
-//   description: string | null
-//   disponible: boolean
-//   ordre_priorite: number
-//   id_category: number
-//   image: string | null
-// }
-
-const ProductsContent = () => {
+export default function ProductsContent() {
   const { data: session } = useSession()
   const [products, setProducts] = useState<ProductType[]>([])
   const [selected, setSelected] = useState<number[]>([])
   const [refresh, setRefresh] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
-  const [sortColumn, setSortColumn] = useState<keyof ProductType>("name") // Colonne par défaut
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc") // Direction par défaut
+  const [sortColumn, setSortColumn] = useState<keyof ProductType>("name")
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc")
 
   const fetchProducts = async () => {
     try {
@@ -35,7 +22,6 @@ const ProductsContent = () => {
         throw new Error(`Erreur HTTP: ${response.status}`)
       }
       const data: ProductType[] = await response.json()
-      console.log("Produits reçus dans page:", data)
       setProducts(data)
       setError(null)
     } catch (error: unknown) {
@@ -48,7 +34,6 @@ const ProductsContent = () => {
     fetchProducts()
   }, [refresh])
 
-  // Gestion du tri
   const handleSort = (column: keyof ProductType) => {
     if (sortColumn === column) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc")
@@ -83,24 +68,28 @@ const ProductsContent = () => {
     if (confirm(`Voulez-vous supprimer ${selected.length} produit(s) ?`)) {
       const idsToDelete = selected
       for (const id of idsToDelete) {
-        await fetch("/api/products", {
+        const response = await fetch("/api/products", {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id }),
         })
+        if (!response.ok) {
+          console.error(`Erreur lors de la suppression du produit ${id}`)
+        }
       }
       setSelected([])
       setRefresh(!refresh)
     }
   }
 
-  // Fonction pour déterminer l'icône de tri à afficher
   const getSortIcon = (column: keyof ProductType): string => {
     if (sortColumn === column) {
-      return sortDirection === "asc" ? "↑" : "↓" // Flèche pour la colonne active
+      return sortDirection === "asc" ? "↑" : "↓"
     }
-    return "↕" // Flèche neutre par défaut pour indiquer que la colonne est triable
+    return "↕"
   }
+
+  if (!session) return <p>Veuillez vous connecter pour accéder à cette page</p>
 
   return (
     <AdminLayout>
@@ -194,13 +183,3 @@ const ProductsContent = () => {
     </AdminLayout>
   )
 }
-
-const Products = () => {
-  return (
-    <ClientSessionProvider>
-      <ProductsContent />
-    </ClientSessionProvider>
-  )
-}
-
-export default Products

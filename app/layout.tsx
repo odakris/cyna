@@ -4,6 +4,7 @@ import "./globals.css"
 import { Navbar } from "@/components/Navbar/Navbar"
 import { Footer } from "../components/Footer/Footer"
 import { CartProvider } from "./context/CartContext"
+import UserSessionProvider from "./context/UserSessionProvider"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,24 +31,26 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-         <CartProvider>
-        <div className="min-h-screen flex flex-col cyna-text">
-          {/* Navbar */}
-          <div className="w-full">
-            <Navbar />
-          </div>
+        <UserSessionProvider>
+          <CartProvider>
+            <div className="min-h-screen flex flex-col cyna-text">
+              {/* Navbar */}
+              <div className="w-full">
+                <Navbar />
+              </div>
 
-          {/* Main Content */}
-          <main className="flex-1 max-w-7xl w-full mx-auto py-4 px-10 mt-20">
-            {children}
-          </main>
+              {/* Main Content */}
+              <main className="flex-1 max-w-7xl w-full mx-auto py-4 px-10 mt-20">
+                {children}
+              </main>
 
-          {/* Footer */}
-          <div className="w-full">
-            <Footer />
-          </div>
-        </div>
-        </CartProvider>
+              {/* Footer */}
+              <div className="w-full">
+                <Footer />
+              </div>
+            </div>
+          </CartProvider>
+        </UserSessionProvider>
       </body>
     </html>
   )

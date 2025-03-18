@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Form,
   FormControl,
@@ -10,83 +10,57 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { signIn, SignInResponse } from "next-auth/react";
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import { signIn } from "next-auth/react"
 
-// Définir le schéma de validation avec Zod
 const formSchema = z.object({
-  email: z
-    .string()
-    .min(1, { message: "L'email est requis" })
-    .email({ message: "Fournissez un email valide" }),
-  password: z.string().min(1, { message: "Le mot de passe est requis" }),
-});
+  email: z.string().min(1, "L'email est requis").email("Email invalide"),
+  password: z.string().min(1, "Le mot de passe est requis"),
+})
 
-// Type pour les données du formulaire inféré à partir du schéma Zod
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof formSchema>
 
-// Interface pour les props du composant
-interface LoginFormProps {
-  redirectTo?: string; // URL de redirection après connexion (optionnel)
-  title?: string; // Titre personnalisé du formulaire (optionnel)
-}
+const LoginForm: React.FC = () => {
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
 
-// Composant LoginForm avec typage explicite
-const LoginForm: React.FC<LoginFormProps> = ({
-  redirectTo = "/",
-  title = "Connexion",
-}) => {
-  const router = useRouter();
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  // Initialisation du formulaire avec typage explicite
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
+    defaultValues: { email: "", password: "" },
+  })
 
-  // Gestion de la soumission du formulaire avec typage explicite
-  const handleSubmit = async (data: FormData): Promise<void> => {
-    setErrorMessage(null);
+  const handleSubmit = async (data: FormData) => {
+    setErrorMessage(null)
+    setIsLoading(true)
 
-    try {
-      const result: SignInResponse | undefined = await signIn("credentials", {
-        redirect: false,
-        email: data.email,
-        password: data.password,
-      });
+    const result = await signIn("credentials", {
+      redirect: false,
+      email: data.email,
+      password: data.password,
+    })
 
-      if (result?.error) {
-        setErrorMessage("Email ou mot de passe incorrect");
-      } else if (result?.ok) {
-        router.push(redirectTo);
-      } else {
-        setErrorMessage("Une erreur inattendue est survenue");
-      }
-    } catch (error: unknown) {
-      console.error("Erreur lors de la connexion:", error);
-      setErrorMessage("Une erreur est survenue lors de la connexion");
+    setIsLoading(false)
+
+    if (result?.error) {
+      setErrorMessage("Email ou mot de passe incorrect")
     }
-  };
+    // No need for manual redirection; middleware handles it
+  }
 
   return (
     <Card className="max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle>Connexion</CardTitle>
         <CardDescription>Connectez-vous avec vos identifiants</CardDescription>
       </CardHeader>
       <CardContent>
@@ -98,7 +72,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
             {errorMessage && (
               <p className="text-red-500 text-sm text-center">{errorMessage}</p>
             )}
-            {/* Champ Email */}
             <FormField
               control={form.control}
               name="email"
@@ -110,8 +83,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
                   <FormControl>
                     <Input
                       type="email"
-                      className="bg-slate-100 dark:bg-slate-500 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                      className="bg-slate-100 dark:bg-slate-500 border-0 focus-visible:ring-0 text-black"
                       placeholder="Email"
+                      disabled={isLoading}
                       {...field}
                     />
                   </FormControl>
@@ -119,7 +93,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 </FormItem>
               )}
             />
-            {/* Champ Mot de passe */}
             <FormField
               control={form.control}
               name="password"
@@ -131,8 +104,9 @@ const LoginForm: React.FC<LoginFormProps> = ({
                   <FormControl>
                     <Input
                       type="password"
-                      className="bg-slate-100 dark:bg-slate-500 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                      className="bg-slate-100 dark:bg-slate-500 border-0 focus-visible:ring-0 text-black"
                       placeholder="Mot de passe"
+                      disabled={isLoading}
                       {...field}
                     />
                   </FormControl>
@@ -140,14 +114,14 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 </FormItem>
               )}
             />
-            <Button className="w-full" variant="cyna">
-              Connexion
+            <Button className="w-full" variant="cyna" disabled={isLoading}>
+              {isLoading ? "Connexion en cours..." : "Connexion"}
             </Button>
           </form>
         </Form>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default LoginForm;
+export default LoginForm
