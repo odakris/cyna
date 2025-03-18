@@ -5,9 +5,9 @@ import { useParams } from "next/navigation"
 import { CarouselPlugin } from "@/components/Carousel/CarouselPlugin"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ProductType } from "../../types"
+import { ProductType } from "../../../types/Types"
 import { TopProducts } from "../../../components/TopProduits/TopProduits"
-import { useCart } from "@/app/context/CartContext"
+import { useCart } from "@/context/CartContext"
 
 const ProductPage = () => {
   const { id } = useParams()

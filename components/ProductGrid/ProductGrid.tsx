@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { ProductType } from "../../app/types"
+import { ProductType } from "../../types/Types"
 import { ProductCard } from "@/components/ProductCard/ProductCard"
 
 export function ProductGrid({ products }: { products: ProductType[] }) {

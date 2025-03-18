@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 import bcrypt from "bcrypt"
-import { Role } from "../../types/Types"
+import { Role } from "../../../types/Types"
 
 const prisma = new PrismaClient()
 

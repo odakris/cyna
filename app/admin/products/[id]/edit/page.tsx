@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react"
 import { useParams, useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ProductType } from "../../../../types/ProductType"
+import { ProductType } from "../../../../../types/Types"
 
 export default function EditProductContent() {
   const { data: session } = useSession()

@@ -4,7 +4,7 @@ import AdminLayout from "@/components/AdminLayout/AdminLayout"
 import { useSession } from "next-auth/react"
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ProductType } from "../../types"
+import { ProductType } from "../../../types/Types"
 
 export default function ProductsContent() {
   const { data: session } = useSession()

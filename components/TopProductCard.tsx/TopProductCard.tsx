@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Card } from "@/components/ui/card"
 import Image from "next/image"
-import { ProductType } from "../../app/types"
+import { ProductType } from "../../types/Types"
 
 export function TopProductCard({ id_product, name }: ProductType) {
   return (

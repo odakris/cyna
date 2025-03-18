@@ -1,6 +1,6 @@
 "use client"
 
-import { useCart } from "@/app/context/CartContext"
+import { useCart } from "@/context/CartContext"
 import CartItem from "@/components/Cart/CartItem"
 import { useState, useEffect } from "react"
 

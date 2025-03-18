@@ -3,8 +3,8 @@ import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { Navbar } from "@/components/Navbar/Navbar"
 import { Footer } from "../components/Footer/Footer"
-import { CartProvider } from "./context/CartContext"
-import UserSessionProvider from "./context/UserSessionProvider"
+import { CartProvider } from "../context/CartContext"
+import UserSessionProvider from "../context/UserSessionProvider"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

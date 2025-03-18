@@ -1,12 +1,11 @@
 "use client"
 
 import AdminLayout from "@/components/AdminLayout/AdminLayout"
-import ClientSessionProvider from "@/components/ClientSessionProvider/ClientSessionProvider"
 import { useSession } from "next-auth/react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ProductType } from "../../../types"
+import { ProductType } from "../../../../types/Types"
 
 // Définir l'interface pour les données du formulaire
 interface FormData {
@@ -15,20 +14,7 @@ interface FormData {
   description: string
 }
 
-// Définir l'interface pour les données envoyées à l'API
-// interface ProductData {
-//   nom: string
-//   prix_unitaire: number
-//   description: string
-//   caracteristiques_techniques: string
-//   disponible: boolean
-//   ordre_priorite: number
-//   date_maj: string
-//   id_category: number
-//   image: string
-// }
-
-const NewProductContent = () => {
+export default function NewProductContent() {
   const { data: session } = useSession()
   const router = useRouter()
   const [formData, setFormData] = useState<FormData>({
@@ -130,13 +116,3 @@ const NewProductContent = () => {
     </AdminLayout>
   )
 }
-
-const NewProduct = () => {
-  return (
-    <ClientSessionProvider>
-      <NewProductContent />
-    </ClientSessionProvider>
-  )
-}
-
-export default NewProduct

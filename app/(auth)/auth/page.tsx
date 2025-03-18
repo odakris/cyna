@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import AuthTabs from "@/components/Auth/AuthTabs"
-import { Role } from "../../types/Types"
+import { Role } from "../../../types/Types"
 
 export default function AuthPage() {
   const { data: session, status } = useSession()

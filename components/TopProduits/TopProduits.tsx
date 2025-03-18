@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react"
 import { TopProductCard } from "@/components/TopProductCard.tsx/TopProductCard"
-import { ProductType } from "../../app/types"
+import { ProductType } from "../../types/Types"
 import { Skeleton } from "../ui/skeleton"
 
 export function TopProducts() {

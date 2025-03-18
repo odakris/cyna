@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { getToken } from "next-auth/jwt"
 import type { NextRequest } from "next/server"
-import { Role } from "./app/types/Types"
+import { Role } from "./types/Types"
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl

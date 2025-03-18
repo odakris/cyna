@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import Image from "next/image"
-import { CategoryType } from "../../app/types"
+import { CategoryType } from "../../types/Types"
 import { Skeleton } from "../ui/skeleton"
 
 export function CategoryGrid() {

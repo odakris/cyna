@@ -3,18 +3,18 @@
 import * as React from "react"
 import { Card, CardContent, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
-import { ProductType } from "../../app/types"
+import { ProductType } from "../../types/Types"
 
 export function ProductCard({
   id_product,
   name,
   unit_price,
   available,
-  priority_order,
-  last_updated,
-  id_category,
-  image,
-  stock,
+  // priority_order,
+  // last_updated,
+  // id_category,
+  // image,
+  // stock,
 }: ProductType) {
   return (
     <Card
