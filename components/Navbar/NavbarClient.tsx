@@ -1,8 +1,9 @@
+"use client"
+
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Menu } from "lucide-react"
-
 import { AvatarDemo } from "@/components/Avatar/Avatar"
 import { Input } from "@/components/ui/input"
 import { SideBasket } from "@/components/SideBasket/SideBasket"
@@ -13,6 +14,8 @@ import {
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
 
@@ -22,8 +25,13 @@ import {
   SheetTrigger,
   SheetTitle,
 } from "@/components/ui/sheet"
+import { CategoryType } from "@/types/Types"
 
-export function Navbar() {
+type NavbarProps = {
+  categories: CategoryType[]
+}
+
+export default function NavbarClient({ categories }: NavbarProps) {
   const navLinks = [
     { name: "Accueil", href: "/" },
     { name: "Categories", href: "/categories" },
@@ -48,14 +56,14 @@ export function Navbar() {
             <NavigationMenu className="flex flex-col justify-start mt-4 space-y-3 w-full">
               {navLinks.map(item => (
                 <NavigationMenuLink
-                  key={item.name} // Utiliser item.name pour la clé unique
+                  key={item.name}
                   href={item.href}
                   className={cn(
                     navigationMenuTriggerStyle(),
                     "w-full cyna-subtitle"
                   )}
                 >
-                  {item.name} {/* Afficher l'attribut name ici */}
+                  {item.name}
                 </NavigationMenuLink>
               ))}
             </NavigationMenu>
@@ -86,21 +94,45 @@ export function Navbar() {
 
           <NavigationMenu>
             <NavigationMenuList className="flex space-x-6">
-              {navLinks.map(item => (
-                <NavigationMenuItem key={item.name}>
-                  {" "}
-                  {/* Utiliser item.name pour la clé unique */}
-                  <NavigationMenuLink
-                    href={item.href} // Utiliser href dynamique
-                    className={cn(
-                      navigationMenuTriggerStyle(),
-                      "cyna-bg-primary-color cyna-text-color hover:cyna-text-primary-color hover:bg-opacity-80 transition"
-                    )}
-                  >
-                    {item.name} {/* Afficher le nom de la catégorie */}
-                  </NavigationMenuLink>
-                </NavigationMenuItem>
-              ))}
+              {navLinks.map(item =>
+                item.name === "Categories" ? (
+                  <NavigationMenuItem key={item.name}>
+                    <NavigationMenuTrigger
+                      className={cn(
+                        navigationMenuTriggerStyle(),
+                        "cyna-bg-primary-color cyna-text-color hover:cyna-text-primary-color hover:bg-opacity-80 transition"
+                      )}
+                    >
+                      {item.name}
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="p-4 md:w-[200px] lg:w-[300px]">
+                        {categories.map(category => (
+                          <ListItem
+                            key={category.id_category}
+                            href={`/categorie/${category.id_category}`}
+                            title={category.name}
+                          >
+                            {category.description}
+                          </ListItem>
+                        ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                ) : (
+                  <NavigationMenuItem key={item.name}>
+                    <NavigationMenuLink
+                      href={item.href}
+                      className={cn(
+                        navigationMenuTriggerStyle(),
+                        "cyna-bg-primary-color cyna-text-color hover:cyna-text-primary-color hover:bg-opacity-80 transition"
+                      )}
+                    >
+                      {item.name}
+                    </NavigationMenuLink>
+                  </NavigationMenuItem>
+                )
+              )}
             </NavigationMenuList>
           </NavigationMenu>
         </div>
@@ -115,3 +147,29 @@ export function Navbar() {
     </header>
   )
 }
+
+const ListItem = React.forwardRef<
+  React.ComponentRef<"a">,
+  React.ComponentPropsWithoutRef<"a">
+>(({ className, title, children, ...props }, ref) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <a
+          ref={ref}
+          className={cn(
+            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </a>
+      </NavigationMenuLink>
+    </li>
+  )
+})
+ListItem.displayName = "ListItem"
