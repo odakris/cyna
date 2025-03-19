@@ -1,10 +1,10 @@
 // app/components/Navbar/NavbarServer.tsx
-import { getCategories } from "@/lib/api/getCategories"
+import { getAllCategories } from "@/lib/api/getAllCategories"
 import NavbarClient from "./NavbarClient"
 import { CategoryType } from "@/types/Types"
 
 export default async function NavbarServer() {
-  const categories: CategoryType[] = await getCategories()
+  const categories: CategoryType[] = await getAllCategories()
 
   return <NavbarClient categories={categories} />
 }
