@@ -2,15 +2,18 @@ import { CategoryType } from "@/types/Types"
 
 export async function getAllCategories(): Promise<CategoryType[]> {
   try {
-    const response = await fetch(`${process.env.NEXTAUTH_URL}/api/categories`, {
-      next: { revalidate: 3600 }, // Cache response for 1 hour - Improve performance
-    })
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/categories`
+    )
     if (!response.ok) {
-      throw new Error("Erreur lors de la récupération des catégories")
+      const errorDetails = await response.text()
+      throw new Error(
+        `Error while fetching categories: ${errorDetails || "Unknown error"}`
+      )
     }
     return response.json()
   } catch (error) {
-    console.error("Erreur lors de la récupération des catégories :", error)
+    console.error("Error while fetching categories :", error)
     return []
   }
 }
