@@ -1,17 +1,29 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
+// Utilitaire pour valider l'ID
+const validateId = (id: string) => {
+  const parsedId = parseInt(id)
+  return !isNaN(parsedId) && parsedId > 0 ? parsedId : null
+}
+
 export async function GET(
-  req: Request,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id // params is already resolved by Next.js
+    const resolvedParams = await params
+    const id = validateId(resolvedParams.id)
+
+    if (!id) {
+      return NextResponse.json({ message: "ID invalide" }, { status: 400 })
+    }
+
     const category = await prisma.category.findUnique({
-      where: { id_category: Number(id) }, // Convert string to number
-      include: { products: true }, // Include related products
+      where: { id_category: id },
+      include: { products: true },
     })
 
     if (!category) {
@@ -23,9 +35,7 @@ export async function GET(
 
     return NextResponse.json(category, { status: 200 })
   } catch (error) {
-    console.error("Erreur lors de la récupération de la catégorie :", error)
+    console.error("Erreur lors de la recherche de la catégorie:", error)
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 })
-  } finally {
-    await prisma.$disconnect() // Ensure Prisma disconnects after the request
   }
 }
