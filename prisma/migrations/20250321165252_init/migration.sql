@@ -28,8 +28,10 @@ CREATE TABLE `Client` (
 CREATE TABLE `Category` (
     `id_category` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
-    `description` VARCHAR(191) NULL,
+    `description` VARCHAR(191) NOT NULL,
     `image` VARCHAR(191) NOT NULL,
+    `updated_at` DATETIME(3) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`id_category`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -38,12 +40,13 @@ CREATE TABLE `Category` (
 CREATE TABLE `Product` (
     `id_product` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(191) NOT NULL,
-    `description` VARCHAR(191) NULL,
-    `technical_specs` VARCHAR(191) NULL,
+    `description` TEXT NOT NULL,
+    `technical_specs` TEXT NOT NULL,
     `unit_price` DOUBLE NOT NULL,
     `available` BOOLEAN NOT NULL,
     `priority_order` INTEGER NOT NULL,
-    `last_updated` DATETIME(3) NOT NULL,
+    `updated_at` DATETIME(3) NOT NULL,
+    `created_at` DATETIME(3) NOT NULL,
     `id_category` INTEGER NOT NULL,
     `image` VARCHAR(191) NOT NULL,
     `stock` INTEGER NOT NULL,

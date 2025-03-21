@@ -39,20 +39,23 @@ model Client {
 model Category {
   id_category  Int     @id @default(autoincrement())
   name         String
-  description  String?
+  description  String
   image        String
+  updated_at   DateTime
+  created_at   DateTime
   products     Product[]
 }
 
 model Product {
   id_product           Int       @id @default(autoincrement())
   name                 String
-  description          String?
-  technical_specs      String?
+  description          String    @db.Text
+  technical_specs      String    @db.Text
   unit_price           Float
   available            Boolean
   priority_order       Int
-  last_updated         DateTime
+  updated_at           DateTime
+  created_at           DateTime
   id_category          Int
   category             Category @relation(fields: [id_category], references: [id_category])
   image                String

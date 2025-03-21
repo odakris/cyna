@@ -34,7 +34,9 @@ async function main() {
     data: {
       name: "Prévention",
       description: "Services dédiés à la prévention des cyber-risques.",
-      image: "image_prevention.jpg",
+      image: "/uploads/prevention.jpg",
+      updated_at: new Date(),
+      created_at: new Date(),
     },
   })
 
@@ -42,7 +44,9 @@ async function main() {
     data: {
       name: "Protection",
       description: "Services dédiés à la protection contre les menaces cyber.",
-      image: "image_protection.jpg",
+      image: "/uploads/protection.jpg",
+      updated_at: new Date(),
+      created_at: new Date(),
     },
   })
 
@@ -50,7 +54,9 @@ async function main() {
     data: {
       name: "Réponse",
       description: "Services dédiés à la réponse aux incidents de sécurité.",
-      image: "image_reponse.jpg",
+      image: "/uploads/reponse.jpg",
+      updated_at: new Date(),
+      created_at: new Date(),
     },
   })
 
@@ -60,7 +66,7 @@ async function main() {
       name: "Diagnostic Cyber",
       unit_price: 4500,
       description: "Diagnostic des cyber-risques",
-      image: "image_diagnostic_cyber.jpg",
+      image: "/uploads/diagnostic_cyber.jpg",
       stock: 5,
       id_category: prevention.id_category,
     },
@@ -68,7 +74,7 @@ async function main() {
       name: "Test d'intrusion",
       unit_price: 4000,
       description: "Test d'intrusion pour évaluer la sécurité",
-      image: "image_test_intrusion.jpg",
+      image: "/uploads/test_intrusion.jpg",
       stock: 2,
       id_category: prevention.id_category,
     },
@@ -76,7 +82,7 @@ async function main() {
       name: "Micro SOC",
       unit_price: 5000,
       description: "Surveillance continue de la sécurité",
-      image: "image_micro_soc.jpg",
+      image: "/uploads/micro_soc.jpg",
       stock: 0,
       id_category: protection.id_category,
     },
@@ -84,7 +90,7 @@ async function main() {
       name: "SOC Managé",
       unit_price: 7000,
       description: "SOC avec gestion managée",
-      image: "image_soc_manage.jpg",
+      image: "/uploads/soc_manage.jpg",
       stock: 3,
       id_category: protection.id_category,
     },
@@ -92,7 +98,7 @@ async function main() {
       name: "Investigation, éradication, remédiation",
       unit_price: 8500,
       description: "Réponse complète aux incidents de sécurité",
-      image: "image_investigation.jpg",
+      image: "/uploads/investigation.jpg",
       stock: 5,
       id_category: reponse.id_category,
     },
@@ -109,7 +115,8 @@ async function main() {
         unit_price: produit.unit_price,
         available: true,
         priority_order: 1,
-        last_updated: new Date(),
+        updated_at: new Date(),
+        created_at: new Date(),
         id_category: produit.id_category,
         image: produit.image,
         stock: produit.stock,
