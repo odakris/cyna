@@ -14,7 +14,7 @@ export async function middleware(req: NextRequest) {
   if (token) {
     // Redirect authenticated users away from /auth
     if (pathname === "/auth") {
-      const redirectUrl = token.role === Role.ADMIN ? "/admin/dashboard" : "/"
+      const redirectUrl = token.role === Role.ADMIN ? "/dashboard" : "/"
       return NextResponse.redirect(new URL(redirectUrl, req.url))
     }
 

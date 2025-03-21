@@ -15,7 +15,7 @@ export default function AuthPage() {
       // console.log("Session role:", session.user.role) // Debugging log
 
       if (session.user.role === Role.ADMIN) {
-        router.push("/admin/dashboard")
+        router.push("/dashboard")
       } else {
         router.push("/")
       }

@@ -5,6 +5,7 @@ import { Footer } from "../components/Footer/Footer"
 import { CartProvider } from "../context/CartContext"
 import UserSessionProvider from "../context/UserSessionProvider"
 import NavbarServer from "../components/Navbar/NavBarServer"
+import { Toaster } from "../components/ui/toaster"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,6 +44,7 @@ export default function RootLayout({
               <main className="flex-1 max-w-7xl w-full mx-auto py-4 px-10 mt-20">
                 {children}
               </main>
+              <Toaster />
 
               {/* Footer */}
               <div className="w-full">

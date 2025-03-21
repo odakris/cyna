@@ -1,22 +1,25 @@
 export type CategoryType = {
   id_category: number
   name: string
-  description?: string | null
+  description?: string
   image: string
+  created_at: string
+  updated_at: string
 }
 
 export type ProductType = {
-  id_product?: number
+  id_product: number
   name: string
-  description?: string
-  technical_specs?: string
+  description: string
+  technical_specs: string
   unit_price: number
-  available: boolean
-  priority_order: number
-  last_updated: Date | string
+  stock: number
   id_category: number
   image: string
-  stock: number
+  priority_order: number
+  available: boolean
+  created_at: string
+  updated_at: string
 }
 
 export enum Role {

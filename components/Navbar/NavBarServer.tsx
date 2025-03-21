@@ -1,5 +1,5 @@
 // app/components/Navbar/NavbarServer.tsx
-import { getAllCategories } from "@/lib/api/getAllCategories"
+import { getAllCategories } from "@/lib/services/categoryService"
 import NavbarClient from "./NavbarClient"
 import { CategoryType } from "@/types/Types"
 
