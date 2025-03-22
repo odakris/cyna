@@ -1,4 +1,4 @@
-import { getAllCategories } from "@/lib/services/categoryService"
+import { getAllCategories } from "@/lib/services/category-service"
 import { CategoryType } from "@/types/Types"
 
 export default async function AdminCategoryHome() {

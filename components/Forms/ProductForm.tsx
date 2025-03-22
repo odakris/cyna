@@ -31,7 +31,7 @@ import {
   productFormSchema,
   ProductFormValues,
 } from "@/lib/validations/productSchema"
-import { createProduct, updateProduct } from "@/lib/services/productService"
+// import { createProduct, updateProduct } from "@/lib/services/product-service"
 import { CategoryType } from "@/types/Types"
 
 interface ProductFormProps {
@@ -83,9 +83,23 @@ export function ProductForm({
       console.log("formattedValues:", formattedValues)
 
       if (isEditing && productId) {
-        await updateProduct(productId, formattedValues)
+        await fetch(`/api/products/${productId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formattedValues),
+        })
+        // await updateProduct(productId, formattedValues)
       } else {
-        await createProduct(formattedValues)
+        await fetch("/api/products", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formattedValues),
+        })
+        // await createProduct(formattedValues)
       }
 
       toast({

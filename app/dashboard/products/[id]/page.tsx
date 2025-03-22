@@ -17,8 +17,8 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
-import { getProductById } from "@/lib/services/productService"
-import { getCategoryById } from "@/lib/services/categoryService"
+// import { getProductById } from "@/lib/services/product-service"
+import { getCategoryById } from "@/lib/services/category-service"
 import {
   ArrowLeft,
   Edit,
@@ -41,11 +41,15 @@ export default function ProductDetailsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productData = await getProductById(id)
+        const productData: ProductType = await fetch(
+          `/api/products/${id}`
+        ).then(res => res.json())
+        console.log("Données reçues:", productData) // Debug
+
         if (!productData) throw new Error("Produit introuvable")
         setProduct(productData)
 
-        const categoryData = await getCategoryById(
+        const categoryData: CategoryType | null = await getCategoryById(
           String(productData.id_category)
         )
         if (!categoryData) throw new Error("Catégorie introuvable")

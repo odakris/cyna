@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
-import { uploadImage } from "@/lib/services/uploadService"
+import { uploadImage } from "@/lib/services/upload-service"
 import { ControllerRenderProps } from "react-hook-form"
 
 interface ImageUploaderProps {

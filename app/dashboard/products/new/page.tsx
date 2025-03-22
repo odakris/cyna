@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { ProductForm } from "@/components/Forms/ProductForm"
 import { CategoryType } from "@/types/Types"
-import { getAllCategories } from "@/lib/services/categoryService"
+import { getAllCategories } from "@/lib/services/category-service"
 import { ArrowLeft } from "lucide-react"
 
 export default function CreateProductPage() {

@@ -42,9 +42,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { ProductType } from "@/types/Types"
-import { useEffect } from "react"
+import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
-import { getAllProducts } from "@/lib/services/productService"
+// import { getAllProducts } from "@/lib/services/product-service"
 import {
   Card,
   CardContent,
@@ -66,22 +66,21 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { ProductColumns } from "./ProductColumns"
 
 export default function ProductHomePage() {
-  const [products, setProducts] = React.useState<ProductType[]>([])
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
-  const [loading, setLoading] = React.useState(true)
-  const [error, setError] = React.useState<string | null>(null)
-  const [showDeleteDialog, setShowDeleteDialog] = React.useState(false)
+  const [products, setProducts] = useState<ProductType[]>([])
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = useState({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
-  const fetchProducts = React.useCallback(async () => {
+  const fetchProducts = useCallback(async () => {
     try {
       setLoading(true)
-      const data: ProductType[] = await getAllProducts()
+      const data: ProductType[] = await fetch("/api/products").then(res =>
+        res.json()
+      )
       setProducts(data)
       setError(null)
     } catch (error: unknown) {
@@ -133,12 +132,11 @@ export default function ProductHomePage() {
     try {
       for (const id of selectedIds) {
         console.log("id handleDelete :", id)
-        const response = await fetch(`/api/products/`, {
+        const response = await fetch(`/api/products/${id}`, {
           method: "DELETE",
           headers: {
             "content-type": "application/json",
           },
-          body: JSON.stringify({ id }),
         })
         if (!response.ok) {
           throw new Error(`Error deleting product ${id}`)

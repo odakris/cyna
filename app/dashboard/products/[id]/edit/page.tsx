@@ -10,8 +10,7 @@ import { useToast } from "@/hooks/use-toast"
 import { ProductForm } from "@/components/Forms/ProductForm"
 import { CategoryType, ProductType } from "@/types/Types"
 import { ProductFormValues } from "@/lib/validations/productSchema"
-import { getProductById } from "@/lib/services/productService"
-import { getAllCategories } from "@/lib/services/categoryService"
+import { getAllCategories } from "@/lib/services/category-service"
 import { ArrowLeft } from "lucide-react"
 
 export default function EditProductPage() {
@@ -26,7 +25,8 @@ export default function EditProductPage() {
     const fetchData = async () => {
       try {
         const [productData, categoriesData] = await Promise.all([
-          getProductById(id),
+          await fetch(`/api/products/${id}`).then(res => res.json()),
+          // getProductById(id),
           getAllCategories(),
         ])
 
