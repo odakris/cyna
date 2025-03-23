@@ -46,7 +46,7 @@ export function AvatarDemo() {
             <>
               <DropdownMenuItem>
                 <Settings />
-                <Link href="./">Mes paramètres</Link>
+                <Link href="./account/settings">Mes paramètres</Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCard />

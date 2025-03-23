@@ -2,7 +2,7 @@
 
 import React, { useState } from "react"
 import { ProductCard } from "../ProductCard/ProductCard"
-import type { CategoryType, ProductType } from "@/app/types"
+import type { CategoryType, ProductType } from "@/types/Types"
 
 type SearchFormProps = {
   categories: CategoryType[]
@@ -27,7 +27,6 @@ export default function SearchForm({ categories }: SearchFormProps) {
   const handlePriceChange = (type: "min" | "max", value: number | "") => {
     if (type === "min") {
       setMinPrice(value)
-
       const max = maxPrice === "" ? Number.MAX_VALUE : Number(maxPrice)
       if (value !== "" && value > max) {
         setPriceError(
@@ -38,7 +37,6 @@ export default function SearchForm({ categories }: SearchFormProps) {
       }
     } else {
       setMaxPrice(value)
-
       const min = minPrice === "" ? 0 : Number(minPrice)
       if (value !== "" && value < min) {
         setPriceError(
@@ -54,13 +52,11 @@ export default function SearchForm({ categories }: SearchFormProps) {
     products: ProductType[],
     order: "asc" | "desc"
   ) => {
-    return [...products].sort((a, b) => {
-      if (order === "asc") {
-        return a.unit_price - b.unit_price // Tri croissant
-      } else {
-        return b.unit_price - a.unit_price // Tri décroissant
-      }
-    })
+    return [...products].sort((a, b) =>
+      order === "asc"
+        ? a.unit_price - b.unit_price
+        : b.unit_price - a.unit_price
+    )
   }
 
   const sortProductsByNewness = (
@@ -70,12 +66,9 @@ export default function SearchForm({ categories }: SearchFormProps) {
     return [...products].sort((a, b) => {
       const dateA = new Date(a.last_updated)
       const dateB = new Date(b.last_updated)
-
-      if (order === "new") {
-        return dateB.getTime() - dateA.getTime() // Tri par date la plus récente
-      } else {
-        return dateA.getTime() - dateB.getTime() // Tri par date la plus ancienne
-      }
+      return order === "new"
+        ? dateB.getTime() - dateA.getTime()
+        : dateA.getTime() - dateB.getTime()
     })
   }
 
@@ -83,15 +76,9 @@ export default function SearchForm({ categories }: SearchFormProps) {
     products: ProductType[],
     order: "available" | "unavailable"
   ) => {
-    return [...products].sort((a, b) => {
-      if (order === "available") {
-        // Les produits disponibles viennent en premier
-        return a.available === b.available ? 0 : a.available ? -1 : 1
-      } else {
-        // Les produits indisponibles viennent en premier
-        return a.available === b.available ? 0 : a.available ? 1 : -1
-      }
-    })
+    return [...products].sort(a =>
+      order === "available" ? (a.available ? -1 : 1) : a.available ? 1 : -1
+    )
   }
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -104,9 +91,7 @@ export default function SearchForm({ categories }: SearchFormProps) {
       return
     }
 
-    // Création de la chaîne de recherche (query)
     const query = new URLSearchParams()
-
     if (title) query.append("query", title)
     if (description) query.append("description", description)
     if (features) query.append("features", features)
@@ -124,13 +109,13 @@ export default function SearchForm({ categories }: SearchFormProps) {
       }
       const data: ProductType[] = await response.json()
 
-      // Appliquer les tris
       let sortedProducts = sortProductsByPrice(data, sortOrder)
       sortedProducts = sortProductsByAvailability(
         sortedProducts,
         sortByAvailability
       )
-      setProducts(sortedProducts) // Mise à jour de l'état des produits
+      sortedProducts = sortProductsByNewness(sortedProducts, sortByNewness)
+      setProducts(sortedProducts)
     } catch (error) {
       console.error("Erreur lors de la recherche des produits:", error)
     }
@@ -144,54 +129,77 @@ export default function SearchForm({ categories }: SearchFormProps) {
 
       {/* Formulaire de recherche */}
       <form onSubmit={handleSearch} className="space-y-6">
-        {/* Titre */}
-        <div className="flex flex-col items-center">
-          <label htmlFor="title" className="text-lg font-semibold mb-2">
-            Titre :
-          </label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={e => setTitle(e.target.value)}
-            className="border border-gray-300 rounded-md p-2 w-full max-w-xs"
-            placeholder="Entrez le titre du produit"
-          />
+        {/* Titre et Description */}
+        <div className="flex gap-4">
+          <div className="flex flex-col w-1/2">
+            <label htmlFor="title" className="text-lg font-semibold mb-2">
+              Titre :
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              className="border border-gray-300 rounded-md p-2 w-full"
+              placeholder="Entrez le titre du produit"
+            />
+          </div>
+          <div className="flex flex-col w-1/2">
+            <label htmlFor="description" className="text-lg font-semibold mb-2">
+              Description :
+            </label>
+            <input
+              type="text"
+              id="description"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              className="border border-gray-300 rounded-md p-2 w-full"
+              placeholder="Entrez la description du produit"
+            />
+          </div>
         </div>
 
-        {/* Description */}
-        <div className="flex flex-col items-center">
-          <label htmlFor="description" className="text-lg font-semibold mb-2">
-            Description :
-          </label>
-          <input
-            type="text"
-            id="description"
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-            className="border border-gray-300 rounded-md p-2 w-full max-w-xs"
-            placeholder="Entrez la description du produit"
-          />
-        </div>
+        {/* Caractéristiques techniques et Catégories */}
+        <div className="flex gap-4">
+          {/* Caractéristiques techniques */}
+          <div className="flex flex-col w-1/2">
+            <label htmlFor="features" className="text-lg font-semibold mb-2">
+              Caractéristiques techniques :
+            </label>
+            <input
+              type="text"
+              id="features"
+              value={features}
+              onChange={e => setFeatures(e.target.value)}
+              className="border border-gray-300 rounded-md p-2 w-full"
+              placeholder="Entrez les caractéristiques techniques"
+            />
+          </div>
 
-        {/* Caractéristiques techniques */}
-        <div className="flex flex-col items-center">
-          <label htmlFor="features" className="text-lg font-semibold mb-2">
-            Caractéristiques techniques :
-          </label>
-          <input
-            type="text"
-            id="features"
-            value={features}
-            onChange={e => setFeatures(e.target.value)}
-            className="border border-gray-300 rounded-md p-2 w-full max-w-xs"
-            placeholder="Entrez les caractéristiques techniques"
-          />
+          {/* Catégories */}
+          <div className="flex flex-col w-1/2">
+            <label htmlFor="categories" className="text-lg font-semibold mb-2">
+              Catégories :
+            </label>
+            <select
+              id="categories"
+              value={selectedCategory}
+              onChange={e => setSelectedCategory(e.target.value)}
+              className="border border-gray-300 rounded-md p-2 w-full"
+            >
+              <option value="">Sélectionner une catégorie</option>
+              {categories.map(category => (
+                <option key={category.id_category} value={category.id_category}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Prix minimum et maximum */}
-        <div className="flex justify-between gap-4">
-          <div className="flex flex-col items-center w-full">
+        <div className="flex gap-4">
+          <div className="flex flex-col w-1/2">
             <label htmlFor="minPrice" className="text-lg font-semibold mb-2">
               Prix minimum :
             </label>
@@ -200,11 +208,11 @@ export default function SearchForm({ categories }: SearchFormProps) {
               id="minPrice"
               value={minPrice}
               onChange={e => handlePriceChange("min", Number(e.target.value))}
-              className="border border-gray-300 rounded-md p-2 w-full max-w-xs"
+              className="border border-gray-300 rounded-md p-2 w-full"
               min="0"
             />
           </div>
-          <div className="flex flex-col items-center w-full">
+          <div className="flex flex-col w-1/2">
             <label htmlFor="maxPrice" className="text-lg font-semibold mb-2">
               Prix maximum :
             </label>
@@ -212,8 +220,8 @@ export default function SearchForm({ categories }: SearchFormProps) {
               type="number"
               id="maxPrice"
               value={maxPrice}
-              onChange={e => setMaxPrice(Number(e.target.value))}
-              className="border border-gray-300 rounded-md p-2 w-full max-w-xs"
+              onChange={e => handlePriceChange("max", Number(e.target.value))}
+              className="border border-gray-300 rounded-md p-2 w-full"
               min="0"
             />
           </div>
@@ -222,38 +230,25 @@ export default function SearchForm({ categories }: SearchFormProps) {
         {/* Affichage de l'erreur de prix */}
         {priceError && <p className="text-red-500 text-center">{priceError}</p>}
 
-        {/* Catégories */}
-        <div className="flex flex-col items-center">
-          <label htmlFor="categories" className="text-lg font-semibold mb-2">
-            Catégories :
-          </label>
-          <select
-            id="categories"
-            value={selectedCategory}
-            onChange={e => setSelectedCategory(e.target.value)}
-            className="border border-gray-300 rounded-md p-2 w-full max-w-xs"
-          >
-            <option value="">Sélectionner une catégorie</option>
-            {categories.map(category => (
-              <option key={category.id_category} value={category.id_category}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
         {/* Uniquement disponible */}
-        <div className="flex flex-col items-center">
-          <label htmlFor="onlyAvailable" className="text-lg font-semibold mb-2">
-            Uniquement disponible :
-          </label>
-          <input
-            type="checkbox"
-            id="onlyAvailable"
-            checked={onlyAvailable}
-            onChange={() => setOnlyAvailable(!onlyAvailable)}
-            className="w-6 h-6"
-          />
+        <div className="flex justify-center">
+          <div className="flex flex-col items-center">
+            {" "}
+            {/* Ajout de items-center pour centrer la colonne */}
+            <label
+              htmlFor="onlyAvailable"
+              className="text-lg font-semibold mb-2"
+            >
+              Uniquement disponible :
+            </label>
+            <input
+              type="checkbox"
+              id="onlyAvailable"
+              checked={onlyAvailable}
+              onChange={() => setOnlyAvailable(!onlyAvailable)}
+              className="w-6 h-6"
+            />
+          </div>
         </div>
 
         {/* Bouton de recherche */}
@@ -267,68 +262,52 @@ export default function SearchForm({ categories }: SearchFormProps) {
         </div>
       </form>
 
-      {/* Affichage des produits */}
+      {/* Résultats de recherche */}
       <div className="mt-8">
         <h2 className="text-xl font-semibold">Services correspondants :</h2>
-
-        {/* Bouton pour trier par Prix */}
-        <div className="flex justify-center mb-4">
+        <div className="flex justify-between mt-4 mb-4">
           <button
             onClick={() => {
-              const newSortOrder = sortOrder === "asc" ? "desc" : "asc"
-              setSortOrder(newSortOrder)
-              // Tri des produits après avoir changé l'ordre
+              setSortOrder(sortOrder === "asc" ? "desc" : "asc")
               setProducts(prevProducts =>
-                sortProductsByPrice(prevProducts, newSortOrder)
+                sortProductsByPrice(prevProducts, sortOrder)
               )
             }}
             className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-200"
           >
-            {sortOrder === "asc" ? "Prix croissant" : "Prix décroissant"}
+            Trier par prix {sortOrder === "asc" ? "croissant" : "décroissant"}
           </button>
-        </div>
-
-        {/* Bouton pour trier par nouveauté */}
-        <div className="flex justify-center mb-4">
           <button
             onClick={() => {
-              const newSortByNewness = sortByNewness === "new" ? "old" : "new"
-              setSortByNewness(newSortByNewness)
+              setSortByNewness(sortByNewness === "new" ? "old" : "new")
               setProducts(prevProducts =>
-                sortProductsByNewness(prevProducts, newSortByNewness)
+                sortProductsByNewness(prevProducts, sortByNewness)
               )
             }}
             className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-200"
           >
-            {sortByNewness === "new" ? "Ancien" : "Nouveau"}
+            Trier par {sortByNewness === "new" ? "nouveaux" : "anciens"}
           </button>
-        </div>
-
-        {/* Bouton pour trier par disponibilité */}
-        <div className="flex justify-center mb-4">
           <button
             onClick={() => {
-              const newSortByAvailability =
+              setSortByAvailability(
                 sortByAvailability === "available" ? "unavailable" : "available"
-              setSortByAvailability(newSortByAvailability)
+              )
               setProducts(prevProducts =>
-                sortProductsByAvailability(prevProducts, newSortByAvailability)
+                sortProductsByAvailability(prevProducts, sortByAvailability)
               )
             }}
             className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-200"
           >
+            Trier par disponibilité (
             {sortByAvailability === "available" ? "Disponible" : "Indisponible"}
+            )
           </button>
         </div>
 
         {products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-4">
             {products.map(product => {
-              // Trouver la catégorie associée au produit en utilisant id_category
-              const productCategory = categories.find(
-                category => category.id_category === product.id_category
-              )
-
               return (
                 <ProductCard
                   key={product.id_product}
@@ -341,6 +320,10 @@ export default function SearchForm({ categories }: SearchFormProps) {
                   id_category={product.id_category}
                   image={product.image}
                   stock={product.stock}
+                  description={""}
+                  technical_specs={""}
+                  created_at={""}
+                  updated_at={""}
                 />
               )
             })}
