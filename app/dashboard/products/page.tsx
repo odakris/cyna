@@ -44,7 +44,6 @@ import {
 import { ProductType } from "@/types/Types"
 import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
-// import { getAllProducts } from "@/lib/services/product-service"
 import {
   Card,
   CardContent,
@@ -63,7 +62,7 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ProductColumns } from "./ProductColumns"
+import { productsColumnNamesInFrench, productColumns } from "./product-columns"
 
 export default function ProductHomePage() {
   const [products, setProducts] = useState<ProductType[]>([])
@@ -95,11 +94,9 @@ export default function ProductHomePage() {
     fetchProducts()
   }, [fetchProducts])
 
-  const columns = ProductColumns
-
   const table = useReactTable({
     data: products,
-    columns,
+    columns: productColumns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -151,16 +148,6 @@ export default function ProductHomePage() {
     }
   }
 
-  const columnNamesInFrench: { [key: string]: string } = {
-    priority_order: "Priorité",
-    image: "Image",
-    name: "Nom",
-    unit_price: "Prix unitaire",
-    stock: "Stock",
-    available: "Statut",
-    actions: "Actions",
-  }
-
   if (loading) {
     return (
       <div className="container mx-auto p-6 space-y-8">
@@ -182,7 +169,7 @@ export default function ProductHomePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  {Array(7)
+                  {Array(productColumns.length)
                     .fill(0)
                     .map((_, i) => (
                       <TableHead key={i}>
@@ -192,11 +179,11 @@ export default function ProductHomePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {Array(5)
+                {Array(products.length || 10)
                   .fill(0)
                   .map((_, i) => (
                     <TableRow key={i}>
-                      {Array(7)
+                      {Array(productColumns.length)
                         .fill(0)
                         .map((_, j) => (
                           <TableCell key={j}>
@@ -331,7 +318,7 @@ export default function ProductHomePage() {
                           column.toggleVisibility(!!value)
                         }
                       >
-                        {columnNamesInFrench[column.id] || column.id}
+                        {productsColumnNamesInFrench[column.id] || column.id}
                       </DropdownMenuCheckboxItem>
                     )
                   })}
@@ -380,7 +367,7 @@ export default function ProductHomePage() {
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={columns.length}
+                      colSpan={productColumns.length}
                       className="h-24 text-center"
                     >
                       Aucun produit trouvé.

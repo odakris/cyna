@@ -9,8 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { ProductForm } from "@/components/Forms/ProductForm"
 import { CategoryType, ProductType } from "@/types/Types"
-import { ProductFormValues } from "@/lib/validations/productSchema"
-import { getAllCategories } from "@/lib/services/category-service"
+import { ProductFormValues } from "@/lib/validations/product-schema"
 import { ArrowLeft } from "lucide-react"
 
 export default function EditProductPage() {
@@ -26,8 +25,7 @@ export default function EditProductPage() {
       try {
         const [productData, categoriesData] = await Promise.all([
           await fetch(`/api/products/${id}`).then(res => res.json()),
-          // getProductById(id),
-          getAllCategories(),
+          await fetch("/api/categories").then(res => res.json()),
         ])
 
         if (!productData) throw new Error("Produit introuvable")

@@ -5,11 +5,10 @@ import { ArrowUpDown, Eye, Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ProductType } from "@/types/Types"
+import { CategoryType } from "@/types/Types"
 import Link from "next/link"
-import { Badge } from "@/components/ui/badge"
 
-export const ProductColumns: ColumnDef<ProductType>[] = [
+export const categoriesColumns: ColumnDef<CategoryType>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -57,7 +56,7 @@ export const ProductColumns: ColumnDef<ProductType>[] = [
       <div className="flex justify-center">
         <div className="relative h-16 w-16 overflow-hidden rounded-md border">
           <Image
-            alt={`Image de ${row.getValue("name") || "produit"}`}
+            alt={`Image de ${row.getValue("name") || "catégorie"}`}
             src={`${row.original.image}`}
             width={70}
             height={70}
@@ -77,7 +76,7 @@ export const ProductColumns: ColumnDef<ProductType>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           className="px-2"
         >
-          Nom du produit
+          Nom de la catégorie
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       </div>
@@ -88,92 +87,11 @@ export const ProductColumns: ColumnDef<ProductType>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "unit_price",
-    header: ({ column }) => (
-      <div className="text-center">
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="px-2"
-        >
-          Prix unitaire
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className="text-center font-medium text-primary">
-        {parseFloat(row.getValue("unit_price")).toFixed(2)} €
-      </div>
-    ),
-    enableSorting: true,
-  },
-  {
-    accessorKey: "stock",
-    header: ({ column }) => (
-      <div className="text-center">
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="px-2"
-        >
-          Stock
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-    ),
-    cell: ({ row }) => {
-      const stock = parseInt(row.getValue("stock"))
-      return (
-        <div className="text-center">
-          <Badge
-            variant={
-              stock > 10 ? "default" : stock > 5 ? "outline" : "destructive"
-            }
-            className="font-medium"
-          >
-            {stock} unités
-          </Badge>
-        </div>
-      )
-    },
-    enableSorting: true,
-  },
-  {
-    accessorKey: "available",
-    header: ({ column }) => (
-      <div className="text-center">
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="px-2"
-        >
-          Statut
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-    ),
-    cell: ({ row }) => {
-      const available = row.getValue("available")
-      return (
-        <div className="text-center">
-          <Badge
-            variant={available ? "default" : "destructive"}
-            className={available ? "bg-green-500 hover:bg-green-600" : ""}
-          >
-            {available ? "Disponible" : "Indisponible"}
-          </Badge>
-        </div>
-      )
-    },
-    enableSorting: true,
-  },
-  {
     id: "actions",
     header: "Actions",
     cell: ({ row }) => (
       <div className="flex justify-center space-x-2">
-        <Link href={`/dashboard/products/${row.original.id_product}`}>
+        <Link href={`/dashboard/categories/${row.original.id_category}`}>
           <Button
             variant="outline"
             size="sm"
@@ -184,7 +102,7 @@ export const ProductColumns: ColumnDef<ProductType>[] = [
             <span className="sr-only">Voir</span>
           </Button>
         </Link>
-        <Link href={`/dashboard/products/${row.original.id_product}/edit`}>
+        <Link href={`/dashboard/categories/${row.original.id_category}/edit`}>
           <Button
             variant="outline"
             size="sm"
@@ -200,3 +118,10 @@ export const ProductColumns: ColumnDef<ProductType>[] = [
     enableHiding: false,
   },
 ]
+
+export const categoriesColumnNamesInFrench: Record<string, string> = {
+  priority_order: "Priorité",
+  image: "Image",
+  name: "Nom",
+  actions: "Actions",
+}

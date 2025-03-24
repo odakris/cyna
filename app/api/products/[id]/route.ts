@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import productController from "@/lib/controllers/product-controller"
+import { validateId } from "@/lib/utils/utils"
 
 /**
  * Récupère un produit par son identifiant.
@@ -13,7 +14,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> } // Typage correct avec Promise
 ): Promise<NextResponse> {
   const resolvedParams = await params // Résoudre la Promise
-  const id = productController.validateId(resolvedParams.id) // Accéder à id après résolution
+  const id = validateId(resolvedParams.id) // Accéder à id après résolution
 
   if (!id) {
     return NextResponse.json({ message: "ID invalide" }, { status: 400 })
@@ -34,7 +35,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const resolvedParams = await params
-  const id = productController.validateId(resolvedParams.id)
+  const id = validateId(resolvedParams.id)
 
   if (!id) {
     return NextResponse.json({ message: "ID invalide" }, { status: 400 })
@@ -55,11 +56,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   const resolvedParams = await params
-  const id = productController.validateId(resolvedParams.id)
+  const id = validateId(resolvedParams.id)
 
   if (!id) {
     return NextResponse.json({ message: "ID invalide" }, { status: 400 })
   }
 
-  return productController.delete(id)
+  return productController.remove(id)
 }

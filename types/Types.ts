@@ -1,7 +1,8 @@
 export type CategoryType = {
   id_category: number
+  priority_order: number
   name: string
-  description?: string
+  description: string
   image: string
   created_at: string
   updated_at: string

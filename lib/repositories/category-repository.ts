@@ -42,6 +42,7 @@ export const create = async (
       name: data.name.trim(),
       description: data.description.trim(),
       image: data.image,
+      priority_order: data.priority_order,
       updated_at: new Date(),
       created_at: new Date(),
     },
@@ -59,11 +60,12 @@ export const update = async (
   data: CategoryFormValues
 ): Promise<CategoryType> => {
   return prisma.category.update({
-    where: { id_catetegory: id },
+    where: { id_category: id },
     data: {
       name: data.name.trim(),
       description: data.description.trim(),
       image: data.image,
+      priority_order: data.priority_order,
       updated_at: new Date(),
     },
   })

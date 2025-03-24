@@ -38,6 +38,7 @@ model Client {
 
 model Category {
   id_category  Int     @id @default(autoincrement())
+  priority_order       Int
   name         String
   description  String
   image        String

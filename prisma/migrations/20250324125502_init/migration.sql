@@ -27,6 +27,7 @@ CREATE TABLE `Client` (
 -- CreateTable
 CREATE TABLE `Category` (
     `id_category` INTEGER NOT NULL AUTO_INCREMENT,
+    `priority_order` INTEGER NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NOT NULL,
     `image` VARCHAR(191) NOT NULL,

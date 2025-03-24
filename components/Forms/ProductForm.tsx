@@ -30,7 +30,7 @@ import { ImageUploader } from "@/components/Forms/ImageUploader"
 import {
   productFormSchema,
   ProductFormValues,
-} from "@/lib/validations/productSchema"
+} from "@/lib/validations/product-schema"
 // import { createProduct, updateProduct } from "@/lib/services/product-service"
 import { CategoryType } from "@/types/Types"
 
