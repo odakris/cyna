@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import productService from "@/lib/services/product-service"
-import { productFormSchema } from "@/lib/validations/productSchema"
+import { productFormSchema } from "@/lib/validations/product-schema"
 
 /**
  * Récupère la liste complète des produits depuis la base de données.
@@ -92,7 +92,7 @@ export const update = async (
  * @param {number} id - Identifiant unique du produit à supprimer.
  * @returns {Promise<NextResponse>} Réponse JSON confirmant la suppression ou indiquant une erreur.
  */
-export const deleteProduct = async (id: number): Promise<NextResponse> => {
+export const remove = async (id: number): Promise<NextResponse> => {
   try {
     const result = await productService.deleteProduct(id)
     return NextResponse.json(result)
@@ -112,16 +112,6 @@ export const deleteProduct = async (id: number): Promise<NextResponse> => {
 }
 
 /**
- * Valide et convertit un identifiant en nombre entier positif.
- * @param {string} id - Identifiant sous forme de chaîne de caractères.
- * @returns {number | null} Identifiant numérique valide ou null en cas d'invalidité.
- */
-export const validateId = (id: string): number | null => {
-  const parsedId = parseInt(id)
-  return !isNaN(parsedId) && parsedId > 0 ? parsedId : null
-}
-
-/**
  * Contrôleur des produits regroupant toutes les fonctions pour une importation simplifiée.
  */
 const productController = {
@@ -129,8 +119,7 @@ const productController = {
   getById,
   create,
   update,
-  delete: deleteProduct,
-  validateId,
+  remove,
 }
 
 export default productController

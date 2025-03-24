@@ -1,18 +1,21 @@
-import { NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
+import { NextRequest, NextResponse } from "next/server"
+import categoryController from "@/lib/controllers/category-controller"
 
-const prisma = new PrismaClient()
+/**
+ * Récupère toutes les categories.
+ *
+ * @returns {Promise<NextResponse>} La réponse contenant la liste des categories.
+ */
+export async function GET(): Promise<NextResponse> {
+  return categoryController.getAll()
+}
 
-export async function GET() {
-  try {
-    const categories = await prisma.category.findMany({})
-
-    return new NextResponse(JSON.stringify(categories ?? {}), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    })
-  } catch (error) {
-    console.error("Erreur lors de la recherche des categories :", error)
-    return NextResponse.json({ message: "Erreur serveur" }, { status: 500 })
-  }
+/**
+ * Crée une nouvelle categorie.
+ *
+ * @param {NextRequest} request - L'objet de requête HTTP contenant les données de la categorie.
+ * @returns {Promise<NextResponse>} La réponse contenant la categorie créé ou un message d'erreur.
+ */
+export async function POST(request: NextRequest): Promise<NextResponse> {
+  return categoryController.create(request)
 }
