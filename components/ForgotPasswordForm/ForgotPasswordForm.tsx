@@ -14,13 +14,13 @@ import {
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import emailjs from "@emailjs/browser";
 
 const formSchema = z.object({
@@ -32,7 +32,17 @@ const formSchema = z.object({
 
 const ForgotPassword = () => {
   const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Initialiser EmailJS au montage du composant
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY) {
+      emailjs.init(process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY);
+    } else {
+      console.error("Clé publique EmailJS manquante");
+    }
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,8 +52,8 @@ const ForgotPassword = () => {
   });
 
   const handleSubmit = async (data: z.infer<typeof formSchema>) => {
-    console.log("Formulaire soumis avec l'e-mail:", data.email);
     setMessage(null);
+    setError(null);
     setLoading(true);
 
     try {
@@ -59,6 +69,11 @@ const ForgotPassword = () => {
       });
 
       console.log("Réponse reçue:", response.status, response.statusText);
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("La réponse du serveur n'est pas un JSON valide");
+      }
+
       const result = await response.json();
       console.log("Résultat de la réponse:", result);
 
@@ -69,36 +84,40 @@ const ForgotPassword = () => {
       // Étape 2 : Vérifier les variables EmailJS
       console.log("Vérification des variables EmailJS...");
       console.log("Service ID:", process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID);
-      console.log("Template ID:", process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_WELCOME);
+      console.log("Template ID:", process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_GENERIC);
       console.log("Public Key:", process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY);
 
-      if (!process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY) {
-        throw new Error("La clé publique EmailJS est manquante. Vérifiez votre fichier .env.");
+      if (
+        !process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID ||
+        !process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_GENERIC ||
+        !process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
+      ) {
+        throw new Error("Les variables EmailJS sont manquantes. Vérifiez votre fichier .env.");
       }
 
       // Étape 3 : Envoyer l'e-mail avec EmailJS
       console.log("Envoi de l'e-mail via EmailJS...");
       const emailParams = {
-        to_email: data.email, // Utilisé pour le champ "To" du modèle
-        firstName: "Utilisateur", // Remplacez par le vrai prénom si disponible
+        to_email: data.email,
+        firstName: "Utilisateur",
         message: "Vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le lien ci-dessous pour procéder :",
-        actionLink: result.resetLink, // Le lien de réinitialisation
+        actionLink: result.resetLink,
       };
 
       console.log("Paramètres de l'e-mail:", emailParams);
 
       const emailResponse = await emailjs.send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_WELCOME!,
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_GENERIC,
         emailParams,
-        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+        process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY
       );
 
       console.log("E-mail envoyé avec succès:", emailResponse);
       setMessage("Si votre e-mail existe, un lien de réinitialisation a été envoyé.");
-    } catch (error: any) {
-      console.error("Erreur lors de la requête ou de l'envoi de l'e-mail:", error);
-      setMessage(error.message || "Une erreur est survenue lors de la demande");
+    } catch (err) {
+      console.error("Erreur lors de la requête ou de l'envoi de l'e-mail:", err);
+      setError(err instanceof Error ? err.message : "Une erreur est survenue lors de la demande.");
     } finally {
       setLoading(false);
     }
@@ -137,13 +156,10 @@ const ForgotPassword = () => {
               )}
             />
             {message && (
-              <p
-                className={
-                  message.includes("envoyé") ? "text-green-500" : "text-red-500"
-                }
-              >
-                {message}
-              </p>
+              <p className="text-green-500">{message}</p>
+            )}
+            {error && (
+              <p className="text-red-500">{error}</p>
             )}
             <Button className="w-full" variant={"cyna"} disabled={loading}>
               {loading ? "Envoi en cours..." : "Envoyer le lien"}

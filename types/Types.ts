@@ -26,3 +26,12 @@ export enum Role {
   ADMIN = "ADMIN",
   CLIENT = "CLIENT",
 }
+
+
+export type PasswordResetTokenType = {
+  id: number;
+  token: string;
+  id_user: number;
+  expiresAt: Date;
+  createdAt: Date;
+};
