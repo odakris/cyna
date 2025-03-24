@@ -8,6 +8,7 @@ export type CategoryType = {
 }
 
 export type ProductType = {
+  last_updated: string | number | Date
   id_product: number
   name: string
   description: string
