@@ -118,8 +118,6 @@ async function main() {
         unit_price: produit.unit_price,
         available: true,
         priority_order: 1,
-        updated_at: new Date(),
-        created_at: new Date(),
         id_category: produit.id_category,
         image: produit.image,
         stock: produit.stock,
@@ -132,13 +130,13 @@ async function main() {
   const adminUser = await prisma.user.create({
     data: {
       email: "admin@example.com",
-      password: "adminpassword123", // À hacher dans un environnement réel ==> const hashedPassword = await bcrypt.hash("adminpassword123", 10);
+      password: "adminpassword123",
       role: "ADMIN",
     },
   })
   console.log("Utilisateur admin créé :", {
     email: adminUser.email,
-    password: "adminpassword123", // À utiliser pour tester la connexion
+    password: "adminpassword123",
     role: adminUser.role,
   })
 
@@ -152,7 +150,7 @@ async function main() {
     const user = await prisma.user.create({
       data: {
         email: email,
-        password: "hashedpassword", // À remplacer par un vrai hash dans un vrai projet
+        password: "password123", // Mot de passe en texte brut pour les tests
         role: "CLIENT",
       },
     })
@@ -163,7 +161,7 @@ async function main() {
         first_name: firstName,
         last_name: lastName,
         email: email,
-        id_user: user.id_user, // Liaison avec l'utilisateur
+        id_user: user.id_user,
       },
     })
 

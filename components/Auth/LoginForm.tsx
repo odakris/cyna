@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { z } from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
@@ -10,52 +10,53 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useState } from "react"
-import { signIn } from "next-auth/react"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { signIn } from "next-auth/react";
+import Link from "next/link"; // Import de Link pour la navigation
 
 const formSchema = z.object({
   email: z.string().min(1, "L'email est requis").email("Email invalide"),
   password: z.string().min(1, "Le mot de passe est requis"),
-})
+});
 
-type FormData = z.infer<typeof formSchema>
+type FormData = z.infer<typeof formSchema>;
 
 const LoginForm: React.FC = () => {
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: { email: "", password: "" },
-  })
+  });
 
   const handleSubmit = async (data: FormData) => {
-    setErrorMessage(null)
-    setIsLoading(true)
+    setErrorMessage(null);
+    setIsLoading(true);
 
     const result = await signIn("credentials", {
       redirect: false,
       email: data.email,
       password: data.password,
-    })
+    });
 
-    setIsLoading(false)
+    setIsLoading(false);
 
     if (result?.error) {
-      setErrorMessage("Email ou mot de passe incorrect")
+      setErrorMessage("Email ou mot de passe incorrect");
     }
     // No need for manual redirection; middleware handles it
-  }
+  };
 
   return (
     <Card className="max-w-md mx-auto">
@@ -65,10 +66,7 @@ const LoginForm: React.FC = () => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
-          >
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             {errorMessage && (
               <p className="text-red-500 text-sm text-center">{errorMessage}</p>
             )}
@@ -111,6 +109,15 @@ const LoginForm: React.FC = () => {
                     />
                   </FormControl>
                   <FormMessage />
+                  {/* Lien "Mot de passe oublié ?" */}
+                  <div className="text-right">
+                    <Link
+                      href="/forgot-password"
+                      className="text-sm text-blue-500 hover:underline dark:text-blue-400"
+                    >
+                      Mot de passe oublié ?
+                    </Link>
+                  </div>
                 </FormItem>
               )}
             />
@@ -121,7 +128,7 @@ const LoginForm: React.FC = () => {
         </Form>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;

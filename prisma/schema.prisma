@@ -13,16 +13,25 @@ enum Role {
 }
 
 model User {
-  id_user     Int      @id @default(autoincrement())
-  email       String   @unique
-  password    String
-  role        Role     @default(CLIENT)
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-  client      Client?  @relation("UserToClient")
+  id_user            Int                 @id @default(autoincrement())
+  email              String              @unique
+  password           String
+  role               Role                @default(CLIENT)
+  created_at         DateTime            @default(now())
+  updated_at         DateTime            @updatedAt
+  client             Client?             @relation("UserToClient")
+  passwordResetTokens PasswordResetToken[]
 }
 
-// Table Client liée à User
+model PasswordResetToken {
+  id         Int      @id @default(autoincrement())
+  token      String   @unique
+  id_user    Int
+  user       User     @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+}
+
 model Client {
   id_client            Int              @id @default(autoincrement())
   last_name            String
@@ -42,8 +51,8 @@ model Category {
   name         String
   description  String
   image        String
-  updated_at   DateTime
-  created_at   DateTime
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
   products     Product[]
 }
 
@@ -55,17 +64,17 @@ model Product {
   unit_price           Float
   available            Boolean
   priority_order       Int
-  updated_at           DateTime
-  created_at           DateTime
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
   id_category          Int
-  category             Category @relation(fields: [id_category], references: [id_category])
+  category             Category  @relation(fields: [id_category], references: [id_category])
   image                String
   stock                Int
   orderedProducts      OrderedProduct[]
 }
 
 model OrderedProduct {
-  id_ordered_product Int       @id @default(autoincrement())
+  id_ordered_product Int      @id @default(autoincrement())
   id_product         Int
   id_order           Int
   product            Product  @relation(fields: [id_product], references: [id_product])
@@ -73,34 +82,34 @@ model OrderedProduct {
 }
 
 model Order {
-  id_order           Int       @id @default(autoincrement())
-  order_date         DateTime
-  subscription_type  String
+  id_order              Int       @id @default(autoincrement())
+  order_date            DateTime
+  subscription_type     String
   subscription_duration Int
-  total_amount       Float
-  order_status       String
-  payment_method     String
-  last_card_digits   String
-  invoice_pdf_url    String
-  renewal_date       DateTime
-  id_client          Int
-  client             Client   @relation(fields: [id_client], references: [id_client])
-  orderedProducts    OrderedProduct[]
+  total_amount          Float
+  order_status          String
+  payment_method        String
+  last_card_digits      String
+  invoice_pdf_url       String
+  renewal_date          DateTime
+  id_client             Int
+  client                Client    @relation(fields: [id_client], references: [id_client])
+  orderedProducts       OrderedProduct[]
 }
 
 model PaymentInfo {
-  id_payment_info    Int    @id @default(autoincrement())
+  id_payment_info    Int     @id @default(autoincrement())
   card_name          String
   last_card_digits   String
   expiration_month   Int
   expiration_year    Int
   is_default_payment Boolean
   id_client          Int
-  client             Client @relation(fields: [id_client], references: [id_client])
+  client             Client  @relation(fields: [id_client], references: [id_client])
 }
 
 model ClientAddress {
-  id_address          Int     @id @default(autoincrement())
+  id_address          Int      @id @default(autoincrement())
   first_name          String
   last_name           String
   street              String
@@ -113,7 +122,7 @@ model ClientAddress {
   is_default_billing  Boolean
   is_default_shipping Boolean
   id_client           Int
-  client              Client @relation(fields: [id_client], references: [id_client])
+  client              Client   @relation(fields: [id_client], references: [id_client])
 }
 
 model ChatbotConversation {
@@ -123,26 +132,26 @@ model ChatbotConversation {
   end_date                DateTime?
   user_email              String
   id_client               Int
-  client                  Client  @relation(fields: [id_client], references: [id_client])
+  client                  Client    @relation(fields: [id_client], references: [id_client])
   messages                ChatbotMessage[]
   escalations             ChatbotEscalation[]
 }
 
 model ChatbotMessage {
-  id_chatbot_message     Int       @id @default(autoincrement())
-  message                String
-  message_type           String
-  message_date           DateTime
+  id_chatbot_message      Int       @id @default(autoincrement())
+  message                 String
+  message_type            String
+  message_date            DateTime
   id_chatbot_conversation Int
-  chatbotConversation    ChatbotConversation @relation(fields: [id_chatbot_conversation], references: [id_chatbot_conversation])
+  chatbotConversation     ChatbotConversation @relation(fields: [id_chatbot_conversation], references: [id_chatbot_conversation])
 }
 
 model ChatbotEscalation {
-  id_chatbot_escalation  Int       @id @default(autoincrement())
-  escalation_date        DateTime
-  escalation_status      String
+  id_chatbot_escalation   Int       @id @default(autoincrement())
+  escalation_date         DateTime
+  escalation_status       String
   id_chatbot_conversation Int
-  chatbotConversation    ChatbotConversation @relation(fields: [id_chatbot_conversation], references: [id_chatbot_conversation])
+  chatbotConversation     ChatbotConversation @relation(fields: [id_chatbot_conversation], references: [id_chatbot_conversation])
 }
 
 model ContactMessage {
