@@ -5,7 +5,6 @@ import { CarouselPlugin } from "../components/Carousel/CarouselPlugin"
 import { CategoryGrid } from "../components/CategoryGrid/CategoryGrid"
 import { Message } from "../components/Message/Message"
 import { TopProducts } from "@/components/TopProduits/TopProduits"
-import Link from "next/link"
 
 export default function Home() {
   const message = "Message très très important sur les promotions et actualités"
@@ -29,7 +28,6 @@ export default function Home() {
         </h1>
 
         <CategoryGrid />
-        <Link href="/admin/login">Connexion au Back-Office</Link>
       </div>
 
       {/* TOP PRODUCTS */}
