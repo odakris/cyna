@@ -1,5 +1,6 @@
-import { PrismaClient } from "@prisma/client"
-const prisma = new PrismaClient()
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 // Liste de prénoms et noms génériques
 const firstNames = [
@@ -13,7 +14,7 @@ const firstNames = [
   "Hannah",
   "Isaac",
   "Jack",
-]
+];
 
 const lastNames = [
   "Dupont",
@@ -26,7 +27,7 @@ const lastNames = [
   "Lopez",
   "Tanguy",
   "Lemoine",
-]
+];
 
 async function main() {
   // Création des catégories
@@ -35,30 +36,27 @@ async function main() {
       name: "Prévention",
       description: "Services dédiés à la prévention des cyber-risques.",
       image: "/uploads/prevention.jpg",
-      updated_at: new Date(),
-      created_at: new Date(),
     },
-  })
+  });
+  console.log("Catégorie Prévention créée avec id_category:", prevention.id_category);
 
   const protection = await prisma.category.create({
     data: {
       name: "Protection",
       description: "Services dédiés à la protection contre les menaces cyber.",
       image: "/uploads/protection.jpg",
-      updated_at: new Date(),
-      created_at: new Date(),
     },
-  })
+  });
+  console.log("Catégorie Protection créée avec id_category:", protection.id_category);
 
   const reponse = await prisma.category.create({
     data: {
       name: "Réponse",
       description: "Services dédiés à la réponse aux incidents de sécurité.",
       image: "/uploads/reponse.jpg",
-      updated_at: new Date(),
-      created_at: new Date(),
     },
-  })
+  });
+  console.log("Catégorie Réponse créée avec id_category:", reponse.id_category);
 
   // Création des produits
   const produits = [
@@ -102,10 +100,10 @@ async function main() {
       stock: 5,
       id_category: reponse.id_category,
     },
-  ]
+  ];
 
   // Insertion des produits et récupération de leurs IDs
-  const createdProduits = []
+  const createdProduits = [];
   for (const produit of produits) {
     const createdProduit = await prisma.product.create({
       data: {
@@ -115,44 +113,42 @@ async function main() {
         unit_price: produit.unit_price,
         available: true,
         priority_order: 1,
-        updated_at: new Date(),
-        created_at: new Date(),
         id_category: produit.id_category,
         image: produit.image,
         stock: produit.stock,
       },
-    })
-    createdProduits.push(createdProduit)
+    });
+    createdProduits.push(createdProduit);
   }
 
   // Création d'un utilisateur admin pour le back-office
   const adminUser = await prisma.user.create({
     data: {
       email: "admin@example.com",
-      password: "adminpassword123", // À hacher dans un environnement réel ==> const hashedPassword = await bcrypt.hash("adminpassword123", 10);
+      password: "adminpassword123",
       role: "ADMIN",
     },
-  })
+  });
   console.log("Utilisateur admin créé :", {
     email: adminUser.email,
-    password: "adminpassword123", // À utiliser pour tester la connexion
+    password: "adminpassword123",
     role: adminUser.role,
-  })
+  });
 
   // Création de 10 utilisateurs et leurs clients associés
   for (let i = 0; i < 10; i++) {
-    const firstName = firstNames[i]
-    const lastName = lastNames[i]
-    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i + 1}@example.com`
+    const firstName = firstNames[i];
+    const lastName = lastNames[i];
+    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i + 1}@example.com`;
 
     // Création d'un utilisateur avec rôle "client"
     const user = await prisma.user.create({
       data: {
         email: email,
-        password: "hashedpassword", // À remplacer par un vrai hash dans un vrai projet
+        password: "password123", // Mot de passe en texte brut pour les tests
         role: "CLIENT",
       },
-    })
+    });
 
     // Création du client lié à cet utilisateur
     const client = await prisma.client.create({
@@ -160,9 +156,9 @@ async function main() {
         first_name: firstName,
         last_name: lastName,
         email: email,
-        id_user: user.id_user, // Liaison avec l'utilisateur
+        id_user: user.id_user,
       },
-    })
+    });
 
     // Création de 3 adresses pour chaque client
     for (let j = 0; j < 3; j++) {
@@ -180,7 +176,7 @@ async function main() {
           is_default_shipping: j === 0,
           id_client: client.id_client,
         },
-      })
+      });
     }
 
     // Création de 3 infos de paiement pour chaque client
@@ -194,7 +190,7 @@ async function main() {
           is_default_payment: k === 0,
           id_client: client.id_client,
         },
-      })
+      });
     }
 
     // Création de 3 commandes pour chaque client
@@ -212,14 +208,11 @@ async function main() {
           renewal_date: new Date(),
           id_client: client.id_client,
         },
-      })
+      });
 
       // Sélection aléatoire de 1 à 3 produits pour cette commande
-      const numberOfProducts = Math.floor(Math.random() * 3) + 1
-      const randomProducts = getRandomProducts(
-        createdProduits,
-        numberOfProducts
-      )
+      const numberOfProducts = Math.floor(Math.random() * 3) + 1;
+      const randomProducts = getRandomProducts(createdProduits, numberOfProducts);
 
       // Insertion des liens produits_commande
       for (const produit of randomProducts) {
@@ -228,18 +221,18 @@ async function main() {
             id_product: produit.id_product,
             id_order: order.id_order,
           },
-        })
+        });
       }
     }
   }
 
   // Création de 10 messages dans la table ContactMessage
   for (let i = 0; i < 10; i++) {
-    const firstName = firstNames[i]
-    const lastName = lastNames[i]
-    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i + 1}@example.com`
-    const subject = `Message de ${firstName} ${lastName}`
-    const message = `Bonjour, je suis ${firstName} ${lastName}, et j'ai une question concernant vos services.`
+    const firstName = firstNames[i];
+    const lastName = lastNames[i];
+    const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}${i + 1}@example.com`;
+    const subject = `Message de ${firstName} ${lastName}`;
+    const message = `Bonjour, je suis ${firstName} ${lastName}, et j'ai une question concernant vos services.`;
 
     await prisma.contactMessage.create({
       data: {
@@ -247,23 +240,23 @@ async function main() {
         subject: subject,
         message: message,
       },
-    })
+    });
   }
 
-  console.log("Base de données peuplée avec succès.")
+  console.log("Base de données peuplée avec succès.");
 }
 
 // Fonction pour obtenir des produits au hasard
 function getRandomProducts(produits, count) {
-  const shuffled = [...produits].sort(() => 0.5 - Math.random())
-  return shuffled.slice(0, count)
+  const shuffled = [...produits].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
 }
 
 main()
-  .catch(e => {
-    console.error(e)
-    process.exit(1)
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect();
+  });

@@ -80,16 +80,18 @@ const RegisterForm = () => {
         // Étape 2 : Envoyer un e-mail de bienvenue avec EmailJS
         const templateParams = {
           firstName: data.firstName,
-          lastName: data.lastName,
           email: data.email,
-        }
-
+          subject: "Bienvenue sur Cyna !",
+          message: "Merci de vous être inscrit sur Cyna ! Votre compte a été créé avec succès.",
+          actionLink: "", // Pas de lien pour l'inscription
+        };
+        
         await emailjs.send(
-          process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!, // Service ID
-          process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_WELCOME!, // Template ID pour l'inscription
+          process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
+          process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_GENERIC!, // Template générique
           templateParams,
-          process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY! // Public Key
-        )
+          process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
+        );
 
         console.log("E-mail de bienvenue envoyé avec succès !")
         router.push("/") // Redirige vers la page d'accueil après succès
