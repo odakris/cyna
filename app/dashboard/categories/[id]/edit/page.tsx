@@ -2,40 +2,48 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
-import { ProductForm } from "@/components/Forms/ProductForm"
 import { CategoryType } from "@/types/Types"
 import { ArrowLeft } from "lucide-react"
+import { CategoryFormValues } from "@/lib/validations/category-schema"
+import { CategoryForm } from "@/components/Forms/CategoryForm"
 
-export default function CreateProductPage() {
+export default function EditCategoryPage() {
+  const { id } = useParams() as { id: string }
   const { toast } = useToast()
-  const [categories, setCategories] = useState<CategoryType[]>([])
+  const [category, setCategory] = useState<CategoryType>()
   const [loading, setLoading] = useState<boolean>(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchData = async () => {
       try {
-        const data = await fetch("/api/categories").then(res => res.json())
-        if (!data) throw new Error("Catégories introuvables")
-        setCategories(data)
+        const categoryData = await fetch(`/api/categories/${id}`).then(res =>
+          res.json()
+        )
+
+        if (!categoryData) throw new Error("Catégorie introuvable")
+
+        setCategory(categoryData)
       } catch (error) {
-        console.error("Erreur fetchCategories:", error)
-        setErrorMessage("Erreur lors du chargement des catégories.")
+        console.error("Erreur fetchData:", error)
+        setErrorMessage("Erreur lors du chargement des données.")
         toast({
           title: "Erreur",
-          description: "Impossible de charger les catégories.",
+          description: "Impossible de charger les données de la catégorie.",
           variant: "destructive",
         })
       } finally {
         setLoading(false)
       }
     }
-    fetchCategories()
-  }, [toast])
+
+    fetchData()
+  }, [id, toast])
 
   if (loading) {
     return (
@@ -61,34 +69,51 @@ export default function CreateProductPage() {
     )
   }
 
-  if (errorMessage && !categories.length) {
+  if (errorMessage || !category) {
     return (
       <div className="max-w-4xl mx-auto p-6 space-y-6">
-        <h1 className="text-3xl font-bold">Créer un Nouveau Produit</h1>
-        <p className="text-red-500">{errorMessage}</p>
+        <h1 className="text-3xl font-bold">Modifier la Categorie</h1>
+        <p className="text-red-500">
+          {errorMessage || "Categorie introuvable"}
+        </p>
         <Button asChild variant="outline">
-          <Link href="/dashboard/products">Retour</Link>
+          <Link href="/dashboard/categories">Retour</Link>
         </Button>
       </div>
     )
   }
 
+  // Conversion du CategoryType en CategoriesFormValues
+  const initialData: CategoryFormValues = {
+    name: category.name,
+    description: category.description,
+    image: category.image,
+    priority_order: category.priority_order,
+  }
+
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-8 animate-in fade-in duration-300">
-      <div className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="icon" className="rounded-full">
-          <Link href="/dashboard/products">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-        </Button>
-        <h1 className="text-3xl font-bold">Créer un Nouveau Produit</h1>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="icon" className="rounded-full">
+            <Link href="/dashboard/products">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold">Modifier le Produit</h1>
+        </div>
       </div>
+
       <Card>
         <CardHeader>
-          <CardTitle>Ajouter un Produit</CardTitle>
+          <CardTitle>Modifier les informations</CardTitle>
         </CardHeader>
         <CardContent>
-          <ProductForm categories={categories} />
+          <CategoryForm
+            initialData={initialData}
+            isEditing={true}
+            categoryId={Number(id)}
+          />
         </CardContent>
       </Card>
     </div>

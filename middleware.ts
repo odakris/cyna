@@ -19,12 +19,12 @@ export async function middleware(req: NextRequest) {
     }
 
     // Protect /admin routes for non-admins
-    if (pathname.startsWith("/admin") && token.role !== Role.ADMIN) {
+    if (pathname.startsWith("/dashboard") && token.role !== Role.ADMIN) {
       return NextResponse.redirect(new URL("/", req.url))
     }
   } else {
     // Redirect unauthenticated users trying to access protected routes
-    if (pathname.startsWith("/admin")) {
+    if (pathname.startsWith("/dashboard")) {
       return NextResponse.redirect(new URL("/auth", req.url))
     }
   }
@@ -33,5 +33,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/auth", "/admin/:path*"], // Apply to /auth and /admin routes
+  matcher: ["/auth", "/dashboard/:path*"], // Apply to /auth and /admin routes
 }

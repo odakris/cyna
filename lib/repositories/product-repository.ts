@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
-import { ProductFormValues } from "@/lib/validations/productSchema"
-import { ProductType } from "../../types/Types"
+import { ProductFormValues } from "@/lib/validations/product-schema"
+import { ProductType } from "@/types/Types"
 
 /**
  * Récupère la liste complète des produits avec leur catégorie associée.
@@ -84,7 +84,7 @@ export const update = async (
  * @param {number} id - Identifiant du produit à supprimer.
  * @returns {Promise<ProductType>} Confirmation de la suppression du produit.
  */
-export const deleteProduct = async (id: number): Promise<ProductType> => {
+export const remove = async (id: number): Promise<ProductType> => {
   return prisma.product.delete({
     where: { id_product: id },
   })
@@ -110,7 +110,7 @@ const productRepository = {
   findById,
   create,
   update,
-  delete: deleteProduct,
+  remove,
   exists,
 }
 

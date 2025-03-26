@@ -1,5 +1,5 @@
 import productRepository from "@/lib/repositories/product-repository"
-import { ProductFormValues } from "@/lib/validations/productSchema"
+import { ProductFormValues } from "@/lib/validations/product-schema"
 import { ProductType } from "../../types/Types"
 
 /**
@@ -75,7 +75,7 @@ export const deleteProduct = async (id: number): Promise<object> => {
     throw new Error("Produit non trouvé")
   }
 
-  await productRepository.delete(id)
+  await productRepository.remove(id)
   return { success: true, message: "Produit supprimé avec succès" }
 }
 
