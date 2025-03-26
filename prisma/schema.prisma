@@ -1,3 +1,6 @@
+// Schéma Prisma optimisé pour la plateforme e-commerce Cyna SaaS
+// Basé sur le cahier des charges et optimisé pour les performances
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,157 +10,281 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Rôles utilisateur dans le système
 enum Role {
-  CLIENT
+  CUSTOMER
+  MANAGER
   ADMIN
+  SUPER_ADMIN
 }
 
-model User {
-  id_user            Int                 @id @default(autoincrement())
-  email              String              @unique
-  password           String
-  role               Role                @default(CLIENT)
-  created_at         DateTime            @default(now())
-  updated_at         DateTime            @updatedAt
-  client             Client?             @relation("UserToClient")
-  passwordResetTokens PasswordResetToken[]
+// Types d'abonnement disponibles
+enum SubscriptionType {
+  MONTHLY
+  YEARLY
+  PER_USER
+  PER_MACHINE
 }
 
-model PasswordResetToken {
-  id         Int      @id @default(autoincrement())
-  token      String   @unique
-  id_user    Int
-  user       User     @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
+// Statuts possibles pour une commande
+enum OrderStatus {
+  PENDING
+  PAID
+  COMPLETED
+  CANCELLED
+  REFUNDED
 }
 
-model Client {
-  id_client            Int              @id @default(autoincrement())
-  last_name            String
-  first_name           String
-  email                String           @unique
-  id_user              Int?             @unique
-  user                 User?            @relation("UserToClient", fields: [id_user], references: [id_user])
-  orders               Order[]
-  paymentInfo          PaymentInfo[]
-  addresses            ClientAddress[]
-  chatbotConversations ChatbotConversation[]
+// Statuts d'abonnement
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PENDING
 }
 
+// Types de messages dans le chatbot
+enum MessageType {
+  USER
+  BOT
+}
+
+// Catégories de produits/services SaaS
 model Category {
-  id_category  Int     @id @default(autoincrement())
-  priority_order       Int
-  name         String
-  description  String
-  image        String
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
-  products     Product[]
+  id_category    Int       @id @default(autoincrement())
+  name           String    @unique @db.VarChar(100)
+  description    String    @db.Text
+  image          String    @db.VarChar(255)
+  priority_order Int       @default(1)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  products       Product[]
+
+  @@index([priority_order])
 }
 
+// Produits/services SaaS (EDR, XDR, SOC)
 model Product {
-  id_product           Int       @id @default(autoincrement())
-  name                 String
-  description          String    @db.Text
-  technical_specs      String    @db.Text
-  unit_price           Float
-  available            Boolean
-  priority_order       Int
-  created_at           DateTime  @default(now())
-  updated_at           DateTime  @updatedAt
-  id_category          Int
-  category             Category  @relation(fields: [id_category], references: [id_category])
-  image                String
-  stock                Int
-  orderedProducts      OrderedProduct[]
+  id_product      Int             @id @default(autoincrement())
+  name            String          @unique @db.VarChar(150)
+  description     String          @db.Text
+  technical_specs String          @db.Text
+  unit_price      Float           @db.Float
+  discount_price  Float?          @db.Float
+  available       Boolean         @default(true)
+  priority_order  Int             @default(1)
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+  id_category     Int
+  category        Category        @relation(fields: [id_category], references: [id_category])
+  product_images  ProductImage[]
+  carousel_images CarouselImage[]
+  order_items     OrderItem[]
+  CartItem        CartItem[]
+
+  @@index([id_category])
+  @@index([available])
+  @@index([priority_order])
+  @@index([name])
 }
 
-model OrderedProduct {
-  id_ordered_product Int      @id @default(autoincrement())
-  id_product         Int
-  id_order           Int
-  product            Product  @relation(fields: [id_product], references: [id_product])
-  order              Order    @relation(fields: [id_order], references: [id_order])
+// Images pour le carrousel
+model CarouselImage {
+  id_carousel_image Int      @id @default(autoincrement())
+  url               String   @db.VarChar(255)
+  alt               String?  @db.VarChar(150)
+  priority_order    Int      @default(1)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  id_product        Int
+  product           Product  @relation(fields: [id_product], references: [id_product], onDelete: Cascade)
+
+  @@index([id_product, priority_order])
 }
 
-model Order {
-  id_order              Int       @id @default(autoincrement())
-  order_date            DateTime
-  subscription_type     String
+// Images associées aux produits
+model ProductImage {
+  id_product_image Int      @id @default(autoincrement())
+  url              String   @db.VarChar(255)
+  alt              String?  @db.VarChar(150)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+  id_product       Int
+  product          Product  @relation(fields: [id_product], references: [id_product], onDelete: Cascade)
+
+  @@index([id_product])
+}
+
+// Éléments individuels d'une commande
+model OrderItem {
+  id_order_item         Int                @id @default(autoincrement())
+  subscription_type     SubscriptionType
+  subscription_status   SubscriptionStatus @default(ACTIVE)
   subscription_duration Int
-  total_amount          Float
-  order_status          String
-  payment_method        String
-  last_card_digits      String
-  invoice_pdf_url       String
-  renewal_date          DateTime
-  id_client             Int
-  client                Client    @relation(fields: [id_client], references: [id_client])
-  orderedProducts       OrderedProduct[]
+  renewal_date          DateTime?
+  quantity              Int                @default(1)
+  unit_price            Float              @db.Float // Prix au moment de la commande
+  id_product            Int
+  id_order              Int
+  product               Product            @relation(fields: [id_product], references: [id_product])
+  order                 Order              @relation(fields: [id_order], references: [id_order], onDelete: Cascade)
+
+  @@index([id_order])
+  @@index([id_product])
+  @@index([subscription_status])
+  @@index([renewal_date])
 }
 
-model PaymentInfo {
-  id_payment_info    Int     @id @default(autoincrement())
-  card_name          String
-  last_card_digits   String
-  expiration_month   Int
-  expiration_year    Int
-  is_default_payment Boolean
-  id_client          Int
-  client             Client  @relation(fields: [id_client], references: [id_client])
+// Commandes passées par les utilisateurs
+model Order {
+  id_order         Int         @id @default(autoincrement())
+  order_date       DateTime    @default(now())
+  total_amount     Float       @db.Float
+  subtotal         Float       @default(0) @db.Float
+  order_status     OrderStatus @default(PENDING)
+  payment_method   String      @db.VarChar(50)
+  last_card_digits String?     @db.VarChar(4)
+  invoice_number   String      @unique @db.VarChar(50)
+  invoice_pdf_url  String?     @db.VarChar(255)
+  id_user          Int
+  id_address       Int
+  user             User        @relation(fields: [id_user], references: [id_user])
+  address          Address     @relation(fields: [id_address], references: [id_address])
+  order_items      OrderItem[]
+
+  @@index([id_user])
+  @@index([order_date])
+  @@index([order_status])
+  @@index([invoice_number])
 }
 
-model ClientAddress {
-  id_address          Int      @id @default(autoincrement())
-  first_name          String
-  last_name           String
-  street              String
-  additional_info     String?
-  postal_code         String
-  city                String
-  region              String
-  country             String
-  mobile_phone        String
-  is_default_billing  Boolean
-  is_default_shipping Boolean
-  id_client           Int
-  client              Client   @relation(fields: [id_client], references: [id_client])
+// Utilisateurs du système
+model User {
+  id_user               Int                  @id @default(autoincrement())
+  first_name            String               @db.VarChar(100)
+  last_name             String               @db.VarChar(100)
+  email                 String               @unique @db.VarChar(255)
+  password              String               @db.VarChar(255)
+  role                  Role                 @default(CUSTOMER)
+  email_verified        Boolean              @default(false)
+  verify_token          String?              @db.VarChar(255)
+  two_factor_enabled    Boolean              @default(false)
+  created_at            DateTime             @default(now())
+  updated_at            DateTime             @updatedAt
+  orders                Order[]
+  contact_messages      ContactMessage[]
+  payment_infos         PaymentInfo[]
+  addresses             Address[]
+  password_reset_tokens PasswordResetToken[]
+  sessions              Session[]
+
+  @@index([email])
+  @@index([role])
+  @@index([email_verified])
+  @@index([created_at])
 }
 
-model ChatbotConversation {
-  id_chatbot_conversation Int       @id @default(autoincrement())
-  conversation_status     String
-  start_date              DateTime
-  end_date                DateTime?
-  user_email              String
-  id_client               Int
-  client                  Client    @relation(fields: [id_client], references: [id_client])
-  messages                ChatbotMessage[]
-  escalations             ChatbotEscalation[]
+// Éléments dans le panier d'achat
+model CartItem {
+  id_cart_item      Int              @id @default(autoincrement())
+  quantity          Int              @default(1)
+  subscription_type SubscriptionType @default(MONTHLY)
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @updatedAt
+  id_product        Int
+  product           Product          @relation(fields: [id_product], references: [id_product])
+  Session           Session?         @relation(fields: [sessionId_session], references: [id_session])
+  sessionId_session Int?
+
+  @@unique([id_product, subscription_type])
+  @@index([id_product])
 }
 
-model ChatbotMessage {
-  id_chatbot_message      Int       @id @default(autoincrement())
-  message                 String
-  message_type            String
-  message_date            DateTime
-  id_chatbot_conversation Int
-  chatbotConversation     ChatbotConversation @relation(fields: [id_chatbot_conversation], references: [id_chatbot_conversation])
+// Sessions utilisateur pour gérer l'authentification
+model Session {
+  id_session    Int        @id @default(autoincrement())
+  session_token String     @unique @db.VarChar(255)
+  expires_at    DateTime
+  created_at    DateTime   @default(now())
+  CartItem      CartItem[]
+  id_user       Int
+  user          User       @relation(fields: [id_user], references: [id_user])
+
+  @@index([id_user])
+  @@index([session_token])
+  @@index([expires_at])
 }
 
-model ChatbotEscalation {
-  id_chatbot_escalation   Int       @id @default(autoincrement())
-  escalation_date         DateTime
-  escalation_status       String
-  id_chatbot_conversation Int
-  chatbotConversation     ChatbotConversation @relation(fields: [id_chatbot_conversation], references: [id_chatbot_conversation])
-}
-
+// Messages de contact envoyés via le formulaire
 model ContactMessage {
-  id_message  Int      @id @default(autoincrement())
-  email       String
-  subject     String
-  message     String
-  sent_date   DateTime @default(now())
+  id_message Int      @id @default(autoincrement())
+  email      String   @db.VarChar(255)
+  subject    String   @db.VarChar(200)
+  message    String   @db.Text
+  sent_date  DateTime @default(now())
+  is_read    Boolean  @default(false)
+  id_user    Int? // Optionnel car peut être envoyé par un visiteur non connecté
+  user       User?    @relation(fields: [id_user], references: [id_user])
+
+  @@index([id_user])
+  @@index([is_read])
+  @@index([sent_date])
+}
+
+// Informations de paiement des utilisateurs
+model PaymentInfo {
+  id_payment_info   Int      @id @default(autoincrement())
+  card_name         String   @db.VarChar(100)
+  last_card_digits  String   @db.VarChar(4)
+  expiration_month  Int      @db.TinyInt
+  expiration_year   Int      @db.SmallInt
+  provider_token_id String?  @db.VarChar(255) // ID du token chez le fournisseur de paiement
+  is_default        Boolean  @default(false)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  id_user           Int
+  user              User     @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
+
+  @@index([id_user])
+  @@index([is_default])
+}
+
+// Adresses enregistrées par les utilisateurs
+model Address {
+  id_address          Int      @id @default(autoincrement())
+  first_name          String   @db.VarChar(100)
+  last_name           String   @db.VarChar(100)
+  address1            String   @db.VarChar(255)
+  address2            String?  @db.VarChar(255)
+  postal_code         String   @db.VarChar(20)
+  city                String   @db.VarChar(100)
+  region              String   @db.VarChar(100)
+  country             String   @db.VarChar(100)
+  mobile_phone        String   @db.VarChar(20)
+  is_default_billing  Boolean  @default(false)
+  is_default_shipping Boolean  @default(false)
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  id_user             Int
+  user                User     @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
+  orders              Order[]
+
+  @@index([id_user])
+  @@index([is_default_billing])
+  @@index([is_default_shipping])
+  @@index([country, region, city])
+}
+
+// Tokens pour la réinitialisation de mot de passe
+model PasswordResetToken {
+  id_password_reset Int      @id @default(autoincrement())
+  token             String   @unique @db.VarChar(255)
+  expires_at        DateTime
+  created_at        DateTime @default(now())
+  id_user           Int
+  user              User     @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
+
+  @@index([token])
+  @@index([id_user])
+  @@index([expires_at])
 }
