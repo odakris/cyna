@@ -7,6 +7,9 @@ import UserSessionProvider from "../context/UserSessionProvider"
 import NavbarServer from "../components/Navbar/NavBarServer"
 import { Toaster } from "../components/ui/toaster"
 
+// Importer TooltipProvider depuis vos composants ui
+import { TooltipProvider } from "@/components/ui/tooltip"
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -34,23 +37,25 @@ export default function RootLayout({
       >
         <UserSessionProvider>
           <CartProvider>
-            <div className="min-h-screen flex flex-col cyna-text">
-              {/* Navbar */}
-              <div className="w-full">
-                <NavbarServer />
-              </div>
+            <TooltipProvider> {/* Envelopper toute l'application avec TooltipProvider */}
+              <div className="min-h-screen flex flex-col cyna-text">
+                {/* Navbar */}
+                <div className="w-full">
+                  <NavbarServer />
+                </div>
 
-              {/* Main Content */}
-              <main className="flex-1 max-w-7xl w-full mx-auto py-4 px-10 mt-20">
-                {children}
-              </main>
-              <Toaster />
+                {/* Main Content */}
+                <main className="flex-1 max-w-7xl w-full mx-auto py-4 px-10 mt-20">
+                  {children}
+                </main>
+                <Toaster />
 
-              {/* Footer */}
-              <div className="w-full">
-                <Footer />
+                {/* Footer */}
+                <div className="w-full">
+                  <Footer />
+                </div>
               </div>
-            </div>
+            </TooltipProvider>
           </CartProvider>
         </UserSessionProvider>
       </body>
