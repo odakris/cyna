@@ -19,7 +19,7 @@ export async function middleware(req: NextRequest) {
     }
 
     // Protect /admin routes for non-admins
-    if (pathname.startsWith("/dashbpard") && token.role !== Role.ADMIN) {
+    if (pathname.startsWith("/dashboard") && token.role !== Role.ADMIN) {
       return NextResponse.redirect(new URL("/", req.url))
     }
   } else {
