@@ -94,8 +94,8 @@ export const update = async (
  */
 export const remove = async (id: number): Promise<NextResponse> => {
   try {
-    const result = await productService.deleteProduct(id)
-    return NextResponse.json(result)
+    await productService.deleteProduct(id)
+    return NextResponse.json({ message: "Produit supprimé" })
   } catch (error) {
     console.error("Erreur lors de la suppression du produit:", error)
 
