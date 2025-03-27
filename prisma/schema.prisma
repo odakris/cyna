@@ -65,22 +65,24 @@ model Category {
 
 // Produits/services SaaS (EDR, XDR, SOC)
 model Product {
-  id_product      Int             @id @default(autoincrement())
-  name            String          @unique @db.VarChar(150)
-  description     String          @db.Text
-  technical_specs String          @db.Text
-  unit_price      Float           @db.Float
-  discount_price  Float?          @db.Float
-  available       Boolean         @default(true)
-  priority_order  Int             @default(1)
-  created_at      DateTime        @default(now())
-  updated_at      DateTime        @updatedAt
-  id_category     Int
-  category        Category        @relation(fields: [id_category], references: [id_category])
-  product_images  ProductImage[]
-  carousel_images CarouselImage[]
-  order_items     OrderItem[]
-  CartItem        CartItem[]
+  id_product               Int                     @id @default(autoincrement())
+  name                     String                  @unique @db.VarChar(150)
+  description              String                  @db.Text
+  technical_specs          String                  @db.Text
+  unit_price               Float                   @db.Float
+  discount_price           Float?                  @db.Float
+  available                Boolean                 @default(true)
+  priority_order           Int                     @default(1)
+  stock                    Int                     @default(0)
+  created_at               DateTime                @default(now())
+  updated_at               DateTime                @updatedAt
+  main_image               String                  @db.VarChar(255)
+  id_category              Int
+  category                 Category                @relation(fields: [id_category], references: [id_category])
+  product_caroussel_images ProductCarousselImage[]
+  carousel_images          CarouselImage[]
+  order_items              OrderItem[]
+  CartItem                 CartItem[]
 
   @@index([id_category])
   @@index([available])
@@ -103,14 +105,14 @@ model CarouselImage {
 }
 
 // Images associées aux produits
-model ProductImage {
-  id_product_image Int      @id @default(autoincrement())
-  url              String   @db.VarChar(255)
-  alt              String?  @db.VarChar(150)
-  created_at       DateTime @default(now())
-  updated_at       DateTime @updatedAt
-  id_product       Int
-  product          Product  @relation(fields: [id_product], references: [id_product], onDelete: Cascade)
+model ProductCarousselImage {
+  id_product_caroussel_image Int      @id @default(autoincrement())
+  url                        String   @db.VarChar(255)
+  alt                        String?  @db.VarChar(150)
+  created_at                 DateTime @default(now())
+  updated_at                 DateTime @updatedAt
+  id_product                 Int
+  product                    Product  @relation(fields: [id_product], references: [id_product], onDelete: Cascade)
 
   @@index([id_product])
 }
@@ -177,6 +179,7 @@ model User {
   addresses             Address[]
   password_reset_tokens PasswordResetToken[]
   sessions              Session[]
+  cartIems              CartItem[]
 
   @@index([email])
   @@index([role])
@@ -195,6 +198,8 @@ model CartItem {
   product           Product          @relation(fields: [id_product], references: [id_product])
   Session           Session?         @relation(fields: [sessionId_session], references: [id_session])
   sessionId_session Int?
+  User              User?            @relation(fields: [userId_user], references: [id_user])
+  userId_user       Int?
 
   @@unique([id_product, subscription_type])
   @@index([id_product])

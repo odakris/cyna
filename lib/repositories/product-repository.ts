@@ -1,16 +1,19 @@
 import { prisma } from "@/lib/prisma"
 import { ProductFormValues } from "@/lib/validations/product-schema"
-import { ProductType } from "@/types/Types"
+import { Product } from "@prisma/client"
 
 /**
  * Récupère la liste complète des produits avec leur catégorie associée.
- * @returns {Promise<ProductType[]>} Liste des produits triés par ordre de priorité.
+ * @returns {Promise<Product[]>} Liste des produits triés par ordre de priorité.
  */
-export const findAll = async (): Promise<ProductType[]> => {
+export const findAll = async (): Promise<Product[]> => {
   return prisma.product.findMany({
     include: {
       category: {
         select: { id_category: true, name: true },
+      },
+      product_caroussel_images: {
+        select: { id_product_caroussel_image: true, url: true, alt: true },
       },
     },
     orderBy: { priority_order: "asc" },
@@ -20,21 +23,21 @@ export const findAll = async (): Promise<ProductType[]> => {
 /**
  * Récupère un produit spécifique en fonction de son identifiant.
  * @param {number} id - Identifiant unique du produit.
- * @returns {Promise<ProductType | null>} Le produit correspondant ou null s'il n'existe pas.
+ * @returns {Promise<Product | null>} Le produit correspondant ou null s'il n'existe pas.
  */
-export const findById = async (id: number): Promise<ProductType | null> => {
+export const findById = async (id: number): Promise<Product | null> => {
   return prisma.product.findUnique({
     where: { id_product: id },
-    include: { category: true },
+    include: { category: true, product_caroussel_images: true },
   })
 }
 
 /**
  * Crée un nouveau produit en base de données.
  * @param {ProductFormValues} data - Données du produit à enregistrer.
- * @returns {Promise<ProductType>} Le produit nouvellement créé.
+ * @returns {Promise<Product>} Le produit nouvellement créé.
  */
-export const create = async (data: ProductFormValues): Promise<ProductType> => {
+export const create = async (data: ProductFormValues): Promise<Product> => {
   return prisma.product.create({
     data: {
       name: data.name.trim(),
@@ -46,8 +49,14 @@ export const create = async (data: ProductFormValues): Promise<ProductType> => {
       updated_at: new Date(),
       created_at: new Date(),
       stock: data.stock,
-      image: data.image,
       category: { connect: { id_category: data.id_category } },
+      main_image: data.main_image,
+      product_caroussel_images: {
+        create: data.product_caroussel_images.map(image => ({
+          url: image,
+          alt: image.trim(),
+        })),
+      },
     },
   })
 }
@@ -56,15 +65,36 @@ export const create = async (data: ProductFormValues): Promise<ProductType> => {
  * Met à jour un produit existant avec les nouvelles informations.
  * @param {number} id - Identifiant du produit à mettre à jour.
  * @param {ProductFormValues} data - Nouvelles données du produit.
- * @returns {Promise<ProductType>} Le produit mis à jour.
+ * @returns {Promise<Product>} Le produit mis à jour.
  */
 export const update = async (
   id: number,
   data: ProductFormValues
-): Promise<ProductType> => {
-  return prisma.product.update({
-    where: { id_product: id },
-    data: {
+): Promise<Product> => {
+  try {
+    // Vérifier d'abord si le produit existe
+    const existingProduct = await prisma.product.findUnique({
+      where: { id_product: id },
+      include: { product_caroussel_images: true },
+    })
+
+    if (!existingProduct) {
+      throw new Error(`Produit avec l'ID ${id} non trouvé`)
+    }
+
+    console.log(`Suppression des images du carrousel pour le produit ${id}`)
+
+    // Utiliser le modèle correct: ProductCarousselImage (avec un P majuscule)
+    if (existingProduct.product_caroussel_images.length > 0) {
+      await prisma.productCarousselImage.deleteMany({
+        where: { id_product: id },
+      })
+    }
+
+    console.log("Nouvelles images du carrousel:", data.product_caroussel_images)
+
+    // Mettre à jour le produit principal
+    const updateData: any = {
       name: data.name.trim(),
       unit_price: data.unit_price,
       description: data.description.trim(),
@@ -73,18 +103,43 @@ export const update = async (
       priority_order: data.priority_order,
       updated_at: new Date(),
       id_category: data.id_category,
-      image: data.image,
-      stock: Math.max(0, data.stock),
-    },
-  })
+      stock: data.stock,
+      main_image: data.main_image,
+    }
+
+    // Ajouter les nouvelles images si elles existent
+    if (
+      data.product_caroussel_images &&
+      data.product_caroussel_images.length > 0
+    ) {
+      updateData.product_caroussel_images = {
+        create: data.product_caroussel_images.map(image => ({
+          url: image,
+          alt: data.name.trim(),
+        })),
+      }
+    }
+
+    // Mise à jour en une seule opération
+    return prisma.product.update({
+      where: { id_product: id },
+      data: updateData,
+      include: {
+        product_caroussel_images: true,
+      },
+    })
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du produit:", error)
+    throw error
+  }
 }
 
 /**
  * Supprime un produit de la base de données en fonction de son identifiant.
  * @param {number} id - Identifiant du produit à supprimer.
- * @returns {Promise<ProductType>} Confirmation de la suppression du produit.
+ * @returns {Promise<Product>} Confirmation de la suppression du produit.
  */
-export const remove = async (id: number): Promise<ProductType> => {
+export const remove = async (id: number): Promise<Product> => {
   return prisma.product.delete({
     where: { id_product: id },
   })

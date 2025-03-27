@@ -5,11 +5,11 @@ import { ArrowUpDown, Eye, Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
-import { ProductType } from "@/types/Types"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
+import { ProductWithImages } from "@/types/Types"
 
-export const productColumns: ColumnDef<ProductType>[] = [
+export const productColumns: ColumnDef<ProductWithImages>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -58,7 +58,7 @@ export const productColumns: ColumnDef<ProductType>[] = [
         <div className="relative h-16 w-16 overflow-hidden rounded-md border">
           <Image
             alt={`Image de ${row.getValue("name") || "produit"}`}
-            src={`${row.original.image}`}
+            src={`${row.original.main_image}`}
             width={70}
             height={70}
             className="h-full w-full object-cover transition-transform hover:scale-110"

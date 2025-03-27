@@ -41,7 +41,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { ProductType } from "@/types/Types"
+import { ProductWithImages } from "@/types/Types"
 import { useCallback, useEffect, useState } from "react"
 import Link from "next/link"
 import {
@@ -65,7 +65,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { productsColumnNamesInFrench, productColumns } from "./product-columns"
 
 export default function ProductHomePage() {
-  const [products, setProducts] = useState<ProductType[]>([])
+  const [products, setProducts] = useState<ProductWithImages[]>([])
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -77,9 +77,10 @@ export default function ProductHomePage() {
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true)
-      const data: ProductType[] = await fetch("/api/products").then(res =>
+      const data: ProductWithImages[] = await fetch("/api/products").then(res =>
         res.json()
       )
+      console.log("data fetchProducts:", data)
       setProducts(data)
       setError(null)
     } catch (error: unknown) {

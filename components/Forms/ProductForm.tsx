@@ -61,9 +61,10 @@ export function ProductForm({
       unit_price: initialData?.unit_price || 0,
       stock: initialData?.stock || 0,
       id_category: initialData?.id_category || 0,
-      image: initialData?.image || "",
+      main_image: initialData?.main_image || "",
       priority_order: initialData?.priority_order || 1,
       available: initialData?.available && true,
+      product_caroussel_images: initialData?.product_caroussel_images || [],
     },
   })
 
@@ -71,6 +72,14 @@ export function ProductForm({
     try {
       setIsSubmitting(true)
 
+      // S'assurer que product_caroussel_images est bien un tableau
+      const product_caroussel_images = Array.isArray(
+        values.product_caroussel_images
+      )
+        ? values.product_caroussel_images
+        : []
+
+      // Formatage des valeurs avec gestion correcte des images du carrousel
       const formattedValues = {
         ...values,
         unit_price: Number(values.unit_price),
@@ -78,37 +87,73 @@ export function ProductForm({
         id_category: Number(values.id_category),
         priority_order: Number(values.priority_order),
         available: values.available,
+        // S'assurer que c'est bien un tableau, même si vide
+        product_caroussel_images: product_caroussel_images,
       }
 
       console.log("formattedValues:", formattedValues)
+      console.log(
+        "Images du carrousel:",
+        formattedValues.product_caroussel_images
+      )
+
+      let response
 
       if (isEditing && productId) {
-        await fetch(`/api/products/${productId}`, {
+        // Mise à jour d'un produit existant
+        response = await fetch(`/api/products/${productId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(formattedValues),
         })
-        // await updateProduct(productId, formattedValues)
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(
+            errorData.message || "Erreur lors de la mise à jour du produit"
+          )
+        }
+
+        toast({
+          title: "Produit mis à jour avec succès !",
+        })
+
+        // Redirection vers la page de détails du produit mis à jour
+        router.push(`/dashboard/products/${productId}`)
       } else {
-        await fetch("/api/products", {
+        // Création d'un nouveau produit
+        response = await fetch("/api/products", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(formattedValues),
         })
-        // await createProduct(formattedValues)
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(
+            errorData.message || "Erreur lors de la création du produit"
+          )
+        }
+
+        // Récupérer l'ID du nouveau produit depuis la réponse
+        const newProduct = await response.json()
+
+        toast({
+          title: "Produit créé avec succès !",
+        })
+
+        // Redirection vers la page de détails du nouveau produit
+        if (newProduct && newProduct.id_product) {
+          router.push(`/dashboard/products/${newProduct.id_product}`)
+        } else {
+          // Fallback si l'ID n'est pas disponible
+          router.push("/dashboard/products")
+        }
       }
-
-      toast({
-        title: isEditing
-          ? "Produit mis à jour avec succès !"
-          : "Produit créé avec succès !",
-      })
-
-      router.push("/dashboard/products")
     } catch (error) {
       console.error("Erreur onSubmit:", error)
       toast({
@@ -142,14 +187,36 @@ export function ProductForm({
         />
 
         <Controller
-          name="image"
+          name="main_image"
           control={form.control}
           render={({ field }) => (
-            <ImageUploader
-              field={field}
-              disabled={isSubmitting}
-              existingImage={initialData?.image}
-            />
+            <FormItem>
+              <ImageUploader
+                field={field}
+                disabled={isSubmitting}
+                existingImage={initialData?.main_image}
+                multiple={false}
+                label="Image Principal du Produit"
+                helpText="Cette image sera utilisée comme image principale du produit."
+              />
+            </FormItem>
+          )}
+        />
+
+        <Controller
+          name="product_caroussel_images"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <ImageUploader
+                field={field}
+                disabled={isSubmitting}
+                existingImage={initialData?.product_caroussel_images}
+                multiple={true}
+                label="Images du Caroussel"
+                helpText="Vous pouvez sélectionner plusieurs images à la fois. Survolez une image et cliquez sur la croix pour la supprimer."
+              />
+            </FormItem>
           )}
         />
 
