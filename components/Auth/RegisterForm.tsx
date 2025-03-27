@@ -1,8 +1,7 @@
-"use client"
+"use client";
 
-import { z } from "zod"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
@@ -10,45 +9,26 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
-import emailjs from "@emailjs/browser"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import emailjs from "@emailjs/browser";
+import { RegisterFormValues, registerFormSchema } from "@/lib/validations/register-schema";
 
-// Schéma de validation avec vérification du mot de passe
-const formSchema = z
-  .object({
-    firstName: z.string().min(1, { message: "Le prénom est requis" }),
-    lastName: z.string().min(1, { message: "Le nom est requis" }),
-    email: z
-      .string()
-      .min(1, { message: "L'email est requis" })
-      .email({ message: "Fournissez un email valide" }),
-    password: z
-      .string()
-      .min(6, { message: "Le mot de passe doit avoir au moins 6 caractères" }),
-    confirmPassword: z
-      .string()
-      .min(6, { message: "La confirmation du mot de passe est requise" }),
-  })
-  .refine(data => data.password === data.confirmPassword, {
-    message: "Les mots de passe ne correspondent pas",
-    path: ["confirmPassword"],
-  })
-
+// Composant RegisterForm
 const RegisterForm = () => {
-  const router = useRouter()
+  const router = useRouter();
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerFormSchema),
     defaultValues: {
       firstName: "",
       lastName: "",
@@ -56,9 +36,9 @@ const RegisterForm = () => {
       password: "",
       confirmPassword: "",
     },
-  })
+  });
 
-  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+  const handleSubmit = async (data: RegisterFormValues) => {
     try {
       // Étape 1 : Inscription via l'API
       const response = await fetch("/api/register", {
@@ -72,9 +52,9 @@ const RegisterForm = () => {
           email: data.email,
           password: data.password,
         }),
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (response.ok) {
         // Étape 2 : Envoyer un e-mail de bienvenue avec EmailJS
@@ -85,7 +65,7 @@ const RegisterForm = () => {
           message: "Merci de vous être inscrit sur Cyna ! Votre compte a été créé avec succès.",
           actionLink: "", // Pas de lien pour l'inscription
         };
-        
+
         await emailjs.send(
           process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
           process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_GENERIC!, // Template générique
@@ -93,24 +73,24 @@ const RegisterForm = () => {
           process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
         );
 
-        console.log("E-mail de bienvenue envoyé avec succès !")
-        router.push("/") // Redirige vers la page d'accueil après succès
+        console.log("E-mail de bienvenue envoyé avec succès !");
+        router.push("/"); // Redirige vers la page d'accueil après succès
       } else {
-        console.error("Erreur lors de l'inscription:", result.error)
-        form.setError("email", { type: "manual", message: result.error })
+        console.error("Erreur lors de l'inscription:", result.error);
+        form.setError("email", { type: "manual", message: result.error });
       }
     } catch (error) {
       console.error(
         "Erreur lors de la requête ou de l'envoi de l'e-mail:",
         error
-      )
+      );
       form.setError("email", {
         type: "manual",
         message:
           "Une erreur est survenue lors de l'inscription ou de l'envoi de l'e-mail",
-      })
+      });
     }
-  }
+  };
 
   // Exemple commenté pour la gestion des commandes (à implémenter plus tard)
   /*
@@ -269,7 +249,7 @@ const RegisterForm = () => {
         </Form>
       </CardContent>
     </Card>
-  )
-}
+  );
+};
 
-export default RegisterForm
+export default RegisterForm;

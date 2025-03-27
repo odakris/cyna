@@ -139,7 +139,7 @@ CREATE TABLE `CartItem` (
     `userId_user` INTEGER NULL,
 
     INDEX `CartItem_id_product_idx`(`id_product`),
-    UNIQUE INDEX `CartItem_id_product_subscription_type_key`(`id_product`, `subscription_type`),
+    UNIQUE INDEX `CartItem_sessionId_session_id_product_subscription_type_key`(`sessionId_session`, `id_product`, `subscription_type`),
     PRIMARY KEY (`id_cart_item`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -149,7 +149,7 @@ CREATE TABLE `Session` (
     `session_token` VARCHAR(255) NOT NULL,
     `expires_at` DATETIME(3) NOT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `id_user` INTEGER NOT NULL,
+    `id_user` INTEGER NULL,
 
     UNIQUE INDEX `Session_session_token_key`(`session_token`),
     INDEX `Session_id_user_idx`(`id_user`),
@@ -263,7 +263,7 @@ ALTER TABLE `CartItem` ADD CONSTRAINT `CartItem_sessionId_session_fkey` FOREIGN 
 ALTER TABLE `CartItem` ADD CONSTRAINT `CartItem_userId_user_fkey` FOREIGN KEY (`userId_user`) REFERENCES `User`(`id_user`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Session` ADD CONSTRAINT `Session_id_user_fkey` FOREIGN KEY (`id_user`) REFERENCES `User`(`id_user`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `Session` ADD CONSTRAINT `Session_id_user_fkey` FOREIGN KEY (`id_user`) REFERENCES `User`(`id_user`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ContactMessage` ADD CONSTRAINT `ContactMessage_id_user_fkey` FOREIGN KEY (`id_user`) REFERENCES `User`(`id_user`) ON DELETE SET NULL ON UPDATE CASCADE;

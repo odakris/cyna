@@ -22,7 +22,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import Link from "next/link"; // Import de Link pour la navigation
+import Link from "next/link";
+import { useRouter } from "next/navigation"; // Ajout pour redirection
 
 const formSchema = z.object({
   email: z.string().min(1, "L'email est requis").email("Email invalide"),
@@ -34,6 +35,7 @@ type FormData = z.infer<typeof formSchema>;
 const LoginForm: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter(); // Ajout pour redirection
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -43,6 +45,7 @@ const LoginForm: React.FC = () => {
   const handleSubmit = async (data: FormData) => {
     setErrorMessage(null);
     setIsLoading(true);
+    console.log("LoginForm - Données envoyées:", data); // Log des données
 
     const result = await signIn("credentials", {
       redirect: false,
@@ -53,9 +56,25 @@ const LoginForm: React.FC = () => {
     setIsLoading(false);
 
     if (result?.error) {
-      setErrorMessage("Email ou mot de passe incorrect");
+      switch (result.error) {
+        case "Email et mot de passe requis":
+          setErrorMessage("Veuillez remplir tous les champs.");
+          break;
+        case "Utilisateur non trouvé":
+          setErrorMessage("Aucun compte n'est associé à cet email.");
+          break;
+        case "Mot de passe incorrect":
+          setErrorMessage("Mot de passe incorrect.");
+          break;
+        default:
+          setErrorMessage("Une erreur est survenue lors de la connexion.");
+      }
+      console.log("LoginForm - Erreur de connexion:", result.error);
+    } else {
+      // Succès : rediriger vers une page (par exemple, la page d'accueil)
+      console.log("LoginForm - Connexion réussie:", result);
+      router.push("/"); // Redirection après succès
     }
-    // No need for manual redirection; middleware handles it
   };
 
   return (
@@ -109,7 +128,6 @@ const LoginForm: React.FC = () => {
                     />
                   </FormControl>
                   <FormMessage />
-                  {/* Lien "Mot de passe oublié ?" */}
                   <div className="text-right">
                     <Link
                       href="/forgot-password"

@@ -1,81 +1,127 @@
-"use client"
+"use client";
 
-import React, { useEffect, useState, useRef } from "react"
-import { useParams } from "next/navigation"
-import { CarouselPlugin } from "@/components/Carousel/CarouselPlugin"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
-import { ProductType } from "../../../types/Types"
-import { TopProducts } from "../../../components/TopProduits/TopProduits"
-import { useCart } from "@/context/CartContext"
+import React, { useEffect, useState, useRef } from "react";
+import { useParams } from "next/navigation";
+import { CarouselPlugin } from "@/components/Carousel/CarouselPlugin";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ProductType } from "../../../types/Types";
+import { TopProducts } from "../../../components/TopProduits/TopProduits";
 
 const ProductPage = () => {
-  const { id } = useParams()
-  const { addToCart } = useCart()
-  const [product, setProduct] = useState<ProductType>()
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [selectedSubscription, setSelectedSubscription] = useState<string>("mensuel") // Par défaut, sélection mensuelle
+  const { id } = useParams(); // id est une chaîne (par exemple, "1")
+  const [product, setProduct] = useState<ProductType | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [selectedSubscription, setSelectedSubscription] = useState<string>("mensuel");
 
   // Référence pour faire défiler vers le tableau tarifaire
-  const pricingTableRef = useRef<HTMLTableElement | null>(null)
+  const pricingTableRef = useRef<HTMLTableElement | null>(null);
 
   useEffect(() => {
-    if (!id) return
+    if (!id) return;
 
     const fetchProductById = async () => {
       try {
-        const response = await fetch(`/api/products/${id}`)
-        if (!response.ok)
-          throw new Error("Erreur lors de la récupération du produit")
-        const data: ProductType = await response.json()
-        setProduct(data)
+        const response = await fetch(`/api/products/${id}`);
+        if (!response.ok) {
+          throw new Error("Erreur lors de la récupération du produit");
+        }
+        const data: ProductType = await response.json();
+        setProduct(data);
       } catch (error) {
-        setError("Erreur lors de la récupération du produit")
-        console.error("Erreur lors de la récupération du produit :", error)
+        setError("Erreur lors de la récupération du produit");
+        console.error("Erreur lors de la récupération du produit :", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
+    };
+    fetchProductById();
+  }, [id]);
+
+  // Fonction pour gérer l'ajout au panier avec l'abonnement sélectionné
+  const handleAddToCart = async (subscriptionType: string) => {
+    try {
+      // Vérifier que l'ID du produit est valide
+      const id_product = product?.id_product;
+      if (!id_product || typeof id_product !== "number") {
+        throw new Error("ID du produit invalide");
+      }
+
+      const quantity = 1; // Quantité par défaut
+      if (!Number.isInteger(quantity) || quantity <= 0) {
+        throw new Error("Quantité invalide");
+      }
+
+      // Mapper le type d'abonnement sélectionné à une valeur de l'enum SubscriptionType
+      let subscription_type: "MONTHLY" | "YEARLY" | "PER_USER" | "PER_MACHINE";
+      switch (subscriptionType) {
+        case "mensuel":
+          subscription_type = "MONTHLY";
+          break;
+        case "annuel":
+          subscription_type = "YEARLY";
+          break;
+        case "appareil":
+          subscription_type = "PER_MACHINE";
+          break;
+        case "unitaire":
+          subscription_type = "PER_USER";
+          break;
+        default:
+          throw new Error("Type d'abonnement invalide");
+      }
+
+      // Préparer les données à envoyer à l'API
+      const payload = {
+        id_product, // Utiliser id_product conformément au schéma Prisma
+        quantity,
+        subscription_type, // Champ requis par CartItem
+      };
+
+      console.log("Données envoyées à l'API:", payload);
+
+      const response = await fetch("/api/cart/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Réponse d'erreur de l'API:", errorData);
+        throw new Error(errorData.message || "Erreur lors de l'ajout au panier");
+      }
+
+      const data = await response.json();
+      console.log("Produit ajouté au panier:", data);
+    } catch (err: any) {
+      console.error("Erreur lors de l'ajout au panier:", err);
+      setError(err.message || "Erreur lors de l'ajout au panier");
     }
-    fetchProductById()
-  }, [id])
+  };
+
+  // Fonction pour faire défiler vers le tableau tarifaire
+  const handleScrollToPricingTable = () => {
+    pricingTableRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // Prix (idéalement, ces valeurs devraient être récupérées dynamiquement)
+  const prixMensuel = 49.99;
+  const prixAnnuel = 499.90;
+  const prixParAppareil = 19.99;
+
+  const prixUnitaire = product?.unit_price;
 
   if (error) {
     return (
       <p className="text-center mt-10 text-red-500">
         {error ?? "Produit non trouvé."}
       </p>
-    )
+    );
   }
-
-  // Fonction pour gérer l'ajout au panier avec l'abonnement sélectionné
-  const handleAddToCart = (subscriptionType: string) => {
-    if (!product || !product.available) return // Ne pas ajouter au panier si le produit est indisponible
-
-    addToCart({
-      id: product.id_product,
-      name: product.name,
-      price:
-        subscriptionType === "mensuel"
-          ? 49.99
-          : subscriptionType === "annuel"
-            ? 499.9
-            : product.unit_price,
-      quantity: 1,
-      subscription: subscriptionType,
-    })
-  }
-
-  // Fonction pour faire défiler vers le tableau tarifaire
-  const handleScrollToPricingTable = () => {
-    pricingTableRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
-
-  const prixMensuel = "49.99"
-  const prixAnnuel = "499.90"
-
-  const prixUnitaire = product?.unit_price
-  const prixParAppareil = 19.99 // Exemple de prix par appareil
 
   return (
     <>
@@ -118,8 +164,10 @@ const ProductPage = () => {
           <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">
             {loading ? (
               <Skeleton className="w-1/2 h-6 mx-auto" />
+            ) : product?.available ? (
+              "Disponible immédiatement"
             ) : (
-              product?.available ? "Disponible immédiatement" : "Service Indisponible"
+              "Service Indisponible"
             )}
           </h2>
 
@@ -129,18 +177,14 @@ const ProductPage = () => {
             <div className="flex justify-center w-full">
               {product?.available ? (
                 <Button
-                  className="w-auto py-2 text-lg" // Réduit la taille du bouton ici
-                  variant="cyna"
-                  onClick={handleScrollToPricingTable} // Ajout du scroll ici
-                >
-                  S&apos;ABONNER MAINTENANT
-                </Button>
-              ) : (
-                <Button
                   className="w-auto py-2 text-lg"
                   variant="cyna"
-                  disabled
+                  onClick={handleScrollToPricingTable}
                 >
+                  S'ABONNER MAINTENANT
+                </Button>
+              ) : (
+                <Button className="w-auto py-2 text-lg" variant="cyna" disabled>
                   SERVICE INDISPONIBLE
                 </Button>
               )}
@@ -153,7 +197,7 @@ const ProductPage = () => {
       {product?.available && (
         <section className="py-8 px-6 bg-white" ref={pricingTableRef}>
           <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
-            Choisir une formule d&apos;abonnement
+            Choisir une formule d'abonnement
           </h2>
 
           <div className="overflow-x-auto">
@@ -221,7 +265,6 @@ const ProductPage = () => {
                     </Button>
                   </td>
                 </tr>
-                {/* Prix par appareil */}
                 <tr>
                   <td className="border px-4 py-2 text-center">
                     Coût par Appareil
@@ -257,7 +300,7 @@ const ProductPage = () => {
         </div>
       </section>
     </>
-  )
-}
+  );
+};
 
-export default ProductPage
+export default ProductPage;

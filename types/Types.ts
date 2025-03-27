@@ -13,20 +13,18 @@ export type CategoryType = {
   updated_at: string
 }
 
-export type ProductType = {
-  last_updated: string | number | Date
-  id_product: number
-  name: string
-  description: string
-  technical_specs: string
-  unit_price: number
-  stock: number
-  id_category: number
-  image: string
-  priority_order: number
-  available: boolean
-  created_at: string
-  updated_at: string
+export interface ProductType {
+  id_product: number;
+  name: string;
+  description: string;
+  technical_specs: string;
+  unit_price: number;
+  discount_price?: number;
+  available: boolean;
+  priority_order: number;
+  created_at: string;
+  updated_at: string;
+  id_category: number;
 }
 
 export enum Role {

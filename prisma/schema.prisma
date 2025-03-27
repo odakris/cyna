@@ -201,7 +201,7 @@ model CartItem {
   User              User?            @relation(fields: [userId_user], references: [id_user])
   userId_user       Int?
 
-  @@unique([id_product, subscription_type])
+  @@unique([sessionId_session, id_product, subscription_type])
   @@index([id_product])
 }
 
@@ -212,8 +212,8 @@ model Session {
   expires_at    DateTime
   created_at    DateTime   @default(now())
   CartItem      CartItem[]
-  id_user       Int
-  user          User       @relation(fields: [id_user], references: [id_user])
+  id_user       Int?
+  user          User?       @relation(fields: [id_user], references: [id_user])
 
   @@index([id_user])
   @@index([session_token])
