@@ -8,14 +8,14 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { ProductForm } from "@/components/Forms/ProductForm"
-import { CategoryType, ProductType } from "@/types/Types"
+import { CategoryType, ProductWithImages } from "@/types/Types"
 import { ProductFormValues } from "@/lib/validations/product-schema"
 import { ArrowLeft } from "lucide-react"
 
 export default function EditProductPage() {
   const { id } = useParams() as { id: string }
   const { toast } = useToast()
-  const [product, setProduct] = useState<ProductType | null>(null)
+  const [product, setProduct] = useState<ProductWithImages | null>(null)
   const [categories, setCategories] = useState<CategoryType[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -93,7 +93,10 @@ export default function EditProductPage() {
     unit_price: product.unit_price,
     stock: product.stock,
     id_category: product.id_category,
-    image: product.image,
+    main_image: product.main_image,
+    product_caroussel_images: product.product_caroussel_images.map(
+      image => image.url
+    ),
     priority_order: product.priority_order,
     available: product.available,
   }

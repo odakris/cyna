@@ -12,9 +12,7 @@ export default function Home() {
   return (
     <div className="flex flex-col justify-center items-center min-h-screen px-4">
       {/* CAROUSEL */}
-      <div className="w-full my-8">
-        <CarouselPlugin />
-      </div>
+      <div className="w-full my-8">{/* <CarouselPlugin /> */}</div>
 
       {/* MAIN MESSAGE */}
       <div className="w-full my-8">

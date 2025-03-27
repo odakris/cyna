@@ -56,6 +56,8 @@ async function main() {
         discount_price: 4200,
         available: true,
         priority_order: 1,
+        main_image: "/uploads/diagnostic_cyber.jpg",
+        stock: Math.floor(Math.random() * 10),
         id_category: prevention.id_category,
       },
     })
@@ -71,6 +73,8 @@ async function main() {
         discount_price: 3800,
         available: true,
         priority_order: 2,
+        main_image: "/uploads/test_intrusion.jpg",
+        stock: Math.floor(Math.random() * 10),
         id_category: prevention.id_category,
       },
     })
@@ -86,6 +90,8 @@ async function main() {
         discount_price: null,
         available: false,
         priority_order: 1,
+        main_image: "/uploads/micro_soc.jpg",
+        stock: Math.floor(Math.random() * 10),
         id_category: protection.id_category,
       },
     })
@@ -101,6 +107,8 @@ async function main() {
         discount_price: 6500,
         available: true,
         priority_order: 2,
+        main_image: "/uploads/soc_manage.jpg",
+        stock: Math.floor(Math.random() * 10),
         id_category: protection.id_category,
       },
     })
@@ -116,13 +124,15 @@ async function main() {
         discount_price: 8000,
         available: true,
         priority_order: 1,
+        main_image: "/uploads/investigation.jpg",
+        stock: Math.floor(Math.random() * 10),
         id_category: reponse.id_category,
       },
     })
 
     // Création des images pour les produits
     console.log("Création des images pour les produits...")
-    await prisma.productImage.createMany({
+    await prisma.productCarousselImage.createMany({
       data: [
         {
           url: "/uploads/diagnostic_cyber.jpg",
@@ -130,7 +140,7 @@ async function main() {
           id_product: diagnosticCyber.id_product,
         },
         {
-          url: "/uploads/diagnostic_cyber_detail.jpg",
+          url: "/uploads/cyber2.jpg",
           alt: "Détail du diagnostic cyber",
           id_product: diagnosticCyber.id_product,
         },
@@ -140,7 +150,7 @@ async function main() {
           id_product: testIntrusion.id_product,
         },
         {
-          url: "/uploads/test_intrusion_detail.jpg",
+          url: "/uploads/cyber2.jpg",
           alt: "Détail du test d’intrusion",
           id_product: testIntrusion.id_product,
         },
@@ -150,13 +160,28 @@ async function main() {
           id_product: microSOC.id_product,
         },
         {
+          url: "/uploads/cyber1.jpg",
+          alt: "Détail du micro SOC",
+          id_product: microSOC.id_product,
+        },
+        {
           url: "/uploads/soc_manage.jpg",
           alt: "SOC Managé",
           id_product: socManage.id_product,
         },
         {
+          url: "/uploads/cyber1.jpg",
+          alt: "Détail du SOC managé",
+          id_product: socManage.id_product,
+        },
+        {
           url: "/uploads/investigation.jpg",
           alt: "Investigation",
+          id_product: investigation.id_product,
+        },
+        {
+          url: "/uploads/cyber1.jpg",
+          alt: "Détail du SOC managé",
           id_product: investigation.id_product,
         },
       ],
@@ -167,31 +192,31 @@ async function main() {
     await prisma.carouselImage.createMany({
       data: [
         {
-          url: "/uploads/carousel/diagnostic_cyber_1.jpg",
+          url: "/uploads/carousel/diagnostic_cyber.jpg",
           alt: "Diagnostic Cyber - Visuel 1",
           priority_order: 1,
           id_product: diagnosticCyber.id_product,
         },
         {
-          url: "/uploads/carousel/diagnostic_cyber_2.jpg",
+          url: "/uploads/carousel/diagnostic_cyber.jpg",
           alt: "Diagnostic Cyber - Visuel 2",
           priority_order: 2,
           id_product: diagnosticCyber.id_product,
         },
         {
-          url: "/uploads/carousel/test_intrusion_1.jpg",
+          url: "/uploads/carousel/test_intrusion.jpg",
           alt: "Test d'intrusion - Visuel 1",
           priority_order: 1,
           id_product: testIntrusion.id_product,
         },
         {
-          url: "/uploads/carousel/soc_manage_1.jpg",
+          url: "/uploads/carousel/soc_manage.jpg",
           alt: "SOC Managé - Visuel 1",
           priority_order: 1,
           id_product: socManage.id_product,
         },
         {
-          url: "/uploads/carousel/investigation_1.jpg",
+          url: "/uploads/carousel/investigation.jpg",
           alt: "Investigation - Visuel 1",
           priority_order: 1,
           id_product: investigation.id_product,

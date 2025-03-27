@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
   FormControl,
   FormItem,
@@ -12,47 +12,90 @@ import Image from "next/image"
 import { useToast } from "@/hooks/use-toast"
 import { uploadImage } from "@/lib/services/upload-service"
 import { ControllerRenderProps } from "react-hook-form"
+import { X } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 interface ImageUploaderProps {
-  field: ControllerRenderProps<any, "image">
+  field: ControllerRenderProps<never, never>
   disabled?: boolean
-  existingImage?: string
+  existingImage?: string | string[]
+  multiple?: boolean
+  label?: string
+  helpText?: string
 }
 
 export function ImageUploader({
   field,
   disabled = false,
   existingImage,
+  multiple = false,
+  label,
+  helpText,
 }: ImageUploaderProps) {
   const { toast } = useToast()
-  const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [previewImages, setPreviewImages] = useState<string[]>([])
   const [uploadingImage, setUploadingImage] = useState<boolean>(false)
 
+  const initialRenderRef = useRef(true)
+
   useEffect(() => {
-    // Initialiser l'aperçu avec l'image existante si disponible
-    if (existingImage) {
-      setPreviewImage(existingImage)
+    if (initialRenderRef.current) {
+      initialRenderRef.current = false
+
+      // Initialiser l'aperçu avec l'image existante si disponible
+      if (existingImage) {
+        if (multiple && Array.isArray(existingImage)) {
+          setPreviewImages(existingImage)
+          field.onChange(existingImage) // Mettre à jour le champ avec toutes les images
+        } else if (!multiple && typeof existingImage === "string") {
+          setPreviewImages([existingImage])
+          field.onChange(existingImage) // Mettre à jour le champ avec l'image unique
+        } else {
+          setPreviewImages(multiple ? [] : [])
+          field.onChange(multiple ? [] : "") // Réinitialiser le champ si aucune image n'est fournie
+        }
+      } else {
+        setPreviewImages([])
+        field.onChange(multiple ? [] : "") // Réinitialiser le champ si aucune image n'est fournie
+      }
     }
-  }, [existingImage])
+  }, [existingImage, multiple, field])
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const files = e.target.files
 
-    if (!file) {
+    if (!files || files.length === 0) {
       return
     }
 
     try {
       setUploadingImage(true)
 
-      const filePath = await uploadImage(file)
+      if (multiple) {
+        // Créer un tableau pour stocker les chemins des images téléchargées
+        const uploadedImagePaths: string[] = [...previewImages]
 
-      field.onChange(filePath)
-      setPreviewImage(filePath)
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i]
+          const filePath = await uploadImage(file)
+          uploadedImagePaths.push(filePath)
+        }
 
-      toast({
-        title: "Image téléchargée avec succès",
-      })
+        setPreviewImages(uploadedImagePaths)
+        field.onChange(uploadedImagePaths) // Mettre à jour le champ avec toutes les images
+
+        toast({
+          title: "Image téléchargée avec succès",
+        })
+      } else {
+        const filePath = await uploadImage(files[0])
+        setPreviewImages([filePath])
+        field.onChange(filePath) // Mettre à jour la valeur du champ
+
+        toast({
+          title: "Image téléchargée avec succès",
+        })
+      }
     } catch (error) {
       console.error("Erreur upload image:", error)
       toast({
@@ -65,20 +108,41 @@ export function ImageUploader({
       })
     } finally {
       setUploadingImage(false)
+      e.target.value = "" // Réinitialiser le champ de fichier
+    }
+  }
+
+  const handleRemoveImage = (index: number) => {
+    if (multiple) {
+      const newImages = [...previewImages]
+      newImages.splice(index, 1)
+      setPreviewImages(newImages)
+      field.onChange(newImages)
+
+      field.onBlur()
+    } else {
+      setPreviewImages([])
+      field.onChange("")
+      field.onBlur()
     }
   }
 
   return (
     <FormItem>
-      <FormLabel>Image du produit</FormLabel>
+      {label && <FormLabel>{label}</FormLabel>}
       <FormControl>
-        <div>
-          <Input
-            type="file"
-            accept="image/*"
-            disabled={disabled || uploadingImage}
-            onChange={handleFileChange}
-          />
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Input
+              type="file"
+              accept="image/*"
+              multiple={multiple}
+              disabled={disabled || uploadingImage}
+              onChange={handleFileChange}
+              className="flex-1"
+            />
+          </div>
+
           {uploadingImage && (
             <div className="mt-2">
               <p className="text-sm text-muted-foreground flex items-center">
@@ -87,18 +151,65 @@ export function ImageUploader({
               </p>
             </div>
           )}
+
+          {helpText && (
+            <p className="text-sm text-muted-foreground">{helpText}</p>
+          )}
         </div>
       </FormControl>
-      {previewImage && (
-        <Image
-          src={previewImage}
-          alt="Aperçu du produit"
-          width={256}
-          height={128}
-          className="mt-2 h-32 object-cover rounded-lg"
-          priority
-        />
+
+      {/* Aperçu pour une seule image */}
+      {!multiple && previewImages.length > 0 && (
+        <div className="mt-3">
+          <div className="relative group inline-block">
+            <Image
+              src={previewImages[0]}
+              alt="Aperçu de l'image"
+              width={300}
+              height={200}
+              className="h-48 w-auto object-contain rounded-lg border"
+              priority
+            />
+            <Button
+              type="button"
+              variant="destructive"
+              size="icon"
+              className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+              onClick={() => handleRemoveImage(0)}
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       )}
+
+      {/* Aperçu pour plusieurs images */}
+      {multiple && previewImages.length > 0 && (
+        <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {previewImages.map((image, index) => (
+            <div key={`image-${index}-${image}`} className="relative group">
+              <Image
+                src={image}
+                alt={`Image ${index + 1}`}
+                width={200}
+                height={150}
+                className="h-32 w-full object-cover rounded-lg border"
+                priority
+              />
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={() => handleRemoveImage(index)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <FormMessage />
     </FormItem>
   )

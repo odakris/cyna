@@ -11,8 +11,16 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel"
+import Image from "next/image"
 
-export function CarouselPlugin() {
+interface CarouselPluginProps {
+  images: Array<{
+    url: string
+    alt: string
+  }>
+}
+
+export function CarouselPlugin({ images }: CarouselPluginProps) {
   const plugin = React.useRef(
     Autoplay({ delay: 2000, stopOnInteraction: true })
   )
@@ -25,12 +33,17 @@ export function CarouselPlugin() {
       onMouseLeave={plugin.current.reset}
     >
       <CarouselContent>
-        {Array.from({ length: 3 }).map((_, index) => (
+        {images.map((image, index) => (
           <CarouselItem key={index} className="basis-full">
             <div className="p-1">
               <Card>
                 <CardContent className="flex aspect-square items-center justify-center p-6 w-full h-60">
-                  <span className="text-4xl font-semibold">{index + 1}</span>
+                  <Image
+                    src={image.url || "/images/placeholder.png"}
+                    alt={image.alt || `Image ${index + 1}`}
+                    fill
+                    className="object-cover w-full h-full rounded-lg"
+                  />
                 </CardContent>
               </Card>
             </div>

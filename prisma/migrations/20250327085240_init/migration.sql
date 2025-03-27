@@ -23,8 +23,10 @@ CREATE TABLE `Product` (
     `discount_price` FLOAT NULL,
     `available` BOOLEAN NOT NULL DEFAULT true,
     `priority_order` INTEGER NOT NULL DEFAULT 1,
+    `stock` INTEGER NOT NULL DEFAULT 0,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
+    `main_image` VARCHAR(255) NOT NULL,
     `id_category` INTEGER NOT NULL,
 
     UNIQUE INDEX `Product_name_key`(`name`),
@@ -50,16 +52,16 @@ CREATE TABLE `CarouselImage` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `ProductImage` (
-    `id_product_image` INTEGER NOT NULL AUTO_INCREMENT,
+CREATE TABLE `ProductCarousselImage` (
+    `id_product_caroussel_image` INTEGER NOT NULL AUTO_INCREMENT,
     `url` VARCHAR(255) NOT NULL,
     `alt` VARCHAR(150) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
     `id_product` INTEGER NOT NULL,
 
-    INDEX `ProductImage_id_product_idx`(`id_product`),
-    PRIMARY KEY (`id_product_image`)
+    INDEX `ProductCarousselImage_id_product_idx`(`id_product`),
+    PRIMARY KEY (`id_product_caroussel_image`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -134,6 +136,7 @@ CREATE TABLE `CartItem` (
     `updated_at` DATETIME(3) NOT NULL,
     `id_product` INTEGER NOT NULL,
     `sessionId_session` INTEGER NULL,
+    `userId_user` INTEGER NULL,
 
     INDEX `CartItem_id_product_idx`(`id_product`),
     UNIQUE INDEX `CartItem_id_product_subscription_type_key`(`id_product`, `subscription_type`),
@@ -236,7 +239,7 @@ ALTER TABLE `Product` ADD CONSTRAINT `Product_id_category_fkey` FOREIGN KEY (`id
 ALTER TABLE `CarouselImage` ADD CONSTRAINT `CarouselImage_id_product_fkey` FOREIGN KEY (`id_product`) REFERENCES `Product`(`id_product`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `ProductImage` ADD CONSTRAINT `ProductImage_id_product_fkey` FOREIGN KEY (`id_product`) REFERENCES `Product`(`id_product`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ProductCarousselImage` ADD CONSTRAINT `ProductCarousselImage_id_product_fkey` FOREIGN KEY (`id_product`) REFERENCES `Product`(`id_product`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `OrderItem` ADD CONSTRAINT `OrderItem_id_product_fkey` FOREIGN KEY (`id_product`) REFERENCES `Product`(`id_product`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -255,6 +258,9 @@ ALTER TABLE `CartItem` ADD CONSTRAINT `CartItem_id_product_fkey` FOREIGN KEY (`i
 
 -- AddForeignKey
 ALTER TABLE `CartItem` ADD CONSTRAINT `CartItem_sessionId_session_fkey` FOREIGN KEY (`sessionId_session`) REFERENCES `Session`(`id_session`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `CartItem` ADD CONSTRAINT `CartItem_userId_user_fkey` FOREIGN KEY (`userId_user`) REFERENCES `User`(`id_user`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Session` ADD CONSTRAINT `Session_id_user_fkey` FOREIGN KEY (`id_user`) REFERENCES `User`(`id_user`) ON DELETE RESTRICT ON UPDATE CASCADE;

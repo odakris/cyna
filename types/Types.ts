@@ -1,3 +1,9 @@
+import { Product } from "@prisma/client"
+
+export interface ProductWithImages extends Product {
+  product_caroussel_images: { url: string; alt: string }[] // Add the related field
+}
+
 export type CategoryType = {
   id_category: number
   priority_order: number
@@ -29,11 +35,10 @@ export enum Role {
   CLIENT = "CLIENT",
 }
 
-
 export type PasswordResetTokenType = {
-  id: number;
-  token: string;
-  id_user: number;
-  expiresAt: Date;
-  createdAt: Date;
-};
+  id: number
+  token: string
+  id_user: number
+  expiresAt: Date
+  createdAt: Date
+}
