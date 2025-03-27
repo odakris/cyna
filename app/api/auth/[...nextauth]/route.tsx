@@ -1,24 +1,29 @@
-import NextAuth, { DefaultSession, NextAuthOptions } from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import { PrismaClient } from "@prisma/client"
-// import bcrypt from "bcrypt"
+import NextAuth, { DefaultSession, NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
+// Surcharge des types pour next-auth
 declare module "next-auth" {
   interface Session {
     user: {
-      role?: string
-    } & DefaultSession["user"]
+      id: string; // Rendre id requis
+      role?: string; // role reste optionnel
+    } & DefaultSession["user"]; // Inclut les propriétés par défaut (name, email, image)
   }
+
   interface User {
-    role?: string
+    id: string; // Rendre id requis
+    role?: string; // role reste optionnel
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    role?: string
+    id?: string; // id dans le token peut rester optionnel
+    role?: string;
   }
 }
 
@@ -31,47 +36,55 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Mot de passe", type: "password" },
       },
       async authorize(credentials) {
+        console.log("Authorize - Credentials reçues:", credentials);
+
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email et mot de passe requis")
+          console.log("Authorize - Erreur: Email ou mot de passe manquant");
+          throw new Error("Email et mot de passe requis");
         }
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
-        })
+        });
+        console.log("Authorize - Utilisateur trouvé:", user ? { id: user.id_user, email: user.email } : null);
 
         if (!user || !user.password) {
-          throw new Error("Utilisateur non trouvé")
+          console.log("Authorize - Erreur: Utilisateur non trouvé ou sans mot de passe");
+          throw new Error("Utilisateur non trouvé");
         }
 
-        // const isPasswordValid = await bcrypt.compare(
-        //   credentials.password,
-        //   user.password
-        // )
+        // Correction ici : comparaison du mot de passe avec bcrypt
+        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        console.log("Authorize - Mot de passe valide:", isPasswordValid);
 
-        // if (!isPasswordValid) {
-        //   throw new Error("Mot de passe incorrect")
-        // }
+        if (!isPasswordValid) {
+          throw new Error("Mot de passe incorrect");
+        }
 
         return {
-          id: user.id_user.toString(),
+          id: user.id_user.toString(), // id doit être une string et requis
           email: user.email,
           role: user.role,
-        }
+        };
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
-      if (user?.role) {
-        token.role = user.role
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
-      if (token.role) {
-        session.user.role = token.role
+      if (token.id) {
+        session.user.id = token.id; // id est requis dans la session
       }
-      return session
+      if (token.role) {
+        session.user.role = token.role;
+      }
+      return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
@@ -81,7 +94,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
-}
+};
 
-const handler = NextAuth(authOptions)
-export { handler as GET, handler as POST }
+const handler = NextAuth(authOptions);
+export { handler as GET, handler as POST };
