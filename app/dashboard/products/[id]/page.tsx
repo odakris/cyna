@@ -25,16 +25,8 @@ import {
   Tag,
   ChartNoAxesCombined,
 } from "lucide-react"
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel"
-import { AspectRatio } from "@/components/ui/aspect-ratio"
 import { Separator } from "@/components/ui/separator"
-import { CarouselPlugin } from "../../../../components/Carousel/CarouselPlugin"
+import { ProductImageGallery } from "@/components/Carousel/ProductImageGallery"
 
 export default function ProductDetailsPage() {
   const { id } = useParams() as { id: string }
@@ -313,60 +305,13 @@ export default function ProductDetailsPage() {
 
           <div className="md:col-span-2 space-y-6">
             <h3 className="text-lg font-semibold">Images du Carrousel</h3>
+            <div className="bg-muted/10 rounded-xl p-6">
+              <ProductImageGallery
+                images={product.product_caroussel_images || []}
+                productName={product.name}
+              />
+            </div>
           </div>
-
-          {product.product_caroussel_images &&
-          product.product_caroussel_images.length > 0 ? (
-            <div className="md:col-span-2 space-y-6">
-              <div className="bg-muted/10 rounded-xl p-6 max-w-3xl mx-auto">
-                {/* Carrousel */}
-                <div className="flex justify-center items-center w-full mb-6">
-                  <div className="w-full" style={{ maxWidth: "500px" }}>
-                    <CarouselPlugin images={product.product_caroussel_images} />
-                  </div>
-                </div>
-
-                {/* Miniatures */}
-                <div className="flex justify-center items-center w-full">
-                  <div
-                    className="flex flex-wrap justify-center gap-3"
-                    style={{ maxWidth: "500px" }}
-                  >
-                    {product.product_caroussel_images.map((image, index) => (
-                      <div
-                        key={index}
-                        className="w-16 h-16 overflow-hidden rounded-md border border-muted hover:border-primary/50 transition-colors cursor-pointer"
-                        onClick={() => {
-                          // Fonction pour sélectionner cette image
-                        }}
-                      >
-                        <div className="relative w-full h-full">
-                          <Image
-                            src={image.url || "/placeholder.png"}
-                            alt={image.alt || `Image ${index + 1}`}
-                            fill
-                            className="object-cover transition-transform hover:scale-110 duration-300"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="md:col-span-2">
-              <h3 className="text-lg font-semibold mb-4 text-center">
-                Images du Produit
-              </h3>
-              <div className="bg-muted/5 border border-dashed border-muted-foreground/30 rounded-lg p-8 text-center">
-                <p className="text-muted-foreground flex flex-col items-center gap-2">
-                  <span className="text-4xl">🖼️</span>
-                  Aucune image supplémentaire disponible pour ce produit
-                </p>
-              </div>
-            </div>
-          )}
         </CardContent>
 
         <CardFooter className="bg-muted/10 border-t px-6 py-4">

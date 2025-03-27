@@ -5,17 +5,18 @@ import { useParams } from "next/navigation"
 import { CarouselPlugin } from "@/components/Carousel/CarouselPlugin"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ProductType } from "../../../types/Types"
+import { ProductWithImages } from "@/types/Types"
 import { TopProducts } from "../../../components/TopProduits/TopProduits"
 import { useCart } from "@/context/CartContext"
 
 const ProductPage = () => {
   const { id } = useParams()
   const { addToCart } = useCart()
-  const [product, setProduct] = useState<ProductType>()
+  const [product, setProduct] = useState<ProductWithImages>()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
-  const [selectedSubscription, setSelectedSubscription] = useState<string>("mensuel") // Par défaut, sélection mensuelle
+  // const [selectedSubscription, setSelectedSubscription] =
+  //   useState<string>("mensuel") // Par défaut, sélection mensuelle
 
   // Référence pour faire défiler vers le tableau tarifaire
   const pricingTableRef = useRef<HTMLTableElement | null>(null)
@@ -28,7 +29,7 @@ const ProductPage = () => {
         const response = await fetch(`/api/products/${id}`)
         if (!response.ok)
           throw new Error("Erreur lors de la récupération du produit")
-        const data: ProductType = await response.json()
+        const data: ProductWithImages = await response.json()
         setProduct(data)
       } catch (error) {
         setError("Erreur lors de la récupération du produit")
@@ -88,7 +89,7 @@ const ProductPage = () => {
           </h1>
         )}
 
-        <CarouselPlugin />
+        <CarouselPlugin images={product?.product_caroussel_images} />
 
         {loading ? (
           <Skeleton className="w-3/4 h-6 mx-auto mt-6" />
@@ -118,8 +119,10 @@ const ProductPage = () => {
           <h2 className="text-2xl font-bold text-center text-gray-900 mb-4">
             {loading ? (
               <Skeleton className="w-1/2 h-6 mx-auto" />
+            ) : product?.available ? (
+              "Disponible immédiatement"
             ) : (
-              product?.available ? "Disponible immédiatement" : "Service Indisponible"
+              "Service Indisponible"
             )}
           </h2>
 
@@ -136,11 +139,7 @@ const ProductPage = () => {
                   S&apos;ABONNER MAINTENANT
                 </Button>
               ) : (
-                <Button
-                  className="w-auto py-2 text-lg"
-                  variant="cyna"
-                  disabled
-                >
+                <Button className="w-auto py-2 text-lg" variant="cyna" disabled>
                   SERVICE INDISPONIBLE
                 </Button>
               )}
@@ -171,7 +170,9 @@ const ProductPage = () => {
               </thead>
               <tbody>
                 <tr>
-                  <td className="border px-4 py-2 text-center">Coût unitaire</td>
+                  <td className="border px-4 py-2 text-center">
+                    Coût unitaire
+                  </td>
                   <td className="border px-4 py-2 text-center">
                     {prixUnitaire} €
                   </td>
