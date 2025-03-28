@@ -49,7 +49,7 @@ async function main() {
       data: {
         name: "Diagnostic Cyber",
         description:
-          "Diagnostic complet des cyber-risques pour votre entreprise, incluant l’évaluation de votre infrastructure et de vos pratiques de sécurité.",
+          "Diagnostic complet des cyber-risques pour votre entreprise, incluant l'évaluation de votre infrastructure et de vos pratiques de sécurité.",
         technical_specs:
           "Audit complet de sécurité, analyse des vulnérabilités, cartographie des risques et recommandations personnalisées.",
         unit_price: 4500,
@@ -66,7 +66,7 @@ async function main() {
       data: {
         name: "Test d'intrusion",
         description:
-          "Test d’intrusion pour évaluer la sécurité de vos systèmes et applications en simulant des attaques réelles.",
+          "Test d'intrusion pour évaluer la sécurité de vos systèmes et applications en simulant des attaques réelles.",
         technical_specs:
           "Pentesting sur applications web, infrastructure et systèmes, avec rapport détaillé des vulnérabilités découvertes.",
         unit_price: 4000,
@@ -83,9 +83,9 @@ async function main() {
       data: {
         name: "Micro SOC",
         description:
-          "Surveillance continue de la sécurité avec un centre d’opérations de sécurité adapté aux PME.",
+          "Surveillance continue de la sécurité avec un centre d'opérations de sécurité adapté aux PME.",
         technical_specs:
-          "Surveillance 24/7, analyse des logs, détection d’anomalies, alertes en temps réel.",
+          "Surveillance 24/7, analyse des logs, détection d'anomalies, alertes en temps réel.",
         unit_price: 5000,
         discount_price: null,
         available: false,
@@ -117,7 +117,7 @@ async function main() {
       data: {
         name: "Investigation, éradication, remédiation",
         description:
-          "Réponse complète aux incidents de sécurité, depuis l’investigation jusqu’à la remédiation.",
+          "Réponse complète aux incidents de sécurité, depuis l'investigation jusqu'à la remédiation.",
         technical_specs:
           "Analyse forensique, confinement des menaces, élimination des malwares, reconstruction des systèmes compromis.",
         unit_price: 8500,
@@ -151,7 +151,7 @@ async function main() {
         },
         {
           url: "/uploads/cyber2.jpg",
-          alt: "Détail du test d’intrusion",
+          alt: "Détail du test d'intrusion",
           id_product: testIntrusion.id_product,
         },
         {
@@ -373,13 +373,36 @@ async function main() {
       },
     })
 
-    // Création des commandes
-    console.log("Création des commandes...")
+    // Création des commandes et de leurs éléments
+    // Modification pour avoir des commandes avec des données cohérentes
+    console.log(
+      "Création des commandes et des éléments de commande cohérents..."
+    )
+
+    // ----- Commande 1 - Jean Dupont - Diagnostic Cyber (Abonnement annuel) -----
+    const orderItems1 = [
+      {
+        subscription_type: "YEARLY",
+        subscription_status: "ACTIVE",
+        subscription_duration: 12,
+        renewal_date: new Date("2024-06-15"),
+        quantity: 1,
+        unit_price: diagnosticCyber.unit_price, // 4500
+        id_product: diagnosticCyber.id_product,
+      },
+    ]
+
+    // Calcul précis du total
+    const total1 = orderItems1.reduce(
+      (acc, item) => acc + item.unit_price * item.quantity,
+      0
+    )
+
     const order1 = await prisma.order.create({
       data: {
         order_date: new Date("2023-06-15"),
-        total_amount: 4500,
-        subtotal: 4500,
+        total_amount: total1,
+        subtotal: total1,
         order_status: "COMPLETED",
         payment_method: "CARD",
         last_card_digits: "4242",
@@ -390,11 +413,49 @@ async function main() {
       },
     })
 
+    // Création des éléments de commande pour order1
+    for (const item of orderItems1) {
+      await prisma.orderItem.create({
+        data: {
+          ...item,
+          id_order: order1.id_order,
+        },
+      })
+    }
+
+    // ----- Commande 2 - Marie Martin - Investigation + Test d'intrusion (Abonnement annuel) -----
+    const orderItems2 = [
+      {
+        subscription_type: "YEARLY",
+        subscription_status: "ACTIVE",
+        subscription_duration: 12,
+        renewal_date: new Date("2024-07-22"),
+        quantity: 1,
+        unit_price: investigation.unit_price, // 8500
+        id_product: investigation.id_product,
+      },
+      {
+        subscription_type: "YEARLY",
+        subscription_status: "ACTIVE",
+        subscription_duration: 12,
+        renewal_date: new Date("2024-07-22"),
+        quantity: 1,
+        unit_price: testIntrusion.discount_price || testIntrusion.unit_price, // 3800 (prix remisé)
+        id_product: testIntrusion.id_product,
+      },
+    ]
+
+    // Calcul précis du total
+    const total2 = orderItems2.reduce(
+      (acc, item) => acc + item.unit_price * item.quantity,
+      0
+    )
+
     const order2 = await prisma.order.create({
       data: {
         order_date: new Date("2023-07-22"),
-        total_amount: 8500,
-        subtotal: 8500,
+        total_amount: total2,
+        subtotal: total2,
         order_status: "PAID",
         payment_method: "CARD",
         last_card_digits: "4444",
@@ -405,11 +466,50 @@ async function main() {
       },
     })
 
+    // Création des éléments de commande pour order2
+    for (const item of orderItems2) {
+      await prisma.orderItem.create({
+        data: {
+          ...item,
+          id_order: order2.id_order,
+        },
+      })
+    }
+
+    // ----- Commande 3 - Jean Dupont - SOC Managé (Mensuel) + Diagnostic Cyber (Annuel) -----
+    const orderItems3 = [
+      {
+        subscription_type: "MONTHLY",
+        subscription_status: "PENDING",
+        subscription_duration: 1,
+        renewal_date: new Date("2023-10-05"),
+        quantity: 1,
+        unit_price: socManage.discount_price || socManage.unit_price, // 6500 (prix remisé)
+        id_product: socManage.id_product,
+      },
+      {
+        subscription_type: "YEARLY",
+        subscription_status: "PENDING",
+        subscription_duration: 12,
+        renewal_date: new Date("2024-09-05"),
+        quantity: 1,
+        unit_price:
+          diagnosticCyber.discount_price || diagnosticCyber.unit_price, // 4200 (prix remisé)
+        id_product: diagnosticCyber.id_product,
+      },
+    ]
+
+    // Calcul précis du total
+    const total3 = orderItems3.reduce(
+      (acc, item) => acc + item.unit_price * item.quantity,
+      0
+    )
+
     const order3 = await prisma.order.create({
       data: {
         order_date: new Date("2023-09-05"),
-        total_amount: 11000,
-        subtotal: 11000,
+        total_amount: total3,
+        subtotal: total3,
         order_status: "PENDING",
         payment_method: "CARD",
         last_card_digits: "4242",
@@ -419,59 +519,59 @@ async function main() {
       },
     })
 
-    // Création des éléments de commande
-    console.log("Création des éléments de commande...")
-    await prisma.orderItem.create({
-      data: {
-        subscription_type: "YEARLY",
-        subscription_status: "ACTIVE",
-        subscription_duration: 12,
-        renewal_date: new Date("2024-06-15"),
-        quantity: 1,
-        unit_price: 4500,
-        id_product: diagnosticCyber.id_product,
-        id_order: order1.id_order,
-      },
-    })
+    // Création des éléments de commande pour order3
+    for (const item of orderItems3) {
+      await prisma.orderItem.create({
+        data: {
+          ...item,
+          id_order: order3.id_order,
+        },
+      })
+    }
 
-    await prisma.orderItem.create({
-      data: {
-        subscription_type: "YEARLY",
-        subscription_status: "ACTIVE",
-        subscription_duration: 12,
-        renewal_date: new Date("2024-07-22"),
-        quantity: 1,
-        unit_price: 8500,
-        id_product: investigation.id_product,
-        id_order: order2.id_order,
-      },
-    })
-
-    await prisma.orderItem.create({
-      data: {
+    // ----- Commande 4 - Marie Martin - Test d'intrusion (Mensuel) avec quantité de 2 -----
+    const orderItems4 = [
+      {
         subscription_type: "MONTHLY",
-        subscription_status: "PENDING",
+        subscription_status: "ACTIVE",
         subscription_duration: 1,
-        renewal_date: new Date("2023-10-05"),
-        quantity: 1,
-        unit_price: 7000,
-        id_product: socManage.id_product,
-        id_order: order3.id_order,
-      },
-    })
-
-    await prisma.orderItem.create({
-      data: {
-        subscription_type: "MONTHLY",
-        subscription_status: "PENDING",
-        subscription_duration: 1,
-        renewal_date: new Date("2023-10-05"),
-        quantity: 1,
-        unit_price: 4000,
+        renewal_date: new Date("2023-09-25"),
+        quantity: 2, // Commander 2 tests d'intrusion mensuels
+        unit_price: testIntrusion.unit_price, // 4000 (prix normal)
         id_product: testIntrusion.id_product,
-        id_order: order3.id_order,
+      },
+    ]
+
+    // Calcul précis du total (en prenant en compte la quantité)
+    const total4 = orderItems4.reduce(
+      (acc, item) => acc + item.unit_price * item.quantity,
+      0
+    )
+
+    const order4 = await prisma.order.create({
+      data: {
+        order_date: new Date("2023-08-25"),
+        total_amount: total4,
+        subtotal: total4,
+        order_status: "COMPLETED",
+        payment_method: "CARD",
+        last_card_digits: "4444",
+        invoice_number: "INV-2023-004",
+        invoice_pdf_url: "/invoices/INV-2023-004.pdf",
+        id_user: customer2.id_user,
+        id_address: address2.id_address,
       },
     })
+
+    // Création des éléments de commande pour order4
+    for (const item of orderItems4) {
+      await prisma.orderItem.create({
+        data: {
+          ...item,
+          id_order: order4.id_order,
+        },
+      })
+    }
 
     // Création des messages de contact
     console.log("Création des messages de contact...")
@@ -480,7 +580,7 @@ async function main() {
         email: "jean.dupont@example.com",
         subject: "Question sur le diagnostic cyber",
         message:
-          "Bonjour, je souhaite en savoir plus sur votre service de diagnostic cyber. Comment se déroule l’intervention dans nos locaux ? Merci d’avance pour votre réponse.",
+          "Bonjour, je souhaite en savoir plus sur votre service de diagnostic cyber. Comment se déroule l'intervention dans nos locaux ? Merci d'avance pour votre réponse.",
         sent_date: new Date("2023-06-10"),
         is_read: true,
         id_user: customer1.id_user,
@@ -504,7 +604,7 @@ async function main() {
         email: "contact@entreprise-xyz.fr",
         subject: "Demande d'information",
         message:
-          "Bonjour, je souhaite recevoir plus d’informations sur vos services de SOC managé. Pouvez-vous me contacter au 01 23 45 67 89 ? Merci.",
+          "Bonjour, je souhaite recevoir plus d'informations sur vos services de SOC managé. Pouvez-vous me contacter au 01 23 45 67 89 ? Merci.",
         sent_date: new Date(),
         is_read: false,
       },

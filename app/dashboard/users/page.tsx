@@ -11,7 +11,17 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  FilterFn,
 } from "@tanstack/react-table"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   ChevronDown,
   ChevronLeft,
@@ -61,7 +71,11 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
-import { usersColumnNamesInFrench, usersColumns } from "./user-columns"
+import {
+  usersColumnNamesInFrench,
+  usersColumns,
+  globalFilterFunction,
+} from "./user-columns"
 import { User } from "@prisma/client"
 
 export default function UserHomePage() {
@@ -73,25 +87,42 @@ export default function UserHomePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [globalFilter, setGlobalFilter] = useState("")
 
-  const fetchProducts = useCallback(async () => {
+  const roleOptions = [
+    { value: "all", label: "Tous les rôles" },
+    { value: "SUPER_ADMIN", label: "Super Admin" },
+    { value: "ADMIN", label: "Admin" },
+    { value: "MANAGER", label: "Manager" },
+    { value: "CUSTOMER", label: "Client" },
+  ]
+
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true)
-      const data: User[] = await fetch("/api/users").then(res => res.json())
+      const response = await fetch("/api/users")
+
+      if (!response.ok) {
+        throw new Error(
+          `Erreur HTTP ${response.status}: ${response.statusText}`
+        )
+      }
+
+      const data: User[] = await response.json()
       console.log("data fetchUsers:", data)
       setUsers(data)
       setError(null)
     } catch (error: unknown) {
       console.error("Erreur fetchUsers:", error)
-      setError("Erreur lors du chargement des produits")
+      setError("Erreur lors du chargement des utilisateurs")
     } finally {
       setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    fetchProducts()
-  }, [fetchProducts])
+    fetchUsers()
+  }, [fetchUsers])
 
   const table = useReactTable({
     data: users,
@@ -104,15 +135,26 @@ export default function UserHomePage() {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    filterFns: {
+      global: globalFilterFunction as FilterFn<any>,
+    },
+    globalFilterFn: globalFilterFunction as FilterFn<any>,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      globalFilter,
     },
+    onGlobalFilterChange: setGlobalFilter,
     initialState: {
       pagination: {
         pageSize: 10,
+      },
+      columnVisibility: {
+        first_name: false,
+        last_name: false,
+        email: false,
       },
     },
   })
@@ -140,7 +182,7 @@ export default function UserHomePage() {
       }
       setShowDeleteDialog(false)
       setRowSelection({})
-      await fetchProducts()
+      await fetchUsers()
     } catch (error: unknown) {
       console.error("Erreur handleDelete:", error)
       setError("Erreur lors de la suppression des utilisateurs")
@@ -218,7 +260,7 @@ export default function UserHomePage() {
           <CardDescription>{error}</CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <Button onClick={fetchProducts}>Réessayer</Button>
+          <Button onClick={fetchUsers}>Réessayer</Button>
         </CardContent>
       </Card>
     )
@@ -229,7 +271,7 @@ export default function UserHomePage() {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold mb-1 text-foreground">
-            Gestion des Produits
+            Gestion des Utilisateurs
           </h1>
           <p className="text-muted-foreground">
             {users.length} utilisateur{users.length > 1 ? "s" : ""} dans la base
@@ -239,7 +281,7 @@ export default function UserHomePage() {
 
         <div className="flex flex-wrap gap-3">
           <Button asChild>
-            <Link href="/dashboard/products/new">
+            <Link href="/dashboard/users/new">
               <Plus className="mr-2 h-4 w-4" />
               Ajouter un utilisateur
             </Link>
@@ -282,21 +324,42 @@ export default function UserHomePage() {
       <Card className="border-border/40 shadow-sm">
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <div className="relative w-full sm:w-auto">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher un utilisateur (nom)..."
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <div className="relative w-full sm:w-80">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher par nom, prénom, email..."
+                  value={globalFilter ?? ""}
+                  onChange={event => setGlobalFilter(event.target.value)}
+                  className="pl-8 w-full"
+                />
+              </div>
+
+              <Select
                 value={
-                  (table.getColumn("last_name")?.getFilterValue() as string) ??
-                  ""
+                  (table.getColumn("role")?.getFilterValue() as string) ?? "all"
                 }
-                onChange={event =>
+                onValueChange={value => {
+                  // Si "all" est sélectionné, effacer le filtre, sinon appliquer la valeur
                   table
-                    .getColumn("last_name")
-                    ?.setFilterValue(event.target.value)
-                }
-                className="pl-8 w-full sm:w-80"
-              />
+                    .getColumn("role")
+                    ?.setFilterValue(value === "all" ? undefined : value)
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-44">
+                  <SelectValue placeholder="Filtrer par rôle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Rôles</SelectLabel>
+                    {roleOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
 
             <DropdownMenu>
@@ -369,7 +432,9 @@ export default function UserHomePage() {
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={usersColumns.length}
+                      colSpan={
+                        Object.keys(table.getVisibleLeafColumns()).length
+                      }
                       className="h-24 text-center"
                     >
                       Aucun utilisateur trouvé.
