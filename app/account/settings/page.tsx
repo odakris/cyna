@@ -15,8 +15,12 @@ import {
   TableHead,
   TableRow,
 } from "@/components/ui/table"
-import { Tooltip } from "@/components/ui/tooltip"
-import { Avatar } from "@/components/ui/avatar"
+import {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
@@ -30,7 +34,7 @@ export default function AccountSettingsPage() {
     const fetchClientInfo = async () => {
       if (session?.user?.email) {
         try {
-          const response = await fetch(`/api/user/${session.user.email}`)
+          const response = await fetch(`/api/users/${session.user.id}`)
           const data = await response.json()
           if (response.ok) {
             setClientInfo(data)
@@ -50,12 +54,16 @@ export default function AccountSettingsPage() {
       if (session?.user?.email) {
         try {
           const response = await fetch(`/api/orders/${session.user.email}`)
-          const data = await response.json()
-          if (response.ok) {
-            setOrders(data) // On récupère les abonnements de l'utilisateur
-          } else {
-            console.error("Erreur:", data.error)
+
+          // Vérifier si la réponse est vide ou invalide
+          if (!response.ok) {
+            const errorData = await response.text() // Lire la réponse brute
+            console.error("Erreur API:", response.status, errorData)
+            return
           }
+
+          const data = await response.json()
+          setOrders(data) // On récupère les abonnements de l'utilisateur
         } catch (error) {
           console.error("Erreur de récupération des abonnements:", error)
         }
@@ -87,10 +95,13 @@ export default function AccountSettingsPage() {
       {/* Card avec les informations du client */}
       <Card className="space-y-4 p-4 mb-6">
         <div className="flex items-center space-x-4">
-          <Avatar
-            src={clientInfo.avatar_url}
-            alt={`${clientInfo.first_name} ${clientInfo.last_name}`}
-          />
+          <Avatar className="space-x-4">
+            <AvatarImage
+              src={clientInfo.avatar_url}
+              alt={`${clientInfo.first_name} ${clientInfo.last_name}`}
+            />
+            <AvatarFallback>{`${clientInfo.first_name.charAt(0)}${clientInfo.last_name.charAt(0)}`}</AvatarFallback>
+          </Avatar>
           <div>
             <p>
               <strong>Prénom :</strong> {clientInfo.first_name || "Non défini"}
@@ -103,7 +114,7 @@ export default function AccountSettingsPage() {
             </p>
           </div>
         </div>
-        <Button onClick={handleEditClick} variant="primary" className="mt-4">
+        <Button onClick={handleEditClick} variant="default" className="mt-4">
           Modifier
         </Button>
       </Card>
@@ -111,7 +122,7 @@ export default function AccountSettingsPage() {
       {/* Affichage des abonnements */}
       <h2 className="text-xl font-bold mt-6">Abonnements</h2>
       <Button variant="secondary" className="mt-4">
-        Voir l'historique des commandes
+        Voir l&apos;historique des commandes
       </Button>
 
       {/* Table des abonnements */}
@@ -120,8 +131,8 @@ export default function AccountSettingsPage() {
           <TableRow>
             <TableHead>Nom du service</TableHead>
             <TableHead>Prix</TableHead>
-            <TableHead>Durée d'abonnement</TableHead>
-            <TableHead>Date d'expiration</TableHead>
+            <TableHead>Durée d&apos;abonnement</TableHead>
+            <TableHead>Date d&apos;expiration</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Renouvellement</TableHead>
             <TableHead>Mise à jour</TableHead>
@@ -144,30 +155,39 @@ export default function AccountSettingsPage() {
               </TableCell>
               <TableCell>
                 <Badge
-                  variant={order.status === "active" ? "success" : "danger"}
+                  variant={order.status = "default"}
                 >
                   {order.status === "active" ? "Actif" : "Inactif"}
                 </Badge>
               </TableCell>
               <TableCell>
-                <Tooltip content="Renouveler l'abonnement">
-                  <Button variant="success" className="py-1 px-3 rounded">
-                    Renouveler
-                  </Button>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button variant="default" className="py-1 px-3 rounded">
+                      Renouveler
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Renouveler l&apos;abonnement</TooltipContent>
                 </Tooltip>
               </TableCell>
               <TableCell>
-                <Tooltip content="Mettre à jour l'abonnement">
-                  <Button variant="warning" className="py-1 px-3 rounded">
-                    Mettre à jour
-                  </Button>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button variant="default" className="py-1 px-3 rounded">
+                      Mettre à jour
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Mettre à jour l&apos;abonnement</TooltipContent>
                 </Tooltip>
               </TableCell>
               <TableCell>
-                <Tooltip content="Résilier l'abonnement">
-                  <Button variant="danger" className="py-1 px-3 rounded">
-                    Résilier
-                  </Button>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Button variant="default" className="py-1 px-3 rounded">
+                      Résilier
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Résilier l&apos;abonnement</TooltipContent>
                 </Tooltip>
               </TableCell>
             </TableRow>

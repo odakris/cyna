@@ -5,10 +5,10 @@ const prisma = new PrismaClient()
 
 export async function GET(
   request: Request,
-  { params }: { params: { email: string } }
+  context: { params: { email: string } }
 ) {
-  // Attendre que le paramètre email soit bien récupéré
-  const { email } = params || {}
+  // Attendre que les params soient résolus avant d'y accéder
+  const { email } = await context.params || {}
 
   // Vérifier si l'email est présent
   if (!email) {
@@ -21,11 +21,11 @@ export async function GET(
   try {
     // Récupérer les commandes associées à l'utilisateur par email
     const orders = await prisma.order.findMany({
-      where: { client: { email } },
+      where: { user: { email } },
       include: {
-        orderedProducts: {
+        order_items: {
           include: {
-            product: true, // Inclure les informations du produit
+            product: true,
           },
         },
       },

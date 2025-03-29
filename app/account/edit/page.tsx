@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useSession } from "next-auth/react"
-import { updateUserInfo } from "@/lib/services/userService"
+import { updateUser } from "@/lib/services/user-service"
 import { useRouter } from "next/navigation"
 
 export default function PersonalInfoForm() {
@@ -25,7 +25,7 @@ export default function PersonalInfoForm() {
     const fetchClientInfo = async () => {
       if (session?.user?.email) {
         try {
-          const response = await fetch(`/api/user/${session.user.email}`)
+          const response = await fetch(`/api/users/${session.user.email}`)
           const data = await response.json()
           if (response.ok) {
             setFormData({
@@ -48,7 +48,7 @@ export default function PersonalInfoForm() {
     if (session?.user) {
       fetchClientInfo()
     }
-  }, [session?.user?.email]) // Cette dépendance assure que les infos sont rafraîchies si l'utilisateur change
+  }, [session?.user, session?.user?.email])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -59,7 +59,7 @@ export default function PersonalInfoForm() {
     setLoading(true)
 
     try {
-      await updateUserInfo(formData) // Fonction pour mettre à jour les données
+      await updateUser(formData) // Fonction pour mettre à jour les données
       toast({
         title: "Succès",
         description: "Vos informations ont été mises à jour.",
