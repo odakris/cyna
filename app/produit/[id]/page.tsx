@@ -11,12 +11,13 @@ import { useCart } from "@/context/CartContext"
 
 const ProductPage = () => {
   const { id } = useParams()
-  const { addToCart } = useCart()
+  const { addToCart, cart } = useCart()
   const [product, setProduct] = useState<ProductWithImages>()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
-  // const [selectedSubscription, setSelectedSubscription] =
-  //   useState<string>("mensuel") // Par défaut, sélection mensuelle
+  const [selectedSubscription, setSelectedSubscription] = useState<
+    string | null
+  >(null)
 
   // Référence pour faire défiler vers le tableau tarifaire
   const pricingTableRef = useRef<HTMLTableElement | null>(null)
@@ -51,20 +52,44 @@ const ProductPage = () => {
 
   // Fonction pour gérer l'ajout au panier avec l'abonnement sélectionné
   const handleAddToCart = (subscriptionType: string) => {
-    if (!product || !product.available) return // Ne pas ajouter au panier si le produit est indisponible
+    if (!product || !product.available) return
 
-    addToCart({
-      id: product.id_product,
-      name: product.name,
-      price:
-        subscriptionType === "mensuel"
-          ? 49.99
-          : subscriptionType === "annuel"
-            ? 499.9
-            : product.unit_price,
-      quantity: 1,
-      subscription: subscriptionType,
-    })
+    // Si l'utilisateur reclique sur le bouton déjà sélectionné
+    if (selectedSubscription === subscriptionType) {
+      setSelectedSubscription(null) // désélectionne
+      return
+    }
+
+    // Met à jour la sélection et ajoute au panier, ou met à jour l'élément existant
+    setSelectedSubscription(subscriptionType)
+
+    const existingItemIndex = cart.findIndex(
+      item =>
+        item.id === product.id_product && item.subscription === subscriptionType
+    )
+
+    if (existingItemIndex !== -1) {
+      // Si l'élément existe déjà, on met à jour la quantité
+      const updatedCart = [...cart]
+      updatedCart[existingItemIndex].quantity += 1
+      setCart(updatedCart)
+    } else {
+      // Sinon, on ajoute un nouvel élément
+      addToCart({
+        id: product.id_product,
+        name: product.name,
+        price:
+          subscriptionType === "mensuel"
+            ? 49.99
+            : subscriptionType === "annuel"
+              ? 499.9
+              : subscriptionType === "appareil"
+                ? 19.99
+                : product.unit_price,
+        quantity: 1,
+        subscription: subscriptionType,
+      })
+    }
   }
 
   // Fonction pour faire défiler vers le tableau tarifaire
@@ -171,7 +196,7 @@ const ProductPage = () => {
               <tbody>
                 <tr>
                   <td className="border px-4 py-2 text-center">
-                    Coût unitaire
+                    Coût par utilisateur
                   </td>
                   <td className="border px-4 py-2 text-center">
                     {prixUnitaire} €
@@ -179,10 +204,16 @@ const ProductPage = () => {
                   <td className="border px-4 py-2 text-center">
                     <Button
                       onClick={() => handleAddToCart("unitaire")}
-                      className="w-auto py-1 text-sm"
+                      className={`w-auto py-1 text-sm ${
+                        selectedSubscription === "unitaire"
+                          ? "bg-green-500 text-white"
+                          : ""
+                      }`}
                       variant="cyna"
                     >
-                      Ajouter au panier
+                      {selectedSubscription === "unitaire"
+                        ? "Ajouté"
+                        : "Ajouter au panier"}
                     </Button>
                   </td>
                 </tr>
@@ -197,10 +228,16 @@ const ProductPage = () => {
                   <td className="border px-4 py-2 text-center">
                     <Button
                       onClick={() => handleAddToCart("mensuel")}
-                      className="w-auto py-1 text-sm"
+                      className={`w-auto py-1 text-sm ${
+                        selectedSubscription === "mensuel"
+                          ? "bg-green-500 text-white"
+                          : ""
+                      }`}
                       variant="cyna"
                     >
-                      Ajouter au panier
+                      {selectedSubscription === "mensuel"
+                        ? "Ajouté"
+                        : "Ajouter au panier"}
                     </Button>
                   </td>
                 </tr>
@@ -215,10 +252,16 @@ const ProductPage = () => {
                   <td className="border px-4 py-2 text-center">
                     <Button
                       onClick={() => handleAddToCart("annuel")}
-                      className="w-auto py-1 text-sm"
+                      className={`w-auto py-1 text-sm ${
+                        selectedSubscription === "annuel"
+                          ? "bg-green-500 text-white"
+                          : ""
+                      }`}
                       variant="cyna"
                     >
-                      Ajouter au panier
+                      {selectedSubscription === "annuel"
+                        ? "Ajouté"
+                        : "Ajouter au panier"}
                     </Button>
                   </td>
                 </tr>
@@ -234,10 +277,16 @@ const ProductPage = () => {
                   <td className="border px-4 py-2 text-center">
                     <Button
                       onClick={() => handleAddToCart("appareil")}
-                      className="w-auto py-1 text-sm"
+                      className={`w-auto py-1 text-sm ${
+                        selectedSubscription === "appareil"
+                          ? "bg-green-500 text-white"
+                          : ""
+                      }`}
                       variant="cyna"
                     >
-                      Ajouter au panier
+                      {selectedSubscription === "appareil"
+                        ? "Ajouté"
+                        : "Ajouter au panier"}
                     </Button>
                   </td>
                 </tr>

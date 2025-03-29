@@ -57,7 +57,7 @@ const CartItem: React.FC<CartItemProps> = ({
           {/* Durée d'abonnement */}
           <div className="flex items-center space-x-4">
             <label className="text-sm text-gray-600 w-[200px]">
-              Durée d&apos;abonnement :
+              Type d&apos;abonnement :
             </label>
             <Select
               value={selectedSubscription}
@@ -69,7 +69,7 @@ const CartItem: React.FC<CartItemProps> = ({
               <SelectContent>
                 <SelectItem value="mensuel">Mensuel</SelectItem>
                 <SelectItem value="annuel">Annuel</SelectItem>
-                <SelectItem value="unitaire">Unitaire</SelectItem>
+                <SelectItem value="unitaire">Utilisateur</SelectItem>
                 <SelectItem value="appareil">Appareil</SelectItem>
               </SelectContent>
             </Select>
