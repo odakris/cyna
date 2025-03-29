@@ -11,6 +11,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  FilterFn,
 } from "@tanstack/react-table"
 import {
   ChevronDown,
@@ -23,6 +24,10 @@ import {
   AlertTriangle,
   ChevronsLeft,
   ChevronsRight,
+  Package,
+  RefreshCw,
+  Sparkles,
+  Filter,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -50,6 +55,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card"
 import {
   Dialog,
@@ -62,24 +68,69 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
-import { productsColumnNamesInFrench, productColumns } from "./product-columns"
+import {
+  productsColumnNamesInFrench,
+  productColumns,
+  globalFilterFunction,
+} from "./product-columns"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default function ProductHomePage() {
   const [products, setProducts] = useState<ProductWithImages[]>([])
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: "priority_order", desc: false },
+  ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [globalFilter, setGlobalFilter] = useState("")
+  const [activeTab, setActiveTab] = useState("tous")
+
+  // Options pour les filtres
+  // const statusOptions = [
+  //   { value: "all", label: "Tous les statuts" },
+  //   { value: "true", label: "Disponibles" },
+  //   { value: "false", label: "Indisponibles" },
+  // ]
+
+  const stockOptions = [
+    { value: "all", label: "Tous les stocks" },
+    { value: "out", label: "Rupture (0)" },
+    { value: "low", label: "Critique (≤ 5)" },
+    { value: "medium", label: "Faible (≤ 10)" },
+    { value: "high", label: "Bon (> 10)" },
+  ]
 
   const fetchProducts = useCallback(async () => {
     try {
       setLoading(true)
-      const data: ProductWithImages[] = await fetch("/api/products").then(res =>
-        res.json()
-      )
+      const response = await fetch("/api/products")
+
+      if (!response.ok) {
+        throw new Error(
+          `Erreur HTTP ${response.status}: ${response.statusText}`
+        )
+      }
+
+      const data: ProductWithImages[] = await response.json()
       console.log("data fetchProducts:", data)
       setProducts(data)
       setError(null)
@@ -95,6 +146,26 @@ export default function ProductHomePage() {
     fetchProducts()
   }, [fetchProducts])
 
+  // Fonction pour filtrer par stock
+  const stockFilterFn: FilterFn<any> = (row, columnId, filterValue) => {
+    if (filterValue === "all") return true
+
+    const stock = row.getValue(columnId) as number
+
+    switch (filterValue) {
+      case "out":
+        return stock === 0
+      case "low":
+        return stock <= 5 && stock > 0
+      case "medium":
+        return stock <= 10 && stock > 5
+      case "high":
+        return stock > 10
+      default:
+        return true
+    }
+  }
+
   const table = useReactTable({
     data: products,
     columns: productColumns,
@@ -106,18 +177,40 @@ export default function ProductHomePage() {
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    filterFns: {
+      global: globalFilterFunction as FilterFn<any>,
+      stockRange: stockFilterFn,
+    },
+    globalFilterFn: globalFilterFunction as FilterFn<any>,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
       rowSelection,
+      globalFilter,
     },
+    onGlobalFilterChange: setGlobalFilter,
     initialState: {
       pagination: {
         pageSize: 10,
       },
+      sorting: [{ id: "priority_order", desc: false }],
+      columnVisibility: {
+        name: false,
+      },
     },
   })
+
+  // Appliquer le filtre en fonction de l'onglet actif
+  useEffect(() => {
+    if (activeTab === "tous") {
+      table.getColumn("available")?.setFilterValue(undefined)
+    } else if (activeTab === "disponibles") {
+      table.getColumn("available")?.setFilterValue(true)
+    } else if (activeTab === "indisponibles") {
+      table.getColumn("available")?.setFilterValue(false)
+    }
+  }, [activeTab, table])
 
   const handleDelete = async () => {
     const selectedIds = table
@@ -149,6 +242,13 @@ export default function ProductHomePage() {
     }
   }
 
+  const stats = {
+    total: products.length,
+    available: products.filter(p => p.available).length,
+    unavailable: products.filter(p => !p.available).length,
+    lowStock: products.filter(p => p.stock <= 5).length,
+  }
+
   if (loading) {
     return (
       <div className="container mx-auto p-6 space-y-8">
@@ -158,6 +258,12 @@ export default function ProductHomePage() {
             <Skeleton className="h-10 w-32" />
             <Skeleton className="h-10 w-32" />
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+          {[1, 2, 3, 4].map(i => (
+            <Skeleton key={i} className="h-24 w-full rounded-lg" />
+          ))}
         </div>
 
         <div className="flex justify-between items-center py-4">
@@ -180,7 +286,7 @@ export default function ProductHomePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {Array(products.length || 10)
+                {Array(5)
                   .fill(0)
                   .map((_, i) => (
                     <TableRow key={i}>
@@ -278,53 +384,212 @@ export default function ProductHomePage() {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <Button variant="outline">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                Actualiser
+              </Button>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-80">
+              <div className="flex justify-between space-x-4">
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold">
+                    Actualiser les données
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    Recharge les données des produits depuis la base de données.
+                  </p>
+                </div>
+              </div>
+            </HoverCardContent>
+          </HoverCard>
         </div>
       </div>
 
+      {/* Statistiques */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Total Produits
+              </p>
+              <p className="text-2xl font-bold">{stats.total}</p>
+            </div>
+            <Package className="h-8 w-8 text-primary opacity-80" />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Disponibles
+              </p>
+              <p className="text-2xl font-bold text-green-600">
+                {stats.available}
+              </p>
+            </div>
+            <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Indisponibles
+              </p>
+              <p className="text-2xl font-bold text-gray-500">
+                {stats.unavailable}
+              </p>
+            </div>
+            <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-gray-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Stock Faible
+              </p>
+              <p className="text-2xl font-bold text-amber-600">
+                {stats.lowStock}
+              </p>
+            </div>
+            <div className="h-8 w-8 rounded-full bg-amber-100 flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
       <Card className="border-border/40 shadow-sm">
+        <CardHeader className="pb-3">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="w-full sm:w-auto">
+              <TabsTrigger value="tous" className="flex-1 sm:flex-initial">
+                Tous
+                <Badge variant="secondary" className="ml-2">
+                  {stats.total}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger
+                value="disponibles"
+                className="flex-1 sm:flex-initial"
+              >
+                Disponibles
+                <Badge
+                  variant="secondary"
+                  className="ml-2 bg-green-100 text-green-800"
+                >
+                  {stats.available}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger
+                value="indisponibles"
+                className="flex-1 sm:flex-initial"
+              >
+                Indisponibles
+                <Badge
+                  variant="secondary"
+                  className="ml-2 bg-gray-100 text-gray-800"
+                >
+                  {stats.unavailable}
+                </Badge>
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </CardHeader>
         <CardContent className="p-6">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-            <div className="relative w-full sm:w-auto">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Rechercher un produit..."
+            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+              <div className="relative w-full sm:w-80">
+                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher par nom, référence..."
+                  value={globalFilter ?? ""}
+                  onChange={event => setGlobalFilter(event.target.value)}
+                  className="pl-8 w-full"
+                />
+              </div>
+
+              <Select
                 value={
-                  (table.getColumn("name")?.getFilterValue() as string) ?? ""
+                  (table.getColumn("stock")?.getFilterValue() as string) ??
+                  "all"
                 }
-                onChange={event =>
-                  table.getColumn("name")?.setFilterValue(event.target.value)
-                }
-                className="pl-8 w-full sm:w-80"
-              />
+                onValueChange={value => {
+                  table
+                    .getColumn("stock")
+                    ?.setFilterValue(value === "all" ? undefined : value)
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-44">
+                  <SelectValue placeholder="Filtrer par stock" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Niveaux de stock</SelectLabel>
+                    {stockOptions.map(option => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="ml-auto">
-                  <Columns className="mr-2 h-4 w-4" />
-                  Colonnes
-                  <ChevronDown className="ml-2 h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40">
-                {table
-                  .getAllColumns()
-                  .filter(column => column.getCanHide())
-                  .map(column => {
-                    return (
-                      <DropdownMenuCheckboxItem
-                        key={column.id}
-                        checked={column.getIsVisible()}
-                        onCheckedChange={value =>
-                          column.toggleVisibility(!!value)
-                        }
-                      >
-                        {productsColumnNamesInFrench[column.id] || column.id}
-                      </DropdownMenuCheckboxItem>
-                    )
-                  })}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => fetchProducts()}
+                title="Actualiser les données"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="ml-auto">
+                    <Columns className="mr-2 h-4 w-4" />
+                    Colonnes
+                    <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-40">
+                  {table
+                    .getAllColumns()
+                    .filter(column => column.getCanHide())
+                    .map(column => {
+                      return (
+                        <DropdownMenuCheckboxItem
+                          key={column.id}
+                          checked={column.getIsVisible()}
+                          onCheckedChange={value =>
+                            column.toggleVisibility(!!value)
+                          }
+                        >
+                          {productsColumnNamesInFrench[column.id] || column.id}
+                        </DropdownMenuCheckboxItem>
+                      )
+                    })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
 
           <div className="rounded-md border">
@@ -353,7 +618,7 @@ export default function ProductHomePage() {
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
-                      className={row.getIsSelected() ? "bg-primary/5" : ""}
+                      className={`group transition-colors ${row.getIsSelected() ? "bg-primary/5" : "hover:bg-muted/50"}`}
                     >
                       {row.getVisibleCells().map(cell => (
                         <TableCell key={cell.id} className="text-center px-3">
@@ -368,10 +633,18 @@ export default function ProductHomePage() {
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={productColumns.length}
+                      colSpan={
+                        Object.keys(table.getVisibleLeafColumns()).length
+                      }
                       className="h-24 text-center"
                     >
-                      Aucun produit trouvé.
+                      <div className="flex flex-col items-center justify-center text-muted-foreground">
+                        <Filter className="h-8 w-8 mb-2 opacity-50" />
+                        <p>Aucun produit trouvé.</p>
+                        <p className="text-sm">
+                          Essayez de modifier vos filtres.
+                        </p>
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
@@ -455,6 +728,19 @@ export default function ProductHomePage() {
             </div>
           </div>
         </CardContent>
+        <CardFooter className="bg-muted/50 py-3 border-t flex justify-between items-center">
+          <p className="text-sm text-muted-foreground">
+            Total des produits: <strong>{products.length}</strong> |
+            Disponibles:{" "}
+            <strong className="text-green-600">{stats.available}</strong> |
+            Stock faible:{" "}
+            <strong className="text-amber-600">{stats.lowStock}</strong>
+          </p>
+          <Button variant="outline" size="sm" onClick={() => fetchProducts()}>
+            <RefreshCw className="mr-2 h-3 w-3" />
+            Actualiser
+          </Button>
+        </CardFooter>
       </Card>
     </div>
   )

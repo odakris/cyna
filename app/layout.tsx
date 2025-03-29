@@ -37,7 +37,9 @@ export default function RootLayout({
       >
         <UserSessionProvider>
           <CartProvider>
-            <TooltipProvider> {/* Envelopper toute l'application avec TooltipProvider */}
+            <TooltipProvider>
+              {" "}
+              {/* Envelopper toute l'application avec TooltipProvider */}
               <div className="min-h-screen flex flex-col cyna-text">
                 {/* Navbar */}
                 <div className="w-full">
