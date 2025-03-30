@@ -179,7 +179,7 @@ model User {
   addresses             Address[]
   password_reset_tokens PasswordResetToken[]
   sessions              Session[]
-  cartIems              CartItem[]
+  cartItems              CartItem[]
 
   @@index([email])
   @@index([role])
