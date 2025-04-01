@@ -1,21 +1,19 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useToast } from "@/hooks/use-toast"
 import { useSession } from "next-auth/react"
-import { updateUser } from "@/lib/services/user-service"
 import { useRouter } from "next/navigation"
 
 export default function PersonalInfoForm() {
   const { data: session } = useSession()
   const router = useRouter()
-  const { toast } = useToast()
 
   // Initialisation de l'état avec des valeurs vides par défaut
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
+    password: "",
   })
 
   const [loading, setLoading] = useState(false)
@@ -25,13 +23,14 @@ export default function PersonalInfoForm() {
     const fetchClientInfo = async () => {
       if (session?.user?.email) {
         try {
-          const response = await fetch(`/api/users/${session.user.email}`)
+          const response = await fetch(`/api/users/${session.user.id}`)
           const data = await response.json()
           if (response.ok) {
             setFormData({
-              firstName: data.first_name || "", // Mettre à jour les informations dans l'état
+              firstName: data.first_name || "",
               lastName: data.last_name || "",
               email: data.email || "",
+              password: "",
             })
           } else {
             console.error("Erreur:", data.error)
@@ -59,21 +58,45 @@ export default function PersonalInfoForm() {
     setLoading(true)
 
     try {
-      await updateUser(formData) // Fonction pour mettre à jour les données
-      toast({
-        title: "Succès",
-        description: "Vos informations ont été mises à jour.",
+      if (!session?.user?.id) {
+        throw new Error("Session or user ID is not available.")
+      }
+
+      // Construire l'objet de données à envoyer
+      const dataToUpdate = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        password: formData.password ? formData.password : undefined,
+      }
+
+      // Si le mot de passe est vide, on le supprime de l'objet
+      if (!formData.password) {
+        delete dataToUpdate.password
+      }
+
+      console.log("Données à envoyer avant l'envoi:", dataToUpdate)
+
+      // Envoi de la requête PUT avec les données du formulaire
+      const response = await fetch(`/api/users/${session.user.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dataToUpdate), // On n'envoie que les données modifiées
       })
-      router.push("/account/settings") // Rediriger vers la page des paramètres après la mise à jour
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(
+          errorData.message || "Impossible de mettre à jour les informations."
+        )
+      }
+
+      console.log("Succès: Vos informations ont été mises à jour.")
+      router.push("/account/settings") // Redirection après mise à jour
     } catch (error) {
-      toast({
-        title: "Erreur",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Impossible de mettre à jour.",
-        variant: "destructive",
-      })
+      console.error("Erreur lors de la mise à jour des informations:", error)
     }
 
     setLoading(false)
@@ -116,6 +139,19 @@ export default function PersonalInfoForm() {
             type="email"
             name="email"
             value={formData.email}
+            onChange={handleChange}
+            className="w-full border p-2 rounded"
+          />
+        </div>
+
+        <div>
+          <label className="block font-medium">
+            Mot de passe (laisser vide pour ne pas changer)
+          </label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
             onChange={handleChange}
             className="w-full border p-2 rounded"
           />

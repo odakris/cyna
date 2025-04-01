@@ -13,7 +13,7 @@ export const userFormSchema = z.object({
     .string()
     .email("L'adresse email n'est pas valide.")
     .max(255, "L'email ne peut pas dépasser 255 caractères."),
-  password: z.string(),
+  password: z.string().optional(),
   // .min(8, "Le mot de passe doit contenir au moins 8 caractères.")
   // .max(255, "Le mot de passe ne peut pas dépasser 255 caractères.")
   // .regex(

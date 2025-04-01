@@ -46,10 +46,10 @@ export default function AccountSettingsPage() {
         const addressesData = await addressesResponse.json()
         const paymentsData = await paymentsResponse.json()
 
-        console.log("User Data:", userData)
-        console.log("Orders Data:", ordersData)
-        console.log("Addresses Data:", addressesData)
-        console.log("Payments Data:", paymentsData)
+        // console.log("User Data:", userData)
+        // console.log("Orders Data:", ordersData)
+        // console.log("Addresses Data:", addressesData)
+        // console.log("Payments Data:", paymentsData)
 
         if (userResponse.ok) setClientInfo(userData)
         if (ordersResponse.ok) setOrders(ordersData)
@@ -75,10 +75,12 @@ export default function AccountSettingsPage() {
     <div className="p-6 space-y-12">
       {/* Section Informations personnelles */}
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-center">Informations personnelles</h1>
+        <h1 className="text-2xl font-bold text-center">
+          Informations personnelles
+        </h1>
         <Card className="space-y-4 p-6">
           <div className="flex items-center space-x-4">
-            <Avatar className="space-x-4">
+            <Avatar>
               <AvatarImage
                 src={clientInfo?.avatar_url}
                 alt={`${clientInfo?.first_name} ${clientInfo?.last_name}`}
@@ -88,9 +90,19 @@ export default function AccountSettingsPage() {
               </AvatarFallback>
             </Avatar>
             <div>
-              <p><strong>Prénom :</strong> {clientInfo?.first_name || "Non défini"}</p>
-              <p><strong>Nom :</strong> {clientInfo?.last_name || "Non défini"}</p>
-              <p><strong>Email :</strong> {clientInfo?.email || "Non défini"}</p>
+              <p>
+                <strong>Prénom :</strong>{" "}
+                {clientInfo?.first_name || "Non défini"}
+              </p>
+              <p>
+                <strong>Nom :</strong> {clientInfo?.last_name || "Non défini"}
+              </p>
+              <p>
+                <strong>Email :</strong> {clientInfo?.email || "Non défini"}
+              </p>
+              <Button onClick={() => (window.location.href = "/account/edit")}>
+                Modifier
+              </Button>
             </div>
           </div>
         </Card>
@@ -119,13 +131,21 @@ export default function AccountSettingsPage() {
                   <TableCell>{sub.subscription_type}</TableCell>
                   <TableCell>{sub.unit_price} €</TableCell>
                   <TableCell>
-                    {sub.renewal_date ? new Date(sub.renewal_date).toLocaleDateString() : "N/A"}
+                    {sub.renewal_date
+                      ? new Date(sub.renewal_date).toLocaleDateString()
+                      : "N/A"}
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={sub.subscription_status === "active" ? "default" : "secondary"}
+                      variant={
+                        sub.subscription_status === "active"
+                          ? "default"
+                          : "secondary"
+                      }
                     >
-                      {sub.subscription_status === "active" ? "Actif" : "Inactif"}
+                      {sub.subscription_status === "active"
+                        ? "Actif"
+                        : "Inactif"}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -205,7 +225,9 @@ export default function AccountSettingsPage() {
               paymentMethods.map(payment => (
                 <TableRow key={payment.id_payment_info}>
                   <TableCell>{payment.card_name}</TableCell>
-                  <TableCell>•••• •••• •••• {payment.last_card_digits}</TableCell>
+                  <TableCell>
+                    •••• •••• •••• {payment.last_card_digits}
+                  </TableCell>
                   <TableCell>{`${payment.expiration_month}/${payment.expiration_year}`}</TableCell>
                   <TableCell>
                     {payment.is_default ? (
