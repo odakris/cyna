@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { OrderFormValues } from "@/lib/validations/order-schema"
 import { Order } from "@prisma/client"
 import { TransactionClient } from "@/types/Types"
+import { Product } from "@prisma/client"
 
 /**
  * Récupère la liste complète des commandes avec leurs produits associés.
@@ -102,17 +103,53 @@ export const create = async (data: OrderFormValues): Promise<Order> => {
       throw new Error("L'adresse n'existe pas")
     }
 
-    // Vérifier si les articles de commande existent avant de créer la commande
-    const orderItemsExist = await Promise.all(
+    // Vérifier si les produits existent et ont un stock suffisant
+    const stocksCheck = await Promise.all(
       data.order_items.map(async item => {
-        const productExists = await prisma.product.findUnique({
+        const product: Product = await prisma.product.findUnique({
           where: { id_product: item.id_product },
         })
-        return !!productExists
+
+        if (!product) {
+          return {
+            exists: false,
+            hasStock: false,
+            productId: item.id_product,
+            name: "Produit inconnu",
+          }
+        }
+
+        // Vérifier si le stock est suffisant
+        const hasStock = product.stock >= item.quantity
+
+        return {
+          exists: true,
+          hasStock,
+          productId: item.id_product,
+          name: product.name,
+          requested: item.quantity,
+          available: product.stock,
+        }
       })
     )
-    if (orderItemsExist.includes(false)) {
-      throw new Error("Un ou plusieurs articles de commande n'existent pas")
+
+    // Vérifier si des produits n'existent pas
+    const nonExistentProducts = stocksCheck.filter(p => !p.exists)
+    if (nonExistentProducts.length > 0) {
+      throw new Error(
+        `Les produits suivants n'existent pas: ${nonExistentProducts.map(p => p.productId).join(", ")}`
+      )
+    }
+
+    // Vérifier si des produits n'ont pas de stock suffisant
+    const insufficientStocks = stocksCheck.filter(p => !p.hasStock)
+    if (insufficientStocks.length > 0) {
+      const details = insufficientStocks
+        .map(
+          p => `${p.name} (demandé: ${p.requested}, disponible: ${p.available})`
+        )
+        .join(", ")
+      throw new Error(`Stock insuffisant pour: ${details}`)
     }
 
     // Utiliser une transaction pour créer l'ordre et ses éléments
@@ -135,8 +172,9 @@ export const create = async (data: OrderFormValues): Promise<Order> => {
 
       // Créer les éléments de commande associés
       await Promise.all(
-        data.order_items.map(item =>
-          tx.orderItem.create({
+        data.order_items.map(async item => {
+          // Créer l'élément de commande
+          await tx.orderItem.create({
             data: {
               subscription_type: item.subscription_type,
               subscription_status: item.subscription_status,
@@ -148,7 +186,17 @@ export const create = async (data: OrderFormValues): Promise<Order> => {
               id_order: newOrder.id_order,
             },
           })
-        )
+
+          // Décrémenter le stock du produit
+          await tx.product.update({
+            where: { id_product: item.id_product },
+            data: {
+              stock: {
+                decrement: item.quantity,
+              },
+            },
+          })
+        })
       )
 
       // Récupérer la commande complète avec les éléments
@@ -166,7 +214,7 @@ export const create = async (data: OrderFormValues): Promise<Order> => {
     })
   } catch (error) {
     console.error("Error creating order:", error)
-    throw new Error("Failed to create order")
+    throw error instanceof Error ? error : new Error("Failed to create order")
   }
 }
 
@@ -192,6 +240,77 @@ export const update = async (
       throw new Error(`Commande avec l'ID ${id} non trouvée`)
     }
 
+    // Créer un map des éléments de commande existants pour faciliter l'accès
+    const existingItemsMap = new Map<number, number>(
+      existingOrder.order_items.map((item: Product) => [
+        item.id_product,
+        item.stock,
+      ])
+    )
+
+    // Vérifier les stocks pour les nouveaux articles ou les articles mis à jour
+    const stocksToCheck = await Promise.all(
+      data.order_items.map(async item => {
+        const product: Product = await prisma.product.findUnique({
+          where: { id_product: item.id_product },
+        })
+
+        if (!product) {
+          return {
+            exists: false,
+            hasStock: false,
+            productId: item.id_product,
+            name: "Produit inconnu",
+          }
+        }
+
+        // Calcul du changement de quantité requis
+        const existingQuantity = existingItemsMap.get(item.id_product) || 0
+        const quantityChange = item.quantity - existingQuantity
+
+        // Si la quantité diminue ou reste la même, pas besoin de vérifier le stock
+        if (quantityChange <= 0) {
+          return {
+            exists: true,
+            hasStock: true,
+            productId: item.id_product,
+            name: product.name,
+          }
+        }
+
+        // Vérifier si le stock est suffisant pour l'augmentation de quantité
+        const hasStock = product.stock >= quantityChange
+
+        return {
+          exists: true,
+          hasStock,
+          productId: item.id_product,
+          name: product.name,
+          requested: quantityChange,
+          available: product.stock,
+        }
+      })
+    )
+
+    // Vérifier si des produits n'existent pas
+    const nonExistentProducts = stocksToCheck.filter(p => !p.exists)
+    if (nonExistentProducts.length > 0) {
+      throw new Error(
+        `Les produits suivants n'existent pas: ${nonExistentProducts.map(p => p.productId).join(", ")}`
+      )
+    }
+
+    // Vérifier si des produits n'ont pas de stock suffisant
+    const insufficientStocks = stocksToCheck.filter(p => !p.hasStock)
+    if (insufficientStocks.length > 0) {
+      const details = insufficientStocks
+        .map(
+          p => `${p.name} (ajout: ${p.requested}, disponible: ${p.available})`
+        )
+        .join(", ")
+      throw new Error(`Stock insuffisant pour: ${details}`)
+    }
+
     // Utiliser une transaction pour mettre à jour l'ordre et ses éléments
     return await prisma.$transaction(async (tx: TransactionClient) => {
       // Mettre à jour l'ordre
@@ -211,15 +330,28 @@ export const update = async (
         },
       })
 
+      // Restaurer le stock pour les articles qui seront supprimés ou modifiés
+      for (const item of existingOrder.order_items) {
+        await tx.product.update({
+          where: { id_product: item.id_product },
+          data: {
+            stock: {
+              increment: item.quantity,
+            },
+          },
+        })
+      }
+
       // Supprimer tous les anciens éléments de commande
       await tx.orderItem.deleteMany({
         where: { id_order: id },
       })
 
-      // Créer les nouveaux éléments de commande
+      // Créer les nouveaux éléments de commande et ajuster les stocks
       await Promise.all(
-        data.order_items.map(item =>
-          tx.orderItem.create({
+        data.order_items.map(async item => {
+          // Créer l'élément de commande
+          await tx.orderItem.create({
             data: {
               subscription_type: item.subscription_type,
               subscription_status: item.subscription_status,
@@ -231,7 +363,17 @@ export const update = async (
               id_order: id,
             },
           })
-        )
+
+          // Décrémenter le stock du produit pour la nouvelle quantité
+          await tx.product.update({
+            where: { id_product: item.id_product },
+            data: {
+              stock: {
+                decrement: item.quantity,
+              },
+            },
+          })
+        })
       )
 
       // Récupérer la commande mise à jour avec tous ses éléments
@@ -249,7 +391,7 @@ export const update = async (
     })
   } catch (error) {
     console.error("Error updating order:", error)
-    throw new Error("Failed to update order")
+    throw error instanceof Error ? error : new Error("Failed to update order")
   }
 }
 
@@ -274,14 +416,27 @@ export const remove = async (id: number): Promise<Order> => {
       throw new Error(`Commande avec l'ID ${id} non trouvée`)
     }
 
-    // Supprimer la commande
-    return await prisma.order.delete({
-      where: { id_order: id },
-      include: {
-        // Vous pourriez vouloir inclure ces informations dans la réponse
-        order_items: true,
-        user: true,
-      },
+    // Utiliser une transaction pour garantir que tous les stocks sont correctement restaurés
+    return await prisma.$transaction(async (tx: TransactionClient) => {
+      for (const item of existingOrder.order_items) {
+        await tx.product.update({
+          where: { id_product: item.id_product },
+          data: {
+            stock: {
+              increment: item.quantity,
+            },
+          },
+        })
+      }
+
+      // Supprimer la commande
+      return await tx.order.delete({
+        where: { id_order: id },
+        include: {
+          order_items: true,
+          user: true,
+        },
+      })
     })
   } catch (error) {
     // Distinguer entre les différents types d'erreurs

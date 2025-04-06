@@ -83,6 +83,7 @@ export const createOrder = async (data: OrderInputValues): Promise<Order> => {
     if (error instanceof Error) {
       // Préserver les erreurs de contraintes (comme utilisateur ou produit non trouvé)
       if (
+        error.message.startsWith("Stock insuffisant") ||
         error.message.includes("n'existe pas") ||
         error.message.includes("non trouvée")
       ) {
@@ -152,7 +153,11 @@ export const updateOrder = async (
     }
 
     // Préserver les erreurs personnalisées
-    if (error instanceof Error && error.message.includes("non trouvée")) {
+    if (
+      error instanceof Error &&
+      (error.message.includes("non trouvée") ||
+        error.message.startsWith("Stock insuffisant"))
+    ) {
       throw error
     }
 

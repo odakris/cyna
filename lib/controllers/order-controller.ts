@@ -121,6 +121,18 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
         },
         { status: 400 }
       )
+    } else if (
+      error instanceof Error &&
+      error.message.includes("Stock insuffisant")
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Stock insuffisant",
+          details: error.message,
+        },
+        { status: 400 }
+      )
     }
 
     // Erreur générique
