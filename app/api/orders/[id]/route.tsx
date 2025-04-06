@@ -11,20 +11,35 @@ import { validateId } from "@/lib/utils/utils"
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
-    const resolvedParams = await params
-    const id = validateId(resolvedParams.id)
+    const id = validateId(params.id)
 
     if (!id) {
-      return NextResponse.json({ message: "ID invalide" }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          message: "ID invalide",
+        },
+        { status: 400 }
+      )
     }
 
-    return orderController.getById(id)
+    return await orderController.getById(id)
   } catch (error) {
-    console.error("Erreur lors de la récupération des commandes:", error)
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
+    console.error(
+      `Erreur non gérée lors de la récupération de la commande ID ${params.id}:`,
+      error
+    )
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Erreur serveur inattendue",
+        details: error instanceof Error ? error.message : "Erreur inconnue",
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -37,20 +52,35 @@ export async function GET(
  */
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
-    const resolvedParams = await params
-    const id = validateId(resolvedParams.id)
+    const id = validateId(params.id)
 
     if (!id) {
-      return NextResponse.json({ message: "ID invalide" }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          message: "ID invalide",
+        },
+        { status: 400 }
+      )
     }
 
-    return orderController.update(request, id)
+    return await orderController.update(request, id)
   } catch (error) {
-    console.error("Erreur lors de la mise à jour de la commande:", error)
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
+    console.error(
+      `Erreur non gérée lors de la mise à jour de la commande ID ${params.id}:`,
+      error
+    )
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Erreur serveur inattendue",
+        details: error instanceof Error ? error.message : "Erreur inconnue",
+      },
+      { status: 500 }
+    )
   }
 }
 
@@ -63,19 +93,34 @@ export async function PUT(
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
-    const resolvedParams = await params
-    const id = validateId(resolvedParams.id)
+    const id = validateId(params.id)
 
     if (!id) {
-      return NextResponse.json({ message: "ID invalide" }, { status: 400 })
+      return NextResponse.json(
+        {
+          success: false,
+          message: "ID invalide",
+        },
+        { status: 400 }
+      )
     }
 
-    return orderController.remove(id)
+    return await orderController.remove(id)
   } catch (error) {
-    console.error("Erreur lors de la suppression de la commande:", error)
-    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
+    console.error(
+      `Erreur non gérée lors de la suppression de la commande ID ${params.id}:`,
+      error
+    )
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Erreur serveur inattendue",
+        details: error instanceof Error ? error.message : "Erreur inconnue",
+      },
+      { status: 500 }
+    )
   }
 }
