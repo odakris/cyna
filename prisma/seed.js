@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+import { OrderStatus, PrismaClient, SubscriptionType } from "@prisma/client"
 const prisma = new PrismaClient()
 
 // const bcrypt = require("bcrypt")
@@ -332,7 +332,7 @@ async function main() {
     await prisma.cartItem.create({
       data: {
         quantity: 1,
-        subscription_type: "YEARLY",
+        subscription_type: SubscriptionType.YEARLY,
         id_product: diagnosticCyber.id_product,
         sessionId_session: session2.id_session,
       },
@@ -341,7 +341,7 @@ async function main() {
     await prisma.cartItem.create({
       data: {
         quantity: 2,
-        subscription_type: "MONTHLY",
+        subscription_type: SubscriptionType.MONTHLY,
         id_product: testIntrusion.id_product,
         sessionId_session: session2.id_session,
       },
@@ -382,8 +382,8 @@ async function main() {
     // ----- Commande 1 - Jean Dupont - Diagnostic Cyber (Abonnement annuel) -----
     const orderItems1 = [
       {
-        subscription_type: "YEARLY",
-        subscription_status: "ACTIVE",
+        subscription_type: SubscriptionType.YEARLY,
+        subscription_status: OrderStatus.ACTIVE,
         subscription_duration: 12,
         renewal_date: new Date("2024-06-15"),
         quantity: 1,
@@ -403,7 +403,7 @@ async function main() {
         order_date: new Date("2023-06-15"),
         total_amount: total1,
         subtotal: total1,
-        order_status: "COMPLETED",
+        order_status: OrderStatus.PROCESSING,
         payment_method: "CARD",
         last_card_digits: "4242",
         invoice_number: "INV-2023-001",
@@ -426,8 +426,8 @@ async function main() {
     // ----- Commande 2 - Marie Martin - Investigation + Test d'intrusion (Abonnement annuel) -----
     const orderItems2 = [
       {
-        subscription_type: "YEARLY",
-        subscription_status: "ACTIVE",
+        subscription_type: SubscriptionType.YEARLY,
+        subscription_status: OrderStatus.ACTIVE,
         subscription_duration: 12,
         renewal_date: new Date("2024-07-22"),
         quantity: 1,
@@ -435,8 +435,8 @@ async function main() {
         id_product: investigation.id_product,
       },
       {
-        subscription_type: "YEARLY",
-        subscription_status: "ACTIVE",
+        subscription_type: SubscriptionType.YEARLY,
+        subscription_status: OrderStatus.ACTIVE,
         subscription_duration: 12,
         renewal_date: new Date("2024-07-22"),
         quantity: 1,
@@ -456,7 +456,7 @@ async function main() {
         order_date: new Date("2023-07-22"),
         total_amount: total2,
         subtotal: total2,
-        order_status: "PAID",
+        order_status: OrderStatus.PROCESSING,
         payment_method: "CARD",
         last_card_digits: "4444",
         invoice_number: "INV-2023-002",
@@ -479,8 +479,8 @@ async function main() {
     // ----- Commande 3 - Jean Dupont - SOC Managé (Mensuel) + Diagnostic Cyber (Annuel) -----
     const orderItems3 = [
       {
-        subscription_type: "MONTHLY",
-        subscription_status: "PENDING",
+        subscription_type: SubscriptionType.MONTHLY,
+        subscription_status: OrderStatus.PENDING,
         subscription_duration: 1,
         renewal_date: new Date("2023-10-05"),
         quantity: 1,
@@ -488,8 +488,8 @@ async function main() {
         id_product: socManage.id_product,
       },
       {
-        subscription_type: "YEARLY",
-        subscription_status: "PENDING",
+        subscription_type: SubscriptionType.YEARLY,
+        subscription_status: OrderStatus.PENDING,
         subscription_duration: 12,
         renewal_date: new Date("2024-09-05"),
         quantity: 1,
@@ -510,7 +510,7 @@ async function main() {
         order_date: new Date("2023-09-05"),
         total_amount: total3,
         subtotal: total3,
-        order_status: "PENDING",
+        order_status: OrderStatus.ACTIVE,
         payment_method: "CARD",
         last_card_digits: "4242",
         invoice_number: "INV-2023-003",
@@ -532,8 +532,8 @@ async function main() {
     // ----- Commande 4 - Marie Martin - Test d'intrusion (Mensuel) avec quantité de 2 -----
     const orderItems4 = [
       {
-        subscription_type: "MONTHLY",
-        subscription_status: "ACTIVE",
+        subscription_type: SubscriptionType.MONTHLY,
+        subscription_status: OrderStatus.ACTIVE,
         subscription_duration: 1,
         renewal_date: new Date("2023-09-25"),
         quantity: 2, // Commander 2 tests d'intrusion mensuels
@@ -553,7 +553,7 @@ async function main() {
         order_date: new Date("2023-08-25"),
         total_amount: total4,
         subtotal: total4,
-        order_status: "COMPLETED",
+        order_status: OrderStatus.COMPLETED,
         payment_method: "CARD",
         last_card_digits: "4444",
         invoice_number: "INV-2023-004",

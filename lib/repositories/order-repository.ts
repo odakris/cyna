@@ -19,6 +19,7 @@ export const findAll = async (): Promise<Order[]> => {
           },
         },
         user: true,
+        address: true,
       },
       orderBy: {
         order_date: "desc",
@@ -60,6 +61,7 @@ export const findById = async (id: number): Promise<Order | null> => {
           },
         },
         user: true,
+        address: true,
       },
     })
 

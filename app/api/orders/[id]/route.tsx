@@ -14,7 +14,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
-    const id = validateId(params.id)
+    const resolvedParams = await params
+    const id = validateId(resolvedParams.id)
 
     if (!id) {
       return NextResponse.json(
