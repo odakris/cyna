@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
-
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -16,9 +16,11 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { useRouter } from "next/navigation"
 
 export default function AccountSettingsPage() {
   const { data: session, status } = useSession()
+  const router = useRouter()
   const [clientInfo, setClientInfo] = useState<any>(null)
   const [orders, setOrders] = useState<any[]>([])
   const [addresses, setAddresses] = useState<any[]>([])
@@ -38,7 +40,7 @@ export default function AccountSettingsPage() {
           fetch(`/api/users/${session.user.id}`),
           fetch(`/api/users/${session.user.id}/orders`),
           fetch(`/api/users/${session.user.id}/addresses`),
-          fetch(`/api/users/${session.user.id}/payments`), // Récupération des méthodes de paiement
+          fetch(`/api/users/${session.user.id}/payments`),
         ])
 
         const userData = await userResponse.json()
@@ -100,7 +102,11 @@ export default function AccountSettingsPage() {
               <p>
                 <strong>Email :</strong> {clientInfo?.email || "Non défini"}
               </p>
-              <Button onClick={() => (window.location.href = "/account/edit")}>
+              <Button
+                onClick={() =>
+                  (window.location.href = "/account/editPersonalInfo")
+                }
+              >
                 Modifier
               </Button>
             </div>
@@ -138,14 +144,26 @@ export default function AccountSettingsPage() {
                   <TableCell>
                     <Badge
                       variant={
-                        sub.subscription_status === "active"
+                        sub.subscription_status === "ACTIVE"
                           ? "default"
-                          : "secondary"
+                          : sub.subscription_status === "CANCELLED"
+                            ? "secondary"
+                            : sub.subscription_status === "EXPIRED"
+                              ? "secondary"
+                              : sub.subscription_status === "PENDING"
+                                ? "secondary"
+                                : "default"
                       }
                     >
-                      {sub.subscription_status === "active"
+                      {sub.subscription_status === "ACTIVE"
                         ? "Actif"
-                        : "Inactif"}
+                        : sub.subscription_status === "CANCELLED"
+                          ? "Annulé"
+                          : sub.subscription_status === "EXPIRED"
+                            ? "Expiré"
+                            : sub.subscription_status === "PENDING"
+                              ? "En attente"
+                              : "Inconnu"}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -164,6 +182,9 @@ export default function AccountSettingsPage() {
       {/* Section Carnet d’adresses */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-center">Carnet d’adresses</h2>
+        <Link href="/account/addresses/add">
+          <Button>Ajouter une adresse</Button>
+        </Link>
         <Table className="min-w-full">
           <TableHeader>
             <TableRow>
@@ -174,6 +195,7 @@ export default function AccountSettingsPage() {
               <TableHead>Pays</TableHead>
               <TableHead>Téléphone</TableHead>
               <TableHead>Type</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -194,6 +216,43 @@ export default function AccountSettingsPage() {
                     ) : (
                       <Badge variant="outline">Autre</Badge>
                     )}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="default"
+                      onClick={() =>
+                        router.push(`/account/addresses/${address.id_address}`)
+                      }
+                    >
+                      Modifier
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      className="ml-2"
+                      onClick={async () => {
+                        try {
+                          const res = await fetch(
+                            `/api/users/${session.user.id}/addresses?addressId=${address.id_address}`,
+                            {
+                              method: "DELETE",
+                            }
+                          )
+                          if (res.ok) {
+                            setAddresses(prev =>
+                              prev.filter(
+                                a => a.id_address !== address.id_address
+                              )
+                            )
+                          } else {
+                            console.error("Erreur suppression adresse")
+                          }
+                        } catch (err) {
+                          console.error("Erreur suppression adresse :", err)
+                        }
+                      }}
+                    >
+                      Supprimer
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))
