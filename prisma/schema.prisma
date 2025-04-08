@@ -28,19 +28,22 @@ enum SubscriptionType {
 
 // Statuts possibles pour une commande
 enum OrderStatus {
-  PENDING
-  PAID
-  COMPLETED
-  CANCELLED
-  REFUNDED
+  PENDING // Commande créée mais pas encore payée
+  PROCESSING // Paiement reçu, commande en cours de traitement
+  ACTIVE // Commande active (services en cours de livraison)
+  COMPLETED // Tous les services ponctuels livrés et abonnements activés
+  CANCELLED // Commande annulée avant traitement
+  REFUNDED // Commande remboursée
 }
 
 // Statuts d'abonnement
 enum SubscriptionStatus {
-  ACTIVE
-  CANCELLED
-  EXPIRED
-  PENDING
+  PENDING // Abonnement en attente d'activation
+  ACTIVE // Abonnement actif et en cours
+  SUSPENDED // Temporairement suspendu (problème de paiement ou à la demande du client)
+  CANCELLED // Annulé par le client avant terme
+  EXPIRED // Terme atteint, non renouvelé
+  RENEWING // En cours de renouvellement
 }
 
 // Types de messages dans le chatbot
@@ -179,7 +182,7 @@ model User {
   addresses             Address[]
   password_reset_tokens PasswordResetToken[]
   sessions              Session[]
-  cartItems              CartItem[]
+  cartItems             CartItem[]
 
   @@index([email])
   @@index([role])

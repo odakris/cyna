@@ -12,6 +12,7 @@ export default function AdminSideBar() {
     { name: "Produits", href: "/dashboard/products" },
     { name: "Categories", href: "/dashboard/categories" },
     { name: "Utilisateurs", href: "/dashboard/users" },
+    { name: "Commandes", href: "/dashboard/orders" },
   ]
 
   return (
