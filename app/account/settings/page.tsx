@@ -270,6 +270,12 @@ export default function AccountSettingsPage() {
       {/* Section Méthodes de paiement */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-center">Méthodes de paiement</h2>
+
+        {/* Bouton Ajouter une carte */}
+        <Link href="/account/payments/add">
+          <Button>Ajouter une carte</Button>
+        </Link>
+
         <Table className="min-w-full mb-12">
           <TableHeader>
             <TableRow>
@@ -277,6 +283,7 @@ export default function AccountSettingsPage() {
               <TableHead>Numéro</TableHead>
               <TableHead>Expiration</TableHead>
               <TableHead>Par défaut</TableHead>
+              <TableHead>Actions</TableHead> {/* Ajout d'une colonne Actions */}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -295,11 +302,17 @@ export default function AccountSettingsPage() {
                       <Badge variant="outline">Non</Badge>
                     )}
                   </TableCell>
+                  <TableCell>
+                    {/* Bouton Modifier */}
+                    <Link href={`/account/payments/${payment.id_payment_info}`}>
+                      <Button variant="default">Modifier</Button>
+                    </Link>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="text-center">
+                <TableCell colSpan={5} className="text-center">
                   Aucune méthode de paiement enregistrée.
                 </TableCell>
               </TableRow>
