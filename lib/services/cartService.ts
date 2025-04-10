@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 
 // Définir une interface pour typer les méthodes de cartService
 interface CartService {
+  clearCart: (id_session: number) => Promise<void>; // Typage de clearCart
   getSessionByToken: (sessionToken: string) => Promise<Session | null>;
   getCartItems: (sessionId: number) => Promise<any>;
   addToCart: (
@@ -21,6 +22,29 @@ interface CartService {
 }
 
 const cartService: CartService = {
+  // Vider le panier pour une session donnée
+  async clearCart(id_session: number) {
+    try {
+      const cartItems = await prisma.cartItem.findMany({
+        where: {
+          sessionId_session: id_session,
+        },
+      });
+
+      if (cartItems.length === 0) {
+        return; // Rien à supprimer si le panier est déjà vide
+      }
+
+      await prisma.cartItem.deleteMany({
+        where: {
+          sessionId_session: id_session,
+        },
+      });
+    } catch (error) {
+      throw new Error("Erreur lors de la suppression du panier");
+    }
+  },
+
   // Récupérer une session par son token
   async getSessionByToken(sessionToken: string) {
     return await prisma.session.findUnique({
