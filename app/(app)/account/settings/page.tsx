@@ -80,6 +80,7 @@ export default function AccountSettingsPage() {
         <h1 className="text-2xl font-bold text-center">
           Informations personnelles
         </h1>
+
         <Card className="space-y-4 p-6">
           <div className="flex items-center space-x-4">
             <Avatar>
@@ -102,16 +103,18 @@ export default function AccountSettingsPage() {
               <p>
                 <strong>Email :</strong> {clientInfo?.email || "Non défini"}
               </p>
-              <Button
-                onClick={() =>
-                  (window.location.href = "/account/editPersonalInfo")
-                }
-              >
-                Modifier
-              </Button>
             </div>
           </div>
         </Card>
+
+        {/* Bouton Modifier placé en dehors de la Card, aligné à droite */}
+        <div className="flex justify-start">
+          <Button
+            onClick={() => (window.location.href = "/account/editPersonalInfo")}
+          >
+            Modifier
+          </Button>
+        </div>
       </div>
 
       {/* Section Abonnements */}
@@ -203,7 +206,7 @@ export default function AccountSettingsPage() {
               addresses.map(address => (
                 <TableRow key={address.id_address}>
                   <TableCell>{`${address.first_name} ${address.last_name}`}</TableCell>
-                  <TableCell>{`${address.address1} ${address.address2 || ""}`}</TableCell>
+                  <TableCell>{`${address.address1}${address.address2 ? " " + address.address2 : ""}`}</TableCell>
                   <TableCell>{address.postal_code}</TableCell>
                   <TableCell>{address.city}</TableCell>
                   <TableCell>{address.country}</TableCell>
@@ -233,9 +236,7 @@ export default function AccountSettingsPage() {
                         try {
                           const res = await fetch(
                             `/api/users/${session.user.id}/addresses?addressId=${address.id_address}`,
-                            {
-                              method: "DELETE",
-                            }
+                            { method: "DELETE" }
                           )
                           if (res.ok) {
                             setAddresses(prev =>
