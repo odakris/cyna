@@ -1,69 +1,51 @@
-"use client"
+"use client";
 
-import { useCart } from "@/context/CartContext"
-import CartItem from "@/components/Cart/CartItem"
-import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button";
+import CartItem from "@/components/Cart/CartItem";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useCart } from "@/context/CartContext";
 
-export default function PanierPage() {
-    const { cart, setCart } = useCart();
-    const [totalAmount, setTotalAmount] = useState(0);
-  
-    useEffect(() => {
-      const total = cart.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-      );
-      setTotalAmount(total);
-    }, [cart]);
-  
-    const handleUpdateItem = (
-      id: string,
-      quantity: number,
-      subscription: string
-    ) => {
-      setCart(
-        cart.map(item =>
-          item.id === id && item.subscription === subscription
-            ? { ...item, quantity }
-            : item
-        )
-      );
-    };
-  
-    const handleRemoveItem = (id: string) => {
-      setCart(cart.filter(item => item.id !== id));
-    };
-  
-    return (
-      <main className="p-6">
-        <h1 className="text-3xl font-bold text-center mb-6">Votre Panier</h1>
-  
-        <h2 className="text-xl font-semibold mb-4">Liste des services ajoutés :</h2>
-  
-        {cart.length === 0 ? (
-          <p className="text-center text-gray-500">Votre panier est vide.</p>
-        ) : (
-          cart.map(item => (
-            <CartItem
-              key={item.id + item.subscription} // Assurez-vous que chaque item est unique
-              id={item.id}
-              name={item.name}
-              price={item.price}
-              quantity={item.quantity}
-              subscription={item.subscription ?? ""}
-              imageUrl={item.imageUrl ?? ""}
-              onUpdate={handleUpdateItem}
-              onRemove={handleRemoveItem}
-            />
-          ))
-        )}
-  
-        {/* Montant total */}
-        <div className="mt-6 p-4 border-t text-xl font-bold flex justify-between">
-          <span>Montant total à payer :</span>
-          <span>{totalAmount.toFixed(2)}€</span>
+export default function CartPage() {
+  const { cart } = useCart();
+
+  const calculateTotalPrice = () => {
+    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  };
+
+  const totalPrice = calculateTotalPrice();
+
+  console.log("Contenu de cart dans CartPage:", cart); // Log pour voir ce qui est vraiment dans cart
+
+  return (
+    <div className="py-8 px-6 container mx-auto">
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">Votre panier</h1>
+
+      {cart.length === 0 ? (
+        <p className="text-center mt-10">Votre panier est vide.</p>
+      ) : (
+        <div className="space-y-4">
+          {cart
+            .filter((item) => item && typeof item.uniqueId === "string") // Filtrer les éléments valides
+            .map((item) => (
+              <CartItem key={item.uniqueId} item={item} />
+            ))}
         </div>
-      </main>
-    );
-  }
-  
+      )}
+      {cart.length > 0 && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Récapitulatif</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-lg">
+              <strong>Total : {totalPrice.toFixed(2)} €</strong>
+            </p>
+            <div className="mt-4 flex justify-end">
+              <Button variant="default" size="lg">Passer à la caisse</Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

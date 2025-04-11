@@ -1,66 +1,38 @@
-import { NextRequest, NextResponse } from "next/server"
-import productController from "@/lib/controllers/product-controller"
-import { validateId } from "@/lib/utils/utils"
+import { NextRequest, NextResponse } from 'next/server';
+import { PrismaClient } from '@prisma/client';
 
-/**
- * Récupère un produit par son identifiant.
- *
- * @param {NextRequest} request - L'objet de requête HTTP.
- * @param {{ params: { id: string } }} context - L'objet contenant les paramètres de la requête.
- * @returns {Promise<NextResponse>} La réponse contenant le produit ou un message d'erreur.
- */
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> } // Typage correct avec Promise
-): Promise<NextResponse> {
-  const resolvedParams = await params // Résoudre la Promise
-  const id = validateId(resolvedParams.id) // Accéder à id après résolution
+const prisma = new PrismaClient();
 
-  if (!id) {
-    return NextResponse.json({ message: "ID invalide" }, { status: 400 })
+export async function GET(req: NextRequest) {
+  try {
+    // Extraire l'ID de l'URL
+    const id = req.nextUrl.pathname.split('/').pop();
+    const id_product = parseInt(id || '');
+
+    if (isNaN(id_product)) {
+      return NextResponse.json(
+        { message: 'ID du produit invalide' },
+        { status: 400 }
+      );
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { id_product },
+    });
+
+    if (!product) {
+      return NextResponse.json(
+        { message: 'Produit non trouvé' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(product, { status: 200 });
+  } catch (error) {
+    console.error('Erreur dans /api/products/[id]:', error);
+    return NextResponse.json(
+      { message: 'Erreur serveur lors de la récupération du produit' },
+      { status: 500 }
+    );
   }
-
-  return productController.getById(id)
-}
-
-/**
- * Met à jour un produit existant.
- *
- * @param {NextRequest} request - L'objet de requête HTTP contenant les nouvelles données.
- * @param {{ params: { id: string } }} context - L'objet contenant les paramètres de la requête.
- * @returns {Promise<NextResponse>} La réponse contenant le produit mis à jour ou un message d'erreur.
- */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-): Promise<NextResponse> {
-  const resolvedParams = await params
-  const id = validateId(resolvedParams.id)
-
-  if (!id) {
-    return NextResponse.json({ message: "ID invalide" }, { status: 400 })
-  }
-
-  return productController.update(request, id)
-}
-
-/**
- * Supprime un produit en fonction de son identifiant.
- *
- * @param {NextRequest} request - L'objet de requête HTTP.
- * @param {{ params: { id: string } }} context - L'objet contenant les paramètres de la requête.
- * @returns {Promise<NextResponse>} La réponse confirmant la suppression ou un message d'erreur.
- */
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-): Promise<NextResponse> {
-  const resolvedParams = await params
-  const id = validateId(resolvedParams.id)
-
-  if (!id) {
-    return NextResponse.json({ message: "ID invalide" }, { status: 400 })
-  }
-
-  return productController.remove(id)
 }

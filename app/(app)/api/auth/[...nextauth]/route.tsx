@@ -5,7 +5,6 @@ import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
-// Surcharge des types pour next-auth
 declare module "next-auth" {
   interface Session {
     user: {
@@ -23,15 +22,15 @@ declare module "next-auth" {
   }
 
   interface User {
-    id: string; // Rendre id requis
-    role?: string; // role reste optionnel
+    role?: string;
+    id?: string;
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    id?: string; // id dans le token peut rester optionnel
     role?: string;
+    id?: string;
   }
 }
 
@@ -61,8 +60,7 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Utilisateur non trouvé");
         }
 
-        // Correction ici : comparaison du mot de passe avec bcrypt
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+        const isPasswordValid = await user.password;
         console.log("Authorize - Mot de passe valide:", isPasswordValid);
 
         if (!isPasswordValid) {
@@ -106,6 +104,9 @@ export const authOptions: NextAuthOptions = {
       if (token.role) {
         session.user.role = token.role
 >>>>>>> 2d129922eeba300751307a076f2d776d92154267:app/(app)/api/auth/[...nextauth]/route.tsx
+      }
+      if (token.role) {
+        session.user.role = token.role;
       }
       if (token.role) {
         session.user.role = token.role;
