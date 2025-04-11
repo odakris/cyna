@@ -36,8 +36,7 @@ export default function NavbarClient({ categories }: NavbarProps) {
     { name: "Accueil", href: "/" },
     { name: "Categories", href: "/categories" },
     { name: "Recherche Avancée", href: "/recherche" },
-    { name: "Panier", href: "/cart" },
-    { name: "Contact", href: "/contact" },
+    { name: "Panier", href: "/panier" },
   ]
 
   return (

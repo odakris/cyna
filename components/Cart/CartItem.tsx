@@ -6,7 +6,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { CartItem } from "@/context/CartContext";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
 import { useState, useMemo } from "react";
@@ -19,62 +18,36 @@ const CartItemComponent: React.FC<CartProps> = ({ item }) => {
   const { cart, updateCartItem, decreaseQuantity, removeFromCart } = useCart();
   const [isRemoving, setIsRemoving] = useState(false);
 
-  const currentItem = cart.find((cartItem) => cartItem.uniqueId === item.uniqueId) || item;
-  console.log("currentItem dans CartItemComponent:", currentItem);
-  console.log("Quantité actuelle:", currentItem.quantity);
-
-  if (!currentItem.uniqueId) {
-    console.error("uniqueId manquant pour l'élément:", currentItem);
+  // Garde minimale pour éviter le crash
+  if (!item || !item.uniqueId) {
+    console.error("Item invalide reçu dans CartItemComponent:", item);
     return null;
   }
 
-  if (!currentItem.subscription) {
-    console.warn("subscription manquant pour l'élément:", currentItem);
-  }
+  const currentItem = cart.find((cartItem) => cartItem.uniqueId === item.uniqueId) || item;
 
   const handleSubscriptionChange = (value: string) => {
-    console.log(`Mise à jour de l'abonnement pour uniqueId ${currentItem.uniqueId}:`, value);
     updateCartItem(currentItem.uniqueId, { subscription: value });
   };
 
   const handleQuantityIncrement = () => {
-    console.log(`Augmentation de la quantité pour uniqueId ${currentItem.uniqueId}`);
     updateCartItem(currentItem.uniqueId, { quantity: currentItem.quantity + 1 });
   };
 
   const handleQuantityDecrement = () => {
-    console.log(`Diminution de la quantité pour uniqueId ${currentItem.uniqueId}`);
     decreaseQuantity(currentItem.uniqueId);
   };
 
   const handleRemove = () => {
     if (isRemoving) return;
     setIsRemoving(true);
-    console.log(`Appel de removeFromCart pour uniqueId ${currentItem.uniqueId}`);
     removeFromCart(currentItem.uniqueId);
     setTimeout(() => setIsRemoving(false), 1000);
   };
 
   const adjustedPrice = useMemo(() => {
-    let price = currentItem.price;
-    switch (currentItem.subscription) {
-      case "MONTHLY":
-        price = currentItem.price * currentItem.quantity;
-        break;
-      case "YEARLY":
-        price = currentItem.price * 12 * currentItem.quantity; // Ou *12 si annualisé sur 12 mois
-        break;
-      case "PER_USER":
-        price = currentItem.price * currentItem.quantity;
-        break;
-      case "PER_MACHINE":
-        price = currentItem.price * currentItem.quantity;
-        break;
-      default:
-        price = currentItem.price * currentItem.quantity;
-    }
-    return price;
-  }, [currentItem.price, currentItem.quantity, currentItem.subscription]);
+    return currentItem.price * currentItem.quantity;
+  }, [currentItem.price, currentItem.quantity]);
 
   return (
     <div className="flex justify-center mb-12">
@@ -86,7 +59,7 @@ const CartItemComponent: React.FC<CartProps> = ({ item }) => {
               Durée d'abonnement :
             </label>
             <Select
-              value={currentItem.subscription}
+              value={currentItem.subscription || "MONTHLY"}
               onValueChange={handleSubscriptionChange}
             >
               <SelectTrigger className="w-[273px]">

@@ -1,8 +1,26 @@
-import { Product } from "@prisma/client"
+import { Product, Order, OrderItem, Address } from "@prisma/client"
+import { PrismaClient } from "@prisma/client"
 
 export interface ProductWithImages extends Product {
   product_caroussel_images: { url: string; alt: string }[] // Add the related field
 }
+
+export interface OrderWithItems extends Order {
+  user: {
+    id_user: number
+    first_name: string
+    last_name: string
+    email: string
+  }
+  order_items: (OrderItem & { product: ProductWithImages })[]
+  address: Address
+}
+
+// Type pour le client de transaction
+export type TransactionClient = Omit<
+  PrismaClient,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+>
 
 export type CategoryType = {
   id_category: number

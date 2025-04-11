@@ -275,7 +275,7 @@ export default function SearchForm({ categories }: SearchFormProps) {
             }}
             className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-200"
           >
-            Trier par prix {sortOrder === "asc" ? "croissant" : "décroissant"}
+            Trier par prix {sortOrder === "asc" ? "décroissant" : "croissant"}
           </button>
           <button
             onClick={() => {
@@ -300,7 +300,7 @@ export default function SearchForm({ categories }: SearchFormProps) {
             className="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition duration-200"
           >
             Trier par disponibilité (
-            {sortByAvailability === "available" ? "Disponible" : "Indisponible"}
+            {sortByAvailability === "available" ? "Indisponible" : "Disponible"}
             )
           </button>
         </div>

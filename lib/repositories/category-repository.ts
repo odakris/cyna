@@ -1,12 +1,12 @@
 import { prisma } from "../prisma"
 import { CategoryFormValues } from "@/lib/validations/category-schema"
-import { CategoryType } from "@/types/Types"
+import { Category } from "@prisma/client"
 
 /**
  * Récupère la liste complète des catégories.
- * @returns {Promise<CategoryType[]>} Liste des catégories triées par ordre alphabétique.
+ * @returns {Promise<Category[]>} Liste des catégories triées par ordre alphabétique.
  */
-export const findAll = async (): Promise<CategoryType[]> => {
+export const findAll = async (): Promise<Category[]> => {
   return prisma.category.findMany({
     include: {
       products: true,
@@ -18,9 +18,9 @@ export const findAll = async (): Promise<CategoryType[]> => {
 /**
  * Récupère une catégorie spécifique en fonction de son identifiant.
  * @param {number} id - Identifiant unique de la catégorie.
- * @returns {Promise<CategoryType | null>} La catégorie correspondante ou null si elle n'existe pas.
+ * @returns {Promise<Category | null>} La catégorie correspondante ou null si elle n'existe pas.
  */
-export const findById = async (id: number): Promise<CategoryType | null> => {
+export const findById = async (id: number): Promise<Category | null> => {
   return prisma.category.findUnique({
     where: { id_category: id },
     include: {
@@ -32,11 +32,9 @@ export const findById = async (id: number): Promise<CategoryType | null> => {
 /**
  * Crée une nouvelle catégorie en base de données.
  * @param {CategoryFormValues} data - Données de la catégorie à enregistrer.
- * @returns {Promise<CategoryType>} La catégorie nouvellement créée.
+ * @returns {Promise<Category>} La catégorie nouvellement créée.
  */
-export const create = async (
-  data: CategoryFormValues
-): Promise<CategoryType> => {
+export const create = async (data: CategoryFormValues): Promise<Category> => {
   return prisma.category.create({
     data: {
       name: data.name.trim(),
@@ -53,12 +51,12 @@ export const create = async (
  * Met à jour une catégorie existante avec les nouvelles informations.
  * @param {number} id - Identifiant de la catégorie à mettre à jour.
  * @param {CategoryFormValues} data - Nouvelles données de la catégorie.
- * @returns {Promise<CategoryType>} La catégorie mise à jour.
+ * @returns {Promise<Category>} La catégorie mise à jour.
  */
 export const update = async (
   id: number,
   data: CategoryFormValues
-): Promise<CategoryType> => {
+): Promise<Category> => {
   return prisma.category.update({
     where: { id_category: id },
     data: {
@@ -74,9 +72,9 @@ export const update = async (
 /**
  * Supprime une catégorie de la base de données.
  * @param {number} id - Identifiant de la catégorie à supprimer.
- * @returns {Promise<CategoryType>} La catégorie supprimée.
+ * @returns {Promise<Category>} La catégorie supprimée.
  */
-export const deleteCategory = async (id: number): Promise<CategoryType> => {
+export const deleteCategory = async (id: number): Promise<Category> => {
   return prisma.category.delete({
     where: { id_category: id },
   })

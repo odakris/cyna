@@ -16,7 +16,7 @@ import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface ImageUploaderProps {
-  field: ControllerRenderProps<never, never>
+  field: ControllerRenderProps<any, any>
   disabled?: boolean
   existingImage?: string | string[]
   multiple?: boolean

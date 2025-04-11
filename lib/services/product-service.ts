@@ -4,7 +4,7 @@ import { Product } from "@prisma/client"
 
 /**
  * Récupère la liste complète des produits depuis le dépôt de données.
- * @returns {Promise<ProductType[]>} Liste des produits.
+ * @returns {Promise<Product[]>} Liste des produits.
  */
 export const getAllProducts = async (): Promise<Product[]> => {
   return productRepository.findAll()
