@@ -8,17 +8,11 @@ const prisma = new PrismaClient();
 declare module "next-auth" {
   interface Session {
     user: {
-<<<<<<< HEAD:app/api/auth/[...nextauth]/route.tsx
-      id: string; // Rendre id requis
-      role?: string; // role reste optionnel
-    } & DefaultSession["user"]; // Inclut les propriétés par défaut (name, email, image)
-=======
       id: string
       firstName: string
       lastName: string
       role?: string
     } & DefaultSession["user"]
->>>>>>> 2d129922eeba300751307a076f2d776d92154267:app/(app)/api/auth/[...nextauth]/route.tsx
   }
 
   interface User {
@@ -71,39 +65,26 @@ export const authOptions: NextAuthOptions = {
           id: user.id_user.toString(), // id doit être une string et requis
           email: user.email,
           role: user.role,
-<<<<<<< HEAD:app/api/auth/[...nextauth]/route.tsx
-        };
-=======
           firstName: user.first_name,
           lastName: user.last_name,
         }
->>>>>>> 2d129922eeba300751307a076f2d776d92154267:app/(app)/api/auth/[...nextauth]/route.tsx
       },
     }),
   ],
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-<<<<<<< HEAD:app/api/auth/[...nextauth]/route.tsx
-        token.id = user.id;
-        token.role = user.role;
-=======
         token.id = user.id
         token.role = user.role
->>>>>>> 2d129922eeba300751307a076f2d776d92154267:app/(app)/api/auth/[...nextauth]/route.tsx
       }
       return token;
     },
     async session({ session, token }) {
       if (token.id) {
-<<<<<<< HEAD:app/api/auth/[...nextauth]/route.tsx
-        session.user.id = token.id; // id est requis dans la session
-=======
         session.user.id = token.id
       }
       if (token.role) {
         session.user.role = token.role
->>>>>>> 2d129922eeba300751307a076f2d776d92154267:app/(app)/api/auth/[...nextauth]/route.tsx
       }
       if (token.role) {
         session.user.role = token.role;
