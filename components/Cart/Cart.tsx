@@ -5,7 +5,10 @@ interface CartProps {
 }
 
 const Cart = ({ items }: CartProps) => {
-  const totalPrice = items.reduce((total, item) => total + item.price * item.quantity, 0)
+  const totalPrice = items.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  )
 
   return (
     <div className="cart">
@@ -17,7 +20,9 @@ const Cart = ({ items }: CartProps) => {
           {items.map(item => (
             <li key={item.id} className="flex justify-between">
               <span>{item.name}</span>
-              <span>{item.quantity} x {item.price} €</span>
+              <span>
+                {item.quantity} x {item.price} €
+              </span>
             </li>
           ))}
         </ul>
