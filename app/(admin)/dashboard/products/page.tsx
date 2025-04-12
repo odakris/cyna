@@ -72,6 +72,7 @@ import {
   productsColumnNamesInFrench,
   productColumns,
   globalFilterFunction,
+  productsFilterFn,
 } from "./product-columns"
 
 // Extend the FilterFns type to include stockRange
@@ -110,13 +111,6 @@ export default function ProductHomePage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [globalFilter, setGlobalFilter] = useState("")
   const [activeTab, setActiveTab] = useState("tous")
-
-  // Options pour les filtres
-  // const statusOptions = [
-  //   { value: "all", label: "Tous les statuts" },
-  //   { value: "true", label: "Disponibles" },
-  //   { value: "false", label: "Indisponibles" },
-  // ]
 
   const stockOptions = [
     { value: "all", label: "Tous les stocks" },
@@ -191,6 +185,12 @@ export default function ProductHomePage() {
     filterFns: {
       dateRange: globalFilterFunction as FilterFn<ProductWithImages>,
       stockRange: stockFilterFn,
+      productsFilter: productsFilterFn,
+      global: globalFilterFunction as FilterFn<ProductWithImages>, // Add a valid filter function
+      emailVerifiedFilter: (row, columnId, filterValue) => {
+        const emailVerified = row.getValue(columnId) as boolean
+        return filterValue === undefined || emailVerified === filterValue
+      },
     },
     globalFilterFn: globalFilterFunction as FilterFn<ProductWithImages>,
     state: {
@@ -347,13 +347,25 @@ export default function ProductHomePage() {
     <div className="container mx-auto p-6 space-y-6 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold mb-1 text-foreground">
-            Gestion des Produits
-          </h1>
-          <p className="text-muted-foreground">
-            {products.length} produit{products.length > 1 ? "s" : ""} dans la
-            base de données
-          </p>
+          <div className="flex items-center gap-2">
+            <Package className="h-6 w-6 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground">
+              Gestion des Produits
+            </h1>
+          </div>
+          <div className="mt-1 flex items-center gap-2">
+            <Badge variant="outline" className="font-normal">
+              {products.length} produit{products.length > 1 ? "s" : ""}
+            </Badge>
+            <Badge
+              variant="secondary"
+              className="font-normal"
+              title="Sélectionnées"
+            >
+              {table.getFilteredSelectedRowModel().rows.length} sélectionnée
+              {table.getFilteredSelectedRowModel().rows.length > 1 ? "s" : ""}
+            </Badge>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-3">

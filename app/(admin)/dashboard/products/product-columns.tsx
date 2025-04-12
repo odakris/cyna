@@ -1,5 +1,5 @@
 import * as React from "react"
-import { ColumnDef, Row } from "@tanstack/react-table"
+import { ColumnDef, FilterFn, Row } from "@tanstack/react-table"
 import {
   ArrowUpDown,
   Eye,
@@ -26,6 +26,29 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+
+export const productsFilterFn: FilterFn<ProductWithImages> = (
+  row,
+  columnId,
+  filterValue
+) => {
+  if (filterValue === undefined || filterValue === "all") return true
+
+  const stock = row.getValue(columnId) as number
+
+  switch (filterValue) {
+    case "out":
+      return stock === 0
+    case "low":
+      return stock < 5
+    case "medium":
+      return stock <= 10
+    case "high":
+      return stock > 10
+    default:
+      return true
+  }
+}
 
 export const productColumns: ColumnDef<ProductWithImages>[] = [
   {
@@ -249,6 +272,7 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
       )
     },
     enableSorting: true,
+    filterFn: productsFilterFn,
   },
   {
     accessorKey: "available",
