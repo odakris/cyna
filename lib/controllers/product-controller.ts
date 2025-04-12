@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import productService from "@/lib/services/product-service"
 import { productFormSchema } from "@/lib/validations/product-schema"
+import { ZodError } from "zod"
 
 /**
  * Récupère la liste complète des produits depuis la base de données.
@@ -12,6 +13,11 @@ export const getAll = async (): Promise<NextResponse> => {
     return NextResponse.json(products)
   } catch (error) {
     console.error("Erreur lors de la récupération des produits:", error)
+
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }
@@ -28,11 +34,8 @@ export const getById = async (id: number): Promise<NextResponse> => {
   } catch (error) {
     console.error("Erreur lors de la récupération du produit par ID:", error)
 
-    if (error instanceof Error && error.message === "Produit non trouvé") {
-      return NextResponse.json(
-        { message: "Produit non trouvé" },
-        { status: 404 }
-      )
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 404 })
     }
 
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
@@ -52,8 +55,19 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
     return NextResponse.json(newProduct, { status: 201 })
   } catch (error) {
     console.error("Erreur lors de la création du produit:", error)
-    const message = error instanceof Error ? error.message : "Erreur inconnue"
-    return NextResponse.json({ error: message }, { status: 400 })
+
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { error: "Données invalides", details: error.errors },
+        { status: 400 }
+      )
+    }
+
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }
 
@@ -75,15 +89,21 @@ export const update = async (
   } catch (error) {
     console.error("Erreur lors de la mise à jour du produit:", error)
 
-    if (error instanceof Error && error.message === "Produit non trouvé") {
+    if (error instanceof ZodError) {
       return NextResponse.json(
-        { message: "Produit non trouvé" },
-        { status: 404 }
+        { error: "Données invalides", details: error.errors },
+        { status: 400 }
       )
     }
 
-    const message = error instanceof Error ? error.message : "Erreur inconnue"
-    return NextResponse.json({ error: message }, { status: 400 })
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message === "Produit non trouvé" ? 404 : 400 }
+      )
+    }
+
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }
 
@@ -94,20 +114,19 @@ export const update = async (
  */
 export const remove = async (id: number): Promise<NextResponse> => {
   try {
-    await productService.deleteProduct(id)
-    return NextResponse.json({ message: "Produit supprimé" })
+    const result = await productService.deleteProduct(id)
+    return NextResponse.json(result)
   } catch (error) {
     console.error("Erreur lors de la suppression du produit:", error)
 
-    if (error instanceof Error && error.message === "Produit non trouvé") {
+    if (error instanceof Error) {
       return NextResponse.json(
-        { message: "Produit non trouvé" },
-        { status: 404 }
+        { error: error.message },
+        { status: error.message === "Produit non trouvé" ? 404 : 400 }
       )
     }
 
-    const message = error instanceof Error ? error.message : "Erreur inconnue"
-    return NextResponse.json({ error: message }, { status: 400 })
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }
 

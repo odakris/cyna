@@ -7,7 +7,15 @@ import categoryController from "@/lib/controllers/category-controller"
  * @returns {Promise<NextResponse>} La réponse contenant la liste des categories.
  */
 export async function GET(): Promise<NextResponse> {
-  return categoryController.getAll()
+  try {
+    return await categoryController.getAll()
+  } catch (error) {
+    console.error("Erreur non gérée dans la route GET /categories:", error)
+    return NextResponse.json(
+      { error: "Erreur serveur inattendue" },
+      { status: 500 }
+    )
+  }
 }
 
 /**
@@ -17,5 +25,13 @@ export async function GET(): Promise<NextResponse> {
  * @returns {Promise<NextResponse>} La réponse contenant la categorie créé ou un message d'erreur.
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  return categoryController.create(request)
+  try {
+    return await categoryController.create(request)
+  } catch (error) {
+    console.error("Erreur non gérée dans la route POST /categories:", error)
+    return NextResponse.json(
+      { error: "Erreur serveur inattendue" },
+      { status: 500 }
+    )
+  }
 }

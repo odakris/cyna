@@ -1,60 +1,95 @@
-import { CategoryType } from "@/types/Types"
 import categoryRepository from "@/lib/repositories/category-repository"
 import { CategoryFormValues } from "../validations/category-schema"
+import { Category } from "@prisma/client"
 
 /**
  * Récupère la liste complète des catégories depuis le dépôt de données.
- * @returns {Promise<CategoryType[]>} Liste des catégories.
+ * @returns {Promise<Category[]>} Liste des catégories.
  */
-export const getAllCategories = async (): Promise<CategoryType[]> => {
-  return categoryRepository.findAll()
+export const getAllCategories = async (): Promise<Category[]> => {
+  try {
+    return await categoryRepository.findAll()
+  } catch (error) {
+    console.error("Erreur lors de la récupération des catégories:", error)
+    throw new Error("Erreur lors de la récupération des catégories")
+  }
 }
 
 /**
  * Récupère une catégorie spécifique en fonction de son identifiant.
  * @param {number} id - Identifiant unique de la catégorie.
- * @returns {Promise<CategoryType>} La catégorie correspondante.
+ * @returns {Promise<Category>} La catégorie correspondante.
  * @throws {Error} Si la catégorie n'existe pas.
  */
-export const getCategoryById = async (id: number): Promise<CategoryType> => {
-  const category = await categoryRepository.findById(id)
+export const getCategoryById = async (id: number): Promise<Category> => {
+  try {
+    const category = await categoryRepository.findById(id)
 
-  if (!category) {
-    throw new Error("Catégorie non trouvée")
+    if (!category) {
+      throw new Error("Catégorie non trouvée")
+    }
+
+    return category
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération de la catégorie par ID:",
+      error
+    )
+    throw new Error(`Erreur lors de la récupération de la catégorie ${id}`)
   }
-
-  return category
 }
 
 /**
  * Crée une nouvelle catégorie en base de données.
  * @param {CategoryFormValues} data - Données de la catégorie à enregistrer.
- * @returns {Promise<CategoryType>} La catégorie nouvellement créée.
+ * @returns {Promise<Category>} La catégorie nouvellement créée.
  */
 export const createCategory = async (
   data: CategoryFormValues
-): Promise<CategoryType> => {
-  return categoryRepository.create(data)
+): Promise<Category> => {
+  try {
+    return await categoryRepository.create(data)
+  } catch (error) {
+    // Si c'est une erreur spécifique concernant un nom de catégorie déjà existant
+    if (error instanceof Error && error.message.includes("existe déjà")) {
+      throw new Error(error.message)
+    }
+    throw new Error("Erreur lors de la création de la catégorie")
+  }
 }
 
 /**
  * Met à jour une catégorie existante avec de nouvelles informations.
  * @param {number} id - Identifiant de la catégorie à mettre à jour.
  * @param {CategoryFormValues} data - Nouvelles données de la catégorie.
- * @returns {Promise<CategoryType>} La catégorie mise à jour.
+ * @returns {Promise<Category>} La catégorie mise à jour.
  * @throws {Error} Si la catégorie n'existe pas.
  */
 export const updateCategory = async (
   id: number,
   data: CategoryFormValues
-): Promise<CategoryType> => {
-  const exists = await categoryRepository.exists(id)
+): Promise<Category> => {
+  try {
+    // Vérifier si la catégorie existe
+    const exists = await categoryRepository.exists(id)
+    if (!exists) {
+      throw new Error("Catégorie non trouvée")
+    }
 
-  if (!exists) {
-    throw new Error("Catégorie non trouvée")
+    return await categoryRepository.update(id, data)
+  } catch (error) {
+    if (error instanceof Error) {
+      // Si c'est une erreur spécifique concernant un nom de catégorie déjà existant
+      if (
+        error.message.includes("existe déjà") ||
+        error.message.includes("n'existe pas")
+      ) {
+        throw new Error(error.message)
+      }
+    }
+
+    throw new Error(`Erreur lors de la mise à jour de la catégorie ${id}`)
   }
-
-  return categoryRepository.update(id, data)
 }
 
 /**
@@ -64,14 +99,35 @@ export const updateCategory = async (
  * @throws {Error} Si la catégorie n'existe pas.
  */
 export const deleteCategory = async (id: number): Promise<object> => {
-  const exists = await categoryRepository.exists(id)
+  try {
+    // Vérifier si la catégorie existe
+    const exists = await categoryRepository.exists(id)
+    if (!exists) {
+      throw new Error("Catégorie non trouvée")
+    }
 
-  if (!exists) {
-    throw new Error("Catégorie non trouvée")
+    await categoryRepository.remove(id)
+    return { success: true, message: "Catégorie supprimée avec succès" }
+  } catch (error) {
+    if (error instanceof Error) {
+      // Si c'est une erreur spécifique concernant des produits associés
+      if (
+        error.message.includes("produit") ||
+        error.message.includes("contient")
+      ) {
+        throw new Error(
+          `Impossible de supprimer la catégorie car elle contient des produits associés`
+        )
+      }
+
+      // Si la catégorie n'existe pas
+      if (error.message.includes("n'existe pas")) {
+        throw new Error(error.message)
+      }
+    }
+
+    throw new Error(`Erreur lors de la suppression de la catégorie ${id}`)
   }
-
-  await categoryRepository.delete(id)
-  return { success: true, message: "Catégorie supprimée avec succès" }
 }
 
 const categoryService = {

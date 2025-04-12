@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import userService from "@/lib/services/user-service"
 import { userFormSchema } from "@/lib/validations/user-schema"
+import { ZodError } from "zod"
 
 /**
  * Récupère la liste complète des produits depuis la base de données.
@@ -12,6 +13,11 @@ export const getAll = async (): Promise<NextResponse> => {
     return NextResponse.json(users)
   } catch (error) {
     console.error("Erreur lors de la récupération des utilisateurs:", error)
+
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }
@@ -31,11 +37,26 @@ export const getById = async (id: number): Promise<NextResponse> => {
       error
     )
 
-    if (error instanceof Error && error.message === "Utilisateur non trouvé") {
-      return NextResponse.json(
-        { message: "Utilisateur non trouvé" },
-        { status: 404 }
-      )
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 404 })
+    }
+
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
+  }
+}
+
+export const getByEmail = async (email: string): Promise<NextResponse> => {
+  try {
+    const user = await userService.getUserByEmail(email)
+    return NextResponse.json(user)
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération de l'utilisateur par email:",
+      error
+    )
+
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 404 })
     }
 
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
@@ -55,6 +76,18 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
     return NextResponse.json(newUser, { status: 201 })
   } catch (error) {
     console.error("Erreur lors de la création de l'utilisateur:", error)
+
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { error: "Données invalides", details: error.errors },
+        { status: 400 }
+      )
+    }
+
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
+    }
+
     const message = error instanceof Error ? error.message : "Erreur inconnue"
     return NextResponse.json({ error: message }, { status: 400 })
   }
@@ -78,11 +111,15 @@ export const update = async (
   } catch (error) {
     console.error("Erreur lors de la mise à jour de l'utilisateur:", error)
 
-    if (error instanceof Error && error.message === "Utilisateur non trouvé") {
+    if (error instanceof ZodError) {
       return NextResponse.json(
-        { message: "Utilisateur non trouvé" },
-        { status: 404 }
+        { error: "Données invalides", details: error.errors },
+        { status: 400 }
       )
+    }
+
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
     const message = error instanceof Error ? error.message : "Erreur inconnue"
@@ -97,16 +134,13 @@ export const update = async (
  */
 export const remove = async (id: number): Promise<NextResponse> => {
   try {
-    await userService.deleteUser(id)
-    return NextResponse.json({ message: "Utilisateur supprimé" })
+    const result = await userService.deleteUser(id)
+    return NextResponse.json(result)
   } catch (error) {
     console.error("Erreur lors de la suppression de l'utilisateur:", error)
 
-    if (error instanceof Error && error.message === "Utilisateur non trouvé") {
-      return NextResponse.json(
-        { message: "Utilisateur non trouvé" },
-        { status: 404 }
-      )
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
     const message = error instanceof Error ? error.message : "Erreur inconnue"

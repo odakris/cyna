@@ -1,20 +1,26 @@
 import { prisma } from "@/lib/prisma"
 import { UserFormValues } from "@/lib/validations/user-schema"
 import { User } from "@prisma/client"
+import { TransactionClient } from "../../types/Types"
 
 /**
  * Récupère la liste complète des utilisateurs.
  * @returns {Promise<User[]>} Liste des produits triés par ordre de priorité.
  */
 export const findAll = async (): Promise<User[]> => {
-  return prisma.user.findMany({
-    include: {
-      orders: true,
-    },
-    orderBy: {
-      id_user: "desc",
-    },
-  })
+  try {
+    return prisma.user.findMany({
+      include: {
+        orders: true,
+      },
+      orderBy: {
+        id_user: "desc",
+      },
+    })
+  } catch (error) {
+    console.error("Impossible de récupérer la liste des utilisateurs:", error)
+    throw new Error("Impossible de récupérer la liste des utilisateurs")
+  }
 }
 
 /**
@@ -23,10 +29,34 @@ export const findAll = async (): Promise<User[]> => {
  * @returns {Promise<User | null>} Le produit correspondant ou null s'il n'existe pas.
  */
 export const findById = async (id: number): Promise<User | null> => {
-  return prisma.user.findUnique({
-    where: { id_user: id },
-    include: { orders: true },
-  })
+  try {
+    return await prisma.user.findUnique({
+      where: { id_user: id },
+      include: { orders: true },
+    })
+  } catch (error) {
+    console.error("Impossible de récupérer l'utilisateur:", error)
+    throw new Error(`Impossible de récupérer l'utilisateur avec l'ID ${id}`)
+  }
+}
+
+/**
+ * Recherche un utilisateur par son adresse email.
+ * @param {string} email - Adresse email de l'utilisateur.
+ * @returns {Promise<User | null>} L'utilisateur correspondant ou null s'il n'existe pas.
+ * @throws {UserError} En cas d'erreur lors de la recherche de l'utilisateur.
+ */
+export const findByEmail = async (email: string): Promise<User | null> => {
+  try {
+    return await prisma.user.findUnique({
+      where: { email },
+    })
+  } catch (error) {
+    console.error("Impossible de récupérer l'utilisateur:", error)
+    throw new Error(
+      `Impossible de trouver un utilisateur avec l'email ${email}`
+    )
+  }
 }
 
 /**
@@ -35,19 +65,37 @@ export const findById = async (id: number): Promise<User | null> => {
  * @returns {Promise<User>} Le produit nouvellement créé.
  */
 export const create = async (data: UserFormValues): Promise<User> => {
-  return prisma.user.create({
-    data: {
-      first_name: data.first_name.trim(),
-      last_name: data.last_name.trim(),
-      email: data.email.trim(),
-      password: data.password,
-      role: data.role,
-      email_verified: data.email_verified,
-      two_factor_enabled: data.two_factor_enabled,
-      created_at: new Date(),
-      updated_at: new Date(),
-    },
-  })
+  try {
+    return await prisma.$transaction(async (tx: TransactionClient) => {
+      // Vérifier si un utilisateur avec le même email existe déjà
+      const existingUser = await tx.user.findUnique({
+        where: { email: data.email.trim() },
+      })
+
+      if (existingUser) {
+        throw new Error(
+          `Un utilisateur avec l'email '${data.email.trim()}' existe déjà`
+        )
+      }
+
+      return await tx.user.create({
+        data: {
+          first_name: data.first_name.trim(),
+          last_name: data.last_name.trim(),
+          email: data.email.trim(),
+          password: data.password,
+          role: data.role,
+          email_verified: data.email_verified,
+          two_factor_enabled: data.two_factor_enabled,
+          created_at: new Date(),
+          updated_at: new Date(),
+        },
+      })
+    })
+  } catch (error) {
+    console.error("Impossible de créer l'utilisateur:", error)
+    throw new Error("Impossible de créer l'utilisateur")
+  }
 }
 
 /**
@@ -60,19 +108,49 @@ export const update = async (
   id: number,
   data: UserFormValues
 ): Promise<User> => {
-  return prisma.user.update({
-    where: { id_user: id },
-    data: {
-      first_name: data.first_name.trim(),
-      last_name: data.last_name.trim(),
-      email: data.email.trim(),
-      password: data.password,
-      role: data.role,
-      email_verified: data.email_verified,
-      two_factor_enabled: data.two_factor_enabled,
-      updated_at: new Date(),
-    },
-  })
+  try {
+    return await prisma.$transaction(async (tx: TransactionClient) => {
+      // Vérifier si l'utilisateur existe
+      const userExists = await tx.user.findUnique({
+        where: { id_user: id },
+      })
+
+      if (!userExists) {
+        throw new Error(`L'utilisateur avec l'ID ${id} n'existe pas`)
+      }
+
+      // Vérifier si un autre utilisateur utilise déjà cet email
+      const duplicateEmail = await tx.user.findFirst({
+        where: {
+          email: data.email.trim(),
+          id_user: { not: id },
+        },
+      })
+
+      if (duplicateEmail) {
+        throw new Error(
+          `Un autre utilisateur utilise déjà l'email '${data.email.trim()}'`
+        )
+      }
+
+      return await tx.user.update({
+        where: { id_user: id },
+        data: {
+          first_name: data.first_name.trim(),
+          last_name: data.last_name.trim(),
+          email: data.email.trim(),
+          password: data.password,
+          role: data.role,
+          email_verified: data.email_verified,
+          two_factor_enabled: data.two_factor_enabled,
+          updated_at: new Date(),
+        },
+      })
+    })
+  } catch (error) {
+    console.error("Impossible de mettre à jour l'utilisateur:", error)
+    throw new Error(`Impossible de mettre à jour l'utilisateur avec l'ID ${id}`)
+  }
 }
 
 /**
@@ -81,9 +159,33 @@ export const update = async (
  * @returns {Promise<User>} L'utilisateur supprimé.
  */
 export const remove = async (id: number): Promise<User> => {
-  return prisma.user.delete({
-    where: { id_user: id },
-  })
+  try {
+    return await prisma.$transaction(async (tx: TransactionClient) => {
+      // Vérifier si l'utilisateur existe
+      const user = await tx.user.findUnique({
+        where: { id_user: id },
+        include: { orders: true },
+      })
+
+      if (!user) {
+        throw new Error(`L'utilisateur avec l'ID ${id} n'existe pas`)
+      }
+
+      // Vérifier si l'utilisateur a des commandes associées
+      if (user.orders.length > 0) {
+        throw new Error(
+          `Impossible de supprimer l'utilisateur car il possède ${user.orders.length} commande(s)`
+        )
+      }
+
+      return await tx.user.delete({
+        where: { id_user: id },
+      })
+    })
+  } catch (error) {
+    console.error("Impossible de supprimer l'utilisateur:", error)
+    throw new Error(`Impossible de supprimer l'utilisateur avec l'ID ${id}`)
+  }
 }
 
 /**
@@ -92,10 +194,17 @@ export const remove = async (id: number): Promise<User> => {
  * @returns {Promise<boolean>} Retourne true si le produit existe, sinon false.
  */
 export const exists = async (id: number): Promise<boolean> => {
-  const count = await prisma.user.count({
-    where: { id_user: id },
-  })
-  return count > 0
+  try {
+    const count = await prisma.user.count({
+      where: { id_user: id },
+    })
+    return count > 0
+  } catch (error) {
+    console.error("Impossible de vérifier l'existence de l'utilisateur:", error)
+    throw new Error(
+      `Impossible de vérifier l'existence de l'utilisateur avec l'ID ${id}`
+    )
+  }
 }
 
 /**
@@ -104,6 +213,7 @@ export const exists = async (id: number): Promise<boolean> => {
 const userRepository = {
   findAll,
   findById,
+  findByEmail,
   create,
   update,
   remove,

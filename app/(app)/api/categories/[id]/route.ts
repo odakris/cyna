@@ -13,14 +13,28 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const resolvedParams = await params // Attendre la résolution des paramètres
-  const id = validateId(resolvedParams.id) // Accéder à id après résolution
+  try {
+    const resolvedParams = await params // Attendre la résolution des paramètres
+    const id = validateId(resolvedParams.id) // Accéder à id après résolution
 
-  if (!id) {
-    return NextResponse.json({ message: "ID invalide" }, { status: 400 })
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID invalide ou manquant" },
+        { status: 400 }
+      )
+    }
+
+    return await categoryController.getById(id)
+  } catch (error) {
+    console.error(
+      `Erreur non gérée dans la route GET /categories/${params.then(p => p.id)}:`,
+      error
+    )
+    return NextResponse.json(
+      { error: "Erreur serveur inattendue" },
+      { status: 500 }
+    )
   }
-
-  return categoryController.getById(id)
 }
 
 /**
@@ -34,14 +48,28 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const resolvedParams = await params
-  const id = validateId(resolvedParams.id)
+  try {
+    const resolvedParams = await params
+    const id = validateId(resolvedParams.id)
 
-  if (!id) {
-    return NextResponse.json({ message: "ID invalide" }, { status: 400 })
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID invalide ou manquant" },
+        { status: 400 }
+      )
+    }
+
+    return await categoryController.update(request, id)
+  } catch (error) {
+    console.error(
+      `Erreur non gérée dans la route PUT /categories/${params.then(p => p.id)}:`,
+      error
+    )
+    return NextResponse.json(
+      { error: "Erreur serveur inattendue" },
+      { status: 500 }
+    )
   }
-
-  return categoryController.update(request, id)
 }
 
 /**
@@ -55,12 +83,26 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const resolvedParams = await params
-  const id = validateId(resolvedParams.id)
+  try {
+    const resolvedParams = await params
+    const id = validateId(resolvedParams.id)
 
-  if (!id) {
-    return NextResponse.json({ message: "ID invalide" }, { status: 400 })
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID invalide ou manquant" },
+        { status: 400 }
+      )
+    }
+
+    return await categoryController.remove(id)
+  } catch (error) {
+    console.error(
+      `Erreur non gérée dans la route DELETE /categories/${params.then(p => p.id)}:`,
+      error
+    )
+    return NextResponse.json(
+      { error: "Erreur serveur inattendue" },
+      { status: 500 }
+    )
   }
-
-  return categoryController.remove(id)
 }
