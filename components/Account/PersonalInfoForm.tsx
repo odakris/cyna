@@ -1,42 +1,47 @@
 "use client"
 
-import { Prisma } from "@prisma/client"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { Prisma } from "@prisma/client"
+import { userFormSchema } from "@/lib/validations/user-schema"
+import { z } from "zod"
 
 export default function PersonalInfoForm({ user }: { user: Prisma.User }) {
   const [formData, setFormData] = useState({
-    firstName: user.first_name || "",
-    lastName: user.last_name || "",
+    first_name: user.first_name || "",
+    last_name: user.last_name || "",
     email: user.email || "",
-    password: user.password || "", // Mot de passe initial
+    password: user.password || "",
   })
 
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof typeof formData, string>>
+  >({})
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
-  // Gestion des changements dans les inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
   }
 
-  // Gestion de la soumission du formulaire
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setErrors({})
     setLoading(true)
 
     try {
+      // Validation avec Zod
+      const validatedData = userFormSchema.parse({
+        ...formData,
+        role: "CUSTOMER", // requis par le schéma
+      })
+
       const res = await fetch(`/api/users/${user.id_user}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          email: formData.email,
-          password: formData.password, // Envoi du mot de passe
-        }),
+        body: JSON.stringify(validatedData),
       })
 
       const result = await res.json()
@@ -45,10 +50,18 @@ export default function PersonalInfoForm({ user }: { user: Prisma.User }) {
         throw new Error(result.message || "Erreur lors de la mise à jour.")
       }
 
-      // Rediriger l'utilisateur vers la page des paramètres après la mise à jour
-      router.push("/account/settings") // Redirection vers la page de paramètres
-    } catch (err: any) {
-      alert(err.message || "Une erreur est survenue")
+      router.push("/account/settings")
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        const fieldErrors: Partial<Record<keyof typeof formData, string>> = {}
+        err.errors.forEach(error => {
+          const field = error.path[0] as keyof typeof formData
+          fieldErrors[field] = error.message
+        })
+        setErrors(fieldErrors)
+      } else {
+        alert((err as Error).message || "Une erreur est survenue")
+      }
     } finally {
       setLoading(false)
     }
@@ -62,22 +75,28 @@ export default function PersonalInfoForm({ user }: { user: Prisma.User }) {
           <label className="block font-medium">Prénom</label>
           <input
             type="text"
-            name="firstName"
-            value={formData.firstName}
+            name="first_name"
+            value={formData.first_name}
             onChange={handleChange}
             className="w-full border p-2 rounded"
           />
+          {errors.first_name && (
+            <p className="text-red-500 text-sm">{errors.first_name}</p>
+          )}
         </div>
 
         <div>
           <label className="block font-medium">Nom</label>
           <input
             type="text"
-            name="lastName"
-            value={formData.lastName}
+            name="last_name"
+            value={formData.last_name}
             onChange={handleChange}
             className="w-full border p-2 rounded"
           />
+          {errors.last_name && (
+            <p className="text-red-500 text-sm">{errors.last_name}</p>
+          )}
         </div>
 
         <div>
@@ -89,6 +108,9 @@ export default function PersonalInfoForm({ user }: { user: Prisma.User }) {
             onChange={handleChange}
             className="w-full border p-2 rounded"
           />
+          {errors.email && (
+            <p className="text-red-500 text-sm">{errors.email}</p>
+          )}
         </div>
 
         <div>
@@ -100,6 +122,9 @@ export default function PersonalInfoForm({ user }: { user: Prisma.User }) {
             onChange={handleChange}
             className="w-full border p-2 rounded"
           />
+          {errors.password && (
+            <p className="text-red-500 text-sm">{errors.password}</p>
+          )}
         </div>
 
         <button

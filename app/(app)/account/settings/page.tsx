@@ -284,7 +284,7 @@ export default function AccountSettingsPage() {
               <TableHead>Numéro</TableHead>
               <TableHead>Expiration</TableHead>
               <TableHead>Par défaut</TableHead>
-              <TableHead>Actions</TableHead> {/* Ajout d'une colonne Actions */}
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

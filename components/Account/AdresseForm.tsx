@@ -4,10 +4,14 @@ import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import {
+  addressSchema,
+  AddressFormValues,
+} from "@/lib/validations/address-schema"
 
 type AddressFormProps = {
-  initialData?: any
-  onSubmit: (address: any) => void
+  initialData?: Partial<AddressFormValues>
+  onSubmit: (address: AddressFormValues) => void
   loading?: boolean
 }
 
@@ -16,7 +20,10 @@ export function AddressForm({
   onSubmit,
   loading,
 }: AddressFormProps) {
-  const [address, setAddress] = useState<any>(initialData || {})
+  const [address, setAddress] = useState<Partial<AddressFormValues>>(
+    initialData || {}
+  )
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (initialData) setAddress(initialData)
@@ -24,7 +31,19 @@ export function AddressForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    onSubmit(address)
+    const result = addressSchema.safeParse(address)
+
+    if (!result.success) {
+      const formattedErrors: Record<string, string> = {}
+      result.error.errors.forEach(err => {
+        if (err.path[0]) formattedErrors[err.path[0] as string] = err.message
+      })
+      setErrors(formattedErrors)
+      return
+    }
+
+    setErrors({})
+    onSubmit(result.data)
   }
 
   return (
@@ -42,6 +61,9 @@ export function AddressForm({
               setAddress({ ...address, first_name: e.target.value })
             }
           />
+          {errors.first_name && (
+            <p className="text-sm text-red-500">{errors.first_name}</p>
+          )}
         </div>
         <div>
           <label htmlFor="last_name" className="block text-sm font-medium">
@@ -54,6 +76,9 @@ export function AddressForm({
               setAddress({ ...address, last_name: e.target.value })
             }
           />
+          {errors.last_name && (
+            <p className="text-sm text-red-500">{errors.last_name}</p>
+          )}
         </div>
       </div>
 
@@ -68,6 +93,9 @@ export function AddressForm({
             value={address.address1 || ""}
             onChange={e => setAddress({ ...address, address1: e.target.value })}
           />
+          {errors.address1 && (
+            <p className="text-sm text-red-500">{errors.address1}</p>
+          )}
         </div>
         <div>
           <label htmlFor="address2" className="block text-sm font-medium">
@@ -78,6 +106,9 @@ export function AddressForm({
             value={address.address2 || ""}
             onChange={e => setAddress({ ...address, address2: e.target.value })}
           />
+          {errors.address2 && (
+            <p className="text-sm text-red-500">{errors.address2}</p>
+          )}
         </div>
       </div>
 
@@ -94,6 +125,9 @@ export function AddressForm({
               setAddress({ ...address, postal_code: e.target.value })
             }
           />
+          {errors.postal_code && (
+            <p className="text-sm text-red-500">{errors.postal_code}</p>
+          )}
         </div>
         <div>
           <label htmlFor="city" className="block text-sm font-medium">
@@ -104,6 +138,7 @@ export function AddressForm({
             value={address.city || ""}
             onChange={e => setAddress({ ...address, city: e.target.value })}
           />
+          {errors.city && <p className="text-sm text-red-500">{errors.city}</p>}
         </div>
         <div>
           <label htmlFor="country" className="block text-sm font-medium">
@@ -114,6 +149,9 @@ export function AddressForm({
             value={address.country || ""}
             onChange={e => setAddress({ ...address, country: e.target.value })}
           />
+          {errors.country && (
+            <p className="text-sm text-red-500">{errors.country}</p>
+          )}
         </div>
         <div>
           <label htmlFor="region" className="block text-sm font-medium">
@@ -124,6 +162,9 @@ export function AddressForm({
             value={address.region || ""}
             onChange={e => setAddress({ ...address, region: e.target.value })}
           />
+          {errors.region && (
+            <p className="text-sm text-red-500">{errors.region}</p>
+          )}
         </div>
       </div>
 
@@ -140,6 +181,9 @@ export function AddressForm({
               setAddress({ ...address, mobile_phone: e.target.value })
             }
           />
+          {errors.mobile_phone && (
+            <p className="text-sm text-red-500">{errors.mobile_phone}</p>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">
