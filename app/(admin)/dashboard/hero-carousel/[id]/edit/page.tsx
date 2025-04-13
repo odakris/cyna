@@ -7,32 +7,36 @@ import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
-import { User } from "@prisma/client"
-import { UserFormValues } from "@/lib/validations/user-schema"
-import { UserForm } from "../../../../../../components/Forms/UserForm"
+import { HeroCarouselForm } from "@/components/Forms/HeroCarouselForm"
 import { ArrowLeft } from "lucide-react"
+import { HeroCarouselSlide } from "@prisma/client"
 
-export default function EditProductPage() {
+export default function EditHeroCarouselSlidePage() {
   const { id } = useParams() as { id: string }
   const { toast } = useToast()
-  const [user, setUser] = useState<User | null>(null)
+  const [slide, setSlide] = useState<HeroCarouselSlide | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const userData = await fetch(`/api/users/${id}`).then(res => res.json())
+        const response = await fetch(`/api/hero-carousel/${id}`)
 
-        if (!userData) throw new Error("Utilisateur introuvable")
+        if (!response.ok) {
+          throw new Error(
+            `Erreur lors de la récupération du slide (${response.status})`
+          )
+        }
 
-        setUser(userData)
+        const data = await response.json()
+        setSlide(data)
       } catch (error) {
         console.error("Erreur fetchData:", error)
         setErrorMessage("Erreur lors du chargement des données.")
         toast({
           title: "Erreur",
-          description: "Impossible de charger les données de l'utilisateur.",
+          description: "Impossible de charger les données du slide.",
           variant: "destructive",
         })
       } finally {
@@ -58,8 +62,6 @@ export default function EditProductPage() {
             <Skeleton className="h-20 w-full" />
             <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
             <Skeleton className="h-10 w-32" />
           </CardContent>
         </Card>
@@ -67,51 +69,37 @@ export default function EditProductPage() {
     )
   }
 
-  if (errorMessage || !user) {
+  if (errorMessage || !slide) {
     return (
       <div className="max-w-4xl mx-auto p-6 space-y-6">
-        <h1 className="text-3xl font-bold">Modifier l&apos;utilisateur</h1>
-        <p className="text-red-500">{errorMessage || "Produit introuvable"}</p>
+        <h1 className="text-3xl font-bold">Modifier le Slide</h1>
+        <p className="text-red-500">{errorMessage || "Slide introuvable"}</p>
         <Button asChild variant="outline">
-          <Link href="/dashboard/products">Retour</Link>
+          <Link href="/dashboard/hero-carousel">Retour</Link>
         </Button>
       </div>
     )
   }
 
-  // Conversion du ProductType en ProductFormValues
-  const initialData: UserFormValues = {
-    first_name: user.first_name,
-    last_name: user.last_name,
-    email: user.email,
-    password: user.password,
-    role: user.role,
-    email_verified: user.email_verified,
-    two_factor_enabled: user.two_factor_enabled,
-  }
-
   return (
     <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="icon" className="rounded-full">
-            <Link href="/dashboard/users">
+            <Link href="/dashboard/hero-carousel">
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <h1 className="text-3xl font-bold">Modifier cet Utilisateur</h1>
+          <h1 className="text-3xl font-bold">Modifier le Slide</h1>
         </div>
       </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Modifier les informations</CardTitle>
         </CardHeader>
         <CardContent>
-          <UserForm
-            initialData={initialData}
-            isEditing={true}
-            userId={Number(id)}
-          />
+          <HeroCarouselForm initialData={slide} isEditing={true} />
         </CardContent>
       </Card>
     </div>

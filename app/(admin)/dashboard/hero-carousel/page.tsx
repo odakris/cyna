@@ -12,7 +12,6 @@ import {
   getSortedRowModel,
   useReactTable,
   FilterFn,
-  ColumnDef,
 } from "@tanstack/react-table"
 import {
   ChevronDown,
@@ -25,13 +24,11 @@ import {
   AlertTriangle,
   ChevronsLeft,
   ChevronsRight,
+  SlidersHorizontal,
   RefreshCw,
+  Sparkles,
   Filter,
-  Clock,
-  ReceiptText,
-  TruckIcon,
-  BanknoteIcon,
-  ShoppingCart,
+  LayoutList,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -72,21 +69,10 @@ import {
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
-  ordersColumnNamesInFrench,
-  orderColumns,
+  heroCarouselColumns,
+  heroCarouselColumnNamesInFrench,
   globalFilterFunction,
-} from "./orders-columns"
-import { OrderWithItems } from "@/types/Types"
-import { OrderStatus } from "@prisma/client"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+} from "./hero-carousel-columns"
 import {
   HoverCard,
   HoverCardContent,
@@ -94,12 +80,13 @@ import {
 } from "@/components/ui/hover-card"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { subDays, isToday } from "date-fns"
+import { useToast } from "@/hooks/use-toast"
+import { HeroCarouselSlide } from "@prisma/client"
 
-export default function OrderHomePage() {
-  const [orders, setOrders] = useState<OrderWithItems[]>([])
+export default function HeroCarouselDashboard() {
+  const [slides, setSlides] = useState<HeroCarouselSlide[]>([])
   const [sorting, setSorting] = useState<SortingState>([
-    { id: "order_date", desc: true },
+    { id: "priority_order", desc: false },
   ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -108,30 +95,13 @@ export default function OrderHomePage() {
   const [error, setError] = useState<string | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [globalFilter, setGlobalFilter] = useState("")
-  const [activeTab, setActiveTab] = useState("all")
+  const [activeTab, setActiveTab] = useState("tous")
+  const { toast } = useToast()
 
-  // Options pour les filtres
-  // const statusOptions = [
-  //   { value: "all", label: "Tous les statuts" },
-  //   { value: "PENDING", label: "En attente" },
-  //   { value: "PROCESSING", label: "En cours" },
-  //   { value: "SHIPPED", label: "Expédiée" },
-  //   { value: "DELIVERED", label: "Livrée" },
-  //   { value: "CANCELLED", label: "Annulée" },
-  //   { value: "REFUNDED", label: "Remboursée" },
-  // ]
-
-  const dateOptions = [
-    { value: "all", label: "Toutes les dates" },
-    { value: "today", label: "Aujourd'hui" },
-    { value: "week", label: "Cette semaine" },
-    { value: "month", label: "Ce mois" },
-  ]
-
-  const fetchOrders = useCallback(async () => {
+  const fetchSlides = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await fetch("/api/orders")
+      const response = await fetch("/api/hero-carousel")
 
       if (!response.ok) {
         throw new Error(
@@ -139,47 +109,25 @@ export default function OrderHomePage() {
         )
       }
 
-      const data = await response.json()
-      setOrders(data.orders || [])
+      const data: HeroCarouselSlide[] = await response.json()
+      console.log("data fetchSlides:", data)
+      setSlides(data)
       setError(null)
     } catch (error: unknown) {
-      console.error("Erreur fetchOrders:", error)
-      setError("Erreur lors du chargement des commandes")
+      console.error("Erreur fetchSlides:", error)
+      setError("Erreur lors du chargement des slides")
     } finally {
       setLoading(false)
     }
   }, [])
 
   useEffect(() => {
-    fetchOrders()
-  }, [fetchOrders])
-
-  // Fonction pour filtrer par date
-  const dateFilterFn: FilterFn<{ order_date: string }> = (
-    row,
-    columnId,
-    filterValue
-  ) => {
-    if (filterValue === "all") return true
-
-    const orderDate = new Date(row.getValue(columnId))
-    const today = new Date()
-
-    switch (filterValue) {
-      case "today":
-        return isToday(orderDate)
-      case "week":
-        return orderDate >= subDays(today, 7)
-      case "month":
-        return orderDate >= new Date(today.getFullYear(), today.getMonth(), 1)
-      default:
-        return true
-    }
-  }
+    fetchSlides()
+  }, [fetchSlides])
 
   const table = useReactTable({
-    data: orders,
-    columns: orderColumns as ColumnDef<unknown, unknown>[],
+    data: slides,
+    columns: heroCarouselColumns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -189,24 +137,17 @@ export default function OrderHomePage() {
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     filterFns: {
-      dateRange: dateFilterFn,
-      stockRange: (row, columnId, filterValue) => {
-        if (!filterValue) return true
-        const stock = row.getValue(columnId)
-        return (
-          typeof stock === "number" &&
-          stock >= filterValue.min &&
-          stock <= filterValue.max
-        )
-      },
+      global: globalFilterFunction as FilterFn<HeroCarouselSlide>,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       productsFilter: (row, columnId, filterValue) => true,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      global: (row, columnId, filterValue) => true,
+      dateRange: (row, columnId, filterValue) => true,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      stockRange: (row, columnId, filterValue) => true,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       emailVerifiedFilter: (row, columnId, filterValue) => true,
     },
-    globalFilterFn: globalFilterFunction as FilterFn<unknown>,
+    globalFilterFn: globalFilterFunction as FilterFn<HeroCarouselSlide>,
     state: {
       sorting,
       columnFilters,
@@ -219,62 +160,94 @@ export default function OrderHomePage() {
       pagination: {
         pageSize: 10,
       },
-      sorting: [{ id: "order_date", desc: true }],
+      sorting: [{ id: "priority_order", desc: false }],
     },
   })
 
   // Appliquer le filtre en fonction de l'onglet actif
   useEffect(() => {
-    if (activeTab === "all") {
-      table.getColumn("order_status")?.setFilterValue(undefined)
-    } else {
-      table.getColumn("order_status")?.setFilterValue(activeTab)
+    if (activeTab === "tous") {
+      table.getColumn("active")?.setFilterValue(undefined)
+    } else if (activeTab === "actifs") {
+      table.getColumn("active")?.setFilterValue(true)
+    } else if (activeTab === "inactifs") {
+      table.getColumn("active")?.setFilterValue(false)
     }
   }, [activeTab, table])
 
   const handleDelete = async () => {
     const selectedIds = table
       .getSelectedRowModel()
-      .rows.map(row => (row.original as OrderWithItems).id_order)
+      .rows.map(row => row.original.id_hero_slide)
 
+    console.log("selectedIds handleDelete:", selectedIds)
     if (selectedIds.length === 0) return
 
     try {
       for (const id of selectedIds) {
-        const response = await fetch(`/api/orders/${id}`, {
+        console.log("id handleDelete :", id)
+        const response = await fetch(`/api/hero-carousel/${id}`, {
           method: "DELETE",
           headers: {
             "content-type": "application/json",
           },
         })
         if (!response.ok) {
-          throw new Error(`Error deleting order ${id}`)
+          throw new Error(`Error deleting slide ${id}`)
         }
       }
       setShowDeleteDialog(false)
       setRowSelection({})
-      await fetchOrders()
+      toast({
+        title: "Succès",
+        description: `${selectedIds.length} slide(s) supprimé(s)`,
+      })
+      await fetchSlides()
     } catch (error: unknown) {
       console.error("Erreur handleDelete:", error)
-      setError("Erreur lors de la suppression des commandes")
+      setError("Erreur lors de la suppression des slides")
+      toast({
+        variant: "destructive",
+        title: "Erreur",
+        description: "Impossible de supprimer les slides sélectionnés",
+      })
     }
   }
 
-  // Calculer les statistiques
+  //   const handleToggleActive = async (id: number, currentState: boolean) => {
+  //     try {
+  //       const response = await fetch(`/api/hero-carousel/${id}`, {
+  //         method: "PATCH",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ active: !currentState }),
+  //       })
+
+  //       if (!response.ok) {
+  //         throw new Error("Erreur lors de la mise à jour")
+  //       }
+
+  //       toast({
+  //         title: "Succès",
+  //         description: `Slide ${!currentState ? "activé" : "désactivé"}`,
+  //       })
+
+  //       await fetchSlides()
+  //     } catch (error) {
+  //       console.error("Failed to update slide:", error)
+  //       toast({
+  //         variant: "destructive",
+  //         title: "Erreur",
+  //         description: "Impossible de mettre à jour le slide",
+  //       })
+  //     }
+  //   }
+
   const stats = {
-    total: orders.length,
-    pending: orders.filter(o => o.order_status === OrderStatus.PENDING).length,
-    processing: orders.filter(o => o.order_status === OrderStatus.PROCESSING)
-      .length,
-    active: orders.filter(o => o.order_status === OrderStatus.ACTIVE).length,
-    completed: orders.filter(o => o.order_status === OrderStatus.COMPLETED)
-      .length,
-    cancelled: orders.filter(o => o.order_status === OrderStatus.CANCELLED)
-      .length,
-    refunded: orders.filter(o => o.order_status === OrderStatus.REFUNDED)
-      .length,
-    today: orders.filter(o => isToday(new Date(o.order_date))).length,
-    totalRevenue: orders.reduce((sum, order) => sum + order.total_amount, 0),
+    total: slides.length,
+    active: slides.filter(p => p.active).length,
+    inactive: slides.filter(p => !p.active).length,
   }
 
   if (loading) {
@@ -288,8 +261,8 @@ export default function OrderHomePage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-          {[1, 2, 3, 4].map(i => (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          {[1, 2, 3].map(i => (
             <Skeleton key={i} className="h-24 w-full rounded-lg" />
           ))}
         </div>
@@ -304,7 +277,7 @@ export default function OrderHomePage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  {Array(orderColumns.length)
+                  {Array(heroCarouselColumns.length)
                     .fill(0)
                     .map((_, i) => (
                       <TableHead key={i}>
@@ -318,7 +291,7 @@ export default function OrderHomePage() {
                   .fill(0)
                   .map((_, i) => (
                     <TableRow key={i}>
-                      {Array(orderColumns.length)
+                      {Array(heroCarouselColumns.length)
                         .fill(0)
                         .map((_, j) => (
                           <TableCell key={j}>
@@ -331,21 +304,13 @@ export default function OrderHomePage() {
             </Table>
           </CardContent>
         </Card>
-
-        <div className="flex justify-between items-center pt-4">
-          <Skeleton className="h-6 w-48" />
-          <div className="flex gap-2">
-            <Skeleton className="h-8 w-24" />
-            <Skeleton className="h-8 w-24" />
-          </div>
-        </div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <Card className="mx-auto mt-8 border-red-200">
+      <Card className="mx-auto max-w-lg mt-8 border-red-200">
         <CardHeader>
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-red-500" />
@@ -354,7 +319,7 @@ export default function OrderHomePage() {
           <CardDescription>{error}</CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <Button onClick={fetchOrders}>Réessayer</Button>
+          <Button onClick={fetchSlides}>Réessayer</Button>
         </CardContent>
       </Card>
     )
@@ -365,21 +330,21 @@ export default function OrderHomePage() {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <ShoppingCart className="h-6 w-6 text-primary" />
+            <SlidersHorizontal className="h-6 w-6 text-primary" />
             <h1 className="text-3xl font-bold text-foreground">
-              Gestion des Commandes
+              Gestion du Hero Carousel
             </h1>
           </div>
           <div className="mt-1 flex items-center gap-2">
             <Badge variant="outline" className="font-normal">
-              {orders.length} commande{orders.length > 1 ? "s" : ""}
+              {slides.length} slide{slides.length > 1 ? "s" : ""}
             </Badge>
             <Badge
               variant="secondary"
               className="font-normal"
-              title="Sélectionnés"
+              title="Sélectionnées"
             >
-              {table.getFilteredSelectedRowModel().rows.length} sélectionné
+              {table.getFilteredSelectedRowModel().rows.length} sélectionnée
               {table.getFilteredSelectedRowModel().rows.length > 1 ? "s" : ""}
             </Badge>
           </div>
@@ -387,9 +352,9 @@ export default function OrderHomePage() {
 
         <div className="flex flex-wrap gap-3">
           <Button asChild>
-            <Link href="/dashboard/orders/new">
+            <Link href="/dashboard/hero-carousel/new">
               <Plus className="mr-2 h-4 w-4" />
-              Créer une commande
+              Ajouter un slide
             </Link>
           </Button>
 
@@ -408,7 +373,7 @@ export default function OrderHomePage() {
                 <DialogTitle>Confirmer la suppression</DialogTitle>
                 <DialogDescription>
                   Vous êtes sur le point de supprimer{" "}
-                  {Object.keys(rowSelection).length} commande
+                  {Object.keys(rowSelection).length} slide
                   {Object.keys(rowSelection).length > 1 ? "s" : ""}. Cette
                   action ne peut pas être annulée.
                 </DialogDescription>
@@ -427,7 +392,7 @@ export default function OrderHomePage() {
 
           <HoverCard>
             <HoverCardTrigger asChild>
-              <Button variant="outline" onClick={() => fetchOrders()}>
+              <Button variant="outline" onClick={fetchSlides}>
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Actualiser
               </Button>
@@ -439,8 +404,7 @@ export default function OrderHomePage() {
                     Actualiser les données
                   </h4>
                   <p className="text-sm text-muted-foreground">
-                    Recharge les données des commandes depuis la base de
-                    données.
+                    Recharge les données des slides depuis la base de données.
                   </p>
                 </div>
               </div>
@@ -450,16 +414,16 @@ export default function OrderHomePage() {
       </div>
 
       {/* Statistiques */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
-                Total Commandes
+                Total Slides
               </p>
               <p className="text-2xl font-bold">{stats.total}</p>
             </div>
-            <ReceiptText className="h-8 w-8 text-primary opacity-80" />
+            <LayoutList className="h-8 w-8 text-primary opacity-80" />
           </CardContent>
         </Card>
 
@@ -467,50 +431,30 @@ export default function OrderHomePage() {
           <CardContent className="p-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
-                En attente
-              </p>
-              <p className="text-2xl font-bold text-yellow-600">
-                {stats.pending}
-              </p>
-            </div>
-            <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
-              <Clock className="h-5 w-5 text-yellow-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Terminées
-              </p>
-              <p className="text-2xl font-bold text-blue-600">
-                {stats.completed}
-              </p>
-            </div>
-            <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
-              <TruckIcon className="h-5 w-5 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-4 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Chiffre d&apos;affaires
+                Actifs
               </p>
               <p className="text-2xl font-bold text-green-600">
-                {new Intl.NumberFormat("fr-FR", {
-                  style: "currency",
-                  currency: "EUR",
-                  maximumFractionDigits: 0,
-                }).format(stats.totalRevenue)}
+                {stats.active}
               </p>
             </div>
             <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-              <BanknoteIcon className="h-5 w-5 text-green-600" />
+              <Sparkles className="h-5 w-5 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Inactifs
+              </p>
+              <p className="text-2xl font-bold text-gray-500">
+                {stats.inactive}
+              </p>
+            </div>
+            <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+              <AlertTriangle className="h-5 w-5 text-gray-500" />
             </div>
           </CardContent>
         </Card>
@@ -524,46 +468,28 @@ export default function OrderHomePage() {
             className="w-full"
           >
             <TabsList className="w-full sm:w-auto">
-              <TabsTrigger value="all" className="flex-1 sm:flex-initial">
-                Toutes
+              <TabsTrigger value="tous" className="flex-1 sm:flex-initial">
+                Tous
                 <Badge variant="secondary" className="ml-2">
                   {stats.total}
                 </Badge>
               </TabsTrigger>
-              <TabsTrigger
-                value={OrderStatus.PENDING}
-                className="flex-1 sm:flex-initial"
-              >
-                En attente
-                <Badge
-                  variant="secondary"
-                  className="ml-2 bg-yellow-100 text-yellow-800"
-                >
-                  {stats.pending}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger
-                value={OrderStatus.PROCESSING}
-                className="flex-1 sm:flex-initial"
-              >
-                En cours
-                <Badge
-                  variant="secondary"
-                  className="ml-2 bg-blue-100 text-blue-800"
-                >
-                  {stats.processing}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger
-                value={OrderStatus.COMPLETED}
-                className="flex-1 sm:flex-initial"
-              >
-                Terminé
+              <TabsTrigger value="actifs" className="flex-1 sm:flex-initial">
+                Actifs
                 <Badge
                   variant="secondary"
                   className="ml-2 bg-green-100 text-green-800"
                 >
-                  {stats.completed}
+                  {stats.active}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="inactifs" className="flex-1 sm:flex-initial">
+                Inactifs
+                <Badge
+                  variant="secondary"
+                  className="ml-2 bg-gray-100 text-gray-800"
+                >
+                  {stats.inactive}
                 </Badge>
               </TabsTrigger>
             </TabsList>
@@ -575,45 +501,19 @@ export default function OrderHomePage() {
               <div className="relative w-full sm:w-80">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Rechercher par n°, client..."
+                  placeholder="Rechercher par titre..."
                   value={globalFilter ?? ""}
                   onChange={event => setGlobalFilter(event.target.value)}
                   className="pl-8 w-full"
                 />
               </div>
-
-              <Select
-                value={
-                  (table.getColumn("order_date")?.getFilterValue() as string) ??
-                  "all"
-                }
-                onValueChange={value => {
-                  table
-                    .getColumn("order_date")
-                    ?.setFilterValue(value === "all" ? undefined : value)
-                }}
-              >
-                <SelectTrigger className="w-full sm:w-44">
-                  <SelectValue placeholder="Filtrer par date" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Période</SelectLabel>
-                    {dateOptions.map(option => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
             </div>
 
             <div className="flex gap-2">
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => fetchOrders()}
+                onClick={() => fetchSlides()}
                 title="Actualiser les données"
               >
                 <RefreshCw className="h-4 w-4" />
@@ -640,7 +540,8 @@ export default function OrderHomePage() {
                             column.toggleVisibility(!!value)
                           }
                         >
-                          {ordersColumnNamesInFrench[column.id] || column.id}
+                          {heroCarouselColumnNamesInFrench[column.id] ||
+                            column.id}
                         </DropdownMenuCheckboxItem>
                       )
                     })}
@@ -697,9 +598,16 @@ export default function OrderHomePage() {
                     >
                       <div className="flex flex-col items-center justify-center text-muted-foreground">
                         <Filter className="h-8 w-8 mb-2 opacity-50" />
-                        <p>Aucune commande trouvée.</p>
+                        <p>Aucun slide trouvé.</p>
                         <p className="text-sm">
-                          Essayez de modifier vos filtres.
+                          Essayez de modifier vos filtres ou{" "}
+                          <Link
+                            href="/dashboard/hero-carousel/new"
+                            className="text-primary hover:underline"
+                          >
+                            ajouter un nouveau slide
+                          </Link>
+                          .
                         </p>
                       </div>
                     </TableCell>
@@ -718,12 +626,12 @@ export default function OrderHomePage() {
               <span className="font-medium">
                 {table.getFilteredRowModel().rows.length}
               </span>{" "}
-              commande(s) sélectionnée(s).
+              slide(s) sélectionné(s).
             </div>
 
             <div className="flex items-center space-x-6 lg:space-x-8">
               <div className="flex items-center space-x-2">
-                <p className="text-sm font-medium">Commandes par page</p>
+                <p className="text-sm font-medium">Slides par page</p>
                 <select
                   className="h-8 w-16 rounded-md border border-input bg-transparent px-2 py-1 text-sm"
                   value={table.getState().pagination.pageSize}
@@ -787,19 +695,12 @@ export default function OrderHomePage() {
         </CardContent>
         <CardFooter className="bg-muted/50 py-3 border-t flex justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            Total des commandes: <strong>{stats.total}</strong> | En attente:{" "}
-            <strong className="text-yellow-600">{stats.pending}</strong> |
-            Aujourd&apos;hui:{" "}
-            <strong className="text-blue-600">{stats.today}</strong> | CA:{" "}
-            <strong className="text-green-600">
-              {new Intl.NumberFormat("fr-FR", {
-                style: "currency",
-                currency: "EUR",
-                maximumFractionDigits: 0,
-              }).format(stats.totalRevenue)}
-            </strong>
+            Total des slides: <strong>{stats.total}</strong> | Actifs:{" "}
+            <strong className="text-green-600">{stats.active}</strong> |
+            Inactifs:{" "}
+            <strong className="text-gray-500">{stats.inactive}</strong>
           </p>
-          <Button variant="outline" size="sm" onClick={() => fetchOrders()}>
+          <Button variant="outline" size="sm" onClick={() => fetchSlides()}>
             <RefreshCw className="mr-2 h-3 w-3" />
             Actualiser
           </Button>

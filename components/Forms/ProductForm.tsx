@@ -65,10 +65,10 @@ import {
   BarChart3,
   Box,
 } from "lucide-react"
-import { CategoryType } from "@/types/Types"
+import { Category } from "@prisma/client"
 
 interface ProductFormProps {
-  categories: CategoryType[]
+  categories: Category[]
   initialData?: ProductFormValues
   isEditing?: boolean
   productId?: number

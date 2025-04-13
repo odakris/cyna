@@ -83,7 +83,6 @@ model Product {
   id_category              Int
   category                 Category                @relation(fields: [id_category], references: [id_category])
   product_caroussel_images ProductCarousselImage[]
-  carousel_images          CarouselImage[]
   order_items              OrderItem[]
   CartItem                 CartItem[]
 
@@ -93,18 +92,18 @@ model Product {
   @@index([name])
 }
 
-// Images pour le carrousel
-model CarouselImage {
-  id_carousel_image Int      @id @default(autoincrement())
-  url               String   @db.VarChar(255)
-  alt               String?  @db.VarChar(150)
-  priority_order    Int      @default(1)
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
-  id_product        Int
-  product           Product  @relation(fields: [id_product], references: [id_product], onDelete: Cascade)
-
-  @@index([id_product, priority_order])
+// Hero carrousel
+model HeroCarouselSlide {
+  id_hero_slide  Int      @id @default(autoincrement())
+  title          String   @unique @db.VarChar(255)
+  description    String?  @db.Text
+  image_url      String   @db.VarChar(255)
+  button_text    String?  @db.VarChar(100)
+  button_link    String?  @db.VarChar(255)
+  active         Boolean  @default(true)
+  priority_order Int      @default(999)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 }
 
 // Images associées aux produits
@@ -216,7 +215,7 @@ model Session {
   created_at    DateTime   @default(now())
   CartItem      CartItem[]
   id_user       Int?
-  user          User?       @relation(fields: [id_user], references: [id_user])
+  user          User?      @relation(fields: [id_user], references: [id_user])
 
   @@index([id_user])
   @@index([session_token])

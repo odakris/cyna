@@ -262,7 +262,7 @@ export default function UserHomePage() {
 
   if (loading) {
     return (
-      <div className="container max-w-7xl mx-auto p-6 space-y-8">
+      <div className="container mx-auto p-6 space-y-8">
         <div className="flex justify-between items-center">
           <Skeleton className="h-10 w-1/3" />
           <div className="flex gap-4">

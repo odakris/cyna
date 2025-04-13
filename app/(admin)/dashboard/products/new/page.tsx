@@ -7,12 +7,12 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { ProductForm } from "@/components/Forms/ProductForm"
-import { CategoryType } from "@/types/Types"
 import { ArrowLeft } from "lucide-react"
+import { Category } from "@prisma/client"
 
 export default function CreateProductPage() {
   const { toast } = useToast()
-  const [categories, setCategories] = useState<CategoryType[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState<boolean>(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -39,7 +39,7 @@ export default function CreateProductPage() {
 
   if (loading) {
     return (
-      <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <div className="mx-auto p-6 space-y-6">
         <Skeleton className="h-10 w-1/3" />
         <Card>
           <CardHeader>
@@ -61,11 +61,11 @@ export default function CreateProductPage() {
     )
   }
 
-  if (errorMessage && !categories.length) {
+  if (errorMessage || categories.length === 0) {
     return (
       <div className="max-w-4xl mx-auto p-6 space-y-6">
-        <h1 className="text-3xl font-bold">Créer un Nouveau Produit</h1>
-        <p className="text-red-500">{errorMessage}</p>
+        <h1 className="text-3xl font-bold">Modifier le Produit</h1>
+        <p className="text-red-500">{errorMessage || "Produit introuvable"}</p>
         <Button asChild variant="outline">
           <Link href="/dashboard/products">Retour</Link>
         </Button>
@@ -74,7 +74,7 @@ export default function CreateProductPage() {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-8 animate-in fade-in duration-300">
+    <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
       <div className="flex items-center gap-2">
         <Button asChild variant="ghost" size="icon" className="rounded-full">
           <Link href="/dashboard/products">
