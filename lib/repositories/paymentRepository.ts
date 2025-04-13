@@ -21,6 +21,7 @@ export const paymentRepository = {
 
     // Ajouter une nouvelle méthode de paiement
     async createPayment(userId: number, paymentData: any): Promise<PaymentInfo> {
+        console.log("Creating payment with:", { id_user: userId, ...paymentData });
         return await prisma.paymentInfo.create({
             data: {
                 id_user: userId,

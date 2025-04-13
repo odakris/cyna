@@ -46,30 +46,30 @@ export function AvatarDemo() {
             <>
               <DropdownMenuItem>
                 <Settings />
-                <Link href="./account/settings">Mes paramètres</Link>
+                <Link href="/account/settings">Mes paramètres</Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCard />
-                <Link href="./">Mes Commandes</Link>
+                <Link href="/account/orders">Mes Commandes</Link>
               </DropdownMenuItem>
             </>
           )}
           {/* Ces options sont visibles pour tout le monde */}
           <DropdownMenuItem>
             <LifeBuoy />
-            <Link href="./mentions-legales">CGU</Link>
+            <Link href="/mentions-legales">CGU</Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Scale />
-            <Link href="./mentions-legales">Mentions légales</Link>
+            <Link href="/mentions-legales">Mentions légales</Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <BookUser />
-            <Link href="./contact">Contact</Link>
+            <Link href="/contact">Contact</Link>
           </DropdownMenuItem>
           <DropdownMenuItem>
             <Store />
-            <Link href="./">À propos de Cyna</Link>
+            <Link href="/">À propos de Cyna</Link>
           </DropdownMenuItem>
         </DropdownMenuGroup>
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { OrderController } from "@/lib/controllers/OrderController";
+import OrderController from "@/lib/controllers/order-controller";
 
 export async function GET(req: NextRequest, context: { params: { id: string } }) {
     try {

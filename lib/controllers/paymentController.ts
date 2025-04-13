@@ -44,6 +44,8 @@ export const paymentController = {
         const userId = parseInt(params.id, 10);
         const body = await req.json();
 
+        console.log("Received body in controller:", body);
+
         if (isNaN(userId)) {
             return NextResponse.json({ message: "ID utilisateur invalide" }, { status: 400 });
         }
