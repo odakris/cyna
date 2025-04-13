@@ -8,10 +8,9 @@ import React, {
   ReactNode,
 } from "react";
 
-// Définition du type d'un produit dans le panier
 export interface CartItem {
   id: string;
-  uniqueId: string; // Identifiant unique (id + subscription)
+  uniqueId: string;
   name: string;
   price: number;
   quantity: number;
@@ -19,7 +18,6 @@ export interface CartItem {
   imageUrl?: string;
 }
 
-// Définition du type du contexte
 interface CartContextType {
   cart: CartItem[];
   setCart: React.Dispatch<React.SetStateAction<CartItem[]>>;
@@ -29,50 +27,73 @@ interface CartContextType {
   updateCartItem: (uniqueId: string, updates: Partial<CartItem>) => void;
 }
 
-// Création du contexte avec un type initial `null | CartContextType`
 const CartContext = createContext<CartContextType | null>(null);
 
 interface CartProviderProps {
   children: ReactNode;
 }
 
-// Fonction pour générer un identifiant unique
 const generateUniqueId = (id: string, subscription?: string): string => {
-  return `${id}-${subscription || "default"}`;
+  return `${id}-${subscription || "default"}-${Date.now()}`;
 };
 
-export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [isAdding, setIsAdding] = useState(false); // État pour éviter les doubles appels
-
-  // Charger le panier depuis localStorage au chargement
-  useEffect(() => {
+// Charger le panier initial depuis localStorage (sûr pour SSR)
+const getInitialCart = (): CartItem[] => {
+  // Vérifier si nous sommes côté client
+  if (typeof window === "undefined") {
+    return [];
+  }
+  try {
     const savedCart = localStorage.getItem("cart");
     if (savedCart) {
       const parsedCart = JSON.parse(savedCart);
-      const updatedCart = parsedCart.map((item: CartItem) => {
-        const subscription = item.subscription || "MONTHLY";
-        return {
-          ...item,
-          uniqueId: item.uniqueId || generateUniqueId(item.id, subscription),
-          subscription,
-        };
-      });
-      setCart(updatedCart);
-      console.log("Panier chargé depuis localStorage:", updatedCart);
+      if (Array.isArray(parsedCart)) {
+        return parsedCart
+          .filter((item) => item && item.id && item.uniqueId)
+          .map((item: CartItem) => {
+            const subscription = item.subscription || "MONTHLY";
+            return {
+              ...item,
+              uniqueId: item.uniqueId || generateUniqueId(item.id, subscription),
+              subscription,
+            };
+          });
+      }
     }
+    return [];
+  } catch (error) {
+    console.error("Erreur lors du chargement initial de localStorage:", error);
+    return [];
+  }
+};
+
+export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
+  const [cart, setCart] = useState<CartItem[]>(getInitialCart());
+  const [isAdding, setIsAdding] = useState(false);
+
+  // Log du chargement initial
+  useEffect(() => {
+    console.log("Cart initial chargé:", cart);
   }, []);
 
-  // Sauvegarder le panier dans localStorage à chaque modification
+  // Sauvegarder le panier dans localStorage à chaque modification (côté client uniquement)
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-    console.log("Panier sauvegardé dans localStorage:", cart);
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem("cart", JSON.stringify(cart));
+      console.log("Panier sauvegardé dans localStorage:", cart);
+    } catch (error) {
+      console.error("Erreur lors de la sauvegarde dans localStorage:", error);
+    }
   }, [cart]);
 
-  // Fonction pour ajouter un produit au panier
   const addToCart = (product: CartItem) => {
     if (isAdding) {
       console.log("Ajout en cours, appel ignoré pour éviter un double ajout");
+      return;
+    }
+    if (!product || !product.id || !product.name || !product.price) {
+      console.error("Produit invalide passé à addToCart:", product);
       return;
     }
     setIsAdding(true);
@@ -80,22 +101,19 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     console.log("Produit reçu dans addToCart:", product);
     setCart((prevCart) => {
       const subscription = product.subscription || "MONTHLY";
-      if (!product.subscription) {
-        console.warn("subscription manquant dans le produit, utilisation de MONTHLY par défaut:", product);
-      }
-
-      const uniqueId = generateUniqueId(product.id, subscription);
+      const uniqueId = product.uniqueId || generateUniqueId(product.id, subscription);
       const productWithUniqueId = {
         ...product,
         uniqueId,
         subscription,
+        quantity: product.quantity || 1,
       };
 
       const existingItem = prevCart.find((item) => item.uniqueId === uniqueId);
       if (existingItem) {
         const updatedCart = prevCart.map((item) =>
           item.uniqueId === uniqueId
-            ? { ...item, quantity: item.quantity + product.quantity }
+            ? { ...item, quantity: item.quantity + productWithUniqueId.quantity }
             : item
         );
         console.log("Produit existant, quantité mise à jour:", updatedCart);
@@ -110,7 +128,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     });
   };
 
-  // Fonction pour diminuer la quantité d'un produit
   const decreaseQuantity = (uniqueId: string) => {
     setCart((prevCart) => {
       const item = prevCart.find((item) => item.uniqueId === uniqueId);
@@ -133,9 +150,8 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     });
   };
 
-  // Fonction pour supprimer un produit du panier
   const removeFromCart = (uniqueId: string) => {
-    console.log("Suppression de l'élément avec uniqueId:", uniqueId);
+    console.log("Suppression de l’élément avec uniqueId:", uniqueId);
     setCart((prevCart) => {
       const updatedCart = prevCart.filter((item) => item.uniqueId !== uniqueId);
       console.log("Nouveau panier après suppression:", updatedCart);
@@ -143,7 +159,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     });
   };
 
-  // Fonction pour mettre à jour un produit dans le panier
   const updateCartItem = (uniqueId: string, updates: Partial<CartItem>) => {
     setCart((prevCart) => {
       const updatedCart = prevCart.map((item) =>
@@ -163,7 +178,6 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   );
 };
 
-// Hook pour utiliser le contexte du panier
 export const useCart = (): CartContextType => {
   const context = useContext(CartContext);
   if (!context) {

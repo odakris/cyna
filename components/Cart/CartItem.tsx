@@ -18,7 +18,6 @@ const CartItemComponent: React.FC<CartProps> = ({ item }) => {
   const { cart, updateCartItem, decreaseQuantity, removeFromCart } = useCart();
   const [isRemoving, setIsRemoving] = useState(false);
 
-  // Garde minimale pour éviter le crash
   if (!item || !item.uniqueId) {
     console.error("Item invalide reçu dans CartItemComponent:", item);
     return null;
@@ -45,9 +44,26 @@ const CartItemComponent: React.FC<CartProps> = ({ item }) => {
     setTimeout(() => setIsRemoving(false), 1000);
   };
 
+  // Calculer le prix unitaire en fonction de l'abonnement
+  const unitPrice = useMemo(() => {
+    switch (currentItem.subscription || "MONTHLY") {
+      case "MONTHLY":
+        return currentItem.price;
+      case "YEARLY":
+        return currentItem.price * 12; // Prix annuel = mensuel * 12
+      case "PER_USER":
+        return currentItem.price;
+      case "PER_MACHINE":
+        return currentItem.price;
+      default:
+        return currentItem.price;
+    }
+  }, [currentItem.price, currentItem.subscription]);
+
+  // Calculer le prix total (prix unitaire * quantité)
   const adjustedPrice = useMemo(() => {
-    return currentItem.price * currentItem.quantity;
-  }, [currentItem.price, currentItem.quantity]);
+    return unitPrice * currentItem.quantity;
+  }, [unitPrice, currentItem.quantity]);
 
   return (
     <div className="flex justify-center mb-12">
@@ -98,11 +114,10 @@ const CartItemComponent: React.FC<CartProps> = ({ item }) => {
           </div>
           <div className="flex flex-col space-y-2">
             <p className="text-sm">
-              Prix unitaire : <span className="font-semibold">{currentItem.price}€</span>
+              Prix unitaire : <span className="font-semibold">{unitPrice.toFixed(2)}€</span>
             </p>
             <p className="text-sm">
-              Prix total :{" "}
-              <span className="font-semibold">{adjustedPrice.toFixed(2)}€</span>
+              Prix total : <span className="font-semibold">{adjustedPrice.toFixed(2)}€</span>
             </p>
           </div>
         </div>
