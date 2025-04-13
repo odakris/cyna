@@ -8,6 +8,7 @@ import {
   ShoppingCart,
   List,
   SlidersHorizontal,
+  MessageSquareText,
 } from "lucide-react"
 import {
   NavigationMenu,
@@ -27,6 +28,11 @@ export default function AdminSideBar() {
       name: "Dashboard",
       href: "/dashboard",
       icon: <Home className="mr-2 h-4 w-4" />,
+    },
+    {
+      name: "Message Principal",
+      href: "/dashboard/main-message",
+      icon: <MessageSquareText className="mr-2 h-4 w-4" />,
     },
     {
       name: "Hero Carousel",

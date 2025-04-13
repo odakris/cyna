@@ -92,6 +92,18 @@ model Product {
   @@index([name])
 }
 
+// Message principal de la page d'accueil
+model MainMessage {
+  id_main_message  Int      @id @default(autoincrement())
+  content          String   @db.Text
+  active           Boolean  @default(true)
+  has_background   Boolean  @default(false)
+  background_color String?  @db.VarChar(20)
+  text_color       String?  @db.VarChar(20)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+}
+
 // Hero carrousel
 model HeroCarouselSlide {
   id_hero_slide  Int      @id @default(autoincrement())

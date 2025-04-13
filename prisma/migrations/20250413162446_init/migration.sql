@@ -38,17 +38,34 @@ CREATE TABLE `Product` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `CarouselImage` (
-    `id_carousel_image` INTEGER NOT NULL AUTO_INCREMENT,
-    `url` VARCHAR(255) NOT NULL,
-    `alt` VARCHAR(150) NULL,
-    `priority_order` INTEGER NOT NULL DEFAULT 1,
+CREATE TABLE `MainMessage` (
+    `id_main_message` INTEGER NOT NULL AUTO_INCREMENT,
+    `content` TEXT NOT NULL,
+    `active` BOOLEAN NOT NULL DEFAULT true,
+    `has_background` BOOLEAN NOT NULL DEFAULT false,
+    `background_color` VARCHAR(20) NULL,
+    `text_color` VARCHAR(20) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
-    `id_product` INTEGER NOT NULL,
 
-    INDEX `CarouselImage_id_product_priority_order_idx`(`id_product`, `priority_order`),
-    PRIMARY KEY (`id_carousel_image`)
+    PRIMARY KEY (`id_main_message`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `HeroCarouselSlide` (
+    `id_hero_slide` INTEGER NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(255) NOT NULL,
+    `description` TEXT NULL,
+    `image_url` VARCHAR(255) NOT NULL,
+    `button_text` VARCHAR(100) NULL,
+    `button_link` VARCHAR(255) NULL,
+    `active` BOOLEAN NOT NULL DEFAULT true,
+    `priority_order` INTEGER NOT NULL DEFAULT 999,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `HeroCarouselSlide_title_key`(`title`),
+    PRIMARY KEY (`id_hero_slide`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -234,9 +251,6 @@ CREATE TABLE `PasswordResetToken` (
 
 -- AddForeignKey
 ALTER TABLE `Product` ADD CONSTRAINT `Product_id_category_fkey` FOREIGN KEY (`id_category`) REFERENCES `Category`(`id_category`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `CarouselImage` ADD CONSTRAINT `CarouselImage_id_product_fkey` FOREIGN KEY (`id_product`) REFERENCES `Product`(`id_product`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ProductCarousselImage` ADD CONSTRAINT `ProductCarousselImage_id_product_fkey` FOREIGN KEY (`id_product`) REFERENCES `Product`(`id_product`) ON DELETE CASCADE ON UPDATE CASCADE;

@@ -3,12 +3,10 @@
 import React from "react"
 import { CarouselPlugin } from "@/components/Carousel/CarouselPlugin"
 import { CategoryGrid } from "@/components/CategoryGrid/CategoryGrid"
-import { Message } from "@/components/Message/Message"
 import { TopProducts } from "@/components/TopProduits/TopProduits"
+import MainMessage from "@/components/MainMessage/MainMessage"
 
 export default function Home() {
-  const message = "Message très très important sur les promotions et actualités"
-
   return (
     <div className="flex flex-col justify-center items-center min-h-screen px-4">
       {/* CAROUSEL */}
@@ -18,7 +16,7 @@ export default function Home() {
 
       {/* MAIN MESSAGE */}
       <div className="w-full my-8">
-        <Message message={message} />
+        <MainMessage />
       </div>
 
       {/* CATEGORY GRID */}
