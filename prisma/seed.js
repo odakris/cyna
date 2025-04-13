@@ -850,6 +850,36 @@ async function main() {
       },
     })
 
+    console.log("Création des messages principaux pour la page d'accueil...")
+    await prisma.mainMessage.createMany({
+      data: [
+        {
+          content:
+            "Message très important sur les promotions et actualités de cybersécurité",
+          active: true,
+          has_background: true,
+          background_color: "bg-amber-100",
+          text_color: "text-amber-800",
+        },
+        {
+          content:
+            "Découvrez notre nouveau service de SOC managé avec 15% de réduction pendant tout le mois",
+          active: false,
+          has_background: true,
+          background_color: "bg-blue-100",
+          text_color: "text-blue-800",
+        },
+        {
+          content:
+            "Important : Mise à jour de sécurité disponible pour tous nos clients",
+          active: false,
+          has_background: false,
+          background_color: null,
+          text_color: "text-red-600",
+        },
+      ],
+    })
+
     console.log("Seeding terminé avec succès !")
   } catch (error) {
     console.error("Erreur durant le seeding :", error)

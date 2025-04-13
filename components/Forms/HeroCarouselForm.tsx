@@ -38,7 +38,7 @@ import { ImageUploader } from "@/components/Forms/ImageUploader"
 import {
   HeroCarouselFormValues,
   heroCarouselSchema,
-} from "../../lib/validations/hero-carousel-schema"
+} from "@/lib/validations/hero-carousel-schema"
 
 interface HeroCarouselFormProps {
   initialData?: HeroCarouselFormValues & { id_hero_slide?: number }
