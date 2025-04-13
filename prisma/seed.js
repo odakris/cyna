@@ -1,4 +1,9 @@
-import { OrderStatus, PrismaClient, SubscriptionType } from "@prisma/client"
+import {
+  OrderStatus,
+  PrismaClient,
+  // Role,
+  SubscriptionType,
+} from "@prisma/client"
 const prisma = new PrismaClient()
 
 // const bcrypt = require("bcrypt")
@@ -187,39 +192,64 @@ async function main() {
       ],
     })
 
-    // Création des images pour le carrousel
-    console.log("Création des images pour le carrousel...")
-    await prisma.carouselImage.createMany({
+    // *** AJOUT : Création des slides du Hero Carousel ***
+    console.log("Création des slides pour le Hero Carousel...")
+    await prisma.heroCarouselSlide.createMany({
       data: [
         {
-          url: "/uploads/carousel/diagnostic_cyber.jpg",
-          alt: "Diagnostic Cyber - Visuel 1",
+          title: "Solutions de cybersécurité pour les entreprises",
+          description:
+            "Des services de pointe pour protéger vos actifs numériques et garantir la continuité de votre activité",
+          image_url:
+            "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?q=80&w=1920",
+          button_text: "Découvrir nos solutions",
+          button_link: "/categories",
+          active: true,
           priority_order: 1,
-          id_product: diagnosticCyber.id_product,
         },
         {
-          url: "/uploads/carousel/diagnostic_cyber.jpg",
-          alt: "Diagnostic Cyber - Visuel 2",
+          title: "Tests d'intrusion et audit de sécurité",
+          description:
+            "Identifiez vos vulnérabilités avant que les hackers ne le fassent",
+          image_url:
+            "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?q=80&w=1920",
+          button_text: "En savoir plus",
+          button_link: "/produit/2",
+          active: true,
           priority_order: 2,
-          id_product: diagnosticCyber.id_product,
         },
         {
-          url: "/uploads/carousel/test_intrusion.jpg",
-          alt: "Test d'intrusion - Visuel 1",
-          priority_order: 1,
-          id_product: testIntrusion.id_product,
+          title: "Nouveau : SOC Managé 24/7",
+          description:
+            "Surveillance continue et réponse immédiate aux menaces pour une protection optimale",
+          image_url:
+            "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=1920",
+          button_text: "Découvrir le service",
+          button_link: "/produit/4",
+          active: true,
+          priority_order: 3,
         },
         {
-          url: "/uploads/carousel/soc_manage.jpg",
-          alt: "SOC Managé - Visuel 1",
-          priority_order: 1,
-          id_product: socManage.id_product,
+          title: "Offre exclusive : -10% sur nos diagnostics",
+          description:
+            "Profitez de notre offre de lancement jusqu'à la fin du mois",
+          image_url:
+            "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=1920",
+          button_text: "Profiter de l'offre",
+          button_link: "/produit/1",
+          active: false,
+          priority_order: 4,
         },
         {
-          url: "/uploads/carousel/investigation.jpg",
-          alt: "Investigation - Visuel 1",
-          priority_order: 1,
-          id_product: investigation.id_product,
+          title: "Services de remédiation après incident",
+          description:
+            "Retrouvez la sérénité après une cyberattaque grâce à nos experts",
+          image_url:
+            "https://images.unsplash.com/photo-1551434678-e076c223a692?q=80&w=1920",
+          button_text: "Nos services de réponse",
+          button_link: "/produit/5",
+          active: true,
+          priority_order: 5,
         },
       ],
     })
@@ -230,6 +260,18 @@ async function main() {
     // const hashedPassword = await bcrypt.hash("Password123!", salt)
     // const adminPassword = await bcrypt.hash("AdminSecure456!", salt)
 
+    // *** AJOUT : Création d'un utilisateur SUPER_ADMIN ***
+    const superAdmin = await prisma.user.create({
+      data: {
+        first_name: "Super",
+        last_name: "Admin",
+        email: "superadmin@cyna.fr",
+        password: "superAdminPassword",
+        role: "SUPER_ADMIN", // Rôle SUPER_ADMIN
+        email_verified: true,
+      },
+    })
+
     const admin = await prisma.user.create({
       data: {
         first_name: "Admin",
@@ -237,6 +279,29 @@ async function main() {
         email: "admin@cyna.fr",
         password: "adminPassword",
         role: "ADMIN",
+        email_verified: true,
+      },
+    })
+
+    // *** AJOUT : Création de plus d'utilisateurs ***
+    const manager1 = await prisma.user.create({
+      data: {
+        first_name: "Philippe",
+        last_name: "Dubois",
+        email: "philippe.dubois@cyna.fr",
+        password: "hashedPassword",
+        role: "MANAGER",
+        email_verified: true,
+      },
+    })
+
+    const manager2 = await prisma.user.create({
+      data: {
+        first_name: "Sophie",
+        last_name: "Moreau",
+        email: "sophie.moreau@cyna.fr",
+        password: "hashedPassword",
+        role: "MANAGER",
         email_verified: true,
       },
     })
@@ -263,14 +328,26 @@ async function main() {
       },
     })
 
-    const manager = await prisma.user.create({
+    const customer3 = await prisma.user.create({
       data: {
-        first_name: "Philippe",
-        last_name: "Dubois",
-        email: "philippe.dubois@cyna.fr",
+        first_name: "Thomas",
+        last_name: "Bernard",
+        email: "thomas.bernard@example.com",
         password: "hashedPassword",
-        role: "MANAGER",
+        role: "CUSTOMER",
         email_verified: true,
+      },
+    })
+
+    const customer4 = await prisma.user.create({
+      data: {
+        first_name: "Émilie",
+        last_name: "Leroy",
+        email: "emilie.leroy@example.com",
+        password: "hashedPassword",
+        role: "CUSTOMER",
+        email_verified: false, // Email non vérifié
+        verify_token: "verify_emilie_token_123",
       },
     })
 
@@ -309,6 +386,39 @@ async function main() {
       },
     })
 
+    // *** AJOUT : Plus d'adresses pour les nouveaux utilisateurs ***
+    const address3 = await prisma.address.create({
+      data: {
+        first_name: "Thomas",
+        last_name: "Bernard",
+        address1: "789 Boulevard Saint-Michel",
+        postal_code: "44000",
+        city: "Nantes",
+        region: "Pays de la Loire",
+        country: "France",
+        mobile_phone: "07 11 22 33 44",
+        is_default_billing: true,
+        is_default_shipping: true,
+        id_user: customer3.id_user,
+      },
+    })
+
+    const address4 = await prisma.address.create({
+      data: {
+        first_name: "Émilie",
+        last_name: "Leroy",
+        address1: "24 Rue des Lilas",
+        postal_code: "33000",
+        city: "Bordeaux",
+        region: "Nouvelle-Aquitaine",
+        country: "France",
+        mobile_phone: "06 55 66 77 88",
+        is_default_billing: true,
+        is_default_shipping: true,
+        id_user: customer4.id_user,
+      },
+    })
+
     // Création des sessions
     console.log("Création des sessions...")
     const session1 = await prisma.session.create({
@@ -324,6 +434,31 @@ async function main() {
         session_token: "sess_67890fghij",
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 jours
         id_user: customer2.id_user,
+      },
+    })
+
+    // *** AJOUT : Plus de sessions ***
+    const session3 = await prisma.session.create({
+      data: {
+        session_token: "sess_abcde12345",
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 jours
+        id_user: customer3.id_user,
+      },
+    })
+
+    const sessionAdmin = await prisma.session.create({
+      data: {
+        session_token: "sess_admin54321",
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 jours
+        id_user: admin.id_user,
+      },
+    })
+
+    const sessionSuperAdmin = await prisma.session.create({
+      data: {
+        session_token: "sess_super98765",
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 jours
+        id_user: superAdmin.id_user,
       },
     })
 
@@ -344,6 +479,25 @@ async function main() {
         subscription_type: SubscriptionType.MONTHLY,
         id_product: testIntrusion.id_product,
         sessionId_session: session2.id_session,
+      },
+    })
+
+    // *** AJOUT : Plus d'éléments de panier ***
+    await prisma.cartItem.create({
+      data: {
+        quantity: 1,
+        subscription_type: SubscriptionType.YEARLY,
+        id_product: socManage.id_product,
+        sessionId_session: session3.id_session,
+      },
+    })
+
+    await prisma.cartItem.create({
+      data: {
+        quantity: 1,
+        subscription_type: SubscriptionType.MONTHLY,
+        id_product: investigation.id_product,
+        userId_user: customer4.id_user, // Panier associé à l'utilisateur directement
       },
     })
 
@@ -370,6 +524,31 @@ async function main() {
         provider_token_id: "tok_visa_4444",
         is_default: true,
         id_user: customer2.id_user,
+      },
+    })
+
+    // *** AJOUT : Plus d'informations de paiement ***
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Thomas Bernard",
+        last_card_digits: "5555",
+        expiration_month: 3,
+        expiration_year: 2025,
+        provider_token_id: "tok_mastercard_5555",
+        is_default: true,
+        id_user: customer3.id_user,
+      },
+    })
+
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Jean Dupont Pro",
+        last_card_digits: "9876",
+        expiration_month: 6,
+        expiration_year: 2024,
+        provider_token_id: "tok_amex_9876",
+        is_default: false,
+        id_user: customer1.id_user,
       },
     })
 
@@ -569,6 +748,57 @@ async function main() {
         data: {
           ...item,
           id_order: order4.id_order,
+        },
+      })
+    }
+
+    // *** AJOUT : Commande supplémentaire pour Thomas Bernard ***
+    const orderItems5 = [
+      {
+        subscription_type: SubscriptionType.YEARLY,
+        subscription_status: OrderStatus.ACTIVE,
+        subscription_duration: 12,
+        renewal_date: new Date("2024-11-10"),
+        quantity: 1,
+        unit_price: microSOC.unit_price, // 5000
+        id_product: microSOC.id_product,
+      },
+      {
+        subscription_type: SubscriptionType.YEARLY,
+        subscription_status: OrderStatus.ACTIVE,
+        subscription_duration: 12,
+        renewal_date: new Date("2024-11-10"),
+        quantity: 1,
+        unit_price: investigation.unit_price, // 8500
+        id_product: investigation.id_product,
+      },
+    ]
+
+    const total5 = orderItems5.reduce(
+      (acc, item) => acc + item.unit_price * item.quantity,
+      0
+    )
+
+    const order5 = await prisma.order.create({
+      data: {
+        order_date: new Date("2023-11-10"),
+        total_amount: total5,
+        subtotal: total5,
+        order_status: OrderStatus.ACTIVE,
+        payment_method: "CARD",
+        last_card_digits: "5555",
+        invoice_number: "INV-2023-005",
+        invoice_pdf_url: "/invoices/INV-2023-005.pdf",
+        id_user: customer3.id_user,
+        id_address: address3.id_address,
+      },
+    })
+
+    for (const item of orderItems5) {
+      await prisma.orderItem.create({
+        data: {
+          ...item,
+          id_order: order5.id_order,
         },
       })
     }

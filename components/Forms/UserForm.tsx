@@ -39,17 +39,7 @@ import { Badge } from "@/components/ui/badge"
 
 import { userFormSchema, UserFormValues } from "@/lib/validations/user-schema"
 import { Role } from "@prisma/client"
-import {
-  User,
-  Mail,
-  Key,
-  Shield,
-  UserCog,
-  Save,
-  ArrowLeft,
-  Lock,
-} from "lucide-react"
-import Link from "next/link"
+import { User, Mail, Key, Shield, UserCog, Save, Lock } from "lucide-react"
 
 interface UserFormProps {
   initialData?: UserFormValues
@@ -210,19 +200,7 @@ export function UserForm({
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      {/* Header avec bouton de retour */}
-      <div className="flex items-center gap-2 mb-6">
-        <Button asChild variant="ghost" size="icon" className="rounded-full">
-          <Link href="/dashboard/users">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-        </Button>
-        <h1 className="text-2xl font-bold">
-          {isEditing ? "Modifier l'utilisateur" : "Nouvel utilisateur"}
-        </h1>
-      </div>
-
+    <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Colonne principale avec formulaire */}
         <div className="lg:col-span-2">

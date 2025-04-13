@@ -1,7 +1,14 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { Home, Package, Users, ShoppingCart, List } from "lucide-react"
+import {
+  Home,
+  Package,
+  Users,
+  ShoppingCart,
+  List,
+  SlidersHorizontal,
+} from "lucide-react"
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -20,6 +27,11 @@ export default function AdminSideBar() {
       name: "Dashboard",
       href: "/dashboard",
       icon: <Home className="mr-2 h-4 w-4" />,
+    },
+    {
+      name: "Hero Carousel",
+      href: "/dashboard/hero-carousel",
+      icon: <SlidersHorizontal className="mr-2 h-4 w-4" />,
     },
     {
       name: "Produits",

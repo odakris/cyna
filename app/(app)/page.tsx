@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-// import { CarouselPlugin } from "@/components/Carousel/CarouselPlugin"
+import { CarouselPlugin } from "@/components/Carousel/CarouselPlugin"
 import { CategoryGrid } from "@/components/CategoryGrid/CategoryGrid"
 import { Message } from "@/components/Message/Message"
 import { TopProducts } from "@/components/TopProduits/TopProduits"
@@ -12,7 +12,9 @@ export default function Home() {
   return (
     <div className="flex flex-col justify-center items-center min-h-screen px-4">
       {/* CAROUSEL */}
-      <div className="w-full my-8">{/* <CarouselPlugin /> */}</div>
+      <div className="w-full my-8">
+        <CarouselPlugin />
+      </div>
 
       {/* MAIN MESSAGE */}
       <div className="w-full my-8">
@@ -24,7 +26,6 @@ export default function Home() {
         <h1 className="text-2xl font-bold mb-4 w-full text-left">
           Nos Catégories
         </h1>
-
         <CategoryGrid />
       </div>
 

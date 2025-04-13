@@ -13,14 +13,28 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const resolvedParams = await params
-  const id = validateId(resolvedParams.id)
+  try {
+    const resolvedParams = await params
+    const id = validateId(resolvedParams.id)
 
-  if (!id) {
-    return NextResponse.json({ message: "ID invalide" }, { status: 400 })
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID invalide ou manquant" },
+        { status: 400 }
+      )
+    }
+
+    return await userController.getById(id)
+  } catch (error) {
+    console.error(
+      `Erreur non gérée dans la route GET /users/${params.then(p => p.id)}:`,
+      error
+    )
+    return NextResponse.json(
+      { error: "Erreur serveur inattendue" },
+      { status: 500 }
+    )
   }
-
-  return userController.getById(id)
 }
 
 /**
@@ -34,14 +48,28 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const resolvedParams = await params
-  const id = validateId(resolvedParams.id)
+  try {
+    const resolvedParams = await params
+    const id = validateId(resolvedParams.id)
 
-  if (!id) {
-    return NextResponse.json({ message: "ID invalide" }, { status: 400 })
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID invalide ou manquant" },
+        { status: 400 }
+      )
+    }
+
+    return await userController.update(request, id)
+  } catch (error) {
+    console.error(
+      `Erreur non gérée dans la route PUT /users/${params.then(p => p.id)}:`,
+      error
+    )
+    return NextResponse.json(
+      { error: "Erreur serveur inattendue" },
+      { status: 500 }
+    )
   }
-
-  return userController.update(request, id)
 }
 
 /**
@@ -55,12 +83,26 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
-  const resolvedParams = await params
-  const id = validateId(resolvedParams.id)
+  try {
+    const resolvedParams = await params
+    const id = validateId(resolvedParams.id)
 
-  if (!id) {
-    return NextResponse.json({ message: "ID invalide" }, { status: 400 })
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID invalide ou manquant" },
+        { status: 400 }
+      )
+    }
+
+    return await userController.remove(id)
+  } catch (error) {
+    console.error(
+      `Erreur non gérée dans la route DELETE /users/${params.then(p => p.id)}:`,
+      error
+    )
+    return NextResponse.json(
+      { error: "Erreur serveur inattendue" },
+      { status: 500 }
+    )
   }
-
-  return userController.remove(id)
 }

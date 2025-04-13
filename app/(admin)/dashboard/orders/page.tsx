@@ -31,6 +31,7 @@ import {
   ReceiptText,
   TruckIcon,
   BanknoteIcon,
+  ShoppingCart,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -198,6 +199,12 @@ export default function OrderHomePage() {
           stock <= filterValue.max
         )
       },
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      productsFilter: (row, columnId, filterValue) => true,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      global: (row, columnId, filterValue) => true,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      emailVerifiedFilter: (row, columnId, filterValue) => true,
     },
     globalFilterFn: globalFilterFunction as FilterFn<unknown>,
     state: {
@@ -272,7 +279,7 @@ export default function OrderHomePage() {
 
   if (loading) {
     return (
-      <div className="mx-auto p-6 space-y-8">
+      <div className="container mx-auto p-6 space-y-8">
         <div className="flex justify-between items-center">
           <Skeleton className="h-10 w-1/3" />
           <div className="flex gap-4">
@@ -354,16 +361,28 @@ export default function OrderHomePage() {
   }
 
   return (
-    <div className="mx-auto p-6 space-y-6 animate-in fade-in duration-300">
+    <div className="container mx-auto p-6 space-y-6 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold mb-1 text-foreground">
-            Gestion des Commandes
-          </h1>
-          <p className="text-muted-foreground">
-            {orders.length} commande{orders.length > 1 ? "s" : ""} dans la base
-            de données
-          </p>
+          <div className="flex items-center gap-2">
+            <ShoppingCart className="h-6 w-6 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground">
+              Gestion des Commandes
+            </h1>
+          </div>
+          <div className="mt-1 flex items-center gap-2">
+            <Badge variant="outline" className="font-normal">
+              {orders.length} commande{orders.length > 1 ? "s" : ""}
+            </Badge>
+            <Badge
+              variant="secondary"
+              className="font-normal"
+              title="Sélectionnés"
+            >
+              {table.getFilteredSelectedRowModel().rows.length} sélectionné
+              {table.getFilteredSelectedRowModel().rows.length > 1 ? "s" : ""}
+            </Badge>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-3">

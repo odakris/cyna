@@ -7,7 +7,15 @@ import userController from "@/lib/controllers/user-controller"
  * @returns {Promise<NextResponse>} La réponse contenant la liste des produits.
  */
 export async function GET(): Promise<NextResponse> {
-  return userController.getAll()
+  try {
+    return await userController.getAll()
+  } catch (error) {
+    console.error("Erreur non gérée dans la route GET /users:", error)
+    return NextResponse.json(
+      { error: "Erreur serveur inattendue" },
+      { status: 500 }
+    )
+  }
 }
 
 /**
@@ -17,5 +25,13 @@ export async function GET(): Promise<NextResponse> {
  * @returns {Promise<NextResponse>} La réponse contenant le produit créé ou un message d'erreur.
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  return userController.create(request)
+  try {
+    return await userController.create(request)
+  } catch (error) {
+    console.error("Erreur non gérée dans la route POST /users:", error)
+    return NextResponse.json(
+      { error: "Erreur serveur inattendue" },
+      { status: 500 }
+    )
+  }
 }

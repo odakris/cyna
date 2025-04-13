@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import categoryService from "@/lib/services/category-service"
 import { categoryFormSchema } from "@/lib/validations/category-schema"
+import { ZodError } from "zod"
 
 /**
  * Récupère la liste complète des catégories depuis la base de données.
@@ -12,6 +13,11 @@ export const getAll = async (): Promise<NextResponse> => {
     return NextResponse.json(categories)
   } catch (error) {
     console.error("Erreur lors de la récupération des catégories:", error)
+
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }
@@ -31,11 +37,8 @@ export const getById = async (id: number): Promise<NextResponse> => {
       error
     )
 
-    if (error instanceof Error && error.message === "Catégorie non trouvée") {
-      return NextResponse.json(
-        { message: "Catégorie non trouvée" },
-        { status: 404 }
-      )
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 404 })
     }
 
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
@@ -55,8 +58,25 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
     return NextResponse.json(newCategory, { status: 201 })
   } catch (error) {
     console.error("Erreur lors de la création de la catégorie:", error)
+
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { error: "Données invalides", details: error.errors },
+        { status: 400 }
+      )
+    }
+
+    if (
+      error instanceof Error &&
+      error.message === "Catégorie déjà existante"
+    ) {
+      return NextResponse.json(
+        { message: "Catégorie déjà existante" },
+        { status: 409 }
+      )
+    }
     const message = error instanceof Error ? error.message : "Erreur inconnue"
-    return NextResponse.json({ error: message }, { status: 400 })
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -78,11 +98,15 @@ export const update = async (
   } catch (error) {
     console.error("Erreur lors de la mise à jour de la catégorie:", error)
 
-    if (error instanceof Error && error.message === "Catégorie non trouvée") {
+    if (error instanceof ZodError) {
       return NextResponse.json(
-        { message: "Catégorie non trouvée" },
-        { status: 404 }
+        { error: "Données invalides", details: error.errors },
+        { status: 400 }
       )
+    }
+
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 404 })
     }
 
     const message = error instanceof Error ? error.message : "Erreur inconnue"
@@ -102,11 +126,8 @@ export const remove = async (id: number): Promise<NextResponse> => {
   } catch (error) {
     console.error("Erreur lors de la suppression de la catégorie:", error)
 
-    if (error instanceof Error && error.message === "Catégorie non trouvée") {
-      return NextResponse.json(
-        { message: "Catégorie non trouvée" },
-        { status: 404 }
-      )
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 404 })
     }
 
     const message = error instanceof Error ? error.message : "Erreur inconnue"
