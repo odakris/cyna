@@ -9,6 +9,7 @@ import {
   List,
   SlidersHorizontal,
   MessageSquareText,
+  Mail,
 } from "lucide-react"
 import {
   NavigationMenu,
@@ -27,42 +28,47 @@ export default function AdminSideBar() {
     {
       name: "Dashboard",
       href: "/dashboard",
-      icon: <Home className="mr-2 h-4 w-4" />,
+      icon: <Home className="h-5 w-5 shrink-0" />,
     },
     {
       name: "Message Principal",
       href: "/dashboard/main-message",
-      icon: <MessageSquareText className="mr-2 h-4 w-4" />,
+      icon: <MessageSquareText className="h-5 w-5 shrink-0" />,
     },
     {
       name: "Hero Carousel",
       href: "/dashboard/hero-carousel",
-      icon: <SlidersHorizontal className="mr-2 h-4 w-4" />,
+      icon: <SlidersHorizontal className="h-5 w-5 shrink-0" />,
     },
     {
       name: "Produits",
       href: "/dashboard/products",
-      icon: <Package className="mr-2 h-4 w-4" />,
+      icon: <Package className="h-5 w-5 shrink-0" />,
     },
     {
       name: "Catégories",
       href: "/dashboard/categories",
-      icon: <List className="mr-2 h-4 w-4" />,
+      icon: <List className="h-5 w-5 shrink-0" />,
     },
     {
       name: "Utilisateurs",
       href: "/dashboard/users",
-      icon: <Users className="mr-2 h-4 w-4" />,
+      icon: <Users className="h-5 w-5 shrink-0" />,
     },
     {
       name: "Commandes",
       href: "/dashboard/orders",
-      icon: <ShoppingCart className="mr-2 h-4 w-4" />,
+      icon: <ShoppingCart className="h-5 w-5 shrink-0" />,
+    },
+    {
+      name: "Contact",
+      href: "/dashboard/contact-messages",
+      icon: <Mail className="h-5 w-5 shrink-0" />,
     },
   ]
 
   return (
-    <aside className="bg-slate-800 text-slate-200 w-50 shrink-0 h-screen sticky top-0 left-0">
+    <aside className="bg-slate-800 text-slate-200 w-64 shrink-0 h-screen sticky top-0 left-0">
       <div className="p-4 border-b border-slate-700">
         <h2 className="text-xl font-bold text-center">Back-Office</h2>
       </div>
@@ -70,7 +76,7 @@ export default function AdminSideBar() {
       <ScrollArea className="h-[calc(100vh-64px)]">
         <div className="p-4">
           <NavigationMenu orientation="vertical" className="max-w-none w-full">
-            <NavigationMenuList className="flex flex-col space-y-1">
+            <NavigationMenuList className="flex flex-col space-y-2">
               {navLinks.map(item => {
                 const isActive =
                   pathname === item.href || pathname.startsWith(`${item.href}/`)
@@ -80,21 +86,28 @@ export default function AdminSideBar() {
                     <NavigationMenuLink
                       href={item.href}
                       className={cn(
-                        "flex items-center p-2 w-full rounded-md text-sm font-medium",
+                        "flex items-start px-4 py-3 w-full h-12 rounded-md text-sm font-medium transition-colors",
                         isActive
                           ? "bg-slate-700 text-slate-100"
                           : "text-slate-300 hover:bg-slate-700 hover:text-slate-100"
                       )}
                     >
                       {item.icon}
-                      {item.name}
+                      <span className="ml-3">{item.name}</span>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
                 )
               })}
 
               <NavigationMenuItem className="pt-6">
-                <DisconnectButton />
+                <div
+                  className={cn(
+                    "flex items-center px-4 py-3 w-full h-12 rounded-md text-sm font-medium transition-colors",
+                    "text-slate-300 hover:bg-slate-700 hover:text-slate-100"
+                  )}
+                >
+                  <DisconnectButton />
+                </div>
               </NavigationMenuItem>
             </NavigationMenuList>
           </NavigationMenu>

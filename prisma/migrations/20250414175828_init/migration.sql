@@ -183,11 +183,15 @@ CREATE TABLE `ContactMessage` (
     `message` TEXT NOT NULL,
     `sent_date` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `is_read` BOOLEAN NOT NULL DEFAULT false,
+    `is_responded` BOOLEAN NOT NULL DEFAULT false,
+    `response` TEXT NULL,
+    `response_date` DATETIME(3) NULL,
     `id_user` INTEGER NULL,
 
     INDEX `ContactMessage_id_user_idx`(`id_user`),
     INDEX `ContactMessage_is_read_idx`(`is_read`),
     INDEX `ContactMessage_sent_date_idx`(`sent_date`),
+    INDEX `ContactMessage_is_responded_idx`(`is_responded`),
     PRIMARY KEY (`id_message`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 

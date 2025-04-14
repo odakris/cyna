@@ -234,20 +234,23 @@ model Session {
   @@index([expires_at])
 }
 
-// Messages de contact envoyés via le formulaire
 model ContactMessage {
-  id_message Int      @id @default(autoincrement())
-  email      String   @db.VarChar(255)
-  subject    String   @db.VarChar(200)
-  message    String   @db.Text
-  sent_date  DateTime @default(now())
-  is_read    Boolean  @default(false)
-  id_user    Int? // Optionnel car peut être envoyé par un visiteur non connecté
-  user       User?    @relation(fields: [id_user], references: [id_user])
+  id_message    Int       @id @default(autoincrement())
+  email         String    @db.VarChar(255)
+  subject       String    @db.VarChar(200)
+  message       String    @db.Text
+  sent_date     DateTime  @default(now())
+  is_read       Boolean   @default(false)
+  is_responded  Boolean   @default(false)
+  response      String?   @db.Text
+  response_date DateTime?
+  id_user       Int? // Optionnel car peut être envoyé par un visiteur non connecté
+  user          User?     @relation(fields: [id_user], references: [id_user])
 
   @@index([id_user])
   @@index([is_read])
   @@index([sent_date])
+  @@index([is_responded])
 }
 
 // Informations de paiement des utilisateurs

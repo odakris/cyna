@@ -813,6 +813,10 @@ async function main() {
           "Bonjour, je souhaite en savoir plus sur votre service de diagnostic cyber. Comment se déroule l'intervention dans nos locaux ? Merci d'avance pour votre réponse.",
         sent_date: new Date("2023-06-10"),
         is_read: true,
+        is_responded: true,
+        response:
+          "Bonjour Jean, merci pour votre intérêt. Notre intervention se déroule en trois phases : audit initial, analyse des vulnérabilités et remise du rapport détaillé. Un consultant se déplacera dans vos locaux pour la première phase. N'hésitez pas si vous avez d'autres questions.",
+        response_date: new Date("2023-06-12"),
         id_user: customer1.id_user,
       },
     })
@@ -825,6 +829,7 @@ async function main() {
           "Bonjour, je dirige une PME de 25 employés dans le secteur financier. Pouvez-vous me proposer un devis personnalisé pour vos services de protection ? Cordialement, Marie Martin",
         sent_date: new Date("2023-07-18"),
         is_read: true,
+        is_responded: false,
         id_user: customer2.id_user,
       },
     })
@@ -837,6 +842,7 @@ async function main() {
           "Bonjour, je souhaite recevoir plus d'informations sur vos services de SOC managé. Pouvez-vous me contacter au 01 23 45 67 89 ? Merci.",
         sent_date: new Date(),
         is_read: false,
+        is_responded: false,
       },
     })
 
