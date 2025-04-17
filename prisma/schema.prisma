@@ -187,6 +187,7 @@ model User {
   two_factor_enabled    Boolean              @default(false)
   created_at            DateTime             @default(now())
   updated_at            DateTime             @updatedAt
+  stripeCustomerId      String?
   orders                Order[]
   contact_messages      ContactMessage[]
   payment_infos         PaymentInfo[]
@@ -255,20 +256,16 @@ model ContactMessage {
 
 // Informations de paiement des utilisateurs
 model PaymentInfo {
-  id_payment_info   Int      @id @default(autoincrement())
-  card_name         String   @db.VarChar(100)
-  last_card_digits  String   @db.VarChar(4)
-  expiration_month  Int      @db.TinyInt
-  expiration_year   Int      @db.SmallInt
-  provider_token_id String?  @db.VarChar(255) // ID du token chez le fournisseur de paiement
-  is_default        Boolean  @default(false)
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
-  id_user           Int
-  user              User     @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
-
-  @@index([id_user])
-  @@index([is_default])
+  id_payment_info     Int      @id @default(autoincrement())
+  card_name           String   @db.VarChar(100)
+  brand               String   @db.VarChar(50)
+  last_card_digits    String   @db.VarChar(4)
+  stripe_payment_id   String   @db.VarChar(255) // <-- l'ID du paymentMethod chez Stripe
+  is_default          Boolean  @default(false)
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  id_user             Int
+  user                User     @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
 }
 
 // Adresses enregistrées par les utilisateurs

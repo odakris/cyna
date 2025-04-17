@@ -41,22 +41,34 @@ export const paymentController = {
 
     // Méthode pour ajouter une nouvelle méthode de paiement
     async createPaymentMethod(req: Request, { params }: { params: { id: string } }) {
-        const userId = parseInt(params.id, 10);
-        const body = await req.json();
+        const userId = parseInt(params.id, 10)
+        const body = await req.json()
 
-        console.log("Received body in controller:", body);
+        console.log("Received body in controller:", body)
 
         if (isNaN(userId)) {
-            return NextResponse.json({ message: "ID utilisateur invalide" }, { status: 400 });
+            return NextResponse.json({ message: "ID utilisateur invalide" }, { status: 400 })
+        }
+
+        const requiredFields = ["stripe_payment_method_id", "card_name", "brand", "last_card_digits"]
+        const missing = requiredFields.filter(field => !body[field])
+
+        if (missing.length > 0) {
+            return NextResponse.json(
+                { message: `Champs manquants : ${missing.join(", ")}` },
+                { status: 400 }
+            )
         }
 
         try {
-            const newPayment = await paymentService.addPayment(userId, body);
-            return NextResponse.json(newPayment, { status: 201 });
-        } catch {
-            return NextResponse.json({ message: "Erreur interne du serveur" }, { status: 500 });
+            const newPayment = await paymentService.addPayment(userId, body)
+            return NextResponse.json(newPayment, { status: 201 })
+        } catch (err) {
+            console.error("Erreur backend:", err)
+            return NextResponse.json({ message: "Erreur interne du serveur" }, { status: 500 })
         }
     },
+
 
     // Méthode pour mettre à jour une méthode de paiement
     async updatePaymentMethod(req: Request, { params }: { params: { id: string } }) {

@@ -19,7 +19,7 @@ export const paymentService = {
     },
 
     async addPayment(userId: number, paymentData: any): Promise<PaymentInfo> {
-        return await paymentRepository.createPayment(userId, paymentData);
+        return await paymentRepository.createPayment(userId, paymentData)
     },
 
     async updatePayment(userId: number, paymentId: number, paymentData: any): Promise<PaymentInfo> {

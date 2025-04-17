@@ -10,7 +10,7 @@ export default function EditPaymentMethodPage() {
   const { data: session } = useSession()
   const router = useRouter()
 
-  const [paymentMethod, setPaymentMethod] = useState<any>(null)
+  const [paymentMethod, setPaymentMethod] = useState(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export default function EditPaymentMethodPage() {
     fetchPaymentMethod()
   }, [id_payment, session?.user?.id])
 
-  const handleUpdate = async (updatedPaymentMethod: any) => {
+  const handleUpdate = async updatedPaymentMethod => {
     setLoading(true)
     try {
       const response = await fetch(

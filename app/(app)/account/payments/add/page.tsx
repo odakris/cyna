@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { PaymentMethodsForm } from "@/components/Account/PaymentMethodsForm"
+import StripeWrapper from "@/components/StripeWrapper"
 import { useState } from "react"
 
 export default function AddPaymentMethod() {
@@ -49,10 +50,12 @@ export default function AddPaymentMethod() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Ajouter une méthode de paiement</h1>
-      {/* On passe la fonction handleCreate comme prop pour gérer la soumission */}
-      <PaymentMethodsForm onSubmit={handleCreate} loading={loading} />
-    </div>
+    <StripeWrapper>
+      <div className="p-6 space-y-6">
+        <h1 className="text-2xl font-bold">Ajouter une méthode de paiement</h1>
+        {/* On passe la fonction handleCreate comme prop pour gérer la soumission */}
+        <PaymentMethodsForm onSubmit={handleCreate} loading={loading} />
+      </div>
+    </StripeWrapper>
   )
 }

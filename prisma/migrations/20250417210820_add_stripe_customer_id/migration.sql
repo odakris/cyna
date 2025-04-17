@@ -11,7 +11,7 @@ CREATE TABLE `Category` (
     UNIQUE INDEX `Category_name_key`(`name`),
     INDEX `Category_priority_order_idx`(`priority_order`),
     PRIMARY KEY (`id_category`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Product` (
@@ -35,7 +35,7 @@ CREATE TABLE `Product` (
     INDEX `Product_priority_order_idx`(`priority_order`),
     INDEX `Product_name_idx`(`name`),
     PRIMARY KEY (`id_product`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `MainMessage` (
@@ -49,7 +49,7 @@ CREATE TABLE `MainMessage` (
     `updated_at` DATETIME(3) NOT NULL,
 
     PRIMARY KEY (`id_main_message`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `HeroCarouselSlide` (
@@ -66,7 +66,7 @@ CREATE TABLE `HeroCarouselSlide` (
 
     UNIQUE INDEX `HeroCarouselSlide_title_key`(`title`),
     PRIMARY KEY (`id_hero_slide`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `ProductCarousselImage` (
@@ -79,7 +79,7 @@ CREATE TABLE `ProductCarousselImage` (
 
     INDEX `ProductCarousselImage_id_product_idx`(`id_product`),
     PRIMARY KEY (`id_product_caroussel_image`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `OrderItem` (
@@ -98,7 +98,7 @@ CREATE TABLE `OrderItem` (
     INDEX `OrderItem_subscription_status_idx`(`subscription_status`),
     INDEX `OrderItem_renewal_date_idx`(`renewal_date`),
     PRIMARY KEY (`id_order_item`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Order` (
@@ -120,7 +120,7 @@ CREATE TABLE `Order` (
     INDEX `Order_order_status_idx`(`order_status`),
     INDEX `Order_invoice_number_idx`(`invoice_number`),
     PRIMARY KEY (`id_order`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `User` (
@@ -135,6 +135,7 @@ CREATE TABLE `User` (
     `two_factor_enabled` BOOLEAN NOT NULL DEFAULT false,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
+    `stripeCustomerId` VARCHAR(191) NULL,
 
     UNIQUE INDEX `User_email_key`(`email`),
     INDEX `User_email_idx`(`email`),
@@ -142,7 +143,7 @@ CREATE TABLE `User` (
     INDEX `User_email_verified_idx`(`email_verified`),
     INDEX `User_created_at_idx`(`created_at`),
     PRIMARY KEY (`id_user`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `CartItem` (
@@ -158,7 +159,7 @@ CREATE TABLE `CartItem` (
     INDEX `CartItem_id_product_idx`(`id_product`),
     UNIQUE INDEX `CartItem_sessionId_session_id_product_subscription_type_key`(`sessionId_session`, `id_product`, `subscription_type`),
     PRIMARY KEY (`id_cart_item`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Session` (
@@ -173,7 +174,7 @@ CREATE TABLE `Session` (
     INDEX `Session_session_token_idx`(`session_token`),
     INDEX `Session_expires_at_idx`(`expires_at`),
     PRIMARY KEY (`id_session`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `ContactMessage` (
@@ -193,25 +194,22 @@ CREATE TABLE `ContactMessage` (
     INDEX `ContactMessage_sent_date_idx`(`sent_date`),
     INDEX `ContactMessage_is_responded_idx`(`is_responded`),
     PRIMARY KEY (`id_message`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `PaymentInfo` (
     `id_payment_info` INTEGER NOT NULL AUTO_INCREMENT,
     `card_name` VARCHAR(100) NOT NULL,
+    `brand` VARCHAR(50) NOT NULL,
     `last_card_digits` VARCHAR(4) NOT NULL,
-    `expiration_month` TINYINT NOT NULL,
-    `expiration_year` SMALLINT NOT NULL,
-    `provider_token_id` VARCHAR(255) NULL,
+    `stripe_payment_id` VARCHAR(255) NOT NULL,
     `is_default` BOOLEAN NOT NULL DEFAULT false,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
     `id_user` INTEGER NOT NULL,
 
-    INDEX `PaymentInfo_id_user_idx`(`id_user`),
-    INDEX `PaymentInfo_is_default_idx`(`is_default`),
     PRIMARY KEY (`id_payment_info`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Address` (
@@ -236,7 +234,7 @@ CREATE TABLE `Address` (
     INDEX `Address_is_default_shipping_idx`(`is_default_shipping`),
     INDEX `Address_country_region_city_idx`(`country`, `region`, `city`),
     PRIMARY KEY (`id_address`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `PasswordResetToken` (
@@ -251,7 +249,7 @@ CREATE TABLE `PasswordResetToken` (
     INDEX `PasswordResetToken_id_user_idx`(`id_user`),
     INDEX `PasswordResetToken_expires_at_idx`(`expires_at`),
     PRIMARY KEY (`id_password_reset`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
 ALTER TABLE `Product` ADD CONSTRAINT `Product_id_category_fkey` FOREIGN KEY (`id_category`) REFERENCES `Category`(`id_category`) ON DELETE RESTRICT ON UPDATE CASCADE;
