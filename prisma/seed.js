@@ -8,6 +8,13 @@ const prisma = new PrismaClient()
 
 // const bcrypt = require("bcrypt")
 
+// Fonction utilitaire pour générer des dates récentes
+const getRecentDate = daysAgo => {
+  const date = new Date()
+  date.setDate(date.getDate() - daysAgo)
+  return date
+}
+
 async function main() {
   try {
     console.log("Début de la procédure de seeding...")
@@ -62,7 +69,7 @@ async function main() {
         available: true,
         priority_order: 1,
         main_image: "/uploads/diagnostic_cyber.jpg",
-        stock: Math.floor(Math.random() * 10),
+        stock: Math.floor(Math.random() * 10) + 10, // Stock plus élevé
         id_category: prevention.id_category,
       },
     })
@@ -79,7 +86,7 @@ async function main() {
         available: true,
         priority_order: 2,
         main_image: "/uploads/test_intrusion.jpg",
-        stock: Math.floor(Math.random() * 10),
+        stock: Math.floor(Math.random() * 10) + 5,
         id_category: prevention.id_category,
       },
     })
@@ -93,10 +100,10 @@ async function main() {
           "Surveillance 24/7, analyse des logs, détection d'anomalies, alertes en temps réel.",
         unit_price: 5000,
         discount_price: null,
-        available: false,
+        available: true, // Maintenant disponible
         priority_order: 1,
         main_image: "/uploads/micro_soc.jpg",
-        stock: Math.floor(Math.random() * 10),
+        stock: Math.floor(Math.random() * 10) + 8,
         id_category: protection.id_category,
       },
     })
@@ -113,7 +120,7 @@ async function main() {
         available: true,
         priority_order: 2,
         main_image: "/uploads/soc_manage.jpg",
-        stock: Math.floor(Math.random() * 10),
+        stock: Math.floor(Math.random() * 10) + 5,
         id_category: protection.id_category,
       },
     })
@@ -130,7 +137,25 @@ async function main() {
         available: true,
         priority_order: 1,
         main_image: "/uploads/investigation.jpg",
-        stock: Math.floor(Math.random() * 10),
+        stock: Math.floor(Math.random() * 10) + 3,
+        id_category: reponse.id_category,
+      },
+    })
+
+    // Nouveau produit dans la catégorie Réponse
+    const crisisManagement = await prisma.product.create({
+      data: {
+        name: "Gestion de crise cybersécurité",
+        description:
+          "Service de gestion de crise complet pour faire face aux incidents de sécurité majeurs.",
+        technical_specs:
+          "Cellule de crise, communication interne et externe, coordination avec les autorités, plan de continuité d'activité.",
+        unit_price: 9500,
+        discount_price: 9000,
+        available: true,
+        priority_order: 2,
+        main_image: "/uploads/crisis_management.jpg",
+        stock: Math.floor(Math.random() * 5) + 2,
         id_category: reponse.id_category,
       },
     })
@@ -186,8 +211,18 @@ async function main() {
         },
         {
           url: "/uploads/cyber1.jpg",
-          alt: "Détail du SOC managé",
+          alt: "Détail du service d'investigation",
           id_product: investigation.id_product,
+        },
+        {
+          url: "/uploads/crisis_management.jpg",
+          alt: "Gestion de crise",
+          id_product: crisisManagement.id_product,
+        },
+        {
+          url: "/uploads/cyber2.jpg",
+          alt: "Détail de la gestion de crise",
+          id_product: crisisManagement.id_product,
         },
       ],
     })
@@ -230,14 +265,14 @@ async function main() {
           priority_order: 3,
         },
         {
-          title: "Offre exclusive : -10% sur nos diagnostics",
+          title: "Offre spéciale 2025 : -10% sur nos diagnostics",
           description:
-            "Profitez de notre offre de lancement jusqu'à la fin du mois",
+            "Profitez de notre offre spéciale jusqu'à la fin du mois d'avril",
           image_url:
             "https://images.unsplash.com/photo-1581092160607-ee22621dd758?q=80&w=1920",
           button_text: "Profiter de l'offre",
           button_link: "/produit/1",
-          active: false,
+          active: true,
           priority_order: 4,
         },
         {
@@ -351,6 +386,40 @@ async function main() {
       },
     })
 
+    // Nouveaux clients pour les commandes récentes
+    const customer5 = await prisma.user.create({
+      data: {
+        first_name: "Alexandre",
+        last_name: "Petit",
+        email: "alexandre.petit@example.com",
+        password: "hashedPassword",
+        role: "CUSTOMER",
+        email_verified: true,
+      },
+    })
+
+    const customer6 = await prisma.user.create({
+      data: {
+        first_name: "Caroline",
+        last_name: "Durand",
+        email: "caroline.durand@example.com",
+        password: "hashedPassword",
+        role: "CUSTOMER",
+        email_verified: true,
+      },
+    })
+
+    const customer7 = await prisma.user.create({
+      data: {
+        first_name: "Stéphane",
+        last_name: "Moreau",
+        email: "stephane.moreau@example.com",
+        password: "hashedPassword",
+        role: "CUSTOMER",
+        email_verified: true,
+      },
+    })
+
     // Création des adresses
     console.log("Création des adresses...")
     const address1 = await prisma.address.create({
@@ -419,6 +488,55 @@ async function main() {
       },
     })
 
+    // Adresses pour les nouveaux clients
+    const address5 = await prisma.address.create({
+      data: {
+        first_name: "Alexandre",
+        last_name: "Petit",
+        address1: "15 Rue du Commerce",
+        postal_code: "13001",
+        city: "Marseille",
+        region: "Provence-Alpes-Côte d'Azur",
+        country: "France",
+        mobile_phone: "07 89 01 23 45",
+        is_default_billing: true,
+        is_default_shipping: true,
+        id_user: customer5.id_user,
+      },
+    })
+
+    const address6 = await prisma.address.create({
+      data: {
+        first_name: "Caroline",
+        last_name: "Durand",
+        address1: "78 Avenue des Fleurs",
+        postal_code: "59000",
+        city: "Lille",
+        region: "Hauts-de-France",
+        country: "France",
+        mobile_phone: "06 12 34 56 78",
+        is_default_billing: true,
+        is_default_shipping: true,
+        id_user: customer6.id_user,
+      },
+    })
+
+    const address7 = await prisma.address.create({
+      data: {
+        first_name: "Stéphane",
+        last_name: "Moreau",
+        address1: "42 Rue de la République",
+        postal_code: "67000",
+        city: "Strasbourg",
+        region: "Grand Est",
+        country: "France",
+        mobile_phone: "07 65 43 21 09",
+        is_default_billing: true,
+        is_default_shipping: true,
+        id_user: customer7.id_user,
+      },
+    })
+
     // Création des sessions
     console.log("Création des sessions...")
     const session1 = await prisma.session.create({
@@ -459,6 +577,31 @@ async function main() {
         session_token: "sess_super98765",
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 jours
         id_user: superAdmin.id_user,
+      },
+    })
+
+    // Sessions pour les nouveaux clients
+    const session5 = await prisma.session.create({
+      data: {
+        session_token: "sess_alex12345",
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        id_user: customer5.id_user,
+      },
+    })
+
+    const session6 = await prisma.session.create({
+      data: {
+        session_token: "sess_carol67890",
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        id_user: customer6.id_user,
+      },
+    })
+
+    const session7 = await prisma.session.create({
+      data: {
+        session_token: "sess_steph13579",
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        id_user: customer7.id_user,
       },
     })
 
@@ -508,7 +651,7 @@ async function main() {
         card_name: "Jean Dupont",
         last_card_digits: "4242",
         expiration_month: 12,
-        expiration_year: 2025,
+        expiration_year: 2026,
         provider_token_id: "tok_visa_4242",
         is_default: true,
         id_user: customer1.id_user,
@@ -533,7 +676,7 @@ async function main() {
         card_name: "Thomas Bernard",
         last_card_digits: "5555",
         expiration_month: 3,
-        expiration_year: 2025,
+        expiration_year: 2026,
         provider_token_id: "tok_mastercard_5555",
         is_default: true,
         id_user: customer3.id_user,
@@ -545,18 +688,52 @@ async function main() {
         card_name: "Jean Dupont Pro",
         last_card_digits: "9876",
         expiration_month: 6,
-        expiration_year: 2024,
+        expiration_year: 2025,
         provider_token_id: "tok_amex_9876",
         is_default: false,
         id_user: customer1.id_user,
       },
     })
 
-    // Création des commandes et de leurs éléments
-    // Modification pour avoir des commandes avec des données cohérentes
-    console.log(
-      "Création des commandes et des éléments de commande cohérents..."
-    )
+    // Informations de paiement pour les nouveaux clients
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Alexandre Petit",
+        last_card_digits: "1234",
+        expiration_month: 4,
+        expiration_year: 2027,
+        provider_token_id: "tok_visa_1234",
+        is_default: true,
+        id_user: customer5.id_user,
+      },
+    })
+
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Caroline Durand",
+        last_card_digits: "5678",
+        expiration_month: 8,
+        expiration_year: 2026,
+        provider_token_id: "tok_mastercard_5678",
+        is_default: true,
+        id_user: customer6.id_user,
+      },
+    })
+
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Stéphane Moreau",
+        last_card_digits: "9012",
+        expiration_month: 11,
+        expiration_year: 2025,
+        provider_token_id: "tok_visa_9012",
+        is_default: true,
+        id_user: customer7.id_user,
+      },
+    })
+
+    // Création des commandes historiques (conserver celles existantes)
+    console.log("Création des commandes historiques...")
 
     // ----- Commande 1 - Jean Dupont - Diagnostic Cyber (Abonnement annuel) -----
     const orderItems1 = [
@@ -803,6 +980,284 @@ async function main() {
       })
     }
 
+    // Création des commandes récentes (pour le tableau de bord)
+    console.log("Création des commandes récentes pour le tableau de bord...")
+
+    // Fonction utilitaire pour créer une commande
+    async function createOrder(
+      orderDate,
+      user,
+      address,
+      items,
+      status,
+      cardDigits
+    ) {
+      // Génération du numéro de facture avec l'année actuelle et un numéro séquentiel
+      const year = orderDate.getFullYear()
+      const month = String(orderDate.getMonth() + 1).padStart(2, "0")
+      const seq = Math.floor(Math.random() * 1000)
+        .toString()
+        .padStart(3, "0")
+      const invoiceNumber = `INV-${year}${month}-${seq}`
+
+      // Calcul du total
+      const total = items.reduce(
+        (acc, item) => acc + item.unit_price * item.quantity,
+        0
+      )
+
+      // Création de la commande
+      const order = await prisma.order.create({
+        data: {
+          order_date: orderDate,
+          total_amount: total,
+          subtotal: total,
+          order_status: status,
+          payment_method: "CARD",
+          last_card_digits: cardDigits,
+          invoice_number: invoiceNumber,
+          invoice_pdf_url: `/invoices/${invoiceNumber}.pdf`,
+          id_user: user.id_user,
+          id_address: address.id_address,
+        },
+      })
+
+      // Création des éléments de commande
+      for (const item of items) {
+        await prisma.orderItem.create({
+          data: {
+            ...item,
+            id_order: order.id_order,
+          },
+        })
+      }
+
+      return order
+    }
+
+    // Créer des commandes pour les 7 derniers jours
+    for (let i = 0; i < 7; i++) {
+      // Jour actuel moins i jours
+      const orderDate = getRecentDate(i)
+
+      // Définir des utilisateurs différents pour chaque jour
+      const users = [
+        customer1,
+        customer2,
+        customer3,
+        customer4,
+        customer5,
+        customer6,
+        customer7,
+      ]
+      const addresses = [
+        address1,
+        address2,
+        address3,
+        address4,
+        address5,
+        address6,
+        address7,
+      ]
+      const cardDigits = [
+        "4242",
+        "4444",
+        "5555",
+        "6666",
+        "1234",
+        "5678",
+        "9012",
+      ]
+
+      // Nombre de commandes pour ce jour (entre 1 et 3)
+      const numOrders = Math.floor(Math.random() * 3) + 1
+
+      for (let j = 0; j < numOrders; j++) {
+        // Sélectionner utilisateur et adresse aléatoires
+        const userIndex = Math.floor(Math.random() * users.length)
+        const user = users[userIndex]
+        const address = addresses[userIndex]
+        const cardDigit = cardDigits[userIndex]
+
+        // Déterminer les produits pour cette commande (entre 1 et 3 produits)
+        const numProducts = Math.floor(Math.random() * 3) + 1
+        const products = [
+          diagnosticCyber,
+          testIntrusion,
+          microSOC,
+          socManage,
+          investigation,
+          crisisManagement,
+        ]
+        const selectedProducts = []
+
+        // Sélectionner des produits aléatoires sans duplication
+        while (selectedProducts.length < numProducts && products.length > 0) {
+          const randomIndex = Math.floor(Math.random() * products.length)
+          selectedProducts.push(products.splice(randomIndex, 1)[0])
+        }
+
+        // Créer les éléments de commande
+        const orderItems = selectedProducts.map(product => {
+          const subscriptionTypes = [
+            SubscriptionType.MONTHLY,
+            SubscriptionType.YEARLY,
+          ]
+          const randomSubType =
+            subscriptionTypes[
+              Math.floor(Math.random() * subscriptionTypes.length)
+            ]
+          const duration = randomSubType === SubscriptionType.MONTHLY ? 1 : 12
+
+          // Date de renouvellement
+          const renewalDate = new Date(orderDate)
+          renewalDate.setMonth(renewalDate.getMonth() + duration)
+
+          // Quantité (1 ou 2)
+          const quantity = Math.random() > 0.7 ? 2 : 1
+
+          // Prix (normal ou remisé si disponible)
+          const unitPrice = product.discount_price || product.unit_price
+
+          return {
+            subscription_type: randomSubType,
+            subscription_status: OrderStatus.ACTIVE,
+            subscription_duration: duration,
+            renewal_date: renewalDate,
+            quantity: quantity,
+            unit_price: unitPrice,
+            id_product: product.id_product,
+          }
+        })
+
+        // Statut de la commande (le plus souvent ACTIVE, parfois PENDING ou COMPLETED)
+        const statuses = [
+          OrderStatus.ACTIVE,
+          OrderStatus.ACTIVE,
+          OrderStatus.ACTIVE,
+          OrderStatus.PENDING,
+          OrderStatus.COMPLETED,
+        ]
+        const randomStatus =
+          statuses[Math.floor(Math.random() * statuses.length)]
+
+        // Créer la commande
+        await createOrder(
+          orderDate,
+          user,
+          address,
+          orderItems,
+          randomStatus,
+          cardDigit
+        )
+      }
+    }
+
+    // Créer des commandes pour les semaines précédentes (pour les 5 dernières semaines)
+    for (let week = 1; week <= 4; week++) {
+      // Pour chaque semaine, créer quelques commandes
+      for (let day = 0; day < 3; day++) {
+        // week semaines plus day jours en arrière
+        const daysAgo = week * 7 + day
+        const orderDate = getRecentDate(daysAgo)
+
+        // Sélectionner utilisateur et adresse aléatoires
+        const userIndex = Math.floor(Math.random() * 7)
+        const users = [
+          customer1,
+          customer2,
+          customer3,
+          customer4,
+          customer5,
+          customer6,
+          customer7,
+        ]
+        const addresses = [
+          address1,
+          address2,
+          address3,
+          address4,
+          address5,
+          address6,
+          address7,
+        ]
+        const cardDigits = [
+          "4242",
+          "4444",
+          "5555",
+          "6666",
+          "1234",
+          "5678",
+          "9012",
+        ]
+
+        const user = users[userIndex]
+        const address = addresses[userIndex]
+        const cardDigit = cardDigits[userIndex]
+
+        // Nombre de produits (entre 1 et 2)
+        const numProducts = Math.floor(Math.random() * 2) + 1
+        const products = [
+          diagnosticCyber,
+          testIntrusion,
+          microSOC,
+          socManage,
+          investigation,
+          crisisManagement,
+        ]
+        const selectedProducts = []
+
+        // Sélectionner des produits aléatoires sans duplication
+        while (selectedProducts.length < numProducts && products.length > 0) {
+          const randomIndex = Math.floor(Math.random() * products.length)
+          selectedProducts.push(products.splice(randomIndex, 1)[0])
+        }
+
+        // Créer les éléments de commande
+        const orderItems = selectedProducts.map(product => {
+          // Privilégier les abonnements annuels pour les anciennes commandes
+          const subscriptionType =
+            Math.random() > 0.3
+              ? SubscriptionType.YEARLY
+              : SubscriptionType.MONTHLY
+          const duration =
+            subscriptionType === SubscriptionType.MONTHLY ? 1 : 12
+
+          // Date de renouvellement
+          const renewalDate = new Date(orderDate)
+          renewalDate.setMonth(renewalDate.getMonth() + duration)
+
+          // Prix (normal ou remisé si disponible)
+          const unitPrice = product.discount_price || product.unit_price
+
+          return {
+            subscription_type: subscriptionType,
+            subscription_status: OrderStatus.ACTIVE,
+            subscription_duration: duration,
+            renewal_date: renewalDate,
+            quantity: 1,
+            unit_price: unitPrice,
+            id_product: product.id_product,
+          }
+        })
+
+        // La plupart des anciennes commandes sont ACTIVE ou COMPLETED
+        const statuses = [OrderStatus.ACTIVE, OrderStatus.COMPLETED]
+        const randomStatus =
+          statuses[Math.floor(Math.random() * statuses.length)]
+
+        // Créer la commande
+        await createOrder(
+          orderDate,
+          user,
+          address,
+          orderItems,
+          randomStatus,
+          cardDigit
+        )
+      }
+    }
+
     // Création des messages de contact
     console.log("Création des messages de contact...")
     await prisma.contactMessage.create({
@@ -846,6 +1301,36 @@ async function main() {
       },
     })
 
+    // Messages récents
+    await prisma.contactMessage.create({
+      data: {
+        email: "alexandre.petit@example.com",
+        subject: "Question technique sur le Micro SOC",
+        message:
+          "Bonjour, nous avons récemment souscrit à votre service Micro SOC et j'aimerais savoir comment accéder au tableau de bord de surveillance. Merci d'avance.",
+        sent_date: getRecentDate(2),
+        is_read: true,
+        is_responded: true,
+        response:
+          "Bonjour Alexandre, merci pour votre message. Vous pouvez accéder au tableau de bord via l'URL suivante : dashboard.cyna.fr en utilisant les identifiants qui vous ont été envoyés par email. N'hésitez pas si vous avez d'autres questions.",
+        response_date: getRecentDate(1),
+        id_user: customer5.id_user,
+      },
+    })
+
+    await prisma.contactMessage.create({
+      data: {
+        email: "caroline.durand@example.com",
+        subject: "Renouvellement de contrat",
+        message:
+          "Bonjour, notre contrat arrive à échéance le mois prochain. Pouvez-vous me contacter pour discuter des conditions de renouvellement ? Merci.",
+        sent_date: getRecentDate(3),
+        is_read: true,
+        is_responded: false,
+        id_user: customer6.id_user,
+      },
+    })
+
     // Création des tokens de réinitialisation de mot de passe
     console.log("Création des tokens de réinitialisation de mot de passe...")
     await prisma.passwordResetToken.create({
@@ -861,7 +1346,7 @@ async function main() {
       data: [
         {
           content:
-            "Message très important sur les promotions et actualités de cybersécurité",
+            "Offres spéciales printemps 2025 : -15% sur tous nos services de protection jusqu'au 30 avril !",
           active: true,
           has_background: true,
           background_color: "bg-amber-100",
