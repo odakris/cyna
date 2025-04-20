@@ -4,6 +4,8 @@ import {
   // Role,
   SubscriptionType,
 } from "@prisma/client"
+import { v4 as uuidv4 } from "uuid"
+
 const prisma = new PrismaClient()
 
 // const bcrypt = require("bcrypt")
@@ -304,6 +306,7 @@ async function main() {
         password: "superAdminPassword",
         role: "SUPER_ADMIN", // Rôle SUPER_ADMIN
         email_verified: true,
+        stripeCustomerId: "cus_super_admin",
       },
     })
 
@@ -315,6 +318,7 @@ async function main() {
         password: "adminPassword",
         role: "ADMIN",
         email_verified: true,
+        stripeCustomerId: "cus_admin",
       },
     })
 
@@ -327,6 +331,7 @@ async function main() {
         password: "hashedPassword",
         role: "MANAGER",
         email_verified: true,
+        stripeCustomerId: "cus_manager1",
       },
     })
 
@@ -338,6 +343,7 @@ async function main() {
         password: "hashedPassword",
         role: "MANAGER",
         email_verified: true,
+        stripeCustomerId: "cus_manager2",
       },
     })
 
@@ -349,6 +355,7 @@ async function main() {
         password: "hashedPassword",
         role: "CUSTOMER",
         email_verified: true,
+        stripeCustomerId: "cus_customer1",
       },
     })
 
@@ -360,6 +367,7 @@ async function main() {
         password: "hashedPassword",
         role: "CUSTOMER",
         email_verified: true,
+        stripeCustomerId: "cus_customer2",
       },
     })
 
@@ -371,6 +379,7 @@ async function main() {
         password: "hashedPassword",
         role: "CUSTOMER",
         email_verified: true,
+        stripeCustomerId: "cus_customer3",
       },
     })
 
@@ -383,6 +392,7 @@ async function main() {
         role: "CUSTOMER",
         email_verified: false, // Email non vérifié
         verify_token: "verify_emilie_token_123",
+        stripeCustomerId: "cus_customer4",
       },
     })
 
@@ -395,6 +405,7 @@ async function main() {
         password: "hashedPassword",
         role: "CUSTOMER",
         email_verified: true,
+        stripeCustomerId: "cus_customer5",
       },
     })
 
@@ -406,6 +417,7 @@ async function main() {
         password: "hashedPassword",
         role: "CUSTOMER",
         email_verified: true,
+        stripeCustomerId: "cus_customer6",
       },
     })
 
@@ -417,6 +429,7 @@ async function main() {
         password: "hashedPassword",
         role: "CUSTOMER",
         email_verified: true,
+        stripeCustomerId: "cus_customer7",
       },
     })
 
@@ -644,15 +657,14 @@ async function main() {
       },
     })
 
-    // Création des informations de paiement
+    // Création des informations de paiement - STRUCTURE MISE À JOUR
     console.log("Création des informations de paiement...")
     await prisma.paymentInfo.create({
       data: {
         card_name: "Jean Dupont",
+        brand: "visa",
         last_card_digits: "4242",
-        expiration_month: 12,
-        expiration_year: 2026,
-        provider_token_id: "tok_visa_4242",
+        stripe_payment_id: "pm_visa_4242",
         is_default: true,
         id_user: customer1.id_user,
       },
@@ -661,10 +673,9 @@ async function main() {
     await prisma.paymentInfo.create({
       data: {
         card_name: "Marie Martin",
+        brand: "visa",
         last_card_digits: "4444",
-        expiration_month: 9,
-        expiration_year: 2026,
-        provider_token_id: "tok_visa_4444",
+        stripe_payment_id: "pm_visa_4444",
         is_default: true,
         id_user: customer2.id_user,
       },
@@ -674,10 +685,9 @@ async function main() {
     await prisma.paymentInfo.create({
       data: {
         card_name: "Thomas Bernard",
+        brand: "mastercard",
         last_card_digits: "5555",
-        expiration_month: 3,
-        expiration_year: 2026,
-        provider_token_id: "tok_mastercard_5555",
+        stripe_payment_id: "pm_mastercard_5555",
         is_default: true,
         id_user: customer3.id_user,
       },
@@ -686,10 +696,9 @@ async function main() {
     await prisma.paymentInfo.create({
       data: {
         card_name: "Jean Dupont Pro",
+        brand: "amex",
         last_card_digits: "9876",
-        expiration_month: 6,
-        expiration_year: 2025,
-        provider_token_id: "tok_amex_9876",
+        stripe_payment_id: "pm_amex_9876",
         is_default: false,
         id_user: customer1.id_user,
       },
@@ -699,10 +708,9 @@ async function main() {
     await prisma.paymentInfo.create({
       data: {
         card_name: "Alexandre Petit",
+        brand: "visa",
         last_card_digits: "1234",
-        expiration_month: 4,
-        expiration_year: 2027,
-        provider_token_id: "tok_visa_1234",
+        stripe_payment_id: "pm_visa_1234",
         is_default: true,
         id_user: customer5.id_user,
       },
@@ -711,10 +719,9 @@ async function main() {
     await prisma.paymentInfo.create({
       data: {
         card_name: "Caroline Durand",
+        brand: "mastercard",
         last_card_digits: "5678",
-        expiration_month: 8,
-        expiration_year: 2026,
-        provider_token_id: "tok_mastercard_5678",
+        stripe_payment_id: "pm_mastercard_5678",
         is_default: true,
         id_user: customer6.id_user,
       },
@@ -723,10 +730,9 @@ async function main() {
     await prisma.paymentInfo.create({
       data: {
         card_name: "Stéphane Moreau",
+        brand: "visa",
         last_card_digits: "9012",
-        expiration_month: 11,
-        expiration_year: 2025,
-        provider_token_id: "tok_visa_9012",
+        stripe_payment_id: "pm_visa_9012",
         is_default: true,
         id_user: customer7.id_user,
       },
@@ -983,7 +989,7 @@ async function main() {
     // Création des commandes récentes (pour le tableau de bord)
     console.log("Création des commandes récentes pour le tableau de bord...")
 
-    // Fonction utilitaire pour créer une commande
+    // Fonction utilitaire pour créer une commande avec UUID
     async function createOrder(
       orderDate,
       user,
@@ -992,13 +998,13 @@ async function main() {
       status,
       cardDigits
     ) {
-      // Génération du numéro de facture avec l'année actuelle et un numéro séquentiel
+      // Génération du numéro de facture avec l'année actuelle, le mois et un UUID court
       const year = orderDate.getFullYear()
       const month = String(orderDate.getMonth() + 1).padStart(2, "0")
-      const seq = Math.floor(Math.random() * 1000)
-        .toString()
-        .padStart(3, "0")
-      const invoiceNumber = `INV-${year}${month}-${seq}`
+
+      // Utiliser un UUID court (8 premiers caractères) pour plus de lisibilité
+      const shortUuid = uuidv4().split("-")[0]
+      const invoiceNumber = `INV-${year}${month}-${shortUuid}`
 
       // Calcul du total
       const total = items.reduce(
