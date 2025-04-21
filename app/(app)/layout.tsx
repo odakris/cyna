@@ -3,6 +3,7 @@ import { CartProvider } from "@/context/CartContext"
 import NavbarServer from "@/components/Navbar/NavBarServer"
 import { Footer } from "@/components/Footer/Footer"
 import { Toaster } from "@/components/ui/toaster"
+import ChatbotButton from "@/components/Chatbot/ChatbotButton"
 
 export default function SiteLayout({
   children,
@@ -22,6 +23,9 @@ export default function SiteLayout({
           {children}
         </main>
         <Toaster />
+
+        {/* Chatbot Button - Ajouté ici */}
+        <ChatbotButton />
 
         {/* Footer */}
         <div className="w-full">

@@ -251,6 +251,35 @@ CREATE TABLE `PasswordResetToken` (
     PRIMARY KEY (`id_password_reset`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `ChatConversation` (
+    `id_conversation` INTEGER NOT NULL AUTO_INCREMENT,
+    `status` ENUM('ACTIVE', 'PENDING_ADMIN', 'CLOSED') NOT NULL DEFAULT 'ACTIVE',
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+    `email` VARCHAR(255) NULL,
+    `id_user` INTEGER NULL,
+
+    INDEX `ChatConversation_id_user_idx`(`id_user`),
+    INDEX `ChatConversation_status_idx`(`status`),
+    INDEX `ChatConversation_created_at_idx`(`created_at`),
+    PRIMARY KEY (`id_conversation`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `ChatMessage` (
+    `id_message` INTEGER NOT NULL AUTO_INCREMENT,
+    `content` TEXT NOT NULL,
+    `message_type` ENUM('USER', 'BOT', 'ADMIN') NOT NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `id_conversation` INTEGER NOT NULL,
+
+    INDEX `ChatMessage_id_conversation_idx`(`id_conversation`),
+    INDEX `ChatMessage_message_type_idx`(`message_type`),
+    INDEX `ChatMessage_created_at_idx`(`created_at`),
+    PRIMARY KEY (`id_message`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `Product` ADD CONSTRAINT `Product_id_category_fkey` FOREIGN KEY (`id_category`) REFERENCES `Category`(`id_category`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -292,3 +321,9 @@ ALTER TABLE `Address` ADD CONSTRAINT `Address_id_user_fkey` FOREIGN KEY (`id_use
 
 -- AddForeignKey
 ALTER TABLE `PasswordResetToken` ADD CONSTRAINT `PasswordResetToken_id_user_fkey` FOREIGN KEY (`id_user`) REFERENCES `User`(`id_user`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ChatConversation` ADD CONSTRAINT `ChatConversation_id_user_fkey` FOREIGN KEY (`id_user`) REFERENCES `User`(`id_user`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `ChatMessage` ADD CONSTRAINT `ChatMessage_id_conversation_fkey` FOREIGN KEY (`id_conversation`) REFERENCES `ChatConversation`(`id_conversation`) ON DELETE CASCADE ON UPDATE CASCADE;

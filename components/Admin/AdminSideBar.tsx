@@ -69,6 +69,12 @@ export default function AdminSideBar() {
       icon: <Mail className="h-5 w-5" />,
       exact: false,
     },
+    {
+      name: "Chatbot",
+      href: "/dashboard/conversations",
+      icon: <Mail className="h-5 w-5" />,
+      exact: false,
+    },
   ]
 
   const isActive = (item: { href: string; exact: boolean }) => {

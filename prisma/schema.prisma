@@ -50,6 +50,14 @@ enum SubscriptionStatus {
 enum MessageType {
   USER
   BOT
+  ADMIN
+}
+
+// Statut de la conversation avec ChatBot
+enum ConversationStatus {
+  ACTIVE
+  PENDING_ADMIN
+  CLOSED
 }
 
 // Catégories de produits/services SaaS
@@ -195,6 +203,7 @@ model User {
   password_reset_tokens PasswordResetToken[]
   sessions              Session[]
   cartItems             CartItem[]
+  ChatConversation      ChatConversation[]
 
   @@index([email])
   @@index([role])
@@ -256,16 +265,16 @@ model ContactMessage {
 
 // Informations de paiement des utilisateurs
 model PaymentInfo {
-  id_payment_info     Int      @id @default(autoincrement())
-  card_name           String   @db.VarChar(100)
-  brand               String   @db.VarChar(50)
-  last_card_digits    String   @db.VarChar(4)
-  stripe_payment_id   String   @db.VarChar(255) // <-- l'ID du paymentMethod chez Stripe
-  is_default          Boolean  @default(false)
-  created_at          DateTime @default(now())
-  updated_at          DateTime @updatedAt
-  id_user             Int
-  user                User     @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
+  id_payment_info   Int      @id @default(autoincrement())
+  card_name         String   @db.VarChar(100)
+  brand             String   @db.VarChar(50)
+  last_card_digits  String   @db.VarChar(4)
+  stripe_payment_id String   @db.VarChar(255) // <-- l'ID du paymentMethod chez Stripe
+  is_default        Boolean  @default(false)
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+  id_user           Int
+  user              User     @relation(fields: [id_user], references: [id_user], onDelete: Cascade)
 }
 
 // Adresses enregistrées par les utilisateurs
@@ -306,4 +315,34 @@ model PasswordResetToken {
   @@index([token])
   @@index([id_user])
   @@index([expires_at])
+}
+
+// Modèle pour les conversations
+model ChatConversation {
+  id_conversation Int                @id @default(autoincrement())
+  status          ConversationStatus @default(ACTIVE)
+  created_at      DateTime           @default(now())
+  updated_at      DateTime           @updatedAt
+  email           String?            @db.VarChar(255)
+  id_user         Int?
+  user            User?              @relation(fields: [id_user], references: [id_user])
+  messages        ChatMessage[]
+
+  @@index([id_user])
+  @@index([status])
+  @@index([created_at])
+}
+
+// Modèle pour les messages individuels
+model ChatMessage {
+  id_message      Int              @id @default(autoincrement())
+  content         String           @db.Text
+  message_type    MessageType
+  created_at      DateTime         @default(now())
+  id_conversation Int
+  conversation    ChatConversation @relation(fields: [id_conversation], references: [id_conversation], onDelete: Cascade)
+
+  @@index([id_conversation])
+  @@index([message_type])
+  @@index([created_at])
 }
