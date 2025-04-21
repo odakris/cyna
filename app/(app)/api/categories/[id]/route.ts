@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import categoryController from "@/lib/controllers/category-controller"
 import { validateId } from "@/lib/utils/utils"
+import { checkPermission } from "../../../../../lib/api-permissions"
 
 /**
  * Récupère une categorie par son identifiant.
@@ -14,8 +15,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    const resolvedParams = await params // Attendre la résolution des paramètres
-    const id = validateId(resolvedParams.id) // Accéder à id après résolution
+    const resolvedParams = await params
+    const id = validateId(resolvedParams.id)
 
     if (!id) {
       return NextResponse.json(
@@ -49,6 +50,10 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("categories:edit")
+    if (permissionCheck) return permissionCheck
+
     const resolvedParams = await params
     const id = validateId(resolvedParams.id)
 
@@ -84,6 +89,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("categories:delete")
+    if (permissionCheck) return permissionCheck
+
     const resolvedParams = await params
     const id = validateId(resolvedParams.id)
 

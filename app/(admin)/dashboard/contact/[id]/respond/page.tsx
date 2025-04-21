@@ -24,9 +24,9 @@ import {
   CardDescription,
 } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { ContactMessage } from "../../contact-message-columns"
+import { ContactMessageRespondSkeleton } from "@/components/Skeletons/ContactMessageSkeletons"
 
 export default function ContactMessageRespond() {
   const [message, setMessage] = useState<ContactMessage | null>(null)
@@ -146,19 +146,7 @@ export default function ContactMessageRespond() {
   }, [message, markAsRead])
 
   if (loading) {
-    return (
-      <div className="container mx-auto p-6 space-y-6">
-        <Skeleton className="h-10 w-1/3" />
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <Skeleton className="h-6 w-1/2" />
-            <Skeleton className="h-6 w-1/4" />
-            <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-16 w-full" />
-          </CardContent>
-        </Card>
-      </div>
-    )
+    return <ContactMessageRespondSkeleton />
   }
 
   if (error || !message) {

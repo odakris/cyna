@@ -16,10 +16,15 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
-import { Loader2 } from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
 import DailySalesChart from "./DailySalesChart"
 import AverageCartByCategory from "./AverageCartByCategory"
 import SalesByCategory from "./SalesByCategory"
+import {
+  DailySalesChartSkeleton,
+  PieChartSkeleton,
+  AverageCartSkeleton,
+} from "../Skeletons/DashboardSkeletons"
 import {
   fetchDailySales,
   fetchCategorySales,
@@ -81,16 +86,20 @@ export default function Dashboard() {
         </h1>
         <div className="flex items-center">
           <span className="mr-2 text-sm font-medium">Période :</span>
-          <Select value={timeFrame} onValueChange={handleTimeFrameChange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Sélectionner une période" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="week">7 derniers jours</SelectItem>
-              <SelectItem value="month">30 derniers jours</SelectItem>
-              <SelectItem value="5weeks">5 dernières semaines</SelectItem>
-            </SelectContent>
-          </Select>
+          {isLoading ? (
+            <Skeleton className="h-10 w-[180px]" />
+          ) : (
+            <Select value={timeFrame} onValueChange={handleTimeFrameChange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sélectionner une période" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="week">7 derniers jours</SelectItem>
+                <SelectItem value="month">30 derniers jours</SelectItem>
+                <SelectItem value="5weeks">5 dernières semaines</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
 
@@ -98,21 +107,28 @@ export default function Dashboard() {
         {/* Histogramme des ventes par jour */}
         <Card className="shadow-md">
           <CardHeader>
-            <CardTitle>Évolution des Ventes</CardTitle>
-            <CardDescription>
-              Total des ventes par jour{" "}
-              {timeFrame === "week"
-                ? "sur les 7 derniers jours"
-                : timeFrame === "month"
-                  ? "sur les 30 derniers jours"
-                  : "sur les 5 dernières semaines"}
-            </CardDescription>
+            {isLoading ? (
+              <>
+                <Skeleton className="h-6 w-60 mb-2" />
+                <Skeleton className="h-4 w-80" />
+              </>
+            ) : (
+              <>
+                <CardTitle>Évolution des Ventes</CardTitle>
+                <CardDescription>
+                  Total des ventes par jour{" "}
+                  {timeFrame === "week"
+                    ? "sur les 7 derniers jours"
+                    : timeFrame === "month"
+                      ? "sur les 30 derniers jours"
+                      : "sur les 5 dernières semaines"}
+                </CardDescription>
+              </>
+            )}
           </CardHeader>
           <CardContent className="h-[400px]">
             {isLoading ? (
-              <div className="flex h-full justify-center items-center">
-                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-              </div>
+              <DailySalesChartSkeleton />
             ) : (
               <DailySalesChart data={dailySales} timeFrame={timeFrame} />
             )}
@@ -122,16 +138,23 @@ export default function Dashboard() {
         {/* Graphique camembert des ventes par catégorie */}
         <Card className="shadow-md">
           <CardHeader>
-            <CardTitle>Répartition des Ventes</CardTitle>
-            <CardDescription>
-              Distribution des ventes par catégorie de produits
-            </CardDescription>
+            {isLoading ? (
+              <>
+                <Skeleton className="h-6 w-48 mb-2" />
+                <Skeleton className="h-4 w-64" />
+              </>
+            ) : (
+              <>
+                <CardTitle>Répartition des Ventes</CardTitle>
+                <CardDescription>
+                  Distribution des ventes par catégorie de produits
+                </CardDescription>
+              </>
+            )}
           </CardHeader>
           <CardContent className="h-[400px]">
             {isLoading ? (
-              <div className="flex h-full justify-center items-center">
-                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-              </div>
+              <PieChartSkeleton />
             ) : (
               <SalesByCategory data={categorySales} />
             )}
@@ -141,16 +164,23 @@ export default function Dashboard() {
         {/* Histogramme multi-couches des paniers moyens */}
         <Card className="shadow-md">
           <CardHeader>
-            <CardTitle>Paniers Moyens par Catégorie</CardTitle>
-            <CardDescription>
-              Répartition des paniers moyens par catégorie de produits
-            </CardDescription>
+            {isLoading ? (
+              <>
+                <Skeleton className="h-6 w-72 mb-2" />
+                <Skeleton className="h-4 w-80" />
+              </>
+            ) : (
+              <>
+                <CardTitle>Paniers Moyens par Catégorie</CardTitle>
+                <CardDescription>
+                  Répartition des paniers moyens par catégorie de produits
+                </CardDescription>
+              </>
+            )}
           </CardHeader>
           <CardContent className="h-[400px]">
             {isLoading ? (
-              <div className="flex h-full justify-center items-center">
-                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-              </div>
+              <AverageCartSkeleton />
             ) : (
               <AverageCartByCategory data={averageCart} timeFrame={timeFrame} />
             )}

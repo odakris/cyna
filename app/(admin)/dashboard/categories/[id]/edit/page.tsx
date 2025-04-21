@@ -1,4 +1,3 @@
-// EditCategoryPage.tsx
 "use client"
 
 import { useEffect, useState } from "react"
@@ -12,12 +11,14 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { ArrowLeft, ShieldAlert } from "lucide-react"
 import { CategoryFormValues } from "@/lib/validations/category-schema"
 import { CategoryForm } from "@/components/Forms/CategoryForm"
-import { Category } from "@prisma/client"
+import { Category, Role } from "@prisma/client"
+import RoleGuard from "@/components/Auth/RoleGuard"
+import AccessDenied from "@/components/Auth/AccessDenied"
+import { CategoryFormSkeleton } from "@/components/Skeletons/CategorySkeletons"
 
 export default function EditCategoryPage() {
   const { id } = useParams() as { id: string }
@@ -53,55 +54,7 @@ export default function EditCategoryPage() {
   }, [id, toast])
 
   if (loading) {
-    return (
-      <div className="mx-auto p-6 space-y-8">
-        <div className="flex flex-col gap-6">
-          <Skeleton className="h-10 w-1/3" />
-
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <div>
-              <Skeleton className="h-8 w-64 mb-2" />
-              <Skeleton className="h-4 w-48" />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-1/4 mb-2" />
-                <Skeleton className="h-4 w-2/3" />
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-32 w-full" />
-                <Skeleton className="h-10 w-1/3" />
-                <div className="flex justify-end gap-2 pt-6">
-                  <Skeleton className="h-10 w-24" />
-                  <Skeleton className="h-10 w-24" />
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-1/2 mb-2" />
-                <Skeleton className="h-4 w-2/3" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Skeleton className="h-40 w-full rounded-lg" />
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-20 w-full" />
-                <Skeleton className="h-6 w-1/3" />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    )
+    return <CategoryFormSkeleton />
   }
 
   if (errorMessage || !category) {
@@ -160,35 +113,30 @@ export default function EditCategoryPage() {
   }
 
   return (
-    <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Button
-              asChild
-              variant="ghost"
-              size="icon"
-              className="rounded-full"
-            >
-              <Link href="/dashboard/categories">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold">Modifier {category.name}</h1>
-              <p className="text-muted-foreground">
-                Mettre à jour les informations de la catégorie
-              </p>
-            </div>
+    <RoleGuard
+      requiredRole={Role.ADMIN}
+      fallback={
+        <AccessDenied message="Vous n'avez pas la permission de modifier des catégories." />
+      }
+    >
+      <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
+        <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="icon" className="rounded-full">
+            <Link href="/dashboard/categories">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">Modifier la Catégorie</h1>
+            <p className="text-muted-foreground">{category.name}</p>
           </div>
         </div>
+        <CategoryForm
+          initialData={initialData}
+          isEditing={true}
+          categoryId={Number(id)}
+        />
       </div>
-
-      <CategoryForm
-        initialData={initialData}
-        isEditing={true}
-        categoryId={Number(id)}
-      />
-    </div>
+    </RoleGuard>
   )
 }

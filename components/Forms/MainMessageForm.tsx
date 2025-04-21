@@ -4,7 +4,14 @@ import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2, ArrowLeft, Save, Palette, AlertCircle } from "lucide-react"
+import {
+  Loader2,
+  ArrowLeft,
+  Save,
+  Palette,
+  AlertCircle,
+  PencilLine,
+} from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import {
@@ -194,7 +201,10 @@ export function MainMessageForm({
           <div className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Contenu du message</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <PencilLine className="h-5 w-5" />
+                  Contenu du message
+                </CardTitle>
                 <CardDescription>
                   Texte qui sera affiché sur la page d&apos;accueil
                 </CardDescription>

@@ -4,13 +4,14 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
-import { User } from "@prisma/client"
+import { Role, User } from "@prisma/client"
 import { UserFormValues } from "@/lib/validations/user-schema"
-import { UserForm } from "../../../../../../components/Forms/UserForm"
+import { UserForm } from "@/components/Forms/UserForm"
 import { ArrowLeft } from "lucide-react"
+import RoleGuard from "@/components/Auth/RoleGuard"
+import AccessDenied from "@/components/Auth/AccessDenied"
+import { UserFormSkeleton } from "@/components/Skeletons/UserSkeletons"
 
 export default function EditProductPage() {
   const { id } = useParams() as { id: string }
@@ -44,27 +45,7 @@ export default function EditProductPage() {
   }, [id, toast])
 
   if (loading) {
-    return (
-      <div className="mx-auto p-6 space-y-6">
-        <Skeleton className="h-10 w-1/3" />
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-1/4" />
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-32" />
-          </CardContent>
-        </Card>
-      </div>
-    )
+    return <UserFormSkeleton />
   }
 
   if (errorMessage || !user) {
@@ -91,29 +72,27 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
-      <div className="flex flex-col gap-6">
+    <RoleGuard
+      requiredRole={Role.ADMIN}
+      fallback={
+        <AccessDenied message="Vous n'avez pas la permission de modifier les utilisateurs." />
+      }
+    >
+      <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="icon" className="rounded-full">
-            <Link href="/dashboard/users">
+            <Link href="/dashboard/products">
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
           <h1 className="text-3xl font-bold">Modifier cet Utilisateur</h1>
         </div>
+        <UserForm
+          initialData={initialData}
+          isEditing={true}
+          userId={Number(id)}
+        />
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Modifier les informations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <UserForm
-            initialData={initialData}
-            isEditing={true}
-            userId={Number(id)}
-          />
-        </CardContent>
-      </Card>
-    </div>
+    </RoleGuard>
   )
 }

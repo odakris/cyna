@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import userController from "@/lib/controllers/user-controller"
+import { checkPermission } from "@/lib/api-permissions"
 
 /**
  * Récupère tous les utilisateurs.
@@ -8,6 +9,10 @@ import userController from "@/lib/controllers/user-controller"
  */
 export async function GET(): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("users:view")
+    if (permissionCheck) return permissionCheck
+
     return await userController.getAll()
   } catch (error) {
     console.error("Erreur non gérée dans la route GET /users:", error)
@@ -26,6 +31,10 @@ export async function GET(): Promise<NextResponse> {
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("users:create")
+    if (permissionCheck) return permissionCheck
+
     return await userController.create(request)
   } catch (error) {
     console.error("Erreur non gérée dans la route POST /users:", error)

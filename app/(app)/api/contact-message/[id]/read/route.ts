@@ -1,22 +1,18 @@
 // app/api/contact-message/[id]/read/route.ts
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "../../../auth/[...nextauth]/route"
 import contactMessageController from "@/lib/controllers/contact-message-controller"
 import { validateId } from "@/lib/utils/utils"
+import { checkPermission } from "@/lib/api-permissions"
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  // Vérifier l'authentification et les permissions pour les admin seulement
-  const session = await getServerSession(authOptions)
-
-  if (!session || session.user.role !== "ADMIN") {
-    return NextResponse.json({ error: "Non autorisé" }, { status: 403 })
-  }
-
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("contact:view")
+    if (permissionCheck) return permissionCheck
+
     const resolvedParams = await params
     const id = validateId(resolvedParams.id)
 

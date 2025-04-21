@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { validateId } from "@/lib/utils/utils"
 import userController from "@/lib/controllers/user-controller"
+import { checkPermission } from "@/lib/api-permissions"
 
 /**
  * Récupère un Utilisateur par son identifiant.
@@ -14,6 +15,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("users:view")
+    if (permissionCheck) return permissionCheck
+
     const resolvedParams = await params
     const id = validateId(resolvedParams.id)
 
@@ -49,6 +54,10 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("users:edit")
+    if (permissionCheck) return permissionCheck
+
     const resolvedParams = await params
     const id = validateId(resolvedParams.id)
 
@@ -84,6 +93,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("users:delete")
+    if (permissionCheck) return permissionCheck
+
     const resolvedParams = await params
     const id = validateId(resolvedParams.id)
 

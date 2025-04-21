@@ -1,18 +1,13 @@
 // app/api/contact-message/route.ts
 import { NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "../../api/auth/[...nextauth]/route"
 import contactMessageController from "@/lib/controllers/contact-message-controller"
+import { checkPermission } from "@/lib/api-permissions"
 
 export async function GET(request: NextRequest) {
   try {
-    // Vérifier l'authentification
-    const session = await getServerSession(authOptions)
-
-    // Optionnel: restreindre l'accès aux administrateurs
-    if (!session || session.user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Non autorisé" }, { status: 403 })
-    }
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("contact:view")
+    if (permissionCheck) return permissionCheck
 
     // Filtrer par messages non lus si spécifié
     const unreadOnly = request.nextUrl.searchParams.get("unread") === "true"
@@ -30,6 +25,10 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("contact:respond")
+    if (permissionCheck) return permissionCheck
+
     return await contactMessageController.create(request)
   } catch (error) {
     console.error("API Route Error:", error)

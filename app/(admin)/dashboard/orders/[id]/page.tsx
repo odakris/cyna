@@ -54,7 +54,7 @@ import {
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { SubscriptionType } from "@prisma/client"
-import { Skeleton } from "../../../../../components/ui/skeleton"
+import { OrderDetailSkeleton } from "@/components/Skeletons/OrderSkeletons"
 
 // Type pour le statut
 type StatusConfig = {
@@ -156,13 +156,13 @@ const OrderDetailPage = () => {
   const router = useRouter()
   const params = useParams()
   const orderId = params?.id as string
+  const { toast } = useToast()
 
   const [order, setOrder] = useState<OrderWithItems | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [updateStatus, setUpdateStatus] = useState<string | null>(null)
   const [updating, setUpdating] = useState(false)
-  const { toast } = useToast()
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -198,19 +198,19 @@ const OrderDetailPage = () => {
     try {
       setUpdating(true)
       const response = await fetch(`/api/orders/${orderId}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...order,
           order_status: updateStatus,
         }),
       })
 
       if (!response.ok) {
+        const errorData = await response.json()
         throw new Error(
-          `Erreur HTTP ${response.status}: ${response.statusText}`
+          `Erreur HTTP ${response.status}: ${errorData.details || response.statusText}`
         )
       }
 
@@ -224,7 +224,10 @@ const OrderDetailPage = () => {
       console.error("Erreur lors de la mise à jour du statut:", error)
       toast({
         title: "Erreur",
-        description: "Impossible de mettre à jour le statut de la commande",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Impossible de mettre à jour le statut de la commande",
         variant: "destructive",
       })
     } finally {
@@ -234,162 +237,7 @@ const OrderDetailPage = () => {
   }
 
   if (loading) {
-    return (
-      <div className="mx-auto py-6 space-y-6">
-        {/* En-tête avec actions - Skeleton */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <Skeleton className="h-8 w-8 rounded-full" />
-              <Skeleton className="h-8 w-48" />
-              <Skeleton className="h-6 w-24 ml-2" />
-            </div>
-            <Skeleton className="h-5 w-56 ml-10" />
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <Skeleton className="h-10 w-[180px]" />
-            <Skeleton className="h-10 w-32" />
-            <Skeleton className="h-10 w-32" />
-            <Skeleton className="h-10 w-40" />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Colonne principale - Skeleton */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Informations produits - Skeleton */}
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-48 mb-2" />
-                <Skeleton className="h-4 w-32" />
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                  <Separator />
-                  {[1, 2, 3].map((_, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between py-2"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Skeleton className="h-10 w-10 rounded" />
-                        <div>
-                          <Skeleton className="h-4 w-32 mb-2" />
-                          <Skeleton className="h-3 w-16" />
-                        </div>
-                      </div>
-                      <Skeleton className="h-4 w-12" />
-                      <Skeleton className="h-4 w-16" />
-                      <Skeleton className="h-6 w-20" />
-                      <Skeleton className="h-4 w-24" />
-                    </div>
-                  ))}
-                  <Separator className="my-2" />
-                  <div className="flex justify-between">
-                    <Skeleton className="h-4 w-20 ml-auto" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                  <div className="flex justify-between">
-                    <Skeleton className="h-5 w-20 ml-auto" />
-                    <Skeleton className="h-5 w-32" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Informations de paiement - Skeleton */}
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-48" />
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {[1, 2, 3, 4].map((_, index) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-center pb-2 border-b"
-                    >
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-4 w-48" />
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Skeleton className="h-10 w-full" />
-              </CardFooter>
-            </Card>
-          </div>
-
-          {/* Colonne d'informations - Skeleton */}
-          <div className="space-y-6">
-            {/* Informations client - Skeleton */}
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-40 mb-2" />
-                <Skeleton className="h-4 w-32" />
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-3 mb-4">
-                  <Skeleton className="h-10 w-10 rounded-full" />
-                  <div>
-                    <Skeleton className="h-4 w-32 mb-2" />
-                    <Skeleton className="h-3 w-40" />
-                  </div>
-                </div>
-                <Separator className="my-3" />
-                <Skeleton className="h-9 w-full mt-2" />
-              </CardContent>
-            </Card>
-
-            {/* Adresse de livraison - Skeleton */}
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-40" />
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-48 mb-1" />
-                  <Skeleton className="h-4 w-full mb-1" />
-                  <Skeleton className="h-4 w-32 mb-1" />
-                  <Skeleton className="h-4 w-24" />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Résumé - Skeleton */}
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-40" />
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {[1, 2, 3].map((_, index) => (
-                    <div key={index} className="flex justify-between">
-                      <Skeleton className="h-4 w-32" />
-                      <Skeleton className="h-4 w-20" />
-                    </div>
-                  ))}
-                  <Separator className="my-2" />
-                  <div className="flex justify-between">
-                    <Skeleton className="h-5 w-16" />
-                    <Skeleton className="h-5 w-24" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    )
+    return <OrderDetailSkeleton />
   }
 
   if (error || !order) {

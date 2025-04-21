@@ -15,7 +15,6 @@ import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
-import { Skeleton } from "@/components/ui/skeleton"
 import {
   ArrowLeft,
   Edit,
@@ -44,6 +43,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import PermissionGuard from "@/components/Auth/PermissionGuard"
+import { ProductDetailSkeleton } from "@/components/Skeletons/ProductSkeletons"
 
 export default function ProductDetailsPage() {
   const { id } = useParams() as { id: string }
@@ -121,51 +122,7 @@ export default function ProductDetailsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="max-w-6xl mx-auto p-6 space-y-8">
-        <div className="flex flex-col gap-6">
-          <Skeleton className="h-10 w-1/3" />
-
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <div>
-              <Skeleton className="h-8 w-64 mb-2" />
-              <Skeleton className="h-4 w-48" />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-1/4 mb-2" />
-                <Skeleton className="h-4 w-2/3" />
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <Skeleton className="h-64 w-full rounded-lg" />
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-20 w-full" />
-              </CardContent>
-            </Card>
-          </div>
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-1/2 mb-2" />
-                <Skeleton className="h-4 w-2/3" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-full" />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    )
+    return <ProductDetailSkeleton />
   }
 
   if (errorMessage || !product) {
@@ -271,44 +228,48 @@ export default function ProductDetailsPage() {
               </Link>
             </Button>
 
-            <Button variant="outline" onClick={handleEdit}>
-              <Edit className="mr-2 h-4 w-4" />
-              Modifier
-            </Button>
+            <PermissionGuard permission="products:edit">
+              <Button variant="outline" onClick={handleEdit}>
+                <Edit className="mr-2 h-4 w-4" />
+                Modifier
+              </Button>
+            </PermissionGuard>
 
-            <Dialog
-              open={isDeleteDialogOpen}
-              onOpenChange={setIsDeleteDialogOpen}
-            >
-              <DialogTrigger asChild>
-                <Button variant="destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Supprimer
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Confirmer la suppression</DialogTitle>
-                  <DialogDescription>
-                    Êtes-vous sûr de vouloir supprimer le produit &quot;
-                    {product.name}&quot; ? Cette action est irréversible.
-                  </DialogDescription>
-                </DialogHeader>
-
-                <DialogFooter className="mt-4 gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsDeleteDialogOpen(false)}
-                  >
-                    Annuler
-                  </Button>
-                  <Button variant="destructive" onClick={handleDelete}>
+            <PermissionGuard permission="products:delete">
+              <Dialog
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+              >
+                <DialogTrigger asChild>
+                  <Button variant="destructive">
                     <Trash2 className="mr-2 h-4 w-4" />
-                    Confirmer la suppression
+                    Supprimer
                   </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Confirmer la suppression</DialogTitle>
+                    <DialogDescription>
+                      Êtes-vous sûr de vouloir supprimer le produit &quot;
+                      {product.name}&quot; ? Cette action est irréversible.
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  <DialogFooter className="mt-4 gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsDeleteDialogOpen(false)}
+                    >
+                      Annuler
+                    </Button>
+                    <Button variant="destructive" onClick={handleDelete}>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Confirmer la suppression
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </PermissionGuard>
           </div>
         </div>
       </div>

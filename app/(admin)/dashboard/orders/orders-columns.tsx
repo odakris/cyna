@@ -2,14 +2,12 @@ import * as React from "react"
 import { ColumnDef, Row } from "@tanstack/react-table"
 import {
   ArrowUpDown,
-  Eye,
   CreditCard,
   Tag,
   Calendar,
   Package,
   Check,
   X,
-  PencilLine,
   User,
   Receipt,
   CheckCircle,
@@ -17,7 +15,6 @@ import {
 import { Clock, Loader2, RefreshCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
@@ -30,6 +27,7 @@ import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { fr } from "date-fns/locale"
 import { OrderWithItems } from "@/types/Types"
+import ActionsCell from "../../../../components/Admin/ActionCell"
 
 declare module "@tanstack/react-table" {
   interface FilterFns {
@@ -354,68 +352,86 @@ export const orderColumns: ColumnDef<OrderWithItems>[] = [
     },
     enableSorting: true,
   },
+  // {
+  //   id: "actions",
+  //   header: "Actions",
+  //   cell: ({ row }) => (
+  //     <div className="flex justify-center space-x-2">
+  //       <TooltipProvider>
+  //         <Tooltip>
+  //           <TooltipTrigger asChild>
+  //             <Link href={`/dashboard/orders/${row.original.id_order}`}>
+  //               <Button variant="ghost" size="icon" className="h-8 w-8">
+  //                 <Eye className="h-4 w-4" />
+  //                 <span className="sr-only">Voir</span>
+  //               </Button>
+  //             </Link>
+  //           </TooltipTrigger>
+  //           <TooltipContent>Voir les détails</TooltipContent>
+  //         </Tooltip>
+  //       </TooltipProvider>
+
+  //       <TooltipProvider>
+  //         <Tooltip>
+  //           <TooltipTrigger asChild>
+  //             <Link href={`/dashboard/orders/${row.original.id_order}/edit`}>
+  //               <Button variant="ghost" size="icon" className="h-8 w-8">
+  //                 <PencilLine className="h-4 w-4" />
+  //                 <span className="sr-only">Modifier</span>
+  //               </Button>
+  //             </Link>
+  //           </TooltipTrigger>
+  //           <TooltipContent>Modifier la commande</TooltipContent>
+  //         </Tooltip>
+  //       </TooltipProvider>
+
+  //       <TooltipProvider>
+  //         <Tooltip>
+  //           <TooltipTrigger asChild>
+  //             <Link
+  //               href={row.original.invoice_pdf_url || "#"}
+  //               target="_blank"
+  //               onClick={e =>
+  //                 !row.original.invoice_pdf_url && e.preventDefault()
+  //               }
+  //             >
+  //               <Button
+  //                 variant="ghost"
+  //                 size="icon"
+  //                 className="h-8 w-8"
+  //                 disabled={!row.original.invoice_pdf_url}
+  //               >
+  //                 <Receipt className="h-4 w-4" />
+  //                 <span className="sr-only">Facture</span>
+  //               </Button>
+  //             </Link>
+  //           </TooltipTrigger>
+  //           <TooltipContent>
+  //             {row.original.invoice_pdf_url
+  //               ? "Voir la facture"
+  //               : "Facture non disponible"}
+  //           </TooltipContent>
+  //         </Tooltip>
+  //       </TooltipProvider>
+  //     </div>
+  //   ),
+  //   enableHiding: false,
+  // },
   {
     id: "actions",
     header: "Actions",
     cell: ({ row }) => (
-      <div className="flex justify-center space-x-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href={`/dashboard/orders/${row.original.id_order}`}>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Eye className="h-4 w-4" />
-                  <span className="sr-only">Voir</span>
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent>Voir les détails</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href={`/dashboard/orders/${row.original.id_order}/edit`}>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <PencilLine className="h-4 w-4" />
-                  <span className="sr-only">Modifier</span>
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent>Modifier la commande</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href={row.original.invoice_pdf_url || "#"}
-                target="_blank"
-                onClick={e =>
-                  !row.original.invoice_pdf_url && e.preventDefault()
-                }
-              >
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  disabled={!row.original.invoice_pdf_url}
-                >
-                  <Receipt className="h-4 w-4" />
-                  <span className="sr-only">Facture</span>
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent>
-              {row.original.invoice_pdf_url
-                ? "Voir la facture"
-                : "Facture non disponible"}
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
+      <ActionsCell
+        actions={[
+          { type: "view", tooltip: "Voir les détails" },
+          { type: "edit", tooltip: "Modifier la commande" },
+          { type: "receipt", tooltip: "Voir sur la facture" },
+        ]}
+        basePath="/dashboard/orders"
+        entityId={row.original.id_order}
+        invoicePdfUrl={row.original.invoice_pdf_url || "#"}
+        externalBasePath="/orders"
+      />
     ),
     enableHiding: false,
   },

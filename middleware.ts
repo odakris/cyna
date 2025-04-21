@@ -1,7 +1,20 @@
 import { NextResponse } from "next/server"
 import { getToken } from "next-auth/jwt"
 import type { NextRequest } from "next/server"
-import { Role } from "./types/Types"
+import { Role } from "@prisma/client"
+
+// Définition de la hiérarchie des rôles
+const roleHierarchy: Record<Role, number> = {
+  CUSTOMER: 0,
+  MANAGER: 1,
+  ADMIN: 2,
+  SUPER_ADMIN: 3,
+}
+
+// Vérification si un rôle a accès à un niveau de permission requis
+const hasRoleAccess = (userRole: Role, requiredRole: Role): boolean => {
+  return roleHierarchy[userRole] >= roleHierarchy[requiredRole]
+}
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
@@ -10,20 +23,25 @@ export async function middleware(req: NextRequest) {
     secret: process.env.NEXTAUTH_SECRET,
   })
 
-  // If user is authenticated
+  // Si l'utilisateur est authentifié
   if (token) {
-    // Redirect authenticated users away from /auth
+    // Redirection des utilisateurs authentifiés depuis /auth
     if (pathname === "/auth") {
-      const redirectUrl = token.role === Role.ADMIN ? "/dashboard" : "/"
+      const redirectUrl = hasRoleAccess(token.role as Role, Role.MANAGER)
+        ? "/dashboard"
+        : "/"
       return NextResponse.redirect(new URL(redirectUrl, req.url))
     }
 
-    // Protect /admin routes for non-admins
-    if (pathname.startsWith("/dashboard") && token.role !== Role.ADMIN) {
+    // Protection des routes /dashboard pour les non-managers/admins
+    if (
+      pathname.startsWith("/dashboard") &&
+      !hasRoleAccess(token.role as Role, Role.MANAGER)
+    ) {
       return NextResponse.redirect(new URL("/", req.url))
     }
   } else {
-    // Redirect unauthenticated users trying to access protected routes
+    // Redirection des utilisateurs non authentifiés essayant d'accéder aux routes protégées
     if (pathname.startsWith("/dashboard")) {
       return NextResponse.redirect(new URL("/auth", req.url))
     }
@@ -33,5 +51,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/auth", "/dashboard/:path*"], // Apply to /auth and /admin routes
+  matcher: ["/auth", "/dashboard/:path*"], // Appliquer aux routes /auth et /dashboard
 }

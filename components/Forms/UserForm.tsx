@@ -39,7 +39,16 @@ import { Badge } from "@/components/ui/badge"
 
 import { userFormSchema, UserFormValues } from "@/lib/validations/user-schema"
 import { Role } from "@prisma/client"
-import { User, Mail, Key, Shield, UserCog, Save, Lock } from "lucide-react"
+import {
+  User,
+  Mail,
+  Key,
+  Shield,
+  UserCog,
+  Save,
+  Lock,
+  PencilLine,
+} from "lucide-react"
 
 interface UserFormProps {
   initialData?: UserFormValues
@@ -208,7 +217,10 @@ export function UserForm({
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Informations personnelles</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <PencilLine className="h-5 w-5" />
+                    Informations personnelles
+                  </CardTitle>
                   <CardDescription>
                     Informations de base de l&apos;utilisateur
                   </CardDescription>

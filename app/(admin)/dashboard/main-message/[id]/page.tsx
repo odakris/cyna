@@ -23,7 +23,6 @@ import {
   XCircle,
   ExternalLink,
 } from "lucide-react"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
@@ -36,6 +35,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { MainMessage } from "@prisma/client"
+import { MainMessageDetailSkeleton } from "@/components/Skeletons/MainMessageSkeletons"
 
 export default function ViewMainMessagePage() {
   const { id } = useParams() as { id: string }
@@ -124,39 +124,8 @@ export default function ViewMainMessagePage() {
   }
 
   if (loading) {
-    return (
-      <div className="container mx-auto p-6 space-y-8">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full"
-              disabled
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <Skeleton className="h-10 w-64" />
-          </div>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-8 w-64 mb-2" />
-            <Skeleton className="h-4 w-96" />
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              <Skeleton className="h-32 w-full" />
-              <Skeleton className="h-24 w-full" />
-              <Skeleton className="h-24 w-full" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
+    return <MainMessageDetailSkeleton />
   }
-
   if (error) {
     return (
       <div className="container mx-auto p-6">

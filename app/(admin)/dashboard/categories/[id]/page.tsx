@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { Category } from "@prisma/client"
 import {
@@ -35,6 +34,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { CategoryDetailsSkeleton } from "@/components/Skeletons/CategorySkeletons"
 
 export default function CategoryDetailsPage() {
   const { id } = useParams() as { id: string }
@@ -57,9 +57,8 @@ export default function CategoryDetailsPage() {
 
         setCategory(categoryData)
 
-        // Simuler un comptage de produits dans cette catégorie (à implémenter réellement)
-        console.log(categoryData)
-        setProductCount(categoryData.products.length)
+        // Obtenir le comptage de produits dans cette catégorie
+        setProductCount(categoryData.products?.length || 0)
       } catch (error) {
         console.error("Erreur fetchData:", error)
         setErrorMessage("Erreur lors du chargement des données.")
@@ -110,51 +109,7 @@ export default function CategoryDetailsPage() {
   }
 
   if (loading) {
-    return (
-      <div className="mx-auto p-6 space-y-8">
-        <div className="flex flex-col gap-6">
-          <Skeleton className="h-10 w-1/3" />
-
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-10 w-10 rounded-full" />
-            <div>
-              <Skeleton className="h-8 w-64 mb-2" />
-              <Skeleton className="h-4 w-48" />
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          <div className="lg:col-span-2">
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-1/4 mb-2" />
-                <Skeleton className="h-4 w-2/3" />
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <Skeleton className="h-64 w-full rounded-lg" />
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-20 w-full" />
-              </CardContent>
-            </Card>
-          </div>
-          <div className="lg:col-span-1">
-            <Card>
-              <CardHeader>
-                <Skeleton className="h-6 w-1/2 mb-2" />
-                <Skeleton className="h-4 w-2/3" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-full" />
-                <Skeleton className="h-6 w-full" />
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    )
+    return <CategoryDetailsSkeleton />
   }
 
   if (errorMessage || !category) {

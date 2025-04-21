@@ -3,19 +3,16 @@ import * as React from "react"
 import { ColumnDef, Row } from "@tanstack/react-table"
 import {
   ArrowUpDown,
-  Eye,
   Mail,
   Calendar,
   CheckCircle,
   XCircle,
   MessageSquare,
   Clock,
-  Reply,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
@@ -24,6 +21,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import ActionsCell from "@/components/Admin/ActionCell"
 
 // Type pour les messages de contact
 export interface ContactMessage {
@@ -255,41 +253,17 @@ export const contactMessageColumns: ColumnDef<ContactMessage>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => {
-      const message = row.original
-
-      return (
-        <div className="flex justify-center space-x-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href={`/dashboard/contact/${message.id_message}`}>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Eye className="h-4 w-4" />
-                    <span className="sr-only">Voir</span>
-                  </Button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>Voir le message</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href={`/dashboard/contact/${message.id_message}/respond`}>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Reply className="h-4 w-4" />
-                    <span className="sr-only">Répondre</span>
-                  </Button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>Répondre au message</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      )
-    },
+    cell: ({ row }) => (
+      <ActionsCell
+        actions={[
+          { type: "view", tooltip: "Voir les détails" },
+          { type: "reply", tooltip: "Répondre" },
+        ]}
+        basePath="/dashboard/contact"
+        entityId={row.original.id_message}
+        externalBasePath="/contact"
+      />
+    ),
     enableHiding: false,
   },
 ]

@@ -64,6 +64,7 @@ import {
   Banknote,
   BarChart3,
   Box,
+  PencilLine,
 } from "lucide-react"
 import { Category } from "@prisma/client"
 
@@ -253,12 +254,12 @@ export function ProductForm({
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Tag className="h-5 w-5" />
-                          Informations générales
+                          <PencilLine className="h-5 w-5" />
+                          Détails du Produit
                         </CardTitle>
                         <CardDescription>
-                          Détails principaux du produit visibles par les
-                          utilisateurs
+                          Informations principales du produit qui seront
+                          visibles par les utilisateurs
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="space-y-6">

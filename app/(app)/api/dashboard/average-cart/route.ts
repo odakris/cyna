@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { TimeFrame } from "@/types/dashboard"
+import { checkPermission } from "@/lib/api-permissions"
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("dashboard:view")
+    if (permissionCheck) return permissionCheck
+
     // Récupérer le paramètre timeFrame de la requête
     const searchParams = request.nextUrl.searchParams
     const timeFrame = (searchParams.get("timeFrame") || "week") as TimeFrame

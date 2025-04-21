@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import mainMessageController from "@/lib/controllers/main-message-controller"
 import { validateId } from "@/lib/utils/utils"
+import { checkPermission } from "@/lib/api-permissions"
 
 export async function GET(
   request: Request,
@@ -35,6 +36,10 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("main-message:edit")
+    if (permissionCheck) return permissionCheck
+
     const resolvedParams = await params
     const id = validateId(resolvedParams.id)
 
@@ -63,6 +68,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("main-message:edit")
+    if (permissionCheck) return permissionCheck
+
     const resolvedParams = await params
     const id = validateId(resolvedParams.id)
 
@@ -91,6 +100,10 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("main-message:delete")
+    if (permissionCheck) return permissionCheck
+
     const resolvedParams = await params
     const id = validateId(resolvedParams.id)
 

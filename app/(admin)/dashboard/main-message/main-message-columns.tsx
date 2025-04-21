@@ -2,18 +2,14 @@ import * as React from "react"
 import { ColumnDef, Row } from "@tanstack/react-table"
 import {
   ArrowUpDown,
-  Eye,
-  PencilLine,
   MessageCircle,
   SlidersHorizontal,
   Palette,
   Calendar,
-  ExternalLink,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import {
   Tooltip,
@@ -24,6 +20,7 @@ import {
 import { cn } from "@/lib/utils"
 import { Switch } from "@/components/ui/switch"
 import { MainMessage } from "@prisma/client"
+import ActionsCell from "@/components/Admin/ActionCell"
 
 // Fonction pour formater la date
 const formatDate = (dateString: string) => {
@@ -266,59 +263,18 @@ export const mainMessageColumns: ColumnDef<MainMessage>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => {
-      const message = row.original
-
-      return (
-        <div className="flex justify-center space-x-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href={`/dashboard/main-message/${message.id_main_message}`}
-                >
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <Eye className="h-4 w-4" />
-                    <span className="sr-only">Voir</span>
-                  </Button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>Voir les détails</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href={`/dashboard/main-message/${message.id_main_message}/edit`}
-                >
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <PencilLine className="h-4 w-4" />
-                    <span className="sr-only">Modifier</span>
-                  </Button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>Modifier le message</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link href={`/`} target="_blank">
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <ExternalLink className="h-4 w-4" />
-                    <span className="sr-only">Voir sur le site</span>
-                  </Button>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>Voir sur le site</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      )
-    },
+    cell: ({ row }) => (
+      <ActionsCell
+        actions={[
+          { type: "view", tooltip: "Voir les détails" },
+          { type: "edit", tooltip: "Modifier le message" },
+          { type: "external", tooltip: "Voir sur le site" },
+        ]}
+        basePath="/dashboard/main-message"
+        entityId={row.original.id_main_message}
+        externalBasePath="/main-message"
+      />
+    ),
     enableHiding: false,
   },
 ]

@@ -1,14 +1,16 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { ProductForm } from "@/components/Forms/ProductForm"
 import { ArrowLeft } from "lucide-react"
+import RoleGuard from "@/components/Auth/RoleGuard"
+import { Role } from "@prisma/client"
+import AccessDenied from "@/components/Auth/AccessDenied"
+import { useEffect, useState } from "react"
 import { Category } from "@prisma/client"
+import { ProductFormSkeleton } from "@/components/Skeletons/ProductSkeletons"
 
 export default function CreateProductPage() {
   const { toast } = useToast()
@@ -38,27 +40,7 @@ export default function CreateProductPage() {
   }, [toast])
 
   if (loading) {
-    return (
-      <div className="mx-auto p-6 space-y-6">
-        <Skeleton className="h-10 w-1/3" />
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-1/4" />
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-32" />
-          </CardContent>
-        </Card>
-      </div>
-    )
+    return <ProductFormSkeleton />
   }
 
   if (errorMessage || categories.length === 0) {
@@ -74,23 +56,23 @@ export default function CreateProductPage() {
   }
 
   return (
-    <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
-      <div className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="icon" className="rounded-full">
-          <Link href="/dashboard/products">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-        </Button>
-        <h1 className="text-3xl font-bold">Créer un Nouveau Produit</h1>
+    <RoleGuard
+      requiredRole={Role.ADMIN}
+      fallback={
+        <AccessDenied message="Vous n'avez pas la permission de créer des produits." />
+      }
+    >
+      <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
+        <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="icon" className="rounded-full">
+            <Link href="/dashboard/products">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold">Créer un Nouveau Produit</h1>
+        </div>
+        <ProductForm categories={categories} />
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Ajouter un Produit</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProductForm categories={categories} />
-        </CardContent>
-      </Card>
-    </div>
+    </RoleGuard>
   )
 }

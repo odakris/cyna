@@ -1,5 +1,4 @@
 "use client"
-
 import { usePathname } from "next/navigation"
 import {
   Home,
@@ -11,15 +10,12 @@ import {
   MessageSquareText,
   Mail,
 } from "lucide-react"
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import DisconnectButton from "../DisconnectButton/DisconnectButton"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Separator } from "@/components/ui/separator"
+import DisconnectButton from "../DisconnectButton/DisconnectButton"
 
 export default function AdminSideBar() {
   const pathname = usePathname()
@@ -28,90 +24,90 @@ export default function AdminSideBar() {
     {
       name: "Dashboard",
       href: "/dashboard",
-      icon: <Home className="h-5 w-5 shrink-0" />,
+      icon: <Home className="h-5 w-5" />,
+      exact: true,
     },
     {
       name: "Message Principal",
       href: "/dashboard/main-message",
-      icon: <MessageSquareText className="h-5 w-5 shrink-0" />,
+      icon: <MessageSquareText className="h-5 w-5" />,
+      exact: false,
     },
     {
       name: "Hero Carousel",
       href: "/dashboard/hero-carousel",
-      icon: <SlidersHorizontal className="h-5 w-5 shrink-0" />,
+      icon: <SlidersHorizontal className="h-5 w-5" />,
+      exact: false,
     },
     {
       name: "Produits",
       href: "/dashboard/products",
-      icon: <Package className="h-5 w-5 shrink-0" />,
+      icon: <Package className="h-5 w-5" />,
+      exact: false,
     },
     {
       name: "Catégories",
       href: "/dashboard/categories",
-      icon: <List className="h-5 w-5 shrink-0" />,
+      icon: <List className="h-5 w-5" />,
+      exact: false,
     },
     {
       name: "Utilisateurs",
       href: "/dashboard/users",
-      icon: <Users className="h-5 w-5 shrink-0" />,
+      icon: <Users className="h-5 w-5" />,
+      exact: false,
     },
     {
       name: "Commandes",
       href: "/dashboard/orders",
-      icon: <ShoppingCart className="h-5 w-5 shrink-0" />,
+      icon: <ShoppingCart className="h-5 w-5" />,
+      exact: false,
     },
     {
       name: "Contact",
       href: "/dashboard/contact",
-      icon: <Mail className="h-5 w-5 shrink-0" />,
+      icon: <Mail className="h-5 w-5" />,
+      exact: false,
     },
   ]
 
+  const isActive = (item: { href: string; exact: boolean }) => {
+    if (item.exact) {
+      return pathname === item.href
+    }
+    return pathname === item.href || pathname.startsWith(`${item.href}/`)
+  }
+
   return (
-    <aside className="bg-slate-800 text-slate-200 w-64 shrink-0 h-screen sticky top-0 left-0">
-      <div className="p-4 border-b border-slate-700">
-        <h2 className="text-xl font-bold text-center">Back-Office</h2>
+    <aside className="bg-card border-r h-screen fixed left-0 top-0 w-52 flex flex-col">
+      <div className="p-6 border-b">
+        <h2 className="text-xl font-bold text-center text-primary">
+          CYNA Admin
+        </h2>
       </div>
-
-      <ScrollArea className="h-[calc(100vh-64px)]">
-        <div className="p-4">
-          <NavigationMenu orientation="vertical" className="max-w-none w-full">
-            <NavigationMenuList className="flex flex-col space-y-2">
-              {navLinks.map(item => {
-                const isActive =
-                  pathname === item.href || pathname.startsWith(`${item.href}/`)
-
-                return (
-                  <NavigationMenuItem key={item.name}>
-                    <NavigationMenuLink
-                      href={item.href}
-                      className={cn(
-                        "flex items-start px-4 py-3 w-full h-12 rounded-md text-sm font-medium transition-colors",
-                        isActive
-                          ? "bg-slate-700 text-slate-100"
-                          : "text-slate-300 hover:bg-slate-700 hover:text-slate-100"
-                      )}
-                    >
-                      {item.icon}
-                      <span className="ml-3">{item.name}</span>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-                )
-              })}
-
-              <NavigationMenuItem className="pt-6">
-                <div
-                  className={cn(
-                    "flex items-center px-4 py-3 w-full h-12 rounded-md text-sm font-medium transition-colors",
-                    "text-slate-300 hover:bg-slate-700 hover:text-slate-100"
-                  )}
-                >
-                  <DisconnectButton />
-                </div>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-        </div>
+      <div className="p-4">
+        <DisconnectButton />
+      </div>
+      <Separator />
+      <ScrollArea className="flex-1 py-2">
+        <nav className="space-y-1 px-3">
+          {navLinks.map(item => (
+            <Link key={item.name} href={item.href} className="block">
+              <Button
+                variant={isActive(item) ? "secondary" : "ghost"}
+                className={cn(
+                  "w-full justify-start h-12 mb-1 px-4",
+                  isActive(item)
+                    ? "font-medium"
+                    : "font-normal text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {item.icon}
+                <span className="ml-3">{item.name}</span>
+              </Button>
+            </Link>
+          ))}
+        </nav>
       </ScrollArea>
     </aside>
   )

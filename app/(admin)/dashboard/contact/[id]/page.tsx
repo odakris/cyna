@@ -21,7 +21,6 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Skeleton } from "@/components/ui/skeleton"
 import {
   Dialog,
   DialogContent,
@@ -34,6 +33,7 @@ import {
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { ContactMessage } from "../contact-message-columns"
+import { ContactMessageDetailSkeleton } from "@/components/Skeletons/ContactMessageSkeletons"
 
 export default function ContactMessageView() {
   const [message, setMessage] = useState<ContactMessage | null>(null)
@@ -126,19 +126,7 @@ export default function ContactMessageView() {
   }, [message, markAsRead])
 
   if (loading) {
-    return (
-      <div className="container mx-auto p-6 space-y-6">
-        <Skeleton className="h-10 w-1/3" />
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <Skeleton className="h-6 w-1/2" />
-            <Skeleton className="h-6 w-1/4" />
-            <Skeleton className="h-6 w-1/4" />
-            <Skeleton className="h-32 w-full" />
-          </CardContent>
-        </Card>
-      </div>
-    )
+    return <ContactMessageDetailSkeleton />
   }
 
   if (error || !message) {

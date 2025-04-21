@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import categoryController from "@/lib/controllers/category-controller"
+import { checkPermission } from "@/lib/api-permissions"
 
 /**
  * Récupère toutes les categories.
@@ -26,6 +27,10 @@ export async function GET(): Promise<NextResponse> {
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("categories:create")
+    if (permissionCheck) return permissionCheck
+
     return await categoryController.create(request)
   } catch (error) {
     console.error("Erreur non gérée dans la route POST /categories:", error)

@@ -1,5 +1,7 @@
+// app/(app)/api/products/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import productController from "@/lib/controllers/product-controller"
+import { checkPermission } from "@/lib/api-permissions"
 
 /**
  * Récupère tous les produits.
@@ -26,6 +28,10 @@ export async function GET(): Promise<NextResponse> {
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("products:create")
+    if (permissionCheck) return permissionCheck
+
     return await productController.create(request)
   } catch (error) {
     console.error("Erreur non gérée dans la route POST /products:", error)

@@ -1,22 +1,11 @@
 import * as React from "react"
 import { ColumnDef, Row, FilterFn } from "@tanstack/react-table"
-import {
-  ArrowUpDown,
-  Eye,
-  Edit,
-  Layers,
-  Tag,
-  BarChart3,
-  Package,
-  ExternalLink,
-} from "lucide-react"
+import { ArrowUpDown, Layers, Tag, BarChart3, Package } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
-import Link from "next/link"
 import { Category } from "@prisma/client"
-
 import {
   Tooltip,
   TooltipContent,
@@ -26,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { CategoryWithProduct } from "@/types/Types"
+import ActionsCell from "@/components/Admin/ActionCell"
 
 // Fonction de filtrage personnalisée pour les produits
 export const productsFilterFn: FilterFn<CategoryWithProduct> = (
@@ -262,62 +252,16 @@ export const categoriesColumns: ColumnDef<CategoryWithProduct>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row }) => (
-      <div className="flex justify-center space-x-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                <Link
-                  href={`/dashboard/categories/${row.original.id_category}`}
-                >
-                  <Eye className="h-4 w-4" />
-                  <span className="sr-only">Voir</span>
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Voir les détails</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                <Link
-                  href={`/dashboard/categories/${row.original.id_category}/edit`}
-                >
-                  <Edit className="h-4 w-4" />
-                  <span className="sr-only">Modifier</span>
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Modifier la catégorie</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                <Link
-                  href={`/categorie/${row.original.id_category}`}
-                  target="_blank"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  <span className="sr-only">Voir sur le site</span>
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Voir sur le site</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
+      <ActionsCell
+        actions={[
+          { type: "view", tooltip: "Voir les détails" },
+          { type: "edit", tooltip: "Modifier la categorie" },
+          { type: "external", tooltip: "Voir sur le site" },
+        ]}
+        basePath="/dashboard/categories"
+        entityId={row.original.id_category}
+        externalBasePath="/categories"
+      />
     ),
     enableHiding: false,
   },

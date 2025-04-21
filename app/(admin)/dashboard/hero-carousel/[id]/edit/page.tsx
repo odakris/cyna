@@ -4,12 +4,14 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { HeroCarouselForm } from "@/components/Forms/HeroCarouselForm"
-import { ArrowLeft } from "lucide-react"
-import { HeroCarouselSlide } from "@prisma/client"
+import { ArrowLeft, ShieldAlert } from "lucide-react"
+import { HeroCarouselSlide, Role } from "@prisma/client"
+import RoleGuard from "@/components/Auth/RoleGuard"
+import AccessDenied from "@/components/Auth/AccessDenied"
+import { HeroCarouselFormSkeleton } from "@/components/Skeletons/HeroCarouselSkeletons"
 
 export default function EditHeroCarouselSlidePage() {
   const { id } = useParams() as { id: string }
@@ -48,42 +50,12 @@ export default function EditHeroCarouselSlidePage() {
   }, [id, toast])
 
   if (loading) {
-    return (
-      <div className="mx-auto p-6 space-y-6">
-        <Skeleton className="h-10 w-1/3" />
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-6 w-1/4" />
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-32" />
-          </CardContent>
-        </Card>
-      </div>
-    )
+    return <HeroCarouselFormSkeleton />
   }
 
   if (errorMessage || !slide) {
     return (
       <div className="max-w-4xl mx-auto p-6 space-y-6">
-        <h1 className="text-3xl font-bold">Modifier le Slide</h1>
-        <p className="text-red-500">{errorMessage || "Slide introuvable"}</p>
-        <Button asChild variant="outline">
-          <Link href="/dashboard/hero-carousel">Retour</Link>
-        </Button>
-      </div>
-    )
-  }
-
-  return (
-    <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div className="flex items-center gap-2">
           <Button asChild variant="ghost" size="icon" className="rounded-full">
             <Link href="/dashboard/hero-carousel">
@@ -92,16 +64,48 @@ export default function EditHeroCarouselSlidePage() {
           </Button>
           <h1 className="text-3xl font-bold">Modifier le Slide</h1>
         </div>
-      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Modifier les informations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <HeroCarouselForm initialData={slide} isEditing={true} />
-        </CardContent>
-      </Card>
-    </div>
+        <Card className="border-red-200 bg-red-50 dark:bg-red-950/20">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <ShieldAlert className="h-5 w-5 text-red-500" />
+              <h2 className="text-xl font-bold text-red-500">Erreur</h2>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-600 mb-4">
+              {errorMessage || "Slide introuvable"}
+            </p>
+            <Button asChild variant="outline">
+              <Link href="/dashboard/hero-carousel">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Retour à la liste
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <RoleGuard
+      requiredRole={Role.ADMIN}
+      fallback={
+        <AccessDenied message="Vous n'avez pas la permission de modifier des slides." />
+      }
+    >
+      <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
+        <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="icon" className="rounded-full">
+            <Link href="/dashboard/hero-carousel">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold">Modifier le Slide</h1>
+        </div>
+        <HeroCarouselForm initialData={slide} isEditing={true} />
+      </div>
+    </RoleGuard>
   )
 }

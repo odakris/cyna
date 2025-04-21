@@ -1,36 +1,16 @@
-// import { z } from "zod"
-// import { orderItemSchema } from "./order-item-schema"
-// import { OrderStatus } from "@prisma/client"
-
-// export const orderFormSchema = z.object({
-//   order_date: z.coerce.date().default(() => new Date()),
-//   total_amount: z
-//     .number()
-//     .nonnegative()
-//     .transform(val => parseFloat(val.toFixed(2))),
-//   subtotal: z
-//     .number()
-//     .nonnegative()
-//     .default(0)
-//     .transform(val => parseFloat(val.toFixed(2))),
-//   order_status: z.nativeEnum(OrderStatus).default("PENDING"),
-//   payment_method: z.string().min(2).max(50),
-//   last_card_digits: z.string().length(4).optional(),
-//   invoice_number: z.string().min(5).max(50),
-//   invoice_pdf_url: z.string().url().max(255).optional(),
-//   id_user: z.number().int().positive(),
-//   id_address: z.number().int().positive(),
-//   order_items: z
-//     .array(orderItemSchema)
-//     .min(1, "Au moins un article est requis dans la commande."),
-// })
-
-// export type OrderFormValues = z.infer<typeof orderFormSchema>
-
 import { z } from "zod"
 import { orderItemSchema } from "./order-item-schema"
 import { OrderStatus } from "@prisma/client"
-import { v4 as uuidv4 } from "uuid" // Assurez-vous d'installer cette dépendance
+import { v4 as uuidv4 } from "uuid"
+
+// Schéma pour valider la mise à jour du statut de la commande
+export const statusSchema = z.object({
+  order_status: z.nativeEnum(OrderStatus, {
+    errorMap: (issue, ctx) => ({
+      message: `Statut invalide. Les valeurs autorisées sont : ${Object.values(OrderStatus).join(", ")}`,
+    }),
+  }),
+})
 
 // Schéma de base avec les champs fournis par l'utilisateur
 export const orderInputSchema = z.object({
@@ -57,7 +37,7 @@ export const orderFormSchema = orderInputSchema.transform(data => {
     subtotal += item.unit_price * item.quantity
   })
 
-  // Arrondissez à 2 décimales
+  // Arrondir à 2 décimales
   subtotal = parseFloat(subtotal.toFixed(2))
 
   // Pour l'instant, total_amount est égal au subtotal
@@ -77,3 +57,4 @@ export const orderFormSchema = orderInputSchema.transform(data => {
 
 export type OrderInputValues = z.infer<typeof orderInputSchema>
 export type OrderFormValues = z.infer<typeof orderFormSchema>
+export type StatusValues = z.infer<typeof statusSchema>

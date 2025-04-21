@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
 import { TimeFrame } from "@/types/dashboard"
+import { checkPermission } from "@/lib/api-permissions"
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("dashboard:view")
+    if (permissionCheck) return permissionCheck
+
     // Récupérer le paramètre timeFrame de la requête
     const searchParams = request.nextUrl.searchParams
     const timeFrame = (searchParams.get("timeFrame") || "week") as TimeFrame
@@ -48,9 +53,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     })
 
     // Grouper les ventes par jour ou par semaine
-    const salesByDate = orders.reduce(
-      (acc, order) => {
-        let dateKey
+    interface SalesByDate {
+      [key: string]: number
+    }
+
+    interface Order {
+      order_date: Date
+      total_amount: number
+    }
+
+    const salesByDate: SalesByDate = orders.reduce(
+      (acc: SalesByDate, order: Order) => {
+        let dateKey: string
 
         if (isWeeklyGrouping) {
           // Obtenir le premier jour de la semaine pour regrouper par semaine
@@ -72,7 +86,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         acc[dateKey] += order.total_amount
         return acc
       },
-      {} as { [key: string]: number }
+      {} as SalesByDate
     )
 
     // Convertir en format de tableau pour le graphique

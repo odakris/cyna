@@ -2,21 +2,17 @@ import * as React from "react"
 import { ColumnDef, FilterFn, Row } from "@tanstack/react-table"
 import {
   ArrowUpDown,
-  Eye,
   Layers,
   Tag,
   BarChart3,
   Package,
   Check,
   X,
-  ExternalLink,
-  PencilLine,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
-import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { ProductWithImages } from "@/types/Types"
 import {
@@ -26,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
+import ActionsCell from "@/components/Admin/ActionCell"
 
 export const productsFilterFn: FilterFn<ProductWithImages> = (
   row,
@@ -314,54 +311,16 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row }) => (
-      <div className="flex justify-center space-x-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link href={`/dashboard/products/${row.original.id_product}`}>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Eye className="h-4 w-4" />
-                  <span className="sr-only">Voir</span>
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent>Voir les détails</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href={`/dashboard/products/${row.original.id_product}/edit`}
-              >
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <PencilLine className="h-4 w-4" />
-                  <span className="sr-only">Modifier</span>
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent>Modifier le produit</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Link
-                href={`/produit/${row.original.id_product}`}
-                target={"_blank"}
-              >
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <ExternalLink className="h-4 w-4" />
-                  <span className="sr-only">Voir sur le site</span>
-                </Button>
-              </Link>
-            </TooltipTrigger>
-            <TooltipContent>Voir sur le site</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
+      <ActionsCell
+        actions={[
+          { type: "view", tooltip: "Voir les détails" },
+          { type: "edit", tooltip: "Modifier le produit" },
+          { type: "external", tooltip: "Voir sur le site" },
+        ]}
+        basePath="/dashboard/products"
+        entityId={row.original.id_product}
+        externalBasePath="/produit"
+      />
     ),
     enableHiding: false,
   },

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import orderController from "@/lib/controllers/order-controller"
+import { checkPermission } from "@/lib/api-permissions"
 
 /**
  * Récupère tous les commandes.
@@ -8,6 +9,10 @@ import orderController from "@/lib/controllers/order-controller"
  */
 export async function GET(): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("orders:view")
+    if (permissionCheck) return permissionCheck
+
     return await orderController.getAll()
   } catch (error) {
     console.error(
@@ -33,6 +38,10 @@ export async function GET(): Promise<NextResponse> {
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
+    // Vérifier les permissions
+    const permissionCheck = await checkPermission("orders:create")
+    if (permissionCheck) return permissionCheck
+
     return await orderController.create(request)
   } catch (error) {
     console.error("Erreur non gérée lors de la création de la commande:", error)

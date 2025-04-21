@@ -50,6 +50,7 @@ import {
   ArrowUpDown,
   FileQuestion,
   ArrowRight,
+  PencilLine,
 } from "lucide-react"
 
 interface CategoryFormProps {
@@ -170,7 +171,7 @@ export function CategoryForm({
                     <Card>
                       <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                          <Tag className="h-5 w-5" />
+                          <PencilLine className="h-5 w-5" />
                           Détails de la catégorie
                         </CardTitle>
                         <CardDescription>

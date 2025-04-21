@@ -4,7 +4,7 @@ import React, { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Loader2 } from "lucide-react"
+import { Loader2, PencilLine } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import {
@@ -133,8 +133,14 @@ export function HeroCarouselForm({
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Informations principales</CardTitle>
-                <CardDescription>Détails essentiels du slide</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  <PencilLine className="h-5 w-5" />
+                  Détails essentiels du slide
+                </CardTitle>
+                <CardDescription>
+                  Informations principales du slide qui seront visibles par les
+                  utilisateurs
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <FormField

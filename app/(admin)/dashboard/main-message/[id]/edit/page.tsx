@@ -13,10 +13,12 @@ import {
 } from "@/components/ui/card"
 import { MainMessageForm } from "@/components/Forms/MainMessageForm"
 import { ArrowLeft } from "lucide-react"
-import { Skeleton } from "@/components/ui/skeleton"
-import { MainMessage } from "@prisma/client"
+import { MainMessage, Role } from "@prisma/client"
+import RoleGuard from "@/components/Auth/RoleGuard"
+import AccessDenied from "@/components/Auth/AccessDenied"
+import { MainMessageFormSkeleton } from "@/components/Skeletons/MainMessageSkeletons"
 
-export default function EditMainMessagePage({}) {
+export default function EditMainMessagePage() {
   const { id } = useParams() as { id: string }
 
   const [message, setMessage] = useState<MainMessage | null>(null)
@@ -54,42 +56,7 @@ export default function EditMainMessagePage({}) {
   }, [id])
 
   if (loading) {
-    return (
-      <div className="container mx-auto p-6 space-y-8">
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full"
-              disabled
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <Skeleton className="h-10 w-64" />
-          </div>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <Skeleton className="h-8 w-64 mb-2" />
-            <Skeleton className="h-4 w-96" />
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-6">
-                <Skeleton className="h-64 w-full" />
-                <Skeleton className="h-32 w-full" />
-              </div>
-              <div className="space-y-6">
-                <Skeleton className="h-64 w-full" />
-                <Skeleton className="h-32 w-full" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
+    return <MainMessageFormSkeleton />
   }
 
   if (error) {
@@ -111,38 +78,25 @@ export default function EditMainMessagePage({}) {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-8 animate-in fade-in duration-300">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <Button
-              asChild
-              variant="ghost"
-              size="icon"
-              className="rounded-full"
-            >
-              <Link href="/dashboard/main-message">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <h1 className="text-3xl font-bold">Modifier le Message</h1>
-          </div>
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Informations du message</CardTitle>
-          <CardDescription>
+    <RoleGuard
+      requiredRole={Role.ADMIN}
+      fallback={
+        <AccessDenied message="Vous n'avez pas la permission de modifier les messages." />
+      }
+    >
+      <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
+        <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="icon" className="rounded-full">
+            <Link href="/dashboard/main-message">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold">
             Modifiez le contenu et l&apos;apparence du message principal
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {message && (
-            <MainMessageForm initialData={message} isEditing={true} />
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </h1>
+        </div>
+        {message && <MainMessageForm initialData={message} isEditing={true} />}
+      </div>
+    </RoleGuard>
   )
 }
