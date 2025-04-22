@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { useSession } from "next-auth/react"
 import { MessageType } from "@prisma/client"
@@ -16,11 +16,13 @@ export function useChatbot() {
   const [isLoading, setIsLoading] = useState(false)
   const [conversationId, setConversationId] = useState<number | null>(null)
   const [needsHumanSupport, setNeedsHumanSupport] = useState(false)
+  const [useGemini, setUseGemini] = useState(true) // Nouvel état pour basculer entre Gemini et l'ancien système
 
   // Pour stocker les données collectées lors de la conversation
-  const [collectedData, setCollectedData] = useState({
+  const collectedDataRef = useRef({
     email: "",
     subject: "",
+    message: "",
   })
 
   const { toast } = useToast()
@@ -32,7 +34,7 @@ export function useChatbot() {
       setMessages([
         {
           content:
-            "Bonjour ! Je suis l'assistant virtuel de CYNA. Comment puis-je vous aider aujourd'hui ?",
+            "Bonjour ! Je suis l'assistant virtuel IA de CYNA. Comment puis-je vous aider aujourd'hui ?",
           type: MessageType.BOT,
         },
       ])
@@ -42,10 +44,7 @@ export function useChatbot() {
   // Si l'utilisateur est connecté, pré-remplir son email
   useEffect(() => {
     if (session?.user?.email) {
-      setCollectedData(prev => ({
-        ...prev,
-        email: session.user.email || "",
-      }))
+      collectedDataRef.current.email = session.user.email || ""
     }
   }, [session?.user?.email])
 
@@ -81,8 +80,11 @@ export function useChatbot() {
         // Mettre à jour l'état avec le nouvel ID
         setConversationId(newConvId)
 
-        // 2. Envoyer le message avec le nouvel ID
-        const messageResponse = await fetch("/api/chatbot/messages", {
+        // 2. Envoyer le message avec le nouvel ID - Choisir l'API (Gemini ou standard)
+        const messageRoute = useGemini
+          ? "/api/chatbot/gemini"
+          : "/api/chatbot/messages"
+        const messageResponse = await fetch(messageRoute, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -92,43 +94,41 @@ export function useChatbot() {
         })
 
         if (!messageResponse.ok) {
-          throw new Error("Impossible d'envoyer le message")
+          // Si Gemini échoue, essayer l'ancien système
+          if (useGemini) {
+            console.log("Gemini API a échoué, passage au système standard")
+            setUseGemini(false)
+            const fallbackResponse = await fetch("/api/chatbot/messages", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                content,
+                conversationId: newConvId,
+              }),
+            })
+
+            if (!fallbackResponse.ok) {
+              throw new Error(
+                "Impossible d'envoyer le message, même avec le système de secours"
+              )
+            }
+
+            const fallbackData = await fallbackResponse.json()
+            handleMessageResponse(fallbackData)
+            return
+          } else {
+            throw new Error("Impossible d'envoyer le message")
+          }
         }
 
         const messageData = await messageResponse.json()
-
-        // Ajouter la réponse du bot
-        setMessages(prev => [
-          ...prev,
-          { content: messageData.response, type: MessageType.BOT },
-        ])
-
-        // Mettre à jour si besoin de support humain
-        setNeedsHumanSupport(messageData.needsHumanSupport)
-
-        // Mettre à jour les données collectées si présentes
-        if (messageData.collectedData) {
-          setCollectedData(prev => ({
-            ...prev,
-            ...messageData.collectedData,
-          }))
-
-          // Si toutes les données sont collectées et prêtes à être soumises
-          if (
-            messageData.context === "ready_to_submit" &&
-            messageData.collectedData.email &&
-            messageData.collectedData.subject
-          ) {
-            submitContactForm(
-              messageData.collectedData.email,
-              messageData.collectedData.subject,
-              content
-            )
-          }
-        }
+        handleMessageResponse(messageData)
       } else {
         // Conversation déjà existante
-        const messageResponse = await fetch("/api/chatbot/messages", {
+        const messageRoute = useGemini
+          ? "/api/chatbot/gemini"
+          : "/api/chatbot/messages"
+        const messageResponse = await fetch(messageRoute, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -138,40 +138,35 @@ export function useChatbot() {
         })
 
         if (!messageResponse.ok) {
-          throw new Error("Impossible d'envoyer le message")
+          // Si Gemini échoue, essayer l'ancien système
+          if (useGemini) {
+            console.log("Gemini API a échoué, passage au système standard")
+            setUseGemini(false)
+            const fallbackResponse = await fetch("/api/chatbot/messages", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                content,
+                conversationId,
+              }),
+            })
+
+            if (!fallbackResponse.ok) {
+              throw new Error(
+                "Impossible d'envoyer le message, même avec le système de secours"
+              )
+            }
+
+            const fallbackData = await fallbackResponse.json()
+            handleMessageResponse(fallbackData)
+            return
+          } else {
+            throw new Error("Impossible d'envoyer le message")
+          }
         }
 
         const messageData = await messageResponse.json()
-
-        // Ajouter la réponse du bot
-        setMessages(prev => [
-          ...prev,
-          { content: messageData.response, type: MessageType.BOT },
-        ])
-
-        // Mettre à jour si besoin de support humain
-        setNeedsHumanSupport(messageData.needsHumanSupport)
-
-        // Mettre à jour les données collectées si présentes
-        if (messageData.collectedData) {
-          setCollectedData(prev => ({
-            ...prev,
-            ...messageData.collectedData,
-          }))
-
-          // Si toutes les données sont collectées et prêtes à être soumises
-          if (
-            messageData.context === "ready_to_submit" &&
-            messageData.collectedData.email &&
-            messageData.collectedData.subject
-          ) {
-            submitContactForm(
-              messageData.collectedData.email,
-              messageData.collectedData.subject,
-              content
-            )
-          }
-        }
+        handleMessageResponse(messageData)
       }
     } catch (error) {
       console.error("Erreur chatbot:", error)
@@ -194,6 +189,45 @@ export function useChatbot() {
       })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  // Traiter la réponse du chatbot (factorisation du code commun)
+  const handleMessageResponse = (messageData: any) => {
+    // Ajouter la réponse du bot
+    setMessages(prev => [
+      ...prev,
+      { content: messageData.response, type: MessageType.BOT },
+    ])
+
+    // Mettre à jour si besoin de support humain
+    setNeedsHumanSupport(messageData.needsHumanSupport)
+
+    // Mettre à jour les données collectées si présentes
+    if (messageData.collectedData) {
+      if (messageData.collectedData.email) {
+        collectedDataRef.current.email = messageData.collectedData.email
+      }
+      if (messageData.collectedData.subject) {
+        collectedDataRef.current.subject = messageData.collectedData.subject
+      }
+      if (messageData.collectedData.message) {
+        collectedDataRef.current.message = messageData.collectedData.message
+      }
+
+      // Si toutes les données sont collectées et prêtes à être soumises
+      if (
+        messageData.context === "ready_to_submit" &&
+        collectedDataRef.current.email &&
+        collectedDataRef.current.subject &&
+        collectedDataRef.current.message
+      ) {
+        submitContactForm(
+          collectedDataRef.current.email,
+          collectedDataRef.current.subject,
+          collectedDataRef.current.message
+        )
+      }
     }
   }
 
@@ -220,14 +254,40 @@ export function useChatbot() {
         message,
       })
 
+      // S'assurer que l'email est une chaîne de caractères valide
+      // et pas le message lui-même (bug potentiel)
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+      let finalEmail = email
+
+      // Si l'email n'est pas valide mais que l'utilisateur est connecté, utiliser son email
+      if (!emailRegex.test(email) && session?.user?.email) {
+        finalEmail = session.user.email
+        console.log(
+          "Email non valide, utilisation de l'email de session:",
+          finalEmail
+        )
+      }
+      // Si l'email est toujours invalide, afficher un message d'erreur
+      else if (!emailRegex.test(email)) {
+        setMessages(prev => [
+          ...prev,
+          {
+            content:
+              "Je n'ai pas pu déterminer votre adresse email. Veuillez réessayer ou utiliser le formulaire de contact directement.",
+            type: MessageType.BOT,
+          },
+        ])
+        return
+      }
+
       const response = await fetch("/api/contact-message", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: email,
-          subject: `[Via Chatbot] ${subject}`,
+          email: finalEmail,
+          subject: `[Via Chatbot IA] ${subject}`,
           message: message,
           id_user: session?.user?.id ? parseInt(session.user.id) : null,
         }),
@@ -237,6 +297,13 @@ export function useChatbot() {
         const errorText = await response.text()
         console.error("Erreur API:", response.status, errorText)
         throw new Error("Erreur lors de l'envoi du formulaire de contact")
+      }
+
+      // Vider les données collectées
+      collectedDataRef.current = {
+        email: "",
+        subject: "",
+        message: "",
       }
 
       // Informer l'utilisateur que sa demande a été enregistrée

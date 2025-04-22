@@ -84,6 +84,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       }
 
       // Enregistrer la réponse du chatbot
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const botMessage = await prisma.chatMessage.create({
         data: {
           content: response.response,
@@ -108,6 +109,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         "Je suis désolé, j'ai rencontré un problème technique. Notre équipe peut vous aider directement. Souhaitez-vous être mis en relation avec un conseiller ?"
 
       // Enregistrer une réponse de secours
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const botMessage = await prisma.chatMessage.create({
         data: {
           content: fallbackResponse,
@@ -135,6 +137,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 // Récupérer les messages d'une conversation
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const session = await getServerSession(authOptions)
 
     // Paramètres de filtrage

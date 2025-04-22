@@ -1,33 +1,34 @@
 // lib/services/chatbot-service.ts
 import { prisma } from "@/lib/prisma"
-import { MessageType } from "@prisma/client"
+import { ChatMessage, MessageType } from "@prisma/client"
 
 export interface BotResponse {
   response: string
   needsHumanSupport: boolean
-  context?: string // Ajouter un contexte pour suivre l'état de la conversation
+  context?: string
   collectedData?: {
-    // Données collectées pour le formulaire de contact
     email?: string
     subject?: string
+    message?: string
   }
 }
 
 // Types de contexte pour suivre l'état de la conversation
 type ConversationContext =
-  | "initial" // État initial
-  | "asking_for_email" // Demande d'email
-  | "email_provided" // Email fourni, attente du sujet
-  | "asking_for_subject" // Demande du sujet
-  | "subject_provided" // Sujet fourni, prêt à soumettre
-  | "ready_to_submit" // Prêt à soumettre le formulaire
-  | "info_products" // Information sur les produits
-  | "info_pricing" // Information sur les tarifs
-  | "info_specific_product" // Information sur un produit spécifique
+  | "initial"
+  | "asking_for_email"
+  | "email_provided"
+  | "asking_for_subject"
+  | "subject_provided"
+  | "asking_for_message"
+  | "message_provided"
+  | "ready_to_submit"
+  | "info_products"
+  | "info_pricing"
+  | "info_specific_product"
 
 /**
  * Traite un message utilisateur et génère une réponse appropriée.
- * Version avec gestion du contexte de conversation.
  */
 export async function processChatbotMessage(
   message: string,
@@ -47,12 +48,12 @@ export async function processChatbotMessage(
     const messageHistory = await prisma.chatMessage.findMany({
       where: { id_conversation: conversationId },
       orderBy: { created_at: "desc" }, // Messages les plus récents en premier
-      take: 5, // Limiter aux 5 derniers messages
+      take: 10, // Augmenté pour capturer plus de contexte
     })
 
     // Récupérer le dernier message du bot pour le contexte
     const lastBotMessage = messageHistory.find(
-      (msg: { message_type: string }) => msg.message_type === MessageType.BOT
+      (msg: ChatMessage) => msg.message_type === MessageType.BOT
     )
     const lastBotContent = lastBotMessage
       ? lastBotMessage.content.toLowerCase()
@@ -60,12 +61,25 @@ export async function processChatbotMessage(
 
     // Déterminer le contexte actuel basé sur le dernier message du bot
     let currentContext: ConversationContext = "initial"
-    let collectedData: { email?: string; subject?: string } = {}
+    let collectedData: { email?: string; subject?: string; message?: string } =
+      {}
 
-    if (lastBotContent.includes("préciser votre adresse email")) {
+    // Détecter le contexte en fonction du contenu du dernier message du bot
+    if (
+      lastBotContent.includes("adresse email") ||
+      lastBotContent.includes("me préciser votre adresse")
+    ) {
       currentContext = "asking_for_email"
-    } else if (lastBotContent.includes("objet de votre demande")) {
+    } else if (
+      lastBotContent.includes("objet de votre demande") ||
+      lastBotContent.includes("préciser brièvement l'objet")
+    ) {
       currentContext = "asking_for_subject"
+    } else if (
+      lastBotContent.includes("détailler votre demande") ||
+      lastBotContent.includes("plus de détails sur votre demande")
+    ) {
+      currentContext = "asking_for_message"
     } else if (lastBotContent.includes("souhaitez-vous des détails")) {
       currentContext = "info_products"
     } else if (lastBotContent.includes("tarifs")) {
@@ -107,14 +121,12 @@ export async function processChatbotMessage(
             context: "asking_for_email",
           }
         } else {
-          // Considérer comme un email pour simplifier l'expérience
-          collectedData.email = message // Garder la casse d'origine
+          // Si la réponse ne semble pas être un email, demander de nouveau
           return {
             response:
-              "Merci pour votre email. Pourriez-vous préciser brièvement l'objet de votre demande ?",
+              "Je n'ai pas reconnu cela comme une adresse email valide. Pourriez-vous me donner votre adresse email (ex: exemple@domaine.com) afin qu'un conseiller puisse vous contacter ?",
             needsHumanSupport: true,
-            context: "asking_for_subject",
-            collectedData,
+            context: "asking_for_email",
           }
         }
 
@@ -122,43 +134,48 @@ export async function processChatbotMessage(
         if (lowerMessage.length < 2) {
           return {
             response:
-              "Pourriez-vous fournir un peu plus de détails sur votre demande ?",
+              "Pourriez-vous fournir un peu plus de détails sur l'objet de votre demande ?",
             needsHumanSupport: true,
             context: "asking_for_subject",
           }
         }
 
-        // Récupérer l'email précédemment collecté
-        const previousMessages = messageHistory.filter(
-          (msg: { message_type: string; content: string }) =>
-            msg.message_type === MessageType.BOT &&
-            msg.content.toLowerCase().includes("merci pour votre email")
-        )
-
+        // Récupérer l'email
         let userEmail = ""
 
-        if (previousMessages.length > 0) {
-          const userEmailIndex = messageHistory.findIndex(
-            (msg: { message_type: string }) =>
-              msg.message_type === MessageType.USER &&
-              messageHistory.indexOf(msg) <
-                messageHistory.indexOf(previousMessages[0])
-          )
+        // Rechercher dans l'historique des messages pour trouver l'email
+        const emailBotMessages = messageHistory.filter(
+          (msg: ChatMessage) =>
+            msg.message_type === MessageType.BOT &&
+            (msg.content.toLowerCase().includes("email") ||
+              msg.content.toLowerCase().includes("adresse"))
+        )
 
-          if (userEmailIndex >= 0) {
-            userEmail = messageHistory[userEmailIndex].content
+        if (emailBotMessages.length > 0) {
+          for (const emailBotMsg of emailBotMessages) {
+            const index = messageHistory.indexOf(emailBotMsg)
+            // Chercher le premier message utilisateur après ce message bot
+            const userMsgsAfterEmailRequest = messageHistory
+              .slice(0, index)
+              .filter(
+                (msg: ChatMessage) => msg.message_type === MessageType.USER
+              )
+
+            if (userMsgsAfterEmailRequest.length > 0) {
+              const potentialEmail = userMsgsAfterEmailRequest[0].content
+              if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(potentialEmail)) {
+                userEmail = potentialEmail
+                break
+              }
+            }
           }
         }
 
-        // S'assurer que l'email est défini
         if (!userEmail) {
           // Rechercher tout message qui pourrait être un email
           const possibleEmails = messageHistory
-            .filter(
-              (msg: { message_type: string }) =>
-                msg.message_type === MessageType.USER
-            )
-            .map((msg: { content: string }) => msg.content)
+            .filter((msg: ChatMessage) => msg.message_type === MessageType.USER)
+            .map((msg: ChatMessage) => msg.content)
             .filter((content: string) =>
               /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(content)
             )
@@ -168,14 +185,85 @@ export async function processChatbotMessage(
           }
         }
 
-        // Mettre à jour les données collectées
+        // Stocker le sujet et demander le corps du message
         collectedData = {
-          email: userEmail,
-          subject: message,
+          email: userEmail || "",
+          subject: message.trim(),
         }
 
         return {
-          response: `Parfait ! Nous avons bien enregistré votre demande concernant "${message}". Un conseiller va vous contacter prochainement à l'adresse ${userEmail}. Merci pour votre confiance !`,
+          response:
+            "Merci pour ces précisions. Maintenant, pouvez-vous détailler votre demande ? Cela nous aidera à mieux comprendre et répondre à votre besoin.",
+          needsHumanSupport: true,
+          context: "asking_for_message",
+          collectedData,
+        }
+
+      case "asking_for_message":
+        if (lowerMessage.length < 5) {
+          return {
+            response:
+              "Pourriez-vous fournir un peu plus de détails sur votre demande ?",
+            needsHumanSupport: true,
+            context: "asking_for_message",
+          }
+        }
+
+        // Récupérer l'email et le sujet
+        let storedEmail = ""
+        let storedSubject = ""
+
+        // Vérifier si nous avons déjà l'email dans les messages précédents
+        const allUserMessages: string[] = messageHistory
+          .filter((msg: ChatMessage) => msg.message_type === MessageType.USER)
+          .map((msg: ChatMessage) => msg.content)
+
+        // Rechercher un email dans les messages utilisateur
+        const emailCandidates = allUserMessages.filter(content =>
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(content)
+        )
+
+        if (emailCandidates.length > 0) {
+          storedEmail = emailCandidates[0]
+        }
+
+        // Chercher le sujet en analysant le dernier message du bot demandant plus de détails
+        const detailsRequestMessages = messageHistory.filter(
+          (msg: ChatMessage) =>
+            msg.message_type === MessageType.BOT &&
+            msg.content.toLowerCase().includes("détailler")
+        )
+
+        if (detailsRequestMessages.length > 0) {
+          const subjectMessagesIndex = messageHistory.indexOf(
+            detailsRequestMessages[0]
+          )
+
+          // Le sujet devrait être le message utilisateur juste avant cette demande
+          for (
+            let i = subjectMessagesIndex + 1;
+            i < messageHistory.length;
+            i++
+          ) {
+            if (
+              messageHistory[i].message_type === MessageType.USER &&
+              !emailCandidates.includes(messageHistory[i].content)
+            ) {
+              storedSubject = messageHistory[i].content
+              break
+            }
+          }
+        }
+
+        // Mettre à jour les données collectées avec le message complet
+        collectedData = {
+          email: storedEmail,
+          subject: storedSubject || "Demande via chatbot",
+          message: message.trim(),
+        }
+
+        return {
+          response: `Parfait ! Nous avons bien enregistré votre demande${storedSubject ? ` concernant "${storedSubject}"` : ""}. Un conseiller va vous contacter prochainement${storedEmail ? ` à l'adresse ${storedEmail}` : ""}. Merci pour votre confiance !`,
           needsHumanSupport: true,
           context: "ready_to_submit",
           collectedData,
