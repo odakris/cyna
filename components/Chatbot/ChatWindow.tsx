@@ -4,8 +4,8 @@ import { useState, useRef, useEffect } from "react"
 import { Card, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Send, User, Bot, Loader2 } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Send, User, Bot, Loader2, Shield } from "lucide-react"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useChatbot } from "@/hooks/use-chatbot"
 import { MessageType } from "@prisma/client"
@@ -43,7 +43,6 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
         <CardTitle className="text-lg flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
-              <AvatarImage src="/logo.svg" alt="CYNA" />
               <AvatarFallback>CN</AvatarFallback>
             </Avatar>
             CYNA Assistant
@@ -58,11 +57,14 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
               key={index}
               className={`flex ${message.type === MessageType.USER ? "justify-end" : "justify-start"} gap-2`}
             >
-              {message.type === MessageType.BOT && (
+              {message.type !== MessageType.USER && (
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src="/logo.svg" alt="Bot" />
                   <AvatarFallback>
-                    <Bot className="h-4 w-4" />
+                    {message.type === MessageType.ADMIN ? (
+                      <Shield className="h-4 w-4" />
+                    ) : (
+                      <Bot className="h-4 w-4" />
+                    )}
                   </AvatarFallback>
                 </Avatar>
               )}
@@ -71,10 +73,12 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
                 className={`px-3 py-2 rounded-lg max-w-[80%] ${
                   message.type === MessageType.USER
                     ? "bg-primary text-primary-foreground rounded-tr-none"
-                    : "bg-muted rounded-tl-none"
+                    : message.type === MessageType.ADMIN
+                      ? "bg-green-100 dark:bg-green-900/20 rounded-tl-none"
+                      : "bg-muted rounded-tl-none"
                 }`}
               >
-                <p className="text-sm">{message.content}</p>
+                <p className="text-sm whitespace-pre-wrap">{message.content}</p>
               </div>
 
               {message.type === MessageType.USER && (
@@ -90,7 +94,6 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
           {isLoading && (
             <div className="flex justify-start gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src="/logo.svg" alt="Bot" />
                 <AvatarFallback>
                   <Bot className="h-4 w-4" />
                 </AvatarFallback>
@@ -113,6 +116,7 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             className="flex-1"
+            disabled={isLoading}
           />
           <Button
             type="submit"
@@ -129,6 +133,7 @@ export default function ChatWindow({ onClose }: ChatWindowProps) {
           size="sm"
           className="w-full text-xs"
           onClick={requestHumanSupport}
+          disabled={isLoading}
         >
           Parler à un conseiller
         </Button>

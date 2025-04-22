@@ -3,15 +3,21 @@ import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/(app)/api/auth/[...nextauth]/route"
 import { processChatbotMessage } from "@/lib/services/chatbot-service"
-import { ConversationStatus, MessageType, Role } from "@prisma/client"
+import { ConversationStatus, MessageType } from "@prisma/client"
 
 // Envoyer un message au chatbot
 export async function POST(req: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions)
-    const { content, conversationId } = await req.json()
+    const data = await req.json()
+
+    // Accepter différents formats de l'ID de conversation
+    const { content, conversationId } = data
+
+    console.log("Données reçues:", { content, conversationId })
 
     if (!content || !conversationId) {
+      console.error("Paramètres manquants:", { content, conversationId })
       return NextResponse.json(
         { error: "Message content and conversation ID are required" },
         { status: 400 }
@@ -20,10 +26,16 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     // Vérifier si la conversation existe
     const conversation = await prisma.chatConversation.findUnique({
-      where: { id_conversation: conversationId },
+      where: {
+        id_conversation:
+          typeof conversationId === "string"
+            ? parseInt(conversationId)
+            : conversationId,
+      },
     })
 
     if (!conversation) {
+      console.error("Conversation non trouvée:", conversationId)
       return NextResponse.json(
         { error: "Conversation not found" },
         { status: 404 }
@@ -41,7 +53,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // Si c'est une nouvelle conversation d'un utilisateur connecté, mettre à jour l'ID utilisateur
     if (conversation.id_user === null && session?.user?.id) {
       await prisma.chatConversation.update({
-        where: { id_conversation: conversationId },
+        where: { id_conversation: conversation.id_conversation },
         data: { id_user: parseInt(session.user.id) },
       })
     }
@@ -51,43 +63,66 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       data: {
         content,
         message_type: MessageType.USER,
-        id_conversation: conversationId,
+        id_conversation: conversation.id_conversation,
       },
     })
 
     // Traiter le message et obtenir une réponse du chatbot
-    const { response, needsHumanSupport } = await processChatbotMessage(
-      content,
-      conversation
-    )
+    try {
+      const response = await processChatbotMessage(content, conversation)
 
-    // Si le chatbot détecte que la demande nécessite un support humain
-    if (
-      needsHumanSupport &&
-      conversation.status === ConversationStatus.ACTIVE
-    ) {
-      // Mettre à jour le statut de la conversation
-      await prisma.chatConversation.update({
-        where: { id_conversation: conversationId },
-        data: { status: ConversationStatus.PENDING_ADMIN },
+      // Si le chatbot détecte que la demande nécessite un support humain
+      if (
+        response.needsHumanSupport &&
+        conversation.status === ConversationStatus.ACTIVE
+      ) {
+        // Mettre à jour le statut de la conversation
+        await prisma.chatConversation.update({
+          where: { id_conversation: conversation.id_conversation },
+          data: { status: ConversationStatus.PENDING_ADMIN },
+        })
+      }
+
+      // Enregistrer la réponse du chatbot
+      const botMessage = await prisma.chatMessage.create({
+        data: {
+          content: response.response,
+          message_type: MessageType.BOT,
+          id_conversation: conversation.id_conversation,
+        },
+      })
+
+      return NextResponse.json({
+        success: true,
+        message: userMessage,
+        response: response.response,
+        needsHumanSupport: response.needsHumanSupport,
+        context: response.context,
+        collectedData: response.collectedData,
+      })
+    } catch (processError) {
+      console.error("Erreur dans processChatbotMessage:", processError)
+
+      // Réponse de secours en cas d'erreur
+      const fallbackResponse =
+        "Je suis désolé, j'ai rencontré un problème technique. Notre équipe peut vous aider directement. Souhaitez-vous être mis en relation avec un conseiller ?"
+
+      // Enregistrer une réponse de secours
+      const botMessage = await prisma.chatMessage.create({
+        data: {
+          content: fallbackResponse,
+          message_type: MessageType.BOT,
+          id_conversation: conversation.id_conversation,
+        },
+      })
+
+      return NextResponse.json({
+        success: true,
+        message: userMessage,
+        response: fallbackResponse,
+        needsHumanSupport: true,
       })
     }
-
-    // Enregistrer la réponse du chatbot
-    const botMessage = await prisma.chatMessage.create({
-      data: {
-        content: response,
-        message_type: MessageType.BOT,
-        id_conversation: conversationId,
-      },
-    })
-
-    return NextResponse.json({
-      success: true,
-      message: userMessage,
-      response: botMessage.content,
-      needsHumanSupport,
-    })
   } catch (error) {
     console.error("Error processing chatbot message:", error)
     return NextResponse.json(
@@ -97,15 +132,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   }
 }
 
-// Récupérer les messages d'une conversation (pour le backoffice)
+// Récupérer les messages d'une conversation
 export async function GET(req: NextRequest): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions)
-
-    // Vérifier les permissions
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
-    }
 
     // Paramètres de filtrage
     const { searchParams } = req.nextUrl
@@ -128,17 +158,6 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
         { error: "Conversation not found" },
         { status: 404 }
       )
-    }
-
-    // Si l'utilisateur n'est pas admin et n'est pas le propriétaire de la conversation
-    if (
-      ![Role.ADMIN, Role.MANAGER, Role.SUPER_ADMIN]
-        .toString()
-        .includes(session.user.role as string) &&
-      conversation.id_user !==
-        (session.user.id ? parseInt(session.user.id) : null)
-    ) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 
     // Récupérer les messages

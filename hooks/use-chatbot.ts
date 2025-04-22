@@ -9,130 +9,182 @@ interface Message {
   id?: number
   content: string
   type: MessageType
-  timestamp?: Date
-}
-
-interface ChatbotState {
-  messages: Message[]
-  isLoading: boolean
-  conversationId: number | null
-  needsHumanSupport: boolean
 }
 
 export function useChatbot() {
-  const [state, setState] = useState<ChatbotState>({
-    messages: [],
-    isLoading: false,
-    conversationId: null,
-    needsHumanSupport: false,
+  const [messages, setMessages] = useState<Message[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [conversationId, setConversationId] = useState<number | null>(null)
+  const [needsHumanSupport, setNeedsHumanSupport] = useState(false)
+
+  // Pour stocker les données collectées lors de la conversation
+  const [collectedData, setCollectedData] = useState({
+    email: "",
+    subject: "",
   })
 
   const { toast } = useToast()
   const { data: session } = useSession()
 
-  // Initialize chatbot with welcome message
+  // Initialiser avec un message de bienvenue
   useEffect(() => {
-    if (state.messages.length === 0) {
-      setState(prev => ({
+    if (messages.length === 0) {
+      setMessages([
+        {
+          content:
+            "Bonjour ! Je suis l'assistant virtuel de CYNA. Comment puis-je vous aider aujourd'hui ?",
+          type: MessageType.BOT,
+        },
+      ])
+    }
+  }, [messages.length])
+
+  // Si l'utilisateur est connecté, pré-remplir son email
+  useEffect(() => {
+    if (session?.user?.email) {
+      setCollectedData(prev => ({
         ...prev,
-        messages: [
-          {
-            content:
-              "Bonjour ! Je suis l'assistant virtuel de CYNA. Comment puis-je vous aider aujourd'hui ?",
-            type: MessageType.BOT,
-          },
-        ],
+        email: session.user.email || "",
       }))
     }
-  }, [state.messages.length])
+  }, [session?.user?.email])
 
-  // Process user message and generate a response
+  // Envoyer un message
   const sendMessage = async (content: string) => {
-    // Add user message to state
-    setState(prev => ({
-      ...prev,
-      messages: [...prev.messages, { content, type: MessageType.USER }],
-      isLoading: true,
-    }))
+    // Ajouter le message de l'utilisateur à l'interface
+    setMessages(prev => [...prev, { content, type: MessageType.USER }])
+    setIsLoading(true)
 
     try {
-      let conversationId = state.conversationId
-
-      // If we don't have a conversation ID yet, create one
+      // 1. Si pas de conversation, en créer une
       if (!conversationId) {
-        const response = await fetch("/api/chatbot/conversations", {
+        const createResponse = await fetch("/api/chatbot/conversations", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             userId: session?.user?.id || null,
             email: session?.user?.email || null,
           }),
         })
 
-        if (!response.ok) throw new Error("Failed to create conversation")
+        if (!createResponse.ok) {
+          throw new Error("Impossible de créer une conversation")
+        }
 
-        const data = await response.json()
-        conversationId = data.conversationId
+        const createData = await createResponse.json()
+        const newConvId = createData.conversationId
 
-        // Update state with the new conversation ID
-        setState(prev => ({
-          ...prev,
-          conversationId: data.conversationId,
-        }))
-      }
+        if (!newConvId) {
+          throw new Error("ID de conversation invalide")
+        }
 
-      // Send the message to our API using the conversationId we just got or already had
-      const response = await fetch("/api/chatbot/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content,
-          conversationId: conversationId,
-          userId: session?.user?.id || null,
-        }),
-      })
+        // Mettre à jour l'état avec le nouvel ID
+        setConversationId(newConvId)
 
-      if (!response.ok) throw new Error("Failed to send message")
-
-      const data = await response.json()
-
-      // Add bot response to state
-      setState(prev => ({
-        ...prev,
-        messages: [
-          ...prev.messages,
-          { content: data.response, type: MessageType.BOT },
-        ],
-        isLoading: false,
-        needsHumanSupport: data.needsHumanSupport || false,
-      }))
-
-      // If human support is needed, show a notification
-      if (data.needsHumanSupport) {
-        toast({
-          title: "Support humain requis",
-          description:
-            "Un conseiller va prendre en charge votre demande dès que possible.",
+        // 2. Envoyer le message avec le nouvel ID
+        const messageResponse = await fetch("/api/chatbot/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content,
+            conversationId: newConvId,
+          }),
         })
+
+        if (!messageResponse.ok) {
+          throw new Error("Impossible d'envoyer le message")
+        }
+
+        const messageData = await messageResponse.json()
+
+        // Ajouter la réponse du bot
+        setMessages(prev => [
+          ...prev,
+          { content: messageData.response, type: MessageType.BOT },
+        ])
+
+        // Mettre à jour si besoin de support humain
+        setNeedsHumanSupport(messageData.needsHumanSupport)
+
+        // Mettre à jour les données collectées si présentes
+        if (messageData.collectedData) {
+          setCollectedData(prev => ({
+            ...prev,
+            ...messageData.collectedData,
+          }))
+
+          // Si toutes les données sont collectées et prêtes à être soumises
+          if (
+            messageData.context === "ready_to_submit" &&
+            messageData.collectedData.email &&
+            messageData.collectedData.subject
+          ) {
+            submitContactForm(
+              messageData.collectedData.email,
+              messageData.collectedData.subject,
+              content
+            )
+          }
+        }
+      } else {
+        // Conversation déjà existante
+        const messageResponse = await fetch("/api/chatbot/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content,
+            conversationId,
+          }),
+        })
+
+        if (!messageResponse.ok) {
+          throw new Error("Impossible d'envoyer le message")
+        }
+
+        const messageData = await messageResponse.json()
+
+        // Ajouter la réponse du bot
+        setMessages(prev => [
+          ...prev,
+          { content: messageData.response, type: MessageType.BOT },
+        ])
+
+        // Mettre à jour si besoin de support humain
+        setNeedsHumanSupport(messageData.needsHumanSupport)
+
+        // Mettre à jour les données collectées si présentes
+        if (messageData.collectedData) {
+          setCollectedData(prev => ({
+            ...prev,
+            ...messageData.collectedData,
+          }))
+
+          // Si toutes les données sont collectées et prêtes à être soumises
+          if (
+            messageData.context === "ready_to_submit" &&
+            messageData.collectedData.email &&
+            messageData.collectedData.subject
+          ) {
+            submitContactForm(
+              messageData.collectedData.email,
+              messageData.collectedData.subject,
+              content
+            )
+          }
+        }
       }
     } catch (error) {
-      console.error("Error in chatbot:", error)
-      setState(prev => ({
+      console.error("Erreur chatbot:", error)
+
+      // Afficher un message d'erreur à l'utilisateur
+      setMessages(prev => [
         ...prev,
-        messages: [
-          ...prev.messages,
-          {
-            content:
-              "Je suis désolé, j'ai rencontré un problème. Veuillez réessayer plus tard ou contacter notre support.",
-            type: MessageType.BOT,
-          },
-        ],
-        isLoading: false,
-      }))
+        {
+          content:
+            "Je suis désolé, j'ai rencontré un problème technique. Veuillez réessayer ou contacter notre support.",
+          type: MessageType.BOT,
+        },
+      ])
 
       toast({
         title: "Erreur",
@@ -140,77 +192,98 @@ export function useChatbot() {
           "Une erreur s'est produite lors de l'envoi de votre message.",
         variant: "destructive",
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
-  // Request human support
-  const requestHumanSupport = async () => {
-    if (!state.conversationId) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez d'abord démarrer une conversation.",
-        variant: "destructive",
-      })
-      return
-    }
+  // Soumettre le formulaire de contact
+  const submitContactForm = async (
+    email: string,
+    subject: string,
+    message: string
+  ) => {
+    try {
+      // Vérifier que nous avons les informations nécessaires
+      if (!email || !subject || !message) {
+        console.error("Données manquantes pour le formulaire de contact:", {
+          email,
+          subject,
+          message,
+        })
+        return
+      }
 
-    setState(prev => ({
-      ...prev,
-      isLoading: true,
-      messages: [
-        ...prev.messages,
+      console.log("Envoi du formulaire avec les données:", {
+        email,
+        subject,
+        message,
+      })
+
+      const response = await fetch("/api/contact-message", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: email,
+          subject: `[Via Chatbot] ${subject}`,
+          message: message,
+          id_user: session?.user?.id ? parseInt(session.user.id) : null,
+        }),
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error("Erreur API:", response.status, errorText)
+        throw new Error("Erreur lors de l'envoi du formulaire de contact")
+      }
+
+      // Informer l'utilisateur que sa demande a été enregistrée
+      setMessages(prev => [
+        ...prev,
         {
           content:
-            "J'ai demandé à ce qu'un conseiller prenne en charge votre demande.",
+            "Votre demande a été enregistrée avec succès. Un conseiller va vous contacter très prochainement !",
           type: MessageType.BOT,
         },
-      ],
-    }))
-
-    try {
-      const response = await fetch(
-        `/api/chatbot/conversations/${state.conversationId}/escalate`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-
-      if (!response.ok) throw new Error("Failed to request human support")
-
-      setState(prev => ({
-        ...prev,
-        isLoading: false,
-        needsHumanSupport: true,
-      }))
+      ])
 
       toast({
         title: "Demande envoyée",
-        description:
-          "Un conseiller va prendre en charge votre demande dès que possible.",
+        description: "Votre demande a été transmise à notre équipe.",
       })
     } catch (error) {
-      console.error("Error requesting human support:", error)
-      setState(prev => ({
+      console.error("Erreur lors de l'envoi du formulaire:", error)
+
+      setMessages(prev => [
         ...prev,
-        isLoading: false,
-      }))
+        {
+          content:
+            "Je suis désolé, une erreur s'est produite lors de l'enregistrement de votre demande. Veuillez réessayer ou contacter notre support directement.",
+          type: MessageType.BOT,
+        },
+      ])
 
       toast({
         title: "Erreur",
         description:
-          "Une erreur s'est produite lors de la demande de support humain.",
+          "Une erreur s'est produite lors de l'envoi de votre demande.",
         variant: "destructive",
       })
     }
   }
 
+  // Demander explicitement à parler à un conseiller
+  const requestHumanSupport = async () => {
+    // Envoyer un message au bot pour demander un support humain
+    await sendMessage("Je souhaite parler à un conseiller")
+  }
+
   return {
-    messages: state.messages,
-    isLoading: state.isLoading,
-    needsHumanSupport: state.needsHumanSupport,
+    messages,
+    isLoading,
+    needsHumanSupport,
     sendMessage,
     requestHumanSupport,
   }
