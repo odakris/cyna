@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
+import { Prisma, PrismaClient } from "@prisma/client"
 import { sortProductsBySearchPriority } from "@/lib/utils/search-utils"
 
 const prisma = new PrismaClient()
@@ -30,59 +30,89 @@ export async function GET(request: NextRequest) {
     const onlyAvailable = searchParams.get("onlyAvailable") === "true"
     const category = searchParams.get("category")
 
-    // Construire les conditions OR pour les recherches textuelles
-    const titleConditions = title
-      ? {
-          OR: [
-            { name: { equals: title } },
-            { name: { contains: title } },
-            { name: { startsWith: title } },
-          ],
-        }
-      : {}
+    // Construire l'objet where pour la requête Prisma
+    // Approche sans tableau de conditions, en utilisant un objet complet
+    const whereClause: Prisma.ProductWhereInput = {
+      unit_price: {
+        gte: minPrice,
+        lte: maxPrice,
+      },
+    }
 
-    const descriptionConditions = description
-      ? {
-          OR: [
-            { description: { equals: description } },
-            { description: { contains: description } },
-            { description: { startsWith: description } },
-          ],
-        }
-      : {}
+    // Ajouter les conditions textuelles si présentes
+    if (title) {
+      whereClause.OR = [
+        { name: { equals: title } },
+        { name: { contains: title } },
+        { name: { startsWith: title } },
+      ]
+    }
 
-    const featuresConditions = features
-      ? {
+    if (description) {
+      // Si title est aussi défini, nous devons combiner avec AND
+      if (title) {
+        whereClause.AND = [
+          {
+            OR: [
+              { description: { equals: description } },
+              { description: { contains: description } },
+              { description: { startsWith: description } },
+            ],
+          },
+        ]
+      } else {
+        whereClause.OR = [
+          { description: { equals: description } },
+          { description: { contains: description } },
+          { description: { startsWith: description } },
+        ]
+      }
+    }
+
+    if (features) {
+      // Si d'autres critères textuels sont définis, ajouter à AND
+      if (whereClause.AND) {
+        if (!Array.isArray(whereClause.AND)) {
+          whereClause.AND = []
+        }
+        whereClause.AND.push({
           OR: [
             { technical_specs: { equals: features } },
             { technical_specs: { contains: features } },
             { technical_specs: { startsWith: features } },
           ],
-        }
-      : {}
+        })
+      } else if (title || description) {
+        whereClause.AND = [
+          {
+            OR: [
+              { technical_specs: { equals: features } },
+              { technical_specs: { contains: features } },
+              { technical_specs: { startsWith: features } },
+            ],
+          },
+        ]
+      } else {
+        whereClause.OR = [
+          { technical_specs: { equals: features } },
+          { technical_specs: { contains: features } },
+          { technical_specs: { startsWith: features } },
+        ]
+      }
+    }
 
-    // Construction des conditions de recherche
-    const conditions = [
-      titleConditions,
-      descriptionConditions,
-      featuresConditions,
-      { unit_price: { gte: minPrice, lte: maxPrice } },
-    ]
-
-    // Ajout conditionnel des autres filtres
+    // Ajouter les filtres booléens et numériques
     if (onlyAvailable) {
-      conditions.push({ available: true })
+      whereClause.available = true
     }
 
     if (category) {
-      conditions.push({ id_category: parseInt(category) })
+      whereClause.id_category = parseInt(category)
     }
 
-    // Construire la requête Prisma avec les filtres
+    // Requête Prisma
     const products = await prisma.product.findMany({
-      where: {
-        AND: conditions,
-      },
+      where: whereClause,
       include: {
         category: {
           select: { id_category: true, name: true },
@@ -93,7 +123,7 @@ export async function GET(request: NextRequest) {
       },
     })
 
-    // Trier les résultats selon les règles de priorité définies dans le cahier des charges
+    // Trier les résultats selon les règles de priorité
     const sortedProducts = sortProductsBySearchPriority(
       products,
       title,
