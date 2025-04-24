@@ -8,7 +8,6 @@
  */
 export async function getCategories() {
   try {
-    // Appel à l'API interne
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL || ""}/api/categories`,
       {
@@ -25,7 +24,6 @@ export async function getCategories() {
     return await response.json()
   } catch (error) {
     console.error("Erreur lors de la récupération des catégories:", error)
-    // Retour d'un tableau vide en cas d'erreur pour éviter de bloquer l'interface
     return []
   }
 }
