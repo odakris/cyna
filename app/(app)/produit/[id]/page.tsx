@@ -2,7 +2,6 @@
 
 import React, { useState, useRef } from "react"
 import { useParams } from "next/navigation"
-import { CarouselPlugin } from "@/components/Carousel/CarouselPlugin"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
@@ -10,6 +9,7 @@ import { useProduct } from "@/hooks/use-product"
 import { useCart, CartItem } from "@/context/CartContext"
 import { TopProducts } from "@/components/Products/TopProducts"
 import { formatEuro } from "@/lib/utils/format"
+import { ProductCarousel } from "@/components/Products/ProductCarousel"
 
 export default function ProductPage() {
   const { id } = useParams()
@@ -21,7 +21,7 @@ export default function ProductPage() {
 
   if (error) {
     return (
-      <div className="w-full p-6 text-center">
+      <div className="w-full p-4 sm:p-6 text-center">
         <div className="rounded-lg bg-red-50 p-4 text-red-500 border border-red-200">
           <p className="text-sm font-medium">
             {error ?? "Erreur lors du chargement du produit"}
@@ -33,13 +33,13 @@ export default function ProductPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6 space-y-8">
-        <Skeleton className="w-1/2 h-10 mx-auto mb-4" />
-        <Skeleton className="w-full h-[400px] mx-auto mb-6" />
-        <Skeleton className="w-3/4 h-6 mx-auto" />
-        <div className="flex flex-col sm:flex-row gap-8 mt-8">
-          <Skeleton className="w-full sm:w-1/2 h-48" />
-          <Skeleton className="w-full sm:w-1/2 h-48" />
+      <div className="container mx-auto p-4 sm:p-6 space-y-6 sm:space-y-8">
+        <Skeleton className="w-full sm:w-1/2 h-8 sm:h-10 mx-auto mb-2 sm:mb-4" />
+        <Skeleton className="w-full h-[300px] sm:h-[400px] mx-auto mb-4 sm:mb-6" />
+        <Skeleton className="w-full sm:w-3/4 h-6 mx-auto" />
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 mt-6 sm:mt-8">
+          <Skeleton className="w-full sm:w-1/2 h-40 sm:h-48" />
+          <Skeleton className="w-full sm:w-1/2 h-40 sm:h-48" />
         </div>
       </div>
     )
@@ -47,7 +47,7 @@ export default function ProductPage() {
 
   if (!product) {
     return (
-      <div className="w-full p-6 text-center">
+      <div className="w-full p-4 sm:p-6 text-center">
         <div className="rounded-lg bg-amber-50 p-4 text-amber-700 border border-amber-200">
           <p className="text-sm font-medium">Produit non trouvé</p>
         </div>
@@ -87,7 +87,7 @@ export default function ProductPage() {
 
     addToCart(cartItem)
     console.log("Produit ajouté au panier:", cartItem)
-    setQuantity(1) // Réinitialiser la quantité après ajout
+    setQuantity(1)
   }
 
   const handleScrollToPricingTable = () => {
@@ -95,20 +95,28 @@ export default function ProductPage() {
   }
 
   return (
-    <div className="bg-white">
+    <>
       {/* En-tête du produit */}
-      <section className="bg-gradient-to-b from-[#302082]/5 to-white py-8 px-6">
-        <h1 className="text-4xl font-extrabold text-[#302082] text-center mb-2 relative pb-3 inline-block mx-auto">
-          {product.name}
-          <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
-        </h1>
+      <section className="bg-gradient-to-b from-[#302082]/5 to-white py-6 sm:py-8 px-4 sm:px-6">
+        <div className="text-center">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-primary mb-2 relative pb-3 inline-block mx-auto">
+            {product.name}
+            <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
+          </h1>
+        </div>
 
-        <div className="max-w-5xl mx-auto mt-6">
-          {/* <CarouselPlugin images={product.product_caroussel_images} /> */}
-          <CarouselPlugin />
+        <div className="max-w-5xl mx-auto mt-4 sm:mt-6">
+          {/* Images du produit */}
+          <div className="mb-8 sm:mb-10">
+            <ProductCarousel
+              images={product.product_caroussel_images}
+              mainImage={product.main_image}
+            />
+          </div>
 
-          <div className="mt-8 p-6 bg-white rounded-lg shadow-sm border border-gray-100">
-            <p className="text-lg text-gray-700 leading-relaxed mt-4 whitespace-pre-line">
+          {/* Description */}
+          <div className="p-4 sm:p-6 bg-white rounded-lg shadow-sm border border-gray-100">
+            <p className="text-base sm:text-lg text-gray-700 leading-relaxed whitespace-pre-line">
               {product.description}
             </p>
           </div>
@@ -116,45 +124,45 @@ export default function ProductPage() {
       </section>
 
       {/* Caractéristiques et CTA */}
-      <section className="flex flex-col sm:flex-row gap-8 py-12 px-6 bg-gray-50 border-y border-gray-200">
-        <div className="w-full sm:w-1/2 p-6 bg-white rounded-lg shadow-sm">
-          <h2 className="text-2xl font-bold text-[#302082] mb-4 relative pb-2 inline-block">
+      <section className="flex flex-col sm:flex-row gap-6 sm:gap-8 py-8 sm:py-12 px-4 sm:px-6 bg-gray-50 border-y border-gray-200">
+        <div className="w-full sm:w-2/3 p-4 sm:p-6 bg-white rounded-lg shadow-sm">
+          <h2 className="text-xl sm:text-2xl font-bold text-primary mb-3 sm:mb-4 relative pb-2 inline-block">
             Caractéristiques techniques
             <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
           </h2>
-          <div className="text-gray-700 leading-relaxed mt-4 whitespace-pre-line">
+          <div className="text-sm sm:text-base text-gray-700 leading-relaxed mt-3 sm:mt-4 whitespace-pre-line">
             {product.technical_specs}
           </div>
         </div>
 
-        <div className="w-full sm:w-1/2 p-6 bg-white rounded-lg shadow-sm flex flex-col items-center justify-center">
+        <div className="w-full sm:w-1/3 p-4 sm:p-6 bg-white rounded-lg shadow-sm flex flex-col items-center justify-center">
           <div className="text-center mb-4">
             {product.available ? (
-              <Badge className="mb-2 bg-green-600 text-white px-3 py-1 text-base">
+              <Badge className="mb-2 bg-green-600 text-white px-2 sm:px-3 py-0.5 sm:py-1 text-sm sm:text-base">
                 Disponible immédiatement
               </Badge>
             ) : (
-              <Badge className="mb-2 bg-red-600 text-white px-3 py-1 text-base">
+              <Badge className="mb-2 bg-red-600 text-white px-2 sm:px-3 py-0.5 sm:py-1 text-sm sm:text-base">
                 Service indisponible
               </Badge>
             )}
 
-            <h2 className="text-2xl font-bold text-[#302082] mt-2">
-              {formatEuro(product.unit_price)}
+            <h2 className="text-xl sm:text-2xl font-bold text-[#302082] mt-2">
+              {formatEuro(prixUnitaire)}
             </h2>
           </div>
 
           <div className="flex justify-center w-full mt-4">
             {product.available ? (
               <Button
-                className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-2 border-transparent hover:border-[#FF6B00] hover:bg-white hover:text-[#FF6B00] transition-colors duration-300 text-lg py-6 px-8"
+                className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-2 border-transparent hover:border-[#FF6B00] hover:bg-white hover:text-[#FF6B00] transition-colors duration-300 text-base sm:text-lg py-4 sm:py-6 px-6 sm:px-8 w-full sm:w-auto"
                 onClick={handleScrollToPricingTable}
               >
                 S&apos;ABONNER MAINTENANT
               </Button>
             ) : (
               <Button
-                className="bg-gray-400 text-white text-lg py-6 px-8"
+                className="bg-gray-400 text-white text-base sm:text-lg py-4 sm:py-6 px-6 sm:px-8 w-full sm:w-auto"
                 disabled
               >
                 SERVICE INDISPONIBLE
@@ -166,13 +174,110 @@ export default function ProductPage() {
 
       {/* Table de tarification */}
       {product.available && (
-        <section className="py-12 px-6 bg-white" ref={pricingTableRef}>
-          <h2 className="text-2xl font-bold text-[#302082] text-center mb-8 relative pb-2 inline-block">
-            Choisir une formule d&apos;abonnement
-            <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
-          </h2>
+        <section
+          className="py-8 sm:py-12 px-4 sm:px-6 bg-white"
+          ref={pricingTableRef}
+        >
+          <div className="mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-bold text-primary relative pb-2 inline-block">
+              Choisir une formule d&apos;abonnement
+              <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
+            </h2>
+          </div>
 
-          <div className="overflow-x-auto">
+          {/* Version mobile: Cartes au lieu d'une table */}
+          <div className="block sm:hidden space-y-4">
+            {/* Carte pour l'abonnement mensuel */}
+            <div className="p-4 bg-white rounded-lg shadow border border-gray-200">
+              <h3 className="font-medium text-center mb-3">
+                Abonnement Mensuel
+              </h3>
+              <div className="text-center mb-3">
+                <div className="font-bold text-[#302082]">
+                  {formatEuro(prixUnitaire)}
+                </div>
+                <div className="text-sm text-gray-600">
+                  puis {formatEuro(prixMensuel)} / mois
+                </div>
+              </div>
+              <Button
+                onClick={() => handleAddToCart("MONTHLY")}
+                className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white w-full"
+              >
+                Ajouter au panier
+              </Button>
+            </div>
+
+            {/* Carte pour l'abonnement annuel */}
+            <div className="p-4 bg-white rounded-lg shadow border border-gray-200">
+              <h3 className="font-medium text-center mb-3">
+                Abonnement Annuel
+              </h3>
+              <div className="text-center mb-3">
+                <div className="font-bold text-[#302082]">
+                  {formatEuro(prixUnitaire)}
+                </div>
+                <div className="text-sm text-gray-600">
+                  puis {formatEuro(prixAnnuel)} / an
+                  <span className="block text-green-600 text-xs font-medium">
+                    (dont 2 mois offerts)
+                  </span>
+                </div>
+              </div>
+              <Button
+                onClick={() => handleAddToCart("YEARLY")}
+                className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white w-full"
+              >
+                Ajouter au panier
+              </Button>
+            </div>
+
+            {/* Carte pour le coût par utilisateur */}
+            <div className="p-4 bg-white rounded-lg shadow border border-gray-200">
+              <h3 className="font-medium text-center mb-3">
+                Coût par utilisateur
+              </h3>
+              <div className="text-center mb-3">
+                <div className="font-bold text-[#302082]">
+                  {formatEuro(prixUnitaire)}
+                </div>
+                <div className="text-sm text-gray-600">
+                  puis {formatEuro(prixParAppareil)} / utilisateur
+                  supplémentaire
+                </div>
+              </div>
+              <Button
+                onClick={() => handleAddToCart("PER_USER")}
+                className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white w-full"
+              >
+                Ajouter au panier
+              </Button>
+            </div>
+
+            {/* Carte pour le coût par appareil */}
+            <div className="p-4 bg-white rounded-lg shadow border border-gray-200">
+              <h3 className="font-medium text-center mb-3">
+                Coût par Appareil
+              </h3>
+              <div className="text-center mb-3">
+                <div className="font-bold text-[#302082]">
+                  {formatEuro(prixUnitaire)}
+                </div>
+                <div className="text-sm text-gray-600">
+                  puis {formatEuro(prixParAppareil)} / appareil supplémentaire
+                </div>
+              </div>
+              <Button
+                onClick={() => handleAddToCart("PER_MACHINE")}
+                className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white w-full"
+              >
+                Ajouter au panier
+              </Button>
+            </div>
+          </div>
+
+          {/* Version desktop: Table */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full max-w-screen-lg mx-auto table-auto border-collapse shadow-sm rounded-lg overflow-hidden">
               <thead>
                 <tr className="bg-[#302082] text-white">
@@ -279,7 +384,7 @@ export default function ProductPage() {
           </div>
 
           {/* Sélecteur de quantité */}
-          <div className="flex justify-center items-center mt-10 space-x-4">
+          <div className="flex justify-center items-center mt-8 sm:mt-10 space-x-4">
             <label className="text-sm font-medium text-gray-700">
               Quantité :
             </label>
@@ -287,16 +392,18 @@ export default function ProductPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-[#302082] text-[#302082] hover:bg-[#302082] hover:text-white"
+                className="border-[#302082] text-[#302082] hover:bg-[#302082] hover:text-white h-8 w-8 p-0"
                 onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
               >
                 -
               </Button>
-              <span className="w-12 text-center font-medium">{quantity}</span>
+              <span className="w-8 sm:w-12 text-center font-medium">
+                {quantity}
+              </span>
               <Button
                 variant="outline"
                 size="sm"
-                className="border-[#302082] text-[#302082] hover:bg-[#302082] hover:text-white"
+                className="border-[#302082] text-[#302082] hover:bg-[#302082] hover:text-white h-8 w-8 p-0"
                 onClick={() => setQuantity(prev => prev + 1)}
               >
                 +
@@ -307,13 +414,13 @@ export default function ProductPage() {
       )}
 
       {/* Produits similaires */}
-      <section className="py-12 px-6 bg-gray-50 border-t border-gray-200">
-        <h2 className="text-2xl font-bold text-[#302082] mb-8 relative pb-2 inline-block">
+      <section className="py-8 sm:py-12 px-4 sm:px-6 bg-gray-50 border-t border-gray-200">
+        <h2 className="text-xl sm:text-2xl font-bold text-primary mb-6 sm:mb-8 relative pb-2 inline-block">
           Services SaaS similaires
           <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
         </h2>
         <TopProducts />
       </section>
-    </div>
+    </>
   )
 }

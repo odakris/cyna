@@ -25,7 +25,7 @@ export default function Home() {
       {/* CATEGORY GRID */}
       <section className="w-full my-4" aria-label="Catégories de produits">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-primary relative inline-block pb-2">
+          <h2 className="text-2xl font-bold relative text-primary inline-block pb-2">
             Nos Catégories
             <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
           </h2>

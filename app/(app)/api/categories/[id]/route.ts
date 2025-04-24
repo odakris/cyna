@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import categoryController from "@/lib/controllers/category-controller"
 import { validateId } from "@/lib/utils/utils"
-import { checkPermission } from "../../../../../lib/api-permissions"
+import { checkPermission } from "@/lib/api-permissions"
 
 /**
  * Récupère une categorie par son identifiant.

@@ -60,7 +60,7 @@ export default function EditProductPage() {
     )
   }
 
-  // Conversion du ProductType en ProductFormValues
+  // Conversion du Product en ProductFormValues
   const initialData: UserFormValues = {
     first_name: user.first_name,
     last_name: user.last_name,
