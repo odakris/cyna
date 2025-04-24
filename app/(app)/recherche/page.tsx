@@ -1,12 +1,12 @@
 import { getCategories } from "../actions/categoryActions"
-import SearchForm from "@/components/SearchForm/SearchForm"
+import AdvancedSearch from "@/components/AdvancedSearch/AdvancedSearch"
 
-export default async function Home() {
+export default async function SearchPage() {
   const categories = await getCategories()
 
   return (
-    <main className="p-6">
-      <SearchForm categories={categories} />
-    </main>
+    <>
+      <AdvancedSearch categories={categories} />
+    </>
   )
 }

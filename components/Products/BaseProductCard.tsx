@@ -99,8 +99,7 @@ export function BaseProductCard({
             <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
           </CardTitle>
 
-          {/* Affichage de la catégorie pour les produits vedettes */}
-          {isFeaturedVariant && category && (
+          {category && (
             <p className="text-sm text-gray-500 mb-1">
               {category.name || "Catégorie"}
             </p>
