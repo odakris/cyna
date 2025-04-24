@@ -5,7 +5,7 @@ import { BaseProductGrid } from "@/components/Products/BaseProductGrid"
 import { TopProductCard } from "./TopProductCard"
 
 export function TopProducts() {
-  const { products, loading, error } = useTopProducts(4)
+  const { products, loading, error } = useTopProducts(6)
 
   if (error) {
     return (
