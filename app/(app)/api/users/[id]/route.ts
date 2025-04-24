@@ -15,10 +15,6 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    // Vérifier les permissions
-    const permissionCheck = await checkPermission("users:view")
-    if (permissionCheck) return permissionCheck
-
     const resolvedParams = await params
     const id = validateId(resolvedParams.id)
 
