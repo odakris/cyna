@@ -42,7 +42,7 @@ export const getProductById = async (id: number): Promise<Product> => {
 /**
  * Crée un nouveau produit en base de données.
  * @param {ProductFormValues} data - Données du produit à enregistrer.
- * @returns {Promise<ProductType>} Le produit nouvellement créé.
+ * @returns {Promise<Product>} Le produit nouvellement créé.
  */
 export const createProduct = async (
   data: ProductFormValues
