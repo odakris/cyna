@@ -12,6 +12,9 @@ export const findAll = async (): Promise<Category[]> => {
     return prisma.category.findMany({
       include: {
         products: true,
+        _count: {
+          select: { products: true },
+        },
       },
       orderBy: { name: "asc" },
     })

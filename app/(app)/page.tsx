@@ -3,37 +3,52 @@
 import React from "react"
 import { CarouselPlugin } from "@/components/Carousel/CarouselPlugin"
 import { CategoryGrid } from "@/components/CategoryGrid/CategoryGrid"
-import { TopProducts } from "@/components/TopProduits/TopProduits"
+import { TopProducts } from "@/components/TopProducts/TopProducts"
 import MainMessage from "@/components/MainMessage/MainMessage"
 
 export default function Home() {
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen px-4">
+    <div className="flex flex-col justify-center items-center min-h-screen px-4 space-y-16">
       {/* CAROUSEL */}
-      <div className="w-full my-8">
+      <section className="w-full my-4" aria-label="Carrousel promotionnel">
         <CarouselPlugin />
-      </div>
+      </section>
 
       {/* MAIN MESSAGE */}
-      <div className="w-full my-8">
+      <section
+        className="w-full my-4 bg-gradient-to-r from-indigo-50 to-white rounded-lg shadow-sm p-6"
+        aria-label="Message principal"
+      >
         <MainMessage />
-      </div>
+      </section>
 
       {/* CATEGORY GRID */}
-      <div className="w-full my-8">
-        <h1 className="text-2xl font-bold mb-4 w-full text-left">
-          Nos Catégories
-        </h1>
+      <section className="w-full my-4" aria-label="Catégories de produits">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-primary relative inline-block pb-2">
+            Nos Catégories
+            <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
+          </h2>
+          <p className="text-gray-600 mt-2">
+            Découvrez notre gamme complète de solutions de sécurité
+          </p>
+        </div>
         <CategoryGrid />
-      </div>
+      </section>
 
       {/* TOP PRODUCTS */}
-      <div className="w-full my-8">
-        <h1 className="text-2xl font-bold mb-4 w-full text-left">
-          Les Top Produits du moment
-        </h1>
+      <section className="w-full my-4" aria-label="Produits vedettes">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-primary relative inline-block pb-2">
+            Les Top Produits du moment
+            <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
+          </h2>
+          <p className="text-gray-600 mt-2">
+            Découvrez nos solutions de sécurité les plus populaires
+          </p>
+        </div>
         <TopProducts />
-      </div>
+      </section>
     </div>
   )
 }
