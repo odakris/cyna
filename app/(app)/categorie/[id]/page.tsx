@@ -4,7 +4,7 @@ import React from "react"
 import { useParams } from "next/navigation"
 import Image from "next/image"
 import { useCategoryProducts } from "@/hooks/use-category-products"
-import { ProductGrid } from "@/components/ProductGrid/ProductGrid"
+import { ProductGrid } from "@/components/Products/ProductGrid"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function CategoryPage() {
@@ -80,7 +80,7 @@ export default function CategoryPage() {
             À propos de cette catégorie
             <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
           </h2>
-          <p className="text-gray-700 leading-relaxed">
+          <p className="text-gray-700 leading-relaxed mt-4 whitespace-pre-line">
             {category.description}
           </p>
         </div>

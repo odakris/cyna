@@ -3,7 +3,7 @@
 import React from "react"
 import { CarouselPlugin } from "@/components/Carousel/CarouselPlugin"
 import { CategoryGrid } from "@/components/CategoryGrid/CategoryGrid"
-import { TopProducts } from "@/components/TopProducts/TopProducts"
+import { TopProducts } from "@/components/Products/TopProducts"
 import MainMessage from "@/components/MainMessage/MainMessage"
 
 export default function Home() {

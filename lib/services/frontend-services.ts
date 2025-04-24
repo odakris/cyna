@@ -4,6 +4,7 @@ import {
   CategoryWithProductCount,
   ProductFilterOptions,
 } from "@/types/frontend-types"
+import { sortProducts, getTopProducts } from "@/lib/utils/product-utils"
 
 /**
  * Service pour gérer les opérations frontend liées aux produits
@@ -20,7 +21,8 @@ export const productService = {
         throw new Error(`Erreur ${response.status}: ${response.statusText}`)
       }
 
-      return await response.json()
+      const products = await response.json()
+      return sortProducts(products)
     } catch (error) {
       console.error("Erreur lors de la récupération des produits:", error)
       throw error
@@ -34,11 +36,11 @@ export const productService = {
     try {
       const products = await this.getAllProducts()
 
-      // Tri par priority_order et limitation au nombre demandé
-      return products
-        .sort((a, b) => a.priority_order - b.priority_order)
-        .slice(0, limit)
-        .map(product => ({ ...product, isFeatured: true }))
+      // Utiliser getTopProducts pour obtenir les produits vedettes
+      return getTopProducts(products, limit).map(product => ({
+        ...product,
+        isFeatured: true,
+      }))
     } catch (error) {
       console.error(
         "Erreur lors de la récupération des produits vedettes:",
@@ -94,7 +96,8 @@ export const productService = {
         throw new Error(`Erreur ${response.status}: ${response.statusText}`)
       }
 
-      return await response.json()
+      const products = await response.json()
+      return sortProducts(products) // Appliquer le tri
     } catch (error) {
       console.error("Erreur lors de la recherche de produits:", error)
       throw error

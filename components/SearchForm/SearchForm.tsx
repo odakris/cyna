@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { ProductCard } from "../ProductCard/ProductCard"
+import { ProductCard } from "../Products/ProductCard"
 import type { CategoryType, ProductType } from "@/types/Types"
 
 type SearchFormProps = {

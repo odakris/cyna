@@ -1,6 +1,7 @@
+// components/TopProducts/TopProducts.tsx
 import React from "react"
 import { useTopProducts } from "@/hooks/use-top-products"
-import { Skeleton } from "@/components/ui/skeleton"
+import { BaseProductGrid } from "@/components/Products/BaseProductGrid"
 import { TopProductCard } from "./TopProductCard"
 
 export function TopProducts() {
@@ -19,14 +20,14 @@ export function TopProducts() {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {loading
-        ? Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="w-full h-64 rounded-lg" />
-          ))
-        : products.map(product => (
-            <TopProductCard key={product.id_product} product={product} />
-          ))}
-    </div>
+    <BaseProductGrid
+      loading={loading}
+      isEmpty={products.length === 0}
+      emptyMessage="Aucun produit vedette disponible actuellement."
+    >
+      {products.map(product => (
+        <TopProductCard key={product.id_product} product={product} />
+      ))}
+    </BaseProductGrid>
   )
 }

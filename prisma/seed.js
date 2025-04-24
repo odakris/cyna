@@ -26,8 +26,10 @@ async function main() {
     const prevention = await prisma.category.create({
       data: {
         name: "Prévention",
-        description: "Services dédiés à la prévention des cyber-risques.",
-        image: "/uploads/prevention.jpg",
+        description:
+          "Notre gamme de services de prévention est conçue pour anticiper et minimiser les risques cyber avant qu'ils ne se matérialisent. Elle comprend des évaluations approfondies de votre infrastructure numérique, des tests d'intrusion réguliers, ainsi que des formations de sensibilisation pour vos collaborateurs. Ces mesures proactives vous permettent d'identifier vos vulnérabilités, de corriger les failles potentielles et de développer une culture de vigilance au sein de votre organisation. Investir dans la prévention, c'est réduire considérablement le risque d'incidents coûteux et protéger votre réputation sur le long terme.",
+        image:
+          "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=2070",
         priority_order: 1,
         updated_at: new Date(),
         created_at: new Date(),
@@ -38,8 +40,9 @@ async function main() {
       data: {
         name: "Protection",
         description:
-          "Services dédiés à la protection contre les menaces cyber.",
-        image: "/uploads/protection.jpg",
+          "Nos solutions de protection constituent votre ligne de défense active contre les cybermenaces en constante évolution. Cette catégorie regroupe nos technologies de surveillance continue, de détection des intrusions et de blocage automatisé des menaces. Grâce à nos outils SOC, EDR et XDR de pointe, nous offrons une protection en temps réel qui s'adapte aux tactiques toujours plus sophistiquées des cybercriminels. Notre approche multicouche garantit une défense robuste de vos systèmes, réseaux et données critiques, permettant à votre entreprise de maintenir ses opérations en toute sécurité face aux menaces persistantes et aux attaques ciblées.",
+        image:
+          "https://images.unsplash.com/photo-1614064642639-e398cf05badb?q=80&w=2070",
         priority_order: 2,
         updated_at: new Date(),
         created_at: new Date(),
@@ -49,8 +52,10 @@ async function main() {
     const reponse = await prisma.category.create({
       data: {
         name: "Réponse",
-        description: "Services dédiés à la réponse aux incidents de sécurité.",
-        image: "/uploads/reponse.jpg",
+        description:
+          "Lorsqu'un incident de sécurité se produit malgré les mesures préventives, notre catégorie de services de réponse entre en action. Nous proposons une intervention rapide et méthodique pour contenir les menaces, éradiquer les malwares, et rétablir vos systèmes avec un minimum d'impact sur votre activité. Notre équipe d'experts en forensique numérique analyse l'étendue de la compromission, identifie les vecteurs d'attaque et vous accompagne dans la remédiation complète. Nous assurons également la coordination avec les autorités réglementaires si nécessaire et vous aidons à tirer les enseignements de l'incident pour renforcer votre posture de sécurité globale et éviter toute récidive.",
+        image:
+          "https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=2074",
         priority_order: 3,
         updated_at: new Date(),
         created_at: new Date(),
@@ -63,14 +68,15 @@ async function main() {
       data: {
         name: "Diagnostic Cyber",
         description:
-          "Diagnostic complet des cyber-risques pour votre entreprise, incluant l'évaluation de votre infrastructure et de vos pratiques de sécurité.",
+          "Notre solution de diagnostic cyber offre une évaluation complète et approfondie de votre infrastructure informatique et de vos pratiques de sécurité. Ce service identifie méthodiquement les vulnérabilités potentielles, analyse votre posture de sécurité actuelle et évalue votre conformité aux normes de l'industrie. Au terme de cette analyse, vous recevrez un rapport détaillé incluant une cartographie précise des risques ainsi que des recommandations personnalisées pour renforcer vos défenses.",
         technical_specs:
-          "Audit complet de sécurité, analyse des vulnérabilités, cartographie des risques et recommandations personnalisées.",
+          "• Audit complet des infrastructures IT et OT\n• Analyse approfondie des vulnérabilités techniques et organisationnelles\n• Evaluation des politiques de sécurité existantes\n• Tests de pénétration ciblés sur vos actifs critiques\n• Cartographie détaillée des risques avec indices de criticité\n• Plan d'action priorisé avec recommandations concrètes\n• Présentation des résultats par nos experts certifiés\n• Rapport exécutif pour la direction et rapport technique détaillé\n• Conformité aux standards ISO 27001, NIST et RGPD",
         unit_price: 4500,
         discount_price: 4200,
         available: true,
         priority_order: 1,
-        main_image: "/uploads/diagnostic_cyber.jpg",
+        main_image:
+          "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 10, // Stock plus élevé
         id_category: prevention.id_category,
       },
@@ -80,15 +86,52 @@ async function main() {
       data: {
         name: "Test d'intrusion",
         description:
-          "Test d'intrusion pour évaluer la sécurité de vos systèmes et applications en simulant des attaques réelles.",
+          "Notre service de test d'intrusion reproduit les techniques utilisées par de véritables attaquants pour évaluer la robustesse réelle de vos systèmes et applications. Nos experts en sécurité offensive mènent des attaques contrôlées et documentées pour identifier les failles exploitables dans votre environnement numérique. Ce processus rigoureux permet de détecter les vulnérabilités qui pourraient échapper aux outils automatisés standards, tout en évaluant l'efficacité de vos mécanismes de détection et de réponse face à une menace concrète.",
         technical_specs:
-          "Pentesting sur applications web, infrastructure et systèmes, avec rapport détaillé des vulnérabilités découvertes.",
+          "• Tests d'intrusion black, grey et white box selon vos besoins\n• Expertise en hacking éthique certifiée (OSCP, CEH, CREST)\n• Méthodologie conforme aux standards OSSTMM et PTES\n• Tests ciblés sur applications web, API, réseaux, infrastructures cloud\n• Exploitation manuelle des vulnérabilités pour éviter les faux positifs\n• Analyse des vecteurs d'attaque complexes et des scénarios réalistes\n• Rapport détaillé incluant preuves d'exploitation et captures d'écran\n• Évaluation de la sévérité selon les métriques CVSS\n• Recommandations techniques précises pour chaque vulnérabilité identifiée",
         unit_price: 4000,
         discount_price: 3800,
         available: true,
         priority_order: 2,
-        main_image: "/uploads/test_intrusion.jpg",
+        main_image:
+          "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 5,
+        id_category: prevention.id_category,
+      },
+    })
+
+    const formationCybersecurite = await prisma.product.create({
+      data: {
+        name: "Formation Cybersécurité",
+        description:
+          "Notre programme de formation en cybersécurité est conçu pour sensibiliser vos collaborateurs aux menaces numériques actuelles et renforcer votre première ligne de défense. Des sessions interactives et personnalisées transforment vos employés en acteurs proactifs de la sécurité informatique de votre entreprise. Ces formations combinent théorie et exercices pratiques pour garantir une rétention optimale des connaissances, avec des mises en situation réalistes adaptées à votre secteur d'activité et aux rôles spécifiques au sein de votre organisation.",
+        technical_specs:
+          "• Modules de formation adaptés à tous les niveaux (débutant à avancé)\n• Contenu personnalisé selon votre secteur d'activité et profil de risque\n• Plateforme e-learning accessible 24/7 avec suivi des progrès\n• Simulations de phishing personnalisées et campagnes de sensibilisation\n• Ateliers pratiques sur la sécurité des mots de passe et l'authentification\n• Formation sur la détection des tentatives d'ingénierie sociale\n• Mise à jour trimestrielle du contenu selon l'évolution des menaces\n• Tableau de bord d'analyse des performances et de progression\n• Certification des participants et rapports détaillés pour la direction",
+        unit_price: 2500,
+        discount_price: 2200,
+        available: true,
+        priority_order: 3,
+        main_image:
+          "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1000",
+        stock: Math.floor(Math.random() * 10) + 15,
+        id_category: prevention.id_category,
+      },
+    })
+
+    const auditRGPD = await prisma.product.create({
+      data: {
+        name: "Audit de conformité RGPD",
+        description:
+          "Notre audit de conformité RGPD offre une analyse exhaustive de vos pratiques de traitement des données personnelles pour garantir leur alignement avec la réglementation européenne. Nos experts juridiques et techniques examinent méticuleusement votre organisation pour identifier les écarts par rapport aux exigences légales et vous accompagnent dans la mise en place des mesures correctives nécessaires. Ce service complet vous permet non seulement d'éviter les sanctions financières considérables, mais également de transformer votre conformité en avantage concurrentiel en renforçant la confiance de vos clients et partenaires.",
+        technical_specs:
+          "• Cartographie complète des traitements de données personnelles\n• Évaluation des bases légales et des consentements\n• Analyse de la documentation (politiques, registres, contrats)\n• Revue des mesures techniques et organisationnelles\n• Évaluation des procédures de notification de violation\n• Vérification des transferts de données hors UE\n• Analyse des outils et processus de respect des droits des personnes\n• Accompagnement dans la désignation et formation du DPO\n• Rapport de non-conformités avec plan d'action correctif priorisé",
+        unit_price: 3500,
+        discount_price: 3200,
+        available: true,
+        priority_order: 4,
+        main_image:
+          "https://images.unsplash.com/photo-1575467678930-c7acd65d6470?q=80&w=1000",
+        stock: Math.floor(Math.random() * 10) + 8,
         id_category: prevention.id_category,
       },
     })
@@ -97,14 +140,15 @@ async function main() {
       data: {
         name: "Micro SOC",
         description:
-          "Surveillance continue de la sécurité avec un centre d'opérations de sécurité adapté aux PME.",
+          "Notre solution Micro SOC offre une surveillance continue de votre environnement numérique, spécifiquement adaptée aux besoins des PME. Ce service détecte les menaces en temps réel en analysant les comportements suspects sur l'ensemble de votre infrastructure. Notre plateforme de surveillance intelligente combine technologies avancées et expertise humaine pour identifier les anomalies potentiellement dangereuses avant qu'elles ne compromettent vos systèmes. Grâce à notre interface intuitive, vous bénéficiez d'une visibilité complète sur votre posture de sécurité et recevez des alertes immédiatement exploitables.",
         technical_specs:
-          "Surveillance 24/7, analyse des logs, détection d'anomalies, alertes en temps réel.",
+          "• Surveillance 24/7/365 de votre infrastructure IT\n• Collecte et analyse des logs système, réseau et applicatifs\n• Détection des menaces basée sur le machine learning et analyses comportementales\n• Corrélation des événements multi-sources pour éliminer les faux positifs\n• Plateforme SIEM optimisée pour les PME avec rétention des données pendant 12 mois\n• Tableaux de bord personnalisables et rapports de sécurité automatisés\n• Alertes contextualisées avec niveau de criticité et recommandations\n• Intégration avec plus de 200 sources de données et applications\n• Support technique réactif et accès à nos experts en cybersécurité",
         unit_price: 5000,
         discount_price: null,
-        available: true, // Maintenant disponible
+        available: true,
         priority_order: 1,
-        main_image: "/uploads/micro_soc.jpg",
+        main_image:
+          "https://images.unsplash.com/photo-1551808525-51a94da548ce?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 8,
         id_category: protection.id_category,
       },
@@ -114,15 +158,70 @@ async function main() {
       data: {
         name: "SOC Managé",
         description:
-          "SOC avec gestion managée pour une sécurité optimale et une réactivité immédiate.",
+          "Notre service SOC Managé offre une solution complète de cybersécurité supervisée par des analystes experts opérant 24h/24, 7j/7. Cette approche proactive combine technologies de pointe et intelligence humaine pour une détection et une réponse rapides face aux cybermenaces. Notre équipe spécialisée surveille constamment votre environnement numérique, analyse les alertes, élimine les faux positifs et orchestre la réponse aux incidents. Vous bénéficiez ainsi d'une protection continue optimale sans avoir à constituer et former votre propre équipe de sécurité.",
         technical_specs:
-          "Surveillance 24/7/365, analyse comportementale, traitement des incidents, équipe dédiée, rapports réguliers.",
+          "• Centre d'opérations de sécurité opérationnel 24/7/365\n• Équipe d'analystes certifiés (CISSP, SANS GIAC, etc.)\n• Architecture SIEM/SOAR avec corrélation avancée et automatisation\n• Veille sur les menaces et intégration de renseignements cyber (CTI)\n• Détection d'anomalies par IA et analyses comportementales (UEBA)\n• Chasse proactive aux menaces (threat hunting)\n• Gestion des incidents avec procédures personnalisées\n• SLA garantissant des temps de réponse selon la criticité\n• Rapports détaillés hebdomadaires, mensuels et trimestriels\n• Portail client sécurisé pour suivi en temps réel",
         unit_price: 7000,
         discount_price: 6500,
         available: true,
         priority_order: 2,
-        main_image: "/uploads/soc_manage.jpg",
+        main_image:
+          "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 5,
+        id_category: protection.id_category,
+      },
+    })
+
+    const edrSolution = await prisma.product.create({
+      data: {
+        name: "EDR - Endpoint Detection and Response",
+        description:
+          "Notre solution EDR (Endpoint Detection and Response) surveille en continu les postes de travail et serveurs de votre organisation pour détecter et neutraliser les menaces sophistiquées qui échappent aux antivirus traditionnels. Contrairement aux solutions classiques qui se contentent de bloquer des signatures connues, notre EDR analyse les comportements suspects en temps réel, détecte les anomalies et permet une réponse immédiate sur l'ensemble de votre parc informatique. La visibilité complète sur chaque terminal vous permet d'identifier rapidement l'origine et l'étendue des attaques potentielles.",
+        technical_specs:
+          "• Agents légers (< 1% d'impact sur les performances) pour Windows, macOS, Linux\n• Protection contre les malwares avancés, fileless attacks et zero-days\n• Analyse comportementale en temps réel basée sur l'IA et le machine learning\n• Détection des techniques d'attaque selon le framework MITRE ATT&CK\n• Isolation réseau et confinement instantané des terminaux compromis\n• Remédiation automatisée pour les menaces identifiées\n• Forensic avancé avec capture de la mémoire et collecte des artefacts\n• Console centralisée avec visualisation des chaînes d'attaque\n• Recherche de menaces sur l'historique des activités (90 jours minimum)\n• Intégration avec votre SOC ou notre service de SOC Managé",
+        unit_price: 4800,
+        discount_price: 4500,
+        available: true,
+        priority_order: 3,
+        main_image:
+          "https://images.unsplash.com/photo-1593642532973-d31b6557fa68?q=80&w=1000",
+        stock: Math.floor(Math.random() * 10) + 7,
+        id_category: protection.id_category,
+      },
+    })
+
+    const xdrPlatform = await prisma.product.create({
+      data: {
+        name: "XDR - Extended Detection and Response",
+        description:
+          "Notre plateforme XDR (Extended Detection and Response) représente l'évolution naturelle de la sécurité en unifiant la détection et la réponse à travers tous vos vecteurs d'attaque. En intégrant les données provenant des endpoints, du réseau, du cloud et des emails, notre XDR fournit une visibilité sans précédent sur l'ensemble de votre écosystème numérique. Cette approche holistique permet de détecter les attaques complexes qui traversent plusieurs systèmes et de coordonner une réponse cohérente à l'échelle de toute votre infrastructure.",
+        technical_specs:
+          "• Plateforme unifiée intégrant les données de multiples sources (endpoints, réseau, cloud, email)\n• Corrélation automatique des alertes entre différents vecteurs d'attaque\n• Réduction drastique des faux positifs grâce à l'analyse contextuelle\n• Détection des attaques multi-vecteurs invisibles aux solutions traditionnelles\n• Visualisation complète de la chaîne d'attaque avec timeline interactive\n• Response automatisée orchestrée sur l'ensemble de l'infrastructure\n• Analyses d'impact en temps réel pour priorisation des incidents\n• Threat hunting proactif avec requêtes personnalisables\n• 400+ règles de détection préconfigurées et mises à jour quotidiennement\n• Intégration native avec plus de 300 outils de sécurité tiers",
+        unit_price: 8500,
+        discount_price: 7900,
+        available: true,
+        priority_order: 4,
+        main_image:
+          "https://images.unsplash.com/photo-1614064642639-e398cf05badb?q=80&w=1000",
+        stock: Math.floor(Math.random() * 10) + 6,
+        id_category: protection.id_category,
+      },
+    })
+
+    const antiPhishing = await prisma.product.create({
+      data: {
+        name: "Protection Email & Anti-Phishing",
+        description:
+          "Notre solution de Protection Email & Anti-Phishing constitue votre ligne de défense contre la menace cybersécuritaire la plus répandue. En utilisant des technologies d'intelligence artificielle avancées, nous analysons chaque message entrant pour détecter les tentatives de phishing, les malwares, les usurpations d'identité et autres menaces sophistiquées. Notre plateforme bloque proactivement les emails malveillants avant qu'ils n'atteignent vos collaborateurs, tout en offrant des outils de sensibilisation pour renforcer la vigilance de vos équipes face aux attaques qui pourraient passer entre les mailles du filet.",
+        technical_specs:
+          "• Filtrage multi-couches des emails entrants et sortants\n• Analyse des pièces jointes par sandbox sécurisée\n• Protection contre les attaques de phishing, spear phishing et whaling\n• Détection des URL malveillantes avec analyse en temps réel au clic\n• Prévention des attaques d'ingénierie sociale et d'usurpation d'identité\n• Vérification DMARC, SPF et DKIM pour authentification des expéditeurs\n• Protection contre les emails de compromission (BEC)\n• Simulation de phishing personnalisée pour la formation des employés\n• Tableau de bord d'analyse des menaces avec rapports détaillés\n• Intégration avec Microsoft 365, Google Workspace et autres plateformes",
+        unit_price: 3500,
+        discount_price: 3000,
+        available: true,
+        priority_order: 5,
+        main_image:
+          "https://images.unsplash.com/photo-1563237023-b1e970526dcb?q=80&w=1000",
+        stock: Math.floor(Math.random() * 10) + 10,
         id_category: protection.id_category,
       },
     })
@@ -131,32 +230,69 @@ async function main() {
       data: {
         name: "Investigation, éradication, remédiation",
         description:
-          "Réponse complète aux incidents de sécurité, depuis l'investigation jusqu'à la remédiation.",
+          "Notre service d'investigation, éradication et remédiation fournit une réponse complète et méthodique aux incidents de sécurité confirmés. Nos experts en forensique numérique interviennent rapidement pour analyser l'étendue de la compromission, isoler les systèmes affectés et éliminer toute présence malveillante de votre infrastructure. Au-delà de la simple résolution de l'incident, notre approche comprend une analyse approfondie des causes racines et la mise en œuvre de mesures correctives pour empêcher des attaques similaires à l'avenir, tout en minimisant l'impact sur vos opérations commerciales.",
         technical_specs:
-          "Analyse forensique, confinement des menaces, élimination des malwares, reconstruction des systèmes compromis.",
+          "• Équipe d'intervention disponible 24/7 avec délai de réponse garanti\n• Analyse forensique approfondie sur systèmes compromis\n• Identification de l'étendue complète de la compromission\n• Collecte et préservation des preuves selon les normes judiciaires\n• Isolation et confinement des systèmes affectés\n• Éradication des malwares et des persistances d'attaquants\n• Restauration sécurisée des systèmes et données\n• Analyse des indicateurs de compromission (IOC)\n• Identification des vecteurs d'attaque et des vulnérabilités exploitées\n• Rapport détaillé d'incident et recommandations pour renforcer vos défenses",
         unit_price: 8500,
         discount_price: 8000,
         available: true,
         priority_order: 1,
-        main_image: "/uploads/investigation.jpg",
+        main_image:
+          "https://images.unsplash.com/photo-1633265486501-0cf524a07213?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 3,
         id_category: reponse.id_category,
       },
     })
 
-    // Nouveau produit dans la catégorie Réponse
     const crisisManagement = await prisma.product.create({
       data: {
         name: "Gestion de crise cybersécurité",
         description:
-          "Service de gestion de crise complet pour faire face aux incidents de sécurité majeurs.",
+          "Notre service de gestion de crise cybersécurité vous accompagne dans les moments les plus critiques suite à un incident majeur. Notre équipe pluridisciplinaire prend en charge la coordination globale de la réponse à l'incident, depuis la communication interne et externe jusqu'à l'interaction avec les autorités, en passant par la mise en œuvre des stratégies de continuité d'activité. Nous transformons une situation de crise potentiellement chaotique en un processus structuré et maîtrisé, minimisant les impacts financiers, opérationnels et réputationnels pour votre organisation.",
         technical_specs:
-          "Cellule de crise, communication interne et externe, coordination avec les autorités, plan de continuité d'activité.",
+          "• Cellule de crise dédiée activable immédiatement 24/7\n• Experts en cybersécurité, communication et aspects juridiques\n• Plan de communication de crise personnalisé (interne/externe)\n• Coordination avec les autorités réglementaires (ANSSI, CNIL)\n• Gestion des relations médias et assistance communication publique\n• Pilotage des prestataires techniques et juridiques\n• Stratégies de continuité d'activité et plans de reprise\n• Documentation complète des actions pour exigences légales\n• Débriefing post-crise et analyse des retours d'expérience\n• Formation préventive de votre comité de direction à la gestion de crise cyber",
         unit_price: 9500,
         discount_price: 9000,
         available: true,
         priority_order: 2,
-        main_image: "/uploads/crisis_management.jpg",
+        main_image:
+          "https://images.unsplash.com/photo-1590856029826-c7a73142bbf1?q=80&w=1000",
+        stock: Math.floor(Math.random() * 5) + 2,
+        id_category: reponse.id_category,
+      },
+    })
+
+    const cyberThreatIntelligence = await prisma.product.create({
+      data: {
+        name: "Cyber Threat Intelligence",
+        description:
+          "Notre service de Cyber Threat Intelligence (CTI) transforme le renseignement sur les menaces en avantage stratégique pour votre organisation. Plutôt que d'attendre d'être victime d'une attaque, notre équipe d'analystes surveille activement le paysage des menaces pour identifier celles qui ciblent spécifiquement votre secteur d'activité et votre entreprise. En fournissant des informations contextualisées et actionnables sur les tactiques, techniques et procédures (TTP) des attaquants, nous vous permettons d'anticiper les menaces et d'adapter proactivement vos défenses pour contrer les attaques avant qu'elles ne se matérialisent.",
+        technical_specs:
+          "• Veille personnalisée sur les menaces ciblant votre secteur d'activité\n• Surveillance du dark web et des forums cybercriminels\n• Analyse des campagnes d'attaques émergentes et des tendances\n• Profiling des acteurs malveillants susceptibles de vous cibler\n• Fourniture d'indicateurs de compromission (IOC) actualisés\n• Alertes précoces sur les vulnérabilités critiques exploitées\n• Rapports de renseignement stratégique pour la direction\n• Briefings tactiques pour les équipes techniques\n• Intégration des IOC dans vos solutions de sécurité\n• Accès à notre plateforme CTI avec tableau de bord personnalisé",
+        unit_price: 6000,
+        discount_price: 5500,
+        available: true,
+        priority_order: 3,
+        main_image:
+          "https://images.unsplash.com/photo-1598128558393-70ff21433be0?q=80&w=1000",
+        stock: Math.floor(Math.random() * 10) + 4,
+        id_category: reponse.id_category,
+      },
+    })
+
+    const redTeam = await prisma.product.create({
+      data: {
+        name: "Red Team - Simulation d'attaques avancées",
+        description:
+          "Notre service Red Team reproduit les méthodes d'attaque des adversaires les plus sophistiqués pour évaluer l'efficacité réelle de vos défenses cybersécurité. Contrairement aux tests d'intrusion traditionnels limités à des cibles spécifiques, nos opérations Red Team sont des simulations complètes qui combinent ingénierie sociale, exploitation technique et mouvement latéral pour tester l'ensemble de votre posture de sécurité. Ces exercices permettent d'évaluer non seulement vos défenses techniques, mais aussi vos capacités de détection et de réponse face à des attaques ciblées, offrant ainsi une vision holistique de votre résilience cybersécurité.",
+        technical_specs:
+          "• Scénarios d'attaque personnalisés basés sur les menaces réelles de votre secteur\n• Simulations d'APT (Advanced Persistent Threats) sur plusieurs semaines\n• Techniques d'ingénierie sociale avancées (phishing, vishing, social engineering)\n• Exploitation de vulnérabilités techniques et organisationnelles\n• Mouvement latéral et élévation de privilèges dans votre réseau\n• Tests d'exfiltration de données sensibles\n• Évaluation de vos capacités de détection et de réponse\n• Débriefing complet avec démonstration des techniques utilisées\n• Rapport détaillant le déroulement complet de l'attaque simulée\n• Plan d'amélioration priorisé pour renforcer vos défenses",
+        unit_price: 10000,
+        discount_price: 9500,
+        available: true,
+        priority_order: 4,
+        main_image:
+          "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=1000",
         stock: Math.floor(Math.random() * 5) + 2,
         id_category: reponse.id_category,
       },
@@ -166,65 +302,290 @@ async function main() {
     console.log("Création des images pour les produits...")
     await prisma.productCarousselImage.createMany({
       data: [
+        // Diagnostic Cyber
         {
-          url: "/uploads/diagnostic_cyber.jpg",
-          alt: "Diagnostic Cyber",
+          url: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1000",
+          alt: "Diagnostic Cyber - Vue d'ensemble",
           id_product: diagnosticCyber.id_product,
         },
         {
-          url: "/uploads/cyber2.jpg",
-          alt: "Détail du diagnostic cyber",
+          url: "https://images.unsplash.com/photo-1597733336794-12d05021d510?q=80&w=1000",
+          alt: "Tableau de bord principal du diagnostic cyber",
           id_product: diagnosticCyber.id_product,
         },
         {
-          url: "/uploads/test_intrusion.jpg",
-          alt: "Test d'intrusion",
+          url: "https://images.unsplash.com/photo-1614064643227-88dbbd80dd0c?q=80&w=1000",
+          alt: "Interface d'analyse des vulnérabilités",
+          id_product: diagnosticCyber.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=1000",
+          alt: "Rapport de diagnostic et cartographie des risques",
+          id_product: diagnosticCyber.id_product,
+        },
+
+        // Test d'intrusion
+        {
+          url: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000",
+          alt: "Test d'intrusion - Vue d'ensemble",
           id_product: testIntrusion.id_product,
         },
         {
-          url: "/uploads/cyber2.jpg",
-          alt: "Détail du test d'intrusion",
+          url: "https://images.unsplash.com/photo-1526374870839-e155464bb9b2?q=80&w=1000",
+          alt: "Console de pentesting en action",
           id_product: testIntrusion.id_product,
         },
         {
-          url: "/uploads/micro_soc.jpg",
-          alt: "Micro SOC",
+          url: "https://images.unsplash.com/photo-1541728472741-03e45a58cf88?q=80&w=1000",
+          alt: "Analyse des vulnérabilités découvertes",
+          id_product: testIntrusion.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1607798748738-b15c38a842b7?q=80&w=1000",
+          alt: "Rapport détaillé des failles identifiées",
+          id_product: testIntrusion.id_product,
+        },
+
+        // Formation Cybersécurité
+        {
+          url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1000",
+          alt: "Formation Cybersécurité - Vue d'ensemble",
+          id_product: formationCybersecurite.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000",
+          alt: "Plateforme de formation en ligne",
+          id_product: formationCybersecurite.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1000",
+          alt: "Session de formation pratique",
+          id_product: formationCybersecurite.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=1000",
+          alt: "Simulation de phishing pour formation",
+          id_product: formationCybersecurite.id_product,
+        },
+
+        // Audit RGPD
+        {
+          url: "https://images.unsplash.com/photo-1575467678930-c7acd65d6470?q=80&w=1000",
+          alt: "Audit RGPD - Vue d'ensemble",
+          id_product: auditRGPD.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?q=80&w=1000",
+          alt: "Interface d'analyse de conformité RGPD",
+          id_product: auditRGPD.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1569235186275-626cb53b83ce?q=80&w=1000",
+          alt: "Cartographie des traitements de données",
+          id_product: auditRGPD.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=1000",
+          alt: "Plan d'action correctif RGPD",
+          id_product: auditRGPD.id_product,
+        },
+
+        // Micro SOC
+        {
+          url: "https://images.unsplash.com/photo-1551808525-51a94da548ce?q=80&w=1000",
+          alt: "Micro SOC - Vue d'ensemble",
           id_product: microSOC.id_product,
         },
         {
-          url: "/uploads/cyber1.jpg",
-          alt: "Détail du micro SOC",
+          url: "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?q=80&w=1000",
+          alt: "Tableau de bord du Centre d'Opérations de Sécurité",
           id_product: microSOC.id_product,
         },
         {
-          url: "/uploads/soc_manage.jpg",
-          alt: "SOC Managé",
+          url: "https://images.unsplash.com/photo-1610018556010-6a11691bc905?q=80&w=1000",
+          alt: "Interface de monitoring temps réel",
+          id_product: microSOC.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1544890225-2f3faec4cd60?q=80&w=1000",
+          alt: "Analyse des logs et alertes de sécurité",
+          id_product: microSOC.id_product,
+        },
+
+        // SOC Managé
+        {
+          url: "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=1000",
+          alt: "SOC Managé - Vue d'ensemble",
           id_product: socManage.id_product,
         },
         {
-          url: "/uploads/cyber1.jpg",
-          alt: "Détail du SOC managé",
+          url: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1000",
+          alt: "Centre d'opérations de sécurité 24/7",
           id_product: socManage.id_product,
         },
         {
-          url: "/uploads/investigation.jpg",
-          alt: "Investigation",
+          url: "https://images.unsplash.com/photo-1557838429-a6e1f668bf3f?q=80&w=1000",
+          alt: "Tableau de bord avancé de monitoring",
+          id_product: socManage.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1569028639620-79befdb5c3ed?q=80&w=1000",
+          alt: "Analyse des menaces en temps réel",
+          id_product: socManage.id_product,
+        },
+
+        // EDR Solution
+        {
+          url: "https://images.unsplash.com/photo-1593642532973-d31b6557fa68?q=80&w=1000",
+          alt: "EDR - Vue d'ensemble",
+          id_product: edrSolution.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1000",
+          alt: "Tableau de bord de détection des menaces sur endpoints",
+          id_product: edrSolution.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1558050032-160f36233a07?q=80&w=1000",
+          alt: "Interface d'analyse comportementale en temps réel",
+          id_product: edrSolution.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1542546068979-b6affb46ea8f?q=80&w=1000",
+          alt: "Visualisation de la chaîne d'attaque sur endpoint",
+          id_product: edrSolution.id_product,
+        },
+
+        // XDR Platform
+        {
+          url: "https://images.unsplash.com/photo-1614064642639-e398cf05badb?q=80&w=1000",
+          alt: "XDR - Vue d'ensemble",
+          id_product: xdrPlatform.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1593062096033-9a26b09da705?q=80&w=1000",
+          alt: "Plateforme unifiée d'analyse multi-vecteur",
+          id_product: xdrPlatform.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1601056639638-c53c50e13ead?q=80&w=1000",
+          alt: "Visualisation avancée des menaces corrélées",
+          id_product: xdrPlatform.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1527689368864-3a821dbccc34?q=80&w=1000",
+          alt: "Interface de réponse orchestrée aux incidents",
+          id_product: xdrPlatform.id_product,
+        },
+
+        // Anti-Phishing
+        {
+          url: "https://images.unsplash.com/photo-1563237023-b1e970526dcb?q=80&w=1000",
+          alt: "Protection Email & Anti-Phishing - Vue d'ensemble",
+          id_product: antiPhishing.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1614332287897-cdc485fa562d?q=80&w=1000",
+          alt: "Interface de filtrage des emails malveillants",
+          id_product: antiPhishing.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?q=80&w=1000",
+          alt: "Tableau de bord des tentatives de phishing bloquées",
+          id_product: antiPhishing.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1590103514966-5e2a11c13e21?q=80&w=1000",
+          alt: "Plateforme de simulation et sensibilisation au phishing",
+          id_product: antiPhishing.id_product,
+        },
+
+        // Investigation
+        {
+          url: "https://images.unsplash.com/photo-1633265486501-0cf524a07213?q=80&w=1000",
+          alt: "Investigation, éradication, remédiation - Vue d'ensemble",
           id_product: investigation.id_product,
         },
         {
-          url: "/uploads/cyber1.jpg",
-          alt: "Détail du service d'investigation",
+          url: "https://images.unsplash.com/photo-1503551723145-6c040742065b-v2?q=80&w=1000",
+          alt: "Interface d'analyse forensique numérique",
           id_product: investigation.id_product,
         },
         {
-          url: "/uploads/crisis_management.jpg",
-          alt: "Gestion de crise",
+          url: "https://images.unsplash.com/photo-1510511459019-5dda7724fd87?q=80&w=1000",
+          alt: "Visualisation des indicateurs de compromission",
+          id_product: investigation.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=1000",
+          alt: "Tableau de bord de remédiation des menaces",
+          id_product: investigation.id_product,
+        },
+
+        // Crisis Management
+        {
+          url: "https://images.unsplash.com/photo-1590856029826-c7a73142bbf1?q=80&w=1000",
+          alt: "Gestion de crise cybersécurité - Vue d'ensemble",
           id_product: crisisManagement.id_product,
         },
         {
-          url: "/uploads/cyber2.jpg",
-          alt: "Détail de la gestion de crise",
+          url: "https://images.unsplash.com/photo-1496096265110-f83ad7f96608?q=80&w=1000",
+          alt: "Interface de coordination de crise",
           id_product: crisisManagement.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?q=80&w=1000",
+          alt: "Tableau de bord de communication en situation de crise",
+          id_product: crisisManagement.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1573497620053-ea5300f94f21?q=80&w=1000",
+          alt: "Plan de continuité d'activité post-incident",
+          id_product: crisisManagement.id_product,
+        },
+
+        // Cyber Threat Intelligence
+        {
+          url: "https://images.unsplash.com/photo-1598128558393-70ff21433be0?q=80&w=1000",
+          alt: "Cyber Threat Intelligence - Vue d'ensemble",
+          id_product: cyberThreatIntelligence.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1510511336377-1a9d3abcbd61?q=80&w=1000",
+          alt: "Plateforme d'analyse des menaces",
+          id_product: cyberThreatIntelligence.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1000",
+          alt: "Dashboard de veille sur les menaces émergentes",
+          id_product: cyberThreatIntelligence.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1563237023-b1e970526dcb?q=80&w=1000",
+          alt: "Visualisation des acteurs de menace par secteur",
+          id_product: cyberThreatIntelligence.id_product,
+        },
+
+        // Red Team
+        {
+          url: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=1000",
+          alt: "Red Team - Simulation d'attaques avancées - Vue d'ensemble",
+          id_product: redTeam.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1548092372-0d1bd40894a3?q=80&w=1000",
+          alt: "Interface de planification d'opérations Red Team",
+          id_product: redTeam.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1563291589-4e9a1757428d?q=80&w=1000",
+          alt: "Tableau de bord de simulation d'attaque en cours",
+          id_product: redTeam.id_product,
+        },
+        {
+          url: "https://images.unsplash.com/photo-1550439062-609e1531270e?q=80&w=1000",
+          alt: "Rapport d'analyse post-simulation d'attaque",
+          id_product: redTeam.id_product,
         },
       ],
     })
@@ -739,7 +1100,6 @@ async function main() {
     })
 
     // Création des commandes historiques (conserver celles existantes)
-    console.log("Création des commandes historiques...")
 
     // ----- Commande 1 - Jean Dupont - Diagnostic Cyber (Abonnement annuel) -----
     const orderItems1 = [
@@ -751,6 +1111,15 @@ async function main() {
         quantity: 1,
         unit_price: diagnosticCyber.unit_price, // 4500
         id_product: diagnosticCyber.id_product,
+      },
+      {
+        subscription_type: SubscriptionType.YEARLY,
+        subscription_status: OrderStatus.ACTIVE,
+        subscription_duration: 12,
+        renewal_date: new Date("2024-06-15"),
+        quantity: 1,
+        unit_price: formationCybersecurite.unit_price, // 2500
+        id_product: formationCybersecurite.id_product,
       },
     ]
 
@@ -805,6 +1174,17 @@ async function main() {
         unit_price: testIntrusion.discount_price || testIntrusion.unit_price, // 3800 (prix remisé)
         id_product: testIntrusion.id_product,
       },
+      {
+        subscription_type: SubscriptionType.YEARLY,
+        subscription_status: OrderStatus.ACTIVE,
+        subscription_duration: 12,
+        renewal_date: new Date("2024-07-22"),
+        quantity: 1,
+        unit_price:
+          cyberThreatIntelligence.discount_price ||
+          cyberThreatIntelligence.unit_price, // 5500
+        id_product: cyberThreatIntelligence.id_product,
+      },
     ]
 
     // Calcul précis du total
@@ -838,7 +1218,7 @@ async function main() {
       })
     }
 
-    // ----- Commande 3 - Jean Dupont - SOC Managé (Mensuel) + Diagnostic Cyber (Annuel) -----
+    // ----- Commande 3 - Jean Dupont - SOC Managé (Mensuel) + EDR Solution (Annuel) -----
     const orderItems3 = [
       {
         subscription_type: SubscriptionType.MONTHLY,
@@ -855,9 +1235,8 @@ async function main() {
         subscription_duration: 12,
         renewal_date: new Date("2024-09-05"),
         quantity: 1,
-        unit_price:
-          diagnosticCyber.discount_price || diagnosticCyber.unit_price, // 4200 (prix remisé)
-        id_product: diagnosticCyber.id_product,
+        unit_price: edrSolution.discount_price || edrSolution.unit_price, // 4500 (prix remisé)
+        id_product: edrSolution.id_product,
       },
     ]
 
@@ -891,16 +1270,16 @@ async function main() {
       })
     }
 
-    // ----- Commande 4 - Marie Martin - Test d'intrusion (Mensuel) avec quantité de 2 -----
+    // ----- Commande 4 - Marie Martin - Protection Email & Anti-Phishing (Mensuel) avec quantité de 2 -----
     const orderItems4 = [
       {
         subscription_type: SubscriptionType.MONTHLY,
         subscription_status: OrderStatus.ACTIVE,
         subscription_duration: 1,
         renewal_date: new Date("2023-09-25"),
-        quantity: 2, // Commander 2 tests d'intrusion mensuels
-        unit_price: testIntrusion.unit_price, // 4000 (prix normal)
-        id_product: testIntrusion.id_product,
+        quantity: 2, // Commander 2 licences mensuelles
+        unit_price: antiPhishing.unit_price, // 3500 (prix normal)
+        id_product: antiPhishing.id_product,
       },
     ]
 
@@ -935,7 +1314,7 @@ async function main() {
       })
     }
 
-    // *** AJOUT : Commande supplémentaire pour Thomas Bernard ***
+    // *** AJOUT : Commande supplémentaire pour Thomas Bernard - XDR Platform & Audit RGPD ***
     const orderItems5 = [
       {
         subscription_type: SubscriptionType.YEARLY,
@@ -943,8 +1322,8 @@ async function main() {
         subscription_duration: 12,
         renewal_date: new Date("2024-11-10"),
         quantity: 1,
-        unit_price: microSOC.unit_price, // 5000
-        id_product: microSOC.id_product,
+        unit_price: xdrPlatform.discount_price || xdrPlatform.unit_price, // 7900 (prix remisé)
+        id_product: xdrPlatform.id_product,
       },
       {
         subscription_type: SubscriptionType.YEARLY,
@@ -952,8 +1331,8 @@ async function main() {
         subscription_duration: 12,
         renewal_date: new Date("2024-11-10"),
         quantity: 1,
-        unit_price: investigation.unit_price, // 8500
-        id_product: investigation.id_product,
+        unit_price: auditRGPD.unit_price, // 3500
+        id_product: auditRGPD.id_product,
       },
     ]
 
@@ -982,6 +1361,58 @@ async function main() {
         data: {
           ...item,
           id_order: order5.id_order,
+        },
+      })
+    }
+
+    // Ajout d'une commande pour la simulation d'attaques Red Team
+    const orderItems6 = [
+      {
+        subscription_type: SubscriptionType.YEARLY,
+        subscription_status: OrderStatus.ACTIVE,
+        subscription_duration: 12,
+        renewal_date: new Date("2024-12-15"),
+        quantity: 1,
+        unit_price: redTeam.discount_price || redTeam.unit_price, // 9500 (prix remisé)
+        id_product: redTeam.id_product,
+      },
+      {
+        subscription_type: SubscriptionType.YEARLY,
+        subscription_status: OrderStatus.ACTIVE,
+        subscription_duration: 12,
+        renewal_date: new Date("2024-12-15"),
+        quantity: 1,
+        unit_price:
+          crisisManagement.discount_price || crisisManagement.unit_price, // 9000 (prix remisé)
+        id_product: crisisManagement.id_product,
+      },
+    ]
+
+    const total6 = orderItems6.reduce(
+      (acc, item) => acc + item.unit_price * item.quantity,
+      0
+    )
+
+    const order6 = await prisma.order.create({
+      data: {
+        order_date: new Date("2023-12-15"),
+        total_amount: total6,
+        subtotal: total6,
+        order_status: OrderStatus.ACTIVE,
+        payment_method: "CARD",
+        last_card_digits: "1234",
+        invoice_number: "INV-2023-006",
+        invoice_pdf_url: "/invoices/INV-2023-006.pdf",
+        id_user: customer5.id_user,
+        id_address: address5.id_address,
+      },
+    })
+
+    for (const item of orderItems6) {
+      await prisma.orderItem.create({
+        data: {
+          ...item,
+          id_order: order6.id_order,
         },
       })
     }
@@ -1041,6 +1472,23 @@ async function main() {
       return order
     }
 
+    // Mettre à jour la liste des produits pour inclure tous les nouveaux produits
+    const allProducts = [
+      diagnosticCyber,
+      testIntrusion,
+      formationCybersecurite,
+      auditRGPD,
+      microSOC,
+      socManage,
+      edrSolution,
+      xdrPlatform,
+      antiPhishing,
+      investigation,
+      crisisManagement,
+      cyberThreatIntelligence,
+      redTeam,
+    ]
+
     // Créer des commandes pour les 7 derniers jours
     for (let i = 0; i < 7; i++) {
       // Jour actuel moins i jours
@@ -1087,20 +1535,18 @@ async function main() {
 
         // Déterminer les produits pour cette commande (entre 1 et 3 produits)
         const numProducts = Math.floor(Math.random() * 3) + 1
-        const products = [
-          diagnosticCyber,
-          testIntrusion,
-          microSOC,
-          socManage,
-          investigation,
-          crisisManagement,
-        ]
+
+        // Créer une copie du tableau de produits pour pouvoir en retirer sans affecter l'original
+        const productPool = [...allProducts]
         const selectedProducts = []
 
         // Sélectionner des produits aléatoires sans duplication
-        while (selectedProducts.length < numProducts && products.length > 0) {
-          const randomIndex = Math.floor(Math.random() * products.length)
-          selectedProducts.push(products.splice(randomIndex, 1)[0])
+        while (
+          selectedProducts.length < numProducts &&
+          productPool.length > 0
+        ) {
+          const randomIndex = Math.floor(Math.random() * productPool.length)
+          selectedProducts.push(productPool.splice(randomIndex, 1)[0])
         }
 
         // Créer les éléments de commande
@@ -1203,20 +1649,18 @@ async function main() {
 
         // Nombre de produits (entre 1 et 2)
         const numProducts = Math.floor(Math.random() * 2) + 1
-        const products = [
-          diagnosticCyber,
-          testIntrusion,
-          microSOC,
-          socManage,
-          investigation,
-          crisisManagement,
-        ]
+
+        // Créer une copie du tableau de produits pour pouvoir en retirer sans affecter l'original
+        const productPool = [...allProducts]
         const selectedProducts = []
 
         // Sélectionner des produits aléatoires sans duplication
-        while (selectedProducts.length < numProducts && products.length > 0) {
-          const randomIndex = Math.floor(Math.random() * products.length)
-          selectedProducts.push(products.splice(randomIndex, 1)[0])
+        while (
+          selectedProducts.length < numProducts &&
+          productPool.length > 0
+        ) {
+          const randomIndex = Math.floor(Math.random() * productPool.length)
+          selectedProducts.push(productPool.splice(randomIndex, 1)[0])
         }
 
         // Créer les éléments de commande

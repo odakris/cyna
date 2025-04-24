@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { useProduct } from "@/hooks/use-product"
 import { useCart, CartItem } from "@/context/CartContext"
-import { TopProducts } from "@/components/TopProducts/TopProducts"
+import { TopProducts } from "@/components/Products/TopProducts"
 import { formatEuro } from "@/lib/utils/format"
 
 export default function ProductPage() {
@@ -108,7 +108,7 @@ export default function ProductPage() {
           <CarouselPlugin />
 
           <div className="mt-8 p-6 bg-white rounded-lg shadow-sm border border-gray-100">
-            <p className="text-lg text-gray-700 leading-relaxed">
+            <p className="text-lg text-gray-700 leading-relaxed mt-4 whitespace-pre-line">
               {product.description}
             </p>
           </div>
@@ -122,7 +122,7 @@ export default function ProductPage() {
             Caractéristiques techniques
             <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
           </h2>
-          <div className="text-gray-700 leading-relaxed mt-4">
+          <div className="text-gray-700 leading-relaxed mt-4 whitespace-pre-line">
             {product.technical_specs}
           </div>
         </div>
