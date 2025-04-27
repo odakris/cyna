@@ -11,7 +11,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet'
 import { ShoppingCart, Trash2 } from 'lucide-react' // Ajout de Trash2
-import { useCart } from '@/context/CartContext'
+import { useCart } from '../../context/CartContext'
 import Image from 'next/image'
 
 export function SideBasket() {

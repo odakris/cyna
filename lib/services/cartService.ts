@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 
 // Définir une interface pour typer les méthodes de cartService
 interface CartService {
+  [x: string]: any;
   clearCart: (id_session: number) => Promise<void>; // Typage de clearCart
   getSessionByToken: (sessionToken: string) => Promise<Session | null>;
   getCartItems: (sessionId: number) => Promise<any>;

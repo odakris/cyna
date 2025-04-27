@@ -1,5 +1,3 @@
-// Schéma Prisma optimisé pour la plateforme e-commerce Cyna SaaS
-// Basé sur le cahier des charges et optimisé pour les performances
 
 generator client {
   provider = "prisma-client-js"
@@ -28,22 +26,22 @@ enum SubscriptionType {
 
 // Statuts possibles pour une commande
 enum OrderStatus {
-  PENDING // Commande créée mais pas encore payée
-  PROCESSING // Paiement reçu, commande en cours de traitement
-  ACTIVE // Commande active (services en cours de livraison)
-  COMPLETED // Tous les services ponctuels livrés et abonnements activés
-  CANCELLED // Commande annulée avant traitement
-  REFUNDED // Commande remboursée
+  PENDING
+  PROCESSING
+  ACTIVE
+  COMPLETED
+  CANCELLED
+  REFUNDED
 }
 
 // Statuts d'abonnement
 enum SubscriptionStatus {
-  PENDING // Abonnement en attente d'activation
-  ACTIVE // Abonnement actif et en cours
-  SUSPENDED // Temporairement suspendu (problème de paiement ou à la demande du client)
-  CANCELLED // Annulé par le client avant terme
-  EXPIRED // Terme atteint, non renouvelé
-  RENEWING // En cours de renouvellement
+  PENDING
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+  EXPIRED
+  RENEWING
 }
 
 // Types de messages dans le chatbot
@@ -147,7 +145,7 @@ model OrderItem {
   subscription_duration Int
   renewal_date          DateTime?
   quantity              Int                @default(1)
-  unit_price            Float              @db.Float // Prix au moment de la commande
+  unit_price            Float              @db.Float
   id_product            Int
   id_order              Int
   product               Product            @relation(fields: [id_product], references: [id_product])
@@ -185,11 +183,12 @@ model Order {
 // Utilisateurs du système
 model User {
   id_user               Int                  @id @default(autoincrement())
-  first_name            String               @db.VarChar(100)
-  last_name             String               @db.VarChar(100)
+  first_name            String?              @db.VarChar(100) // Optionnel pour invités
+  last_name             String?              @db.VarChar(100) // Optionnel pour invités
   email                 String               @unique @db.VarChar(255)
-  password              String               @db.VarChar(255)
+  password              String?              @db.VarChar(255) // Optionnel pour invités
   role                  Role                 @default(CUSTOMER)
+  isGuest               Boolean              @default(false) // Nouveau champ pour invités
   email_verified        Boolean              @default(false)
   verify_token          String?              @db.VarChar(255)
   two_factor_enabled    Boolean              @default(false)
@@ -207,6 +206,7 @@ model User {
 
   @@index([email])
   @@index([role])
+  @@index([isGuest]) // Index pour requêtes sur les invités
   @@index([email_verified])
   @@index([created_at])
 }
@@ -254,7 +254,7 @@ model ContactMessage {
   is_responded  Boolean   @default(false)
   response      String?   @db.Text
   response_date DateTime?
-  id_user       Int? // Optionnel car peut être envoyé par un visiteur non connecté
+  id_user       Int?
   user          User?     @relation(fields: [id_user], references: [id_user])
 
   @@index([id_user])
@@ -269,7 +269,7 @@ model PaymentInfo {
   card_name         String   @db.VarChar(100)
   brand             String   @db.VarChar(50)
   last_card_digits  String   @db.VarChar(4)
-  stripe_payment_id String   @db.VarChar(255) // <-- l'ID du paymentMethod chez Stripe
+  stripe_payment_id String   @db.VarChar(255)
   is_default        Boolean  @default(false)
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt

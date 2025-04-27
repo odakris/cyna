@@ -4,12 +4,23 @@ import NavbarServer from "@/components/Navbar/NavBarServer"
 import { Footer } from "@/components/Footer/Footer"
 import { Toaster } from "@/components/ui/toaster"
 import ChatbotButton from "@/components/Chatbot/ChatbotButton"
+import { prisma } from "@/lib/prisma"
+import { getServerSession } from "next-auth"
 
-export default function SiteLayout({
+export default async function SiteLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+
+  const user = await getServerSession();
+
+  const cart = await prisma.cartItem.findMany({
+    where: {
+      userId_user: user?.user.id
+    }
+  });
+
   return (
     <CartProvider>
       <div className="min-h-screen flex flex-col cyna-text">
