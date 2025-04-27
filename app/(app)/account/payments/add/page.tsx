@@ -10,24 +10,37 @@ export default function AddPaymentMethod() {
   const { data: session } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleCreate = async (newPaymentMethod: any) => {
     setLoading(true)
+    setErrorMessage(null)
 
-    // Vérifie si newPaymentMethod est valide
+    if (!session?.user?.id_user) {
+      console.error("Session utilisateur non trouvée.")
+      setErrorMessage(
+        "Vous devez être connecté pour ajouter une méthode de paiement."
+      )
+      setLoading(false)
+      return
+    }
+
     if (!newPaymentMethod || Object.keys(newPaymentMethod).length === 0) {
       console.error(
+        "Les données de la méthode de paiement sont invalides ou manquantes."
+      )
+      setErrorMessage(
         "Les données de la méthode de paiement sont invalides ou manquantes."
       )
       setLoading(false)
       return
     }
 
-    // Log de debug pour vérifier que newPaymentMethod est bien passé à la fonction
+    console.log("User ID:", session.user.id_user)
     console.log("Données envoyées :", newPaymentMethod)
 
     try {
-      const response = await fetch(`/api/users/${session?.user?.id}/payments`, {
+      const response = await fetch(`/api/users/${session.user.id_user}/payments`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -36,14 +49,21 @@ export default function AddPaymentMethod() {
       })
 
       if (!response.ok) {
+        const errorData = await response.json()
+        console.error("Erreur API:", errorData)
         throw new Error(
-          "Erreur lors de la création de la méthode de paiement (page)."
+          errorData.message ||
+            "Erreur lors de la création de la méthode de paiement."
         )
       }
 
       router.push("/account/settings")
-    } catch (err) {
-      console.error(err)
+    } catch (err: any) {
+      console.error("Erreur dans handleCreate:", err)
+      setErrorMessage(
+        err.message ||
+          "Une erreur est survenue lors de l'ajout de la méthode de paiement."
+      )
     }
 
     setLoading(false)
@@ -51,9 +71,13 @@ export default function AddPaymentMethod() {
 
   return (
     <StripeWrapper>
-      <div className="p-6 space-y-6">
-        <h1 className="text-2xl font-bold">Ajouter une méthode de paiement</h1>
-        {/* On passe la fonction handleCreate comme prop pour gérer la soumission */}
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4">
+          Ajouter une méthode de paiement
+        </h1>
+        {errorMessage && (
+          <div className="text-red-600 text-sm mb-4">{errorMessage}</div>
+        )}
         <PaymentMethodsForm onSubmit={handleCreate} loading={loading} />
       </div>
     </StripeWrapper>

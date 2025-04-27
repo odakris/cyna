@@ -204,6 +204,7 @@ model User {
   sessions              Session[]
   cartItems             CartItem[]
   ChatConversation      ChatConversation[]
+  emailVerifications    EmailVerification[]  @relation // Ajout de la relation inverse
 
   @@index([email])
   @@index([role])
@@ -270,6 +271,8 @@ model PaymentInfo {
   brand             String   @db.VarChar(50)
   last_card_digits  String   @db.VarChar(4)
   stripe_payment_id String   @db.VarChar(255) // <-- l'ID du paymentMethod chez Stripe
+  exp_month         Int
+  exp_year          Int
   is_default        Boolean  @default(false)
   created_at        DateTime @default(now())
   updated_at        DateTime @updatedAt
@@ -301,6 +304,19 @@ model Address {
   @@index([is_default_billing])
   @@index([is_default_shipping])
   @@index([country, region, city])
+}
+
+model EmailVerification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  newEmail  String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id_user], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
 }
 
 // Tokens pour la réinitialisation de mot de passe

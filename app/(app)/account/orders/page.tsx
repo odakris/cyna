@@ -43,10 +43,10 @@ export default function OrdersPage() {
   }
 
   useEffect(() => {
-    if (!session?.user?.id) return
+    if (!session?.user?.id_user) return
     const fetchOrders = async () => {
       try {
-        const res = await fetch(`/api/users/${session.user.id}/orders`)
+        const res = await fetch(`/api/users/${session.user.id_user}/orders`)
         const data = await res.json()
         if (res.ok) setOrders(data)
       } catch (error) {

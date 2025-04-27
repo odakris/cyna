@@ -1,23 +1,33 @@
-// lib/api-permissions.ts
-import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/app/(app)/api/auth/[...nextauth]/route"
-import { hasPermission } from "@/lib/permissions"
-import { Permission } from "@/lib/permissions"
-import { Role } from "@prisma/client"
+import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/(app)/api/auth/[...nextauth]/route";
+import { hasPermission, Permission } from "@/lib/permissions";
 
-export async function checkPermission(
-  permission: Permission
-): Promise<NextResponse | null> {
-  const session = await getServerSession(authOptions)
-  const userRole = session?.user?.role as Role | undefined
+export const checkPermission = async (permission: Permission) => {
+    const session = await getServerSession(authOptions);
+    console.log("Session dans checkPermission:", session);
+    console.log("Permission vérifiée:", permission);
+    if (!session?.user) {
+        console.error("Session utilisateur absente");
+        return NextResponse.json(
+            { error: "Vous devez être connecté" },
+            { status: 401 }
+        );
+    }
 
-  if (!userRole || !hasPermission(userRole, permission)) {
-    return NextResponse.json(
-      { error: "Vous n'avez pas la permission requise pour cette action" },
-      { status: 403 }
-    )
-  }
+    console.log("Rôle utilisateur dans checkPermission:", session.user.role);
+    if (!hasPermission(session.user.role as Role, permission)) {
+        console.error(
+            `Permission ${permission} refusée pour le rôle ${session.user.role}`
+        );
+        return NextResponse.json(
+            { error: "Accès non autorisé" },
+            { status: 401 }
+        );
+    }
 
-  return null
-}
+    console.log(
+        `Permission ${permission} accordée pour le rôle ${session.user.role}`
+    );
+    return null;
+};

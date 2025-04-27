@@ -12,22 +12,43 @@ import {
   TableHead,
   TableRow,
 } from "@/components/ui/table"
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { User } from "next-auth"
+import { Address, Order } from "@prisma/client"
+import { PaymentMethod } from "@stripe/stripe-js"
 
 export default function AccountSettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [clientInfo, setClientInfo] = useState<any>(null)
-  const [orders, setOrders] = useState<any[]>([])
-  const [addresses, setAddresses] = useState<any[]>([])
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([])
+  const [clientInfo, setClientInfo] = useState<User | null>(null)
+  const [orders, setOrders] = useState<Order[]>([])
+  const [addresses, setAddresses] = useState<Address[]>([])
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isDeleteAddressModalOpen, setIsDeleteAddressModalOpen] =
+    useState(false)
+  const [addressToDelete, setAddressToDelete] = useState<number | null>(null)
+  const [isDeletePaymentModalOpen, setIsDeletePaymentModalOpen] =
+    useState(false)
+  const [paymentToDelete, setPaymentToDelete] = useState<number | null>(null)
+  const [modalError, setModalError] = useState<string | null>(null)
+  const [password, setPassword] = useState<string>("") // Nouvel état pour le mot de passe
+  const [passwordError, setPasswordError] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!session?.user?.id) return
+    if (!session?.user?.id_user) return
 
     const fetchClientData = async () => {
       try {
@@ -37,33 +58,215 @@ export default function AccountSettingsPage() {
           addressesResponse,
           paymentsResponse,
         ] = await Promise.all([
-          fetch(`/api/users/${session.user.id}`),
-          fetch(`/api/users/${session.user.id}/orders`),
-          fetch(`/api/users/${session.user.id}/addresses`),
-          fetch(`/api/users/${session.user.id}/payments`),
+          fetch(`/api/users/${session.user.id_user}`, {
+            credentials: "include",
+          }).then(async res => ({
+            ok: res.ok,
+            status: res.status,
+            data: res.ok ? await res.json() : null,
+            error: !res.ok
+              ? await res.json().catch(() => ({ message: "Erreur inconnue" }))
+              : null,
+          })),
+          fetch(`/api/users/${session.user.id_user}/orders`, {
+            credentials: "include",
+          }).then(async res => ({
+            ok: res.ok,
+            status: res.status,
+            data: res.ok ? await res.json() : null,
+            error: !res.ok
+              ? await res.json().catch(() => ({ message: "Erreur inconnue" }))
+              : null,
+          })),
+          fetch(`/api/users/${session.user.id_user}/addresses`, {
+            credentials: "include",
+          }).then(async res => ({
+            ok: res.ok,
+            status: res.status,
+            data: res.ok ? await res.json() : null,
+            error: !res.ok
+              ? await res.json().catch(() => ({ message: "Erreur inconnue" }))
+              : null,
+          })),
+          fetch(`/api/users/${session.user.id_user}/payments`, {
+            credentials: "include",
+          }).then(async res => ({
+            ok: res.ok,
+            status: res.status,
+            data: res.ok ? await res.json() : null,
+            error: !res.ok
+              ? await res.json().catch(() => ({ message: "Erreur inconnue" }))
+              : null,
+          })),
         ])
 
-        const userData = await userResponse.json()
-        const ordersData = await ordersResponse.json()
-        const addressesData = await addressesResponse.json()
-        const paymentsData = await paymentsResponse.json()
+        console.log("User Response:", userResponse)
+        console.log("Orders Response:", ordersResponse)
+        console.log("Addresses Response:", addressesResponse)
+        console.log("Payments Response:", paymentsResponse)
 
-        // console.log("User Data:", userData)
-        // console.log("Orders Data:", ordersData)
-        // console.log("Addresses Data:", addressesData)
-        // console.log("Payments Data:", paymentsData)
+        if (userResponse.ok) setClientInfo(userResponse.data)
+        else
+          setErrorMessage(
+            userResponse.error?.message ||
+              "Erreur lors de la récupération des informations utilisateur"
+          )
 
-        if (userResponse.ok) setClientInfo(userData)
-        if (ordersResponse.ok) setOrders(ordersData)
-        if (addressesResponse.ok) setAddresses(addressesData)
-        if (paymentsResponse.ok) setPaymentMethods(paymentsData)
+        if (ordersResponse.ok) setOrders(ordersResponse.data)
+        else
+          setErrorMessage(
+            ordersResponse.error?.message ||
+              "Erreur lors de la récupération des commandes"
+          )
+
+        if (addressesResponse.ok) setAddresses(addressesResponse.data)
+        else
+          setErrorMessage(
+            addressesResponse.error?.message ||
+              "Erreur lors de la récupération des adresses"
+          )
+
+        if (paymentsResponse.ok) setPaymentMethods(paymentsResponse.data)
+        else
+          setErrorMessage(
+            paymentsResponse.error?.message ||
+              "Erreur lors de la récupération des méthodes de paiement"
+          )
       } catch (error) {
-        console.error("Erreur de récupération des données :", error)
+        console.error("Erreur générale dans fetchClientData:", error)
+        setErrorMessage(
+          "Une erreur est survenue lors de la récupération des données."
+        )
       }
     }
 
     fetchClientData()
   }, [session])
+
+  const checkPassword = async (password: string) => {
+    try {
+      const response = await fetch("/api/check-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password, userId: session?.user?.id_user }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la vérification du mot de passe.")
+      }
+
+      const data = await response.json()
+      return data.isValid
+    } catch (err) {
+      console.error("Erreur lors de la vérification du mot de passe:", err)
+      setPasswordError("Erreur lors de la vérification du mot de passe.")
+      return false
+    }
+  }
+
+  const handleDeletePaymentMethod = async (paymentId: number) => {
+    if (!session?.user?.id_user) {
+      setModalError(
+        "Vous devez être connecté pour supprimer une méthode de paiement."
+      )
+      return
+    }
+
+    if (!password) {
+      setPasswordError("Veuillez entrer votre mot de passe actuel.")
+      return
+    }
+
+    // Vérifier le mot de passe
+    const isPasswordValid = await checkPassword(password)
+    if (!isPasswordValid) {
+      setPasswordError("Mot de passe incorrect.")
+      return
+    }
+
+    try {
+      const response = await fetch(
+        `/api/users/${session.user.id_user}/payments/${paymentId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response
+          .json()
+          .catch(() => ({ message: "Erreur inconnue" }))
+        throw new Error(
+          errorData.message ||
+            "Erreur lors de la suppression de la méthode de paiement."
+        )
+      }
+
+      setPaymentMethods(prev =>
+        prev.filter(payment => payment.id_payment_info !== paymentId)
+      )
+      setModalError(null)
+      setPassword("") // Réinitialiser le mot de passe après succès
+    } catch (err: any) {
+      console.error(
+        "Erreur lors de la suppression de la méthode de paiement:",
+        err
+      )
+      setModalError(
+        err.message ||
+          "Une erreur est survenue lors de la suppression de la méthode de paiement."
+      )
+    } finally {
+      if (!modalError) {
+        setIsDeletePaymentModalOpen(false)
+        setPaymentToDelete(null)
+        setPasswordError(null)
+      }
+    }
+  }
+
+  const handleDeleteAddress = async (addressId: number) => {
+    if (!session?.user?.id_user) {
+      setModalError("Vous devez être connecté pour supprimer une adresse.")
+      return
+    }
+
+    try {
+      const res = await fetch(
+        `/api/users/${session.user.id_user}/addresses?addressId=${addressId}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      )
+
+      if (!res.ok) {
+        const errorData = await res
+          .json()
+          .catch(() => ({ message: "Erreur inconnue" }))
+        throw new Error(
+          errorData.message || "Erreur lors de la suppression de l'adresse."
+        )
+      }
+
+      setAddresses(prev => prev.filter(a => a.id_address !== addressId))
+      setModalError(null)
+    } catch (err: any) {
+      console.error("Erreur lors de la suppression de l'adresse:", err)
+      setModalError(
+        err.message ||
+          "Une erreur est survenue lors de la suppression de l'adresse."
+      )
+    } finally {
+      if (!modalError) {
+        setIsDeleteAddressModalOpen(false)
+        setAddressToDelete(null)
+      }
+    }
+  }
 
   if (status === "loading") {
     return <div>Chargement...</div>
@@ -75,12 +278,14 @@ export default function AccountSettingsPage() {
 
   return (
     <div className="p-6 space-y-12">
+      {errorMessage && (
+        <div className="text-red-600 text-sm mb-4">{errorMessage}</div>
+      )}
       {/* Section Informations personnelles */}
       <div className="space-y-4">
         <h1 className="text-2xl font-bold text-center">
           Informations personnelles
         </h1>
-
         <Card className="space-y-4 p-6">
           <div className="flex items-center space-x-4">
             <Avatar>
@@ -106,12 +311,8 @@ export default function AccountSettingsPage() {
             </div>
           </div>
         </Card>
-
-        {/* Bouton Modifier placé en dehors de la Card, aligné à droite */}
         <div className="flex justify-start">
-          <Button
-            onClick={() => (window.location.href = "/account/editPersonalInfo")}
-          >
+          <Button onClick={() => router.push("/account/editPersonalInfo")}>
             Modifier
           </Button>
         </div>
@@ -124,7 +325,7 @@ export default function AccountSettingsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Nom du service</TableHead>
-              <TableHead>Type d&apos;abonnement</TableHead>
+              <TableHead>Type d'abonnement</TableHead>
               <TableHead>Prix</TableHead>
               <TableHead>Date de renouvellement</TableHead>
               <TableHead>Status</TableHead>
@@ -210,7 +411,7 @@ export default function AccountSettingsPage() {
                   <TableCell>{address.postal_code}</TableCell>
                   <TableCell>{address.city}</TableCell>
                   <TableCell>{address.country}</TableCell>
-                  <TableCell>{address.mobile_phone}</TableCell>
+                  <TableCell>{address.mobile_phone || "N/A"}</TableCell>
                   <TableCell>
                     {address.is_default_billing ? (
                       <Badge variant="default">Facturation</Badge>
@@ -229,37 +430,71 @@ export default function AccountSettingsPage() {
                     >
                       Modifier
                     </Button>
-                    <Button
-                      variant="destructive"
-                      className="ml-2"
-                      onClick={async () => {
-                        try {
-                          const res = await fetch(
-                            `/api/users/${session.user.id}/addresses?addressId=${address.id_address}`,
-                            { method: "DELETE" }
-                          )
-                          if (res.ok) {
-                            setAddresses(prev =>
-                              prev.filter(
-                                a => a.id_address !== address.id_address
-                              )
-                            )
-                          } else {
-                            console.error("Erreur suppression adresse")
-                          }
-                        } catch (err) {
-                          console.error("Erreur suppression adresse :", err)
-                        }
+                    <Dialog
+                      open={
+                        isDeleteAddressModalOpen &&
+                        addressToDelete === address.id_address
+                      }
+                      onOpenChange={open => {
+                        setIsDeleteAddressModalOpen(open)
+                        setModalError(null)
+                        if (!open) setAddressToDelete(null)
                       }}
                     >
-                      Supprimer
-                    </Button>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          className="ml-2"
+                          onClick={() => {
+                            setAddressToDelete(address.id_address)
+                            setIsDeleteAddressModalOpen(true)
+                          }}
+                        >
+                          Supprimer
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Confirmer la suppression</DialogTitle>
+                          <DialogDescription>
+                            Êtes-vous sûr de vouloir supprimer l'adresse "
+                            {address.address1}, {address.city}" ? Cette action
+                            est irréversible.
+                          </DialogDescription>
+                        </DialogHeader>
+                        {modalError && (
+                          <div className="text-red-600 text-sm mb-4">
+                            {modalError}
+                          </div>
+                        )}
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setIsDeleteAddressModalOpen(false)
+                              setAddressToDelete(null)
+                              setModalError(null)
+                            }}
+                          >
+                            Annuler
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={() =>
+                              handleDeleteAddress(address.id_address)
+                            }
+                          >
+                            Supprimer
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">
+                <TableCell colSpan={8} className="text-center">
                   Aucune adresse enregistrée.
                 </TableCell>
               </TableRow>
@@ -271,12 +506,9 @@ export default function AccountSettingsPage() {
       {/* Section Méthodes de paiement */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-center">Méthodes de paiement</h2>
-
-        {/* Bouton Ajouter une carte */}
         <Link href="/account/payments/add">
           <Button>Ajouter une carte</Button>
         </Link>
-
         <Table className="min-w-full mb-12">
           <TableHeader>
             <TableRow>
@@ -295,7 +527,7 @@ export default function AccountSettingsPage() {
                   <TableCell>
                     •••• •••• •••• {payment.last_card_digits}
                   </TableCell>
-                  <TableCell>{`${payment.expiration_month}/${payment.expiration_year}`}</TableCell>
+                  <TableCell>{`${payment.exp_month}/${payment.exp_year}`}</TableCell>
                   <TableCell>
                     {payment.is_default ? (
                       <Badge variant="default">Oui</Badge>
@@ -304,10 +536,94 @@ export default function AccountSettingsPage() {
                     )}
                   </TableCell>
                   <TableCell>
-                    {/* Bouton Modifier */}
                     <Link href={`/account/payments/${payment.id_payment_info}`}>
                       <Button variant="default">Modifier</Button>
                     </Link>
+                    <Dialog
+                      open={
+                        isDeletePaymentModalOpen &&
+                        paymentToDelete === payment.id_payment_info
+                      }
+                      onOpenChange={open => {
+                        setIsDeletePaymentModalOpen(open)
+                        setModalError(null)
+                        setPasswordError(null)
+                        setPassword("")
+                        if (!open) setPaymentToDelete(null)
+                      }}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          className="ml-2"
+                          onClick={() => {
+                            setPaymentToDelete(payment.id_payment_info)
+                            setIsDeletePaymentModalOpen(true)
+                          }}
+                        >
+                          Supprimer
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Confirmer la suppression</DialogTitle>
+                          <DialogDescription>
+                            Êtes-vous sûr de vouloir supprimer la méthode de
+                            paiement se terminant par {payment.last_card_digits}{" "}
+                            ? Cette action est irréversible. Veuillez entrer
+                            votre mot de passe actuel pour confirmer.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div>
+                          <label
+                            htmlFor="password"
+                            className="block text-sm font-medium text-gray-700"
+                          >
+                            Mot de passe actuel
+                          </label>
+                          <input
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            required
+                            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          />
+                          {passwordError && (
+                            <div className="text-red-600 text-sm mt-2">
+                              {passwordError}
+                            </div>
+                          )}
+                        </div>
+                        {modalError && (
+                          <div className="text-red-600 text-sm mb-4">
+                            {modalError}
+                          </div>
+                        )}
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setIsDeletePaymentModalOpen(false)
+                              setPaymentToDelete(null)
+                              setModalError(null)
+                              setPasswordError(null)
+                              setPassword("")
+                            }}
+                          >
+                            Annuler
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={() =>
+                              handleDeletePaymentMethod(payment.id_payment_info)
+                            }
+                          >
+                            Supprimer
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </TableCell>
                 </TableRow>
               ))

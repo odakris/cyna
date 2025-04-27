@@ -2,16 +2,26 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Prisma } from "@prisma/client"
 import { userFormSchema } from "@/lib/validations/user-schema"
 import { z } from "zod"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { toast } from "react-hot-toast"
 
-export default function PersonalInfoForm({ user }: { user: Prisma.User }) {
+type User = {
+  id_user: number
+  first_name: string
+  last_name: string
+  email: string
+}
+
+export default function PersonalInfoForm({ user }: { user: User }) {
   const [formData, setFormData] = useState({
     first_name: user.first_name || "",
     last_name: user.last_name || "",
     email: user.email || "",
-    password: user.password || "",
+    currentPassword: "", // nouveau champ
+    newPassword: "", // nouveau champ
   })
 
   const [errors, setErrors] = useState<
@@ -30,26 +40,42 @@ export default function PersonalInfoForm({ user }: { user: Prisma.User }) {
     setLoading(true)
 
     try {
-      // Validation avec Zod
-      const validatedData = userFormSchema.parse({
-        ...formData,
-        role: "CUSTOMER", // requis par le schéma
-      })
+      const { first_name, last_name, email, currentPassword, newPassword } =
+        formData
 
-      const res = await fetch(`/api/users/${user.id_user}`, {
-        method: "PUT",
+      // Valider les données
+      const validatedData = userFormSchema
+        .partial()
+        .parse({ first_name, last_name, email })
+
+      if (newPassword) {
+        userFormSchema.shape.password.parse(newPassword)
+      }
+
+      const res = await fetch(`/api/users/${user.id_user}/email-verification`, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(validatedData),
+        credentials: "include",
+        body: JSON.stringify({
+          ...validatedData,
+          currentPassword,
+          newPassword,
+        }),
       })
 
       const result = await res.json()
-
       if (!res.ok) {
         throw new Error(result.message || "Erreur lors de la mise à jour.")
       }
 
+      // Afficher un message de succès
+      const message =
+        formData.email !== user.email
+          ? "Un e-mail de confirmation a été envoyé à votre nouvelle adresse."
+          : "Informations mises à jour avec succès."
+      toast.success(message)
       router.push("/account/settings")
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -60,7 +86,8 @@ export default function PersonalInfoForm({ user }: { user: Prisma.User }) {
         })
         setErrors(fieldErrors)
       } else {
-        alert((err as Error).message || "Une erreur est survenue")
+        toast.error((err as Error).message || "Une erreur est survenue")
+        console.error("Erreur:", err)
       }
     } finally {
       setLoading(false)
@@ -72,68 +99,93 @@ export default function PersonalInfoForm({ user }: { user: Prisma.User }) {
       <h2 className="text-xl font-bold mb-4">Informations personnelles</h2>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block font-medium">Prénom</label>
-          <input
-            type="text"
+          <label htmlFor="first_name" className="block font-medium">
+            Prénom
+          </label>
+          <Input
+            id="first_name"
             name="first_name"
             value={formData.first_name}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="mt-1"
           />
           {errors.first_name && (
-            <p className="text-red-500 text-sm">{errors.first_name}</p>
+            <p className="text-red-500 text-sm mt-1">{errors.first_name}</p>
           )}
         </div>
 
         <div>
-          <label className="block font-medium">Nom</label>
-          <input
-            type="text"
+          <label htmlFor="last_name" className="block font-medium">
+            Nom
+          </label>
+          <Input
+            id="last_name"
             name="last_name"
             value={formData.last_name}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="mt-1"
           />
           {errors.last_name && (
-            <p className="text-red-500 text-sm">{errors.last_name}</p>
+            <p className="text-red-500 text-sm mt-1">{errors.last_name}</p>
           )}
         </div>
 
         <div>
-          <label className="block font-medium">Email</label>
-          <input
+          <label htmlFor="email" className="block font-medium">
+            Email
+          </label>
+          <Input
+            id="email"
             type="email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="mt-1"
           />
           {errors.email && (
-            <p className="text-red-500 text-sm">{errors.email}</p>
+            <p className="text-red-500 text-sm mt-1">{errors.email}</p>
           )}
         </div>
 
         <div>
-          <label className="block font-medium">Mot de passe</label>
-          <input
+          <label htmlFor="currentPassword" className="block font-medium">
+            Mot de passe actuel
+          </label>
+          <Input
+            id="currentPassword"
+            name="currentPassword"
             type="password"
-            name="password"
-            value={formData.password}
+            value={formData.currentPassword}
             onChange={handleChange}
-            className="w-full border p-2 rounded"
+            className="mt-1"
           />
-          {errors.password && (
-            <p className="text-red-500 text-sm">{errors.password}</p>
+          {errors.currentPassword && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.currentPassword}
+            </p>
           )}
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded mt-4"
-          disabled={loading}
-        >
+        <div>
+          <label htmlFor="newPassword" className="block font-medium">
+            Nouveau mot de passe
+          </label>
+          <Input
+            id="newPassword"
+            name="newPassword"
+            type="password"
+            value={formData.newPassword}
+            onChange={handleChange}
+            className="mt-1"
+          />
+          {errors.newPassword && (
+            <p className="text-red-500 text-sm mt-1">{errors.newPassword}</p>
+          )}
+        </div>
+
+        <Button type="submit" disabled={loading} className="w-full">
           {loading ? "Enregistrement..." : "Enregistrer"}
-        </button>
+        </Button>
       </form>
     </div>
   )
