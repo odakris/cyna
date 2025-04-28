@@ -1,67 +1,81 @@
-import React, { useEffect, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import React from "react"
 import Image from "next/image"
-import { CategoryType } from "../../types/Types"
-import { Skeleton } from "../ui/skeleton"
+import Link from "next/link"
+import { useCategories } from "@/hooks/use-categories"
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Badge } from "@/components/ui/badge"
+import { CategoryWithProductCount } from "@/types/frontend-types"
 
 export function CategoryGrid() {
-  const [categories, setCategories] = useState<CategoryType[]>([])
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const fetchAllCategories = async () => {
-      try {
-        const response = await fetch(`/api/categories`)
-        if (!response.ok)
-          throw new Error("Erreur lors de la récupération des catégories")
-        const data: CategoryType[] = await response.json()
-        setCategories(data)
-      } catch (error) {
-        setError("Erreur lors de la récupération des catégories")
-        console.error("Erreur :", error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    fetchAllCategories()
-  }, [])
+  const { categories, loading, error } = useCategories()
 
   if (error) {
     return (
-      <p className="text-center mt-10 text-red-500">
-        {error ?? "Catégories non trouvées."}
-      </p>
+      <div className="w-full p-6 text-center">
+        <div className="rounded-lg bg-red-50 p-4 text-red-500 border border-red-200">
+          <p className="text-sm font-medium">
+            {error ?? "Erreur lors du chargement des catégories"}
+          </p>
+        </div>
+      </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {loading
         ? Array.from({ length: 3 }).map((_, index) => (
             <Skeleton key={index} className="w-full h-60 rounded-lg" />
           ))
         : categories.map(category => (
-            <Card
-              key={category.id_category}
-              href={`/categorie/${category.id_category}`}
-            >
-              <CardContent className="relative p-0">
-                <Image
-                  src={`/images/cyber${category.id_category}.jpg`}
-                  alt={category.name}
-                  className="w-full h-48 object-cover rounded-t-lg"
-                  width={400}
-                  height={240}
-                />
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <h2 className="text-white text-lg font-bold drop-shadow-lg">
-                    {category.name}
-                  </h2>
-                </div>
-              </CardContent>
-            </Card>
+            <CategoryCard key={category.id_category} category={category} />
           ))}
     </div>
+  )
+}
+
+interface CategoryCardProps {
+  category: CategoryWithProductCount
+}
+
+function CategoryCard({ category }: CategoryCardProps) {
+  const productCount = category._count?.products || 0
+
+  return (
+    <Link
+      href={`/categorie/${category.id_category}`}
+      passHref
+      className="block transform transition-all duration-300 hover:scale-[1.02]"
+    >
+      <Card className="group overflow-hidden h-full cursor-pointer hover:shadow-lg transition-all duration-300 bg-gradient-to-br from-white to-gray-50 border-2 border-transparent hover:border-[#302082]">
+        <CardContent className="p-0 relative">
+          <div className="relative h-48 overflow-hidden">
+            <Image
+              src={category.image || `/images/cyber${category.id_category}.jpg`}
+              alt={category.name}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent group-hover:from-[#302082]/70 transition-colors duration-300" />
+          </div>
+
+          <div className="absolute bottom-0 left-0 w-full p-4 text-white">
+            <div className="flex items-end justify-between">
+              <h3 className="text-xl font-bold mb-1 drop-shadow-md">
+                {category.name}
+              </h3>
+
+              {productCount > 0 && (
+                <Badge className="bg-[#302082] text-white group-hover:bg-[#FF6B00] transition-colors duration-300">
+                  {productCount} produit{productCount > 1 ? "s" : ""}
+                </Badge>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   )
 }

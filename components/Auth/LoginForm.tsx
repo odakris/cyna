@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { z } from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import {
   Form,
   FormControl,
@@ -10,72 +10,72 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from "@/components/ui/form"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation"; // Ajout pour redirection
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { useState } from "react"
+import { signIn } from "next-auth/react"
+import Link from "next/link"
+import { useRouter } from "next/navigation" // Ajout pour redirection
 
 const formSchema = z.object({
   email: z.string().min(1, "L'email est requis").email("Email invalide"),
   password: z.string().min(1, "Le mot de passe est requis"),
-});
+})
 
-type FormData = z.infer<typeof formSchema>;
+type FormData = z.infer<typeof formSchema>
 
 const LoginForm: React.FC = () => {
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter(); // Ajout pour redirection
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter() // Ajout pour redirection
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: { email: "", password: "" },
-  });
+  })
 
   const handleSubmit = async (data: FormData) => {
-    setErrorMessage(null);
-    setIsLoading(true);
-    console.log("LoginForm - Données envoyées:", data); // Log des données
+    setErrorMessage(null)
+    setIsLoading(true)
+    console.log("LoginForm - Données envoyées:", data) // Log des données
 
     const result = await signIn("credentials", {
       redirect: false,
       email: data.email,
       password: data.password,
-    });
+    })
 
-    setIsLoading(false);
+    setIsLoading(false)
 
     if (result?.error) {
       switch (result.error) {
         case "Email et mot de passe requis":
-          setErrorMessage("Veuillez remplir tous les champs.");
-          break;
+          setErrorMessage("Veuillez remplir tous les champs.")
+          break
         case "Utilisateur non trouvé":
-          setErrorMessage("Aucun compte n'est associé à cet email.");
-          break;
+          setErrorMessage("Aucun compte n'est associé à cet email.")
+          break
         case "Mot de passe incorrect":
-          setErrorMessage("Mot de passe incorrect.");
-          break;
+          setErrorMessage("Mot de passe incorrect.")
+          break
         default:
-          setErrorMessage("Une erreur est survenue lors de la connexion.");
+          setErrorMessage("Une erreur est survenue lors de la connexion.")
       }
-      console.log("LoginForm - Erreur de connexion:", result.error);
+      console.log("LoginForm - Erreur de connexion:", result.error)
     } else {
       // Succès : rediriger vers une page (par exemple, la page d'accueil)
-      console.log("LoginForm - Connexion réussie:", result);
-      router.push("/"); // Redirection après succès
+      console.log("LoginForm - Connexion réussie:", result)
+      router.push("/") // Redirection après succès
     }
-  };
+  }
 
   return (
     <Card className="max-w-md mx-auto">
@@ -85,7 +85,10 @@ const LoginForm: React.FC = () => {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-6"
+          >
             {errorMessage && (
               <p className="text-red-500 text-sm text-center">{errorMessage}</p>
             )}
@@ -146,7 +149,7 @@ const LoginForm: React.FC = () => {
         </Form>
       </CardContent>
     </Card>
-  );
-};
+  )
+}
 
-export default LoginForm;
+export default LoginForm

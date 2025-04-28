@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
-import { CategoryType, ProductWithImages } from "@/types/Types"
+import { ProductWithImages } from "@/types/Types"
 import {
   Card,
   CardContent,
@@ -45,13 +45,14 @@ import {
 } from "@/components/ui/dialog"
 import PermissionGuard from "@/components/Auth/PermissionGuard"
 import { ProductDetailSkeleton } from "@/components/Skeletons/ProductSkeletons"
+import { Category } from "@prisma/client"
 
 export default function ProductDetailsPage() {
   const { id } = useParams() as { id: string }
   const router = useRouter()
   const { toast } = useToast()
   const [product, setProduct] = useState<ProductWithImages | null>(null)
-  const [category, setCategory] = useState<CategoryType | null>(null)
+  const [category, setCategory] = useState<Category | null>(null)
   const [loading, setLoading] = useState<boolean>(true)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
@@ -66,7 +67,7 @@ export default function ProductDetailsPage() {
         if (!productData) throw new Error("Produit introuvable")
         setProduct(productData)
 
-        const categoryData: CategoryType | null = await fetch(
+        const categoryData: Category | null = await fetch(
           `/api/categories/${productData.id_category}`
         ).then(res => res.json())
 

@@ -30,12 +30,12 @@ export default async function SiteLayout({
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 max-w-7xl w-full mx-auto py-4 px-10 mt-20">
+        <main className="flex-1 w-full mx-auto py-4 px-4 sm:px-6 md:px-8 lg:px-10 mt-16 sm:mt-18 lg:mt-20 md:max-w-5xl lg:max-w-6xl xl:max-w-7xl">
           {children}
         </main>
         <Toaster />
 
-        {/* Chatbot Button - Ajouté ici */}
+        {/* Chatbot Button */}
         <ChatbotButton />
 
         {/* Footer */}

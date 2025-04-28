@@ -104,7 +104,7 @@ export default function EditCategoryPage() {
     )
   }
 
-  // Conversion du CategoryType en CategoriesFormValues
+  // Conversion du Category en CategoriesFormValues
   const initialData: CategoryFormValues = {
     name: category.name,
     description: category.description,

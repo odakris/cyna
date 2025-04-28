@@ -20,13 +20,37 @@ export function AddressForm({
   onSubmit,
   loading,
 }: AddressFormProps) {
-  const [address, setAddress] = useState<Partial<AddressFormValues>>(
-    initialData || {}
-  )
+  const [address, setAddress] = useState<AddressFormValues>({
+    first_name: initialData?.first_name || "",
+    last_name: initialData?.last_name || "",
+    address1: initialData?.address1 || "",
+    address2: initialData?.address2 || "",
+    postal_code: initialData?.postal_code || "",
+    city: initialData?.city || "",
+    country: initialData?.country || "",
+    region: initialData?.region || "",
+    mobile_phone: initialData?.mobile_phone || "",
+    is_default_billing: initialData?.is_default_billing ? 1 : 0,
+    is_default_shipping: initialData?.is_default_shipping ? 1 : 0,
+  })
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
-    if (initialData) setAddress(initialData)
+    if (initialData) {
+      setAddress({
+        first_name: initialData.first_name || "",
+        last_name: initialData.last_name || "",
+        address1: initialData.address1 || "",
+        address2: initialData.address2 || "",
+        postal_code: initialData.postal_code || "",
+        city: initialData.city || "",
+        country: initialData.country || "",
+        region: initialData.region || "",
+        mobile_phone: initialData.mobile_phone || "",
+        is_default_billing: initialData.is_default_billing ? 1 : 0,
+        is_default_shipping: initialData.is_default_shipping ? 1 : 0,
+      })
+    }
   }, [initialData])
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -56,7 +80,7 @@ export function AddressForm({
           </label>
           <Input
             id="first_name"
-            value={address.first_name || ""}
+            value={address.first_name}
             onChange={e =>
               setAddress({ ...address, first_name: e.target.value })
             }
@@ -71,7 +95,7 @@ export function AddressForm({
           </label>
           <Input
             id="last_name"
-            value={address.last_name || ""}
+            value={address.last_name}
             onChange={e =>
               setAddress({ ...address, last_name: e.target.value })
             }
@@ -90,7 +114,7 @@ export function AddressForm({
           </label>
           <Input
             id="address1"
-            value={address.address1 || ""}
+            value={address.address1}
             onChange={e => setAddress({ ...address, address1: e.target.value })}
           />
           {errors.address1 && (
@@ -103,7 +127,7 @@ export function AddressForm({
           </label>
           <Input
             id="address2"
-            value={address.address2 || ""}
+            value={address.address2}
             onChange={e => setAddress({ ...address, address2: e.target.value })}
           />
           {errors.address2 && (
@@ -120,7 +144,7 @@ export function AddressForm({
           </label>
           <Input
             id="postal_code"
-            value={address.postal_code || ""}
+            value={address.postal_code}
             onChange={e =>
               setAddress({ ...address, postal_code: e.target.value })
             }
@@ -135,7 +159,7 @@ export function AddressForm({
           </label>
           <Input
             id="city"
-            value={address.city || ""}
+            value={address.city}
             onChange={e => setAddress({ ...address, city: e.target.value })}
           />
           {errors.city && <p className="text-sm text-red-500">{errors.city}</p>}
@@ -146,7 +170,7 @@ export function AddressForm({
           </label>
           <Input
             id="country"
-            value={address.country || ""}
+            value={address.country}
             onChange={e => setAddress({ ...address, country: e.target.value })}
           />
           {errors.country && (
@@ -159,7 +183,7 @@ export function AddressForm({
           </label>
           <Input
             id="region"
-            value={address.region || ""}
+            value={address.region}
             onChange={e => setAddress({ ...address, region: e.target.value })}
           />
           {errors.region && (
@@ -176,7 +200,7 @@ export function AddressForm({
           </label>
           <Input
             id="mobile_phone"
-            value={address.mobile_phone || ""}
+            value={address.mobile_phone}
             onChange={e =>
               setAddress({ ...address, mobile_phone: e.target.value })
             }
@@ -187,13 +211,13 @@ export function AddressForm({
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">
-            Type d&apos;adresse :
+            Type d'adresse :
           </label>
           <div className="flex gap-4">
             <div className="flex items-center gap-2">
               <Checkbox
                 id="billing"
-                checked={address.is_default_billing === 1}
+                checked={!!address.is_default_billing}
                 onCheckedChange={(val: boolean) =>
                   setAddress({ ...address, is_default_billing: val ? 1 : 0 })
                 }
@@ -203,7 +227,7 @@ export function AddressForm({
             <div className="flex items-center gap-2">
               <Checkbox
                 id="shipping"
-                checked={address.is_default_shipping === 1}
+                checked={!!address.is_default_shipping}
                 onCheckedChange={(val: boolean) =>
                   setAddress({ ...address, is_default_shipping: val ? 1 : 0 })
                 }

@@ -125,11 +125,12 @@ CREATE TABLE `Order` (
 -- CreateTable
 CREATE TABLE `User` (
     `id_user` INTEGER NOT NULL AUTO_INCREMENT,
-    `first_name` VARCHAR(100) NOT NULL,
-    `last_name` VARCHAR(100) NOT NULL,
+    `first_name` VARCHAR(100) NULL,
+    `last_name` VARCHAR(100) NULL,
     `email` VARCHAR(255) NOT NULL,
-    `password` VARCHAR(255) NOT NULL,
+    `password` VARCHAR(255) NULL,
     `role` ENUM('CUSTOMER', 'MANAGER', 'ADMIN', 'SUPER_ADMIN') NOT NULL DEFAULT 'CUSTOMER',
+    `isGuest` BOOLEAN NOT NULL DEFAULT false,
     `email_verified` BOOLEAN NOT NULL DEFAULT false,
     `verify_token` VARCHAR(255) NULL,
     `two_factor_enabled` BOOLEAN NOT NULL DEFAULT false,
@@ -140,6 +141,7 @@ CREATE TABLE `User` (
     UNIQUE INDEX `User_email_key`(`email`),
     INDEX `User_email_idx`(`email`),
     INDEX `User_role_idx`(`role`),
+    INDEX `User_isGuest_idx`(`isGuest`),
     INDEX `User_email_verified_idx`(`email_verified`),
     INDEX `User_created_at_idx`(`created_at`),
     PRIMARY KEY (`id_user`)
@@ -203,6 +205,8 @@ CREATE TABLE `PaymentInfo` (
     `brand` VARCHAR(50) NOT NULL,
     `last_card_digits` VARCHAR(4) NOT NULL,
     `stripe_payment_id` VARCHAR(255) NOT NULL,
+    `exp_month` INTEGER NOT NULL,
+    `exp_year` INTEGER NOT NULL,
     `is_default` BOOLEAN NOT NULL DEFAULT false,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
@@ -234,6 +238,21 @@ CREATE TABLE `Address` (
     INDEX `Address_is_default_shipping_idx`(`is_default_shipping`),
     INDEX `Address_country_region_city_idx`(`country`, `region`, `city`),
     PRIMARY KEY (`id_address`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `EmailVerification` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `userId` INTEGER NOT NULL,
+    `newEmail` VARCHAR(191) NOT NULL,
+    `token` VARCHAR(191) NOT NULL,
+    `expiresAt` DATETIME(3) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+
+    UNIQUE INDEX `EmailVerification_token_key`(`token`),
+    INDEX `EmailVerification_userId_idx`(`userId`),
+    INDEX `EmailVerification_token_idx`(`token`),
+    PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -318,6 +337,9 @@ ALTER TABLE `PaymentInfo` ADD CONSTRAINT `PaymentInfo_id_user_fkey` FOREIGN KEY 
 
 -- AddForeignKey
 ALTER TABLE `Address` ADD CONSTRAINT `Address_id_user_fkey` FOREIGN KEY (`id_user`) REFERENCES `User`(`id_user`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `EmailVerification` ADD CONSTRAINT `EmailVerification_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `User`(`id_user`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `PasswordResetToken` ADD CONSTRAINT `PasswordResetToken_id_user_fkey` FOREIGN KEY (`id_user`) REFERENCES `User`(`id_user`) ON DELETE CASCADE ON UPDATE CASCADE;

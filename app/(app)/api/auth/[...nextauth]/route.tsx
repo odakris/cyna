@@ -8,23 +8,30 @@ const prisma = new PrismaClient()
 declare module "next-auth" {
   interface Session {
     user: {
-      id: string
-      firstName: string
-      lastName: string
-      role?: string
+      id_user: number
+      first_name: string
+      last_name: string
+      email: string
+      role: string
     } & DefaultSession["user"]
   }
 
   interface User {
-    role?: string
-    id: string
+    id_user: number
+    first_name: string
+    last_name: string
+    email: string
+    role: string
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
-    role?: string
-    id: string
+    id_user: number
+    first_name: string
+    last_name: string
+    email: string
+    role: string
   }
 }
 
@@ -49,7 +56,9 @@ export const authOptions: NextAuthOptions = {
         })
         console.log(
           "Authorize - Utilisateur trouvé:",
-          user ? { id: user.id_user, email: user.email } : null
+          user
+            ? { id_user: user.id_user, email: user.email, role: user.role }
+            : null
         )
 
         if (!user || !user.password) {
@@ -59,19 +68,23 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Utilisateur non trouvé")
         }
 
-        const isPasswordValid = await user.password
+        const isPasswordValid = await bcrypt.compare(
+          credentials.password,
+          user.password
+        )
         console.log("Authorize - Mot de passe valide:", isPasswordValid)
 
         if (!isPasswordValid) {
+          console.log("Authorize - Erreur: Mot de passe incorrect")
           throw new Error("Mot de passe incorrect")
         }
 
         return {
-          id: user.id_user.toString(), // id doit être une string et requis
+          id_user: user.id_user,
           email: user.email,
+          first_name: user.first_name,
+          last_name: user.last_name,
           role: user.role,
-          firstName: user.first_name,
-          lastName: user.last_name,
         }
       },
     }),
@@ -79,22 +92,20 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
+        token.id_user = user.id_user
+        token.email = user.email
+        token.first_name = user.first_name
+        token.last_name = user.last_name
         token.role = user.role
       }
       return token
     },
     async session({ session, token }) {
-      if (token.id) {
-        session.user.id = token.id
-      }
-      if (token.role) {
-        session.user.role = token.role
-      }
-      if (token.role) {
-        session.user.role = token.role
-      }
-      if (token.role) {
+      if (token) {
+        session.user.id_user = token.id_user
+        session.user.email = token.email
+        session.user.first_name = token.first_name
+        session.user.last_name = token.last_name
         session.user.role = token.role
       }
       return session

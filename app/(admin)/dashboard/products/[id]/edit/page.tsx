@@ -67,7 +67,7 @@ export default function EditProductPage() {
     )
   }
 
-  // Conversion du ProductType en ProductFormValues
+  // Conversion du Product en ProductFormValues
   const initialData: ProductFormValues = {
     name: product.name,
     description: product.description,

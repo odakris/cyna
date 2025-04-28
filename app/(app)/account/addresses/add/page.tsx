@@ -25,7 +25,7 @@ export default function AddAddressPage() {
 
     try {
       const response = await fetch(
-        `/api/users/${session?.user?.id}/addresses`,
+        `/api/users/${session?.user?.id_user}/addresses`,
         {
           method: "POST",
           headers: {

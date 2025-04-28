@@ -24,6 +24,105 @@ body {
 } */
 
 /* CYNA COLORS */
+/* Styles personnalisés pour CYNA */
+
+/* Classes pour les couleurs CYNA */
+.cyna-primary {
+  color: #302082;
+}
+
+.cyna-bg-primary {
+  background-color: #302082;
+}
+
+.cyna-border-primary {
+  border-color: #302082;
+}
+
+.cyna-hover-primary:hover {
+  color: #302082;
+}
+
+.cyna-hover-bg-primary:hover {
+  background-color: #302082;
+}
+
+.cyna-hover-border-primary:hover {
+  border-color: #302082;
+}
+
+.cyna-secondary {
+  color: #FF6B00;
+}
+
+.cyna-bg-secondary {
+  background-color: #FF6B00;
+}
+
+.cyna-border-secondary {
+  border-color: #FF6B00;
+}
+
+.cyna-hover-secondary:hover {
+  color: #FF6B00;
+}
+
+.cyna-hover-bg-secondary:hover {
+  background-color: #FF6B00;
+}
+
+.cyna-hover-border-secondary:hover {
+  border-color: #FF6B00;
+}
+
+.cyna-tertiary {
+  color: #F2F2F2;
+}
+
+.cyna-bg-tertiary {
+  background-color: #F2F2F2;
+}
+
+/* Effet de hover pour les cartes de produits */
+.product-card-hover {
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.product-card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(48, 32, 130, 0.2);
+  border-color: #302082;
+}
+
+.product-card-hover:hover .product-title {
+  color: #FF6B00;
+}
+
+.product-card-hover:hover .product-image {
+  transform: scale(1.05);
+}
+
+/* Effet de hover pour les cartes de catégories */
+.category-card-hover {
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.category-card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(48, 32, 130, 0.2);
+  border-color: #302082;
+}
+
+.category-card-hover:hover .category-overlay {
+  background-image: linear-gradient(to top, rgba(48, 32, 130, 0.7), transparent);
+}
+
+.category-card-hover:hover .category-image {
+  transform: scale(1.05);
+}
+
 .cyna-bg-primary-color {
   background-color: #302082;
 }

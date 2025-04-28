@@ -1,7 +1,8 @@
 import productRepository from "@/lib/repositories/product-repository"
 import { ProductFormValues } from "@/lib/validations/product-schema"
 import { Product } from "@prisma/client"
-import categoryRepository from "../repositories/category-repository"
+import categoryRepository from "@/lib/repositories/category-repository"
+import { sortProducts } from "@/lib/utils/product-utils"
 
 /**
  * Récupère la liste complète des produits depuis le dépôt de données.
@@ -9,7 +10,8 @@ import categoryRepository from "../repositories/category-repository"
  */
 export const getAllProducts = async (): Promise<Product[]> => {
   try {
-    return await productRepository.findAll()
+    const products = await productRepository.findAll()
+    return sortProducts(products) // Appliquer le tri
   } catch (error) {
     console.error("Erreur lors de la récupération des produits:", error)
     throw new Error("Erreur lors de la récupération des produits")
@@ -40,7 +42,7 @@ export const getProductById = async (id: number): Promise<Product> => {
 /**
  * Crée un nouveau produit en base de données.
  * @param {ProductFormValues} data - Données du produit à enregistrer.
- * @returns {Promise<ProductType>} Le produit nouvellement créé.
+ * @returns {Promise<Product>} Le produit nouvellement créé.
  */
 export const createProduct = async (
   data: ProductFormValues
