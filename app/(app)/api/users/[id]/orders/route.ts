@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import OrderController from "@/lib/controllers/order-controller";
 
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
     try {
-        const { id } = await context.params;
+        // Résoudre params avec await
+        const { id } = await params;
+
         if (!id) {
             return NextResponse.json({ error: "User ID is required" }, { status: 400 });
         }
-        return await OrderController.getUserOrders(id);
+
+        return await OrderController.getUserOrderHistoryForDisplay(id);
     } catch (error) {
-        console.error("Error fetching orders in API route:", error);
-        return NextResponse.json({ error: "API Error fetching orders" }, { status: 500 });
+        console.error("Error fetching order history in API route:", error || "Unknown error");
+        return NextResponse.json({ error: "API Error fetching order history" }, { status: 500 });
     }
 }
