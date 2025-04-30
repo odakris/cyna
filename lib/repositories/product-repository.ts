@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { ProductFormValues } from "@/lib/validations/product-schema"
 import { Product } from "@prisma/client"
-import { TransactionClient } from "../../types/Types"
+import { TransactionClient } from "@/types/Types"
 
 /**
  * Récupère la liste complète des produits avec leur catégorie associée.

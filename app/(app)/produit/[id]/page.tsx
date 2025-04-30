@@ -45,7 +45,8 @@ export default function ProductPage() {
     )
   }
 
-  if (!product) {
+  // Vérification que le produit existe et est actif
+  if (!product || !product.active) {
     return (
       <div className="w-full p-4 sm:p-6 text-center">
         <div className="rounded-lg bg-amber-50 p-4 text-amber-700 border border-amber-200">

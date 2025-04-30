@@ -28,6 +28,7 @@ export function useTopProducts(limit: number = 4) {
           .sort((a, b) => a.priority_order - b.priority_order)
           .slice(0, limit)
           .map(product => ({ ...product, isFeatured: true }))
+          .filter(product => product.active)
 
         setProducts(sortedProducts)
       } catch (error) {
