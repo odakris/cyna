@@ -1,37 +1,42 @@
 import { useState, useEffect } from "react"
-import { CategoryWithProductCount } from "@/types/frontend-types"
+import { useToast } from "@/hooks/use-toast"
+import { Category } from "@prisma/client"
 
-/**
- * Hook personnalisé pour récupérer les catégories depuis l'API
- * @returns Les catégories, l'état de chargement et les éventuelles erreurs
- */
 export function useCategories() {
-  const [categories, setCategories] = useState<CategoryWithProductCount[]>([])
+  const { toast } = useToast()
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         setLoading(true)
-        const response = await fetch("/api/categories")
+        const data = await fetch("/api/categories").then(res => res.json())
 
-        if (!response.ok) {
-          throw new Error("Erreur lors de la récupération des catégories")
-        }
+        if (!data) throw new Error("Catégories introuvables")
 
-        const data = await response.json()
         setCategories(data)
+        setErrorMessage(null)
       } catch (error) {
-        setError(error instanceof Error ? error.message : "Erreur inconnue")
-        console.error("Erreur:", error)
+        console.error("Erreur fetchCategories:", error)
+        setErrorMessage("Erreur lors du chargement des catégories.")
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les catégories.",
+          variant: "destructive",
+        })
       } finally {
         setLoading(false)
       }
     }
 
     fetchCategories()
-  }, [])
+  }, [toast])
 
-  return { categories, loading, error }
+  return {
+    categories,
+    loading,
+    errorMessage,
+  }
 }
