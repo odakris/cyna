@@ -325,7 +325,7 @@ export default function AccountSettingsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Nom du service</TableHead>
-              <TableHead>Type d'abonnement</TableHead>
+              <TableHead>Type d&apos;abonnement</TableHead>
               <TableHead>Prix</TableHead>
               <TableHead>Date de renouvellement</TableHead>
               <TableHead>Status</TableHead>
@@ -457,8 +457,8 @@ export default function AccountSettingsPage() {
                         <DialogHeader>
                           <DialogTitle>Confirmer la suppression</DialogTitle>
                           <DialogDescription>
-                            Êtes-vous sûr de vouloir supprimer l'adresse "
-                            {address.address1}, {address.city}" ? Cette action
+                            Êtes-vous sûr de vouloir supprimer l&apos;adresse &quot;
+                            {address.address1}, {address.city}&quot; ? Cette action
                             est irréversible.
                           </DialogDescription>
                         </DialogHeader>
