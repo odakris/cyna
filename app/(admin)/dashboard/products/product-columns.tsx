@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import ActionsCell from "@/components/Admin/ActionCell"
+import ProductActiveSwitch from "@/components/Admin/Products/ProductActiveSwitch"
 
 export const productsFilterFn: FilterFn<ProductWithImages> = (
   row,
@@ -306,6 +307,18 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
       )
     },
     enableSorting: true,
+  },
+  {
+    accessorKey: "active",
+    header: "Actif",
+    cell: ({ row }) => (
+      <div className="flex justify-center">
+        <ProductActiveSwitch
+          productId={row.original.id_product}
+          initialActive={row.original.active}
+        />
+      </div>
+    ),
   },
   {
     id: "actions",

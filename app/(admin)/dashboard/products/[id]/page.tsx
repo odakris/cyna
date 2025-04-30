@@ -46,6 +46,7 @@ import {
 import PermissionGuard from "@/components/Auth/PermissionGuard"
 import { ProductDetailSkeleton } from "@/components/Skeletons/ProductSkeletons"
 import { Category } from "@prisma/client"
+import ProductActiveSwitch from "@/components/Admin/Products/ProductActiveSwitch"
 
 export default function ProductDetailsPage() {
   const { id } = useParams() as { id: string }
@@ -514,6 +515,28 @@ export default function ProductDetailsPage() {
                         : "(Priorité standard)"}
                   </span>
                 </div>
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium mb-1">Statut du produit</p>
+                  <Badge
+                    variant={product.active ? "default" : "outline"}
+                    className={
+                      product.active
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-600"
+                    }
+                  >
+                    {product.active ? "Actif" : "Inactif"}
+                  </Badge>
+                </div>
+                <ProductActiveSwitch
+                  productId={product.id_product}
+                  initialActive={product.active}
+                />
               </div>
 
               <Separator />

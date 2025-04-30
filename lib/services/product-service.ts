@@ -142,6 +142,29 @@ export const deleteProduct = async (id: number): Promise<object> => {
 }
 
 /**
+ * Active ou désactive un produit.
+ * @param {number} id - Identifiant du produit à modifier.
+ * @returns {Promise<Product>} Le produit avec son statut mis à jour.
+ * @throws {Error} Si le produit n'existe pas.
+ */
+export const toggleProductStatus = async (id: number): Promise<Product> => {
+  try {
+    // Vérifier si le produit existe
+    const product = await productRepository.findById(id)
+    if (!product) {
+      throw new Error("Produit non trouvé")
+    }
+
+    // Inverser le statut actif
+    const newStatus = !product.active
+    return await productRepository.updateActiveStatus(id, newStatus)
+  } catch (error) {
+    console.error("Erreur lors du changement de statut du produit:", error)
+    throw error
+  }
+}
+
+/**
  * Service de gestion des produits, regroupant toutes les fonctionnalités.
  */
 const productService = {
@@ -150,6 +173,7 @@ const productService = {
   createProduct,
   updateProduct,
   deleteProduct,
+  toggleProductStatus,
 }
 
 export default productService

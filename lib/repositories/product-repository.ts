@@ -82,6 +82,7 @@ export const create = async (data: ProductFormValues): Promise<Product> => {
           updated_at: new Date(),
           created_at: new Date(),
           stock: data.stock,
+          active: data.active,
           category: { connect: { id_category: data.id_category } },
           main_image: data.main_image,
           product_caroussel_images: {
@@ -164,6 +165,7 @@ export const update = async (
         updated_at: new Date(),
         id_category: data.id_category,
         stock: data.stock,
+        active: data.active,
         main_image: data.main_image,
         product_caroussel_images: {
           create:
@@ -251,6 +253,34 @@ export const exists = async (id: number): Promise<boolean> => {
 }
 
 /**
+ * Met à jour uniquement le statut actif d'un produit.
+ * @param {number} id - Identifiant du produit à mettre à jour.
+ * @param {boolean} active - Le nouveau statut actif du produit.
+ * @returns {Promise<Product>} Le produit mis à jour.
+ */
+export const updateActiveStatus = async (
+  id: number,
+  active: boolean
+): Promise<Product> => {
+  try {
+    return await prisma.product.update({
+      where: { id_product: id },
+      data: {
+        active,
+        updated_at: new Date(),
+      },
+      include: {
+        category: true,
+        product_caroussel_images: true,
+      },
+    })
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du statut actif:", error)
+    throw error
+  }
+}
+
+/**
  * Dépôt de données (repository) pour la gestion des produits.
  */
 const productRepository = {
@@ -260,6 +290,7 @@ const productRepository = {
   update,
   remove,
   exists,
+  updateActiveStatus,
 }
 
 export default productRepository

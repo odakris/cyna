@@ -35,6 +35,7 @@ export const productFormSchema = z.object({
     .int("La priorité doit être un nombre entier.")
     .min(1, "La priorité doit être supérieure à 0."),
   available: z.boolean().optional(),
+  active: z.boolean().optional(),
 })
 
 export type ProductFormValues = z.infer<typeof productFormSchema>

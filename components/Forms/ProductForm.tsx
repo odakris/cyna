@@ -65,6 +65,7 @@ import {
   BarChart3,
   Box,
   PencilLine,
+  Power,
 } from "lucide-react"
 import { Category } from "@prisma/client"
 
@@ -98,6 +99,7 @@ export function ProductForm({
       main_image: initialData?.main_image || "",
       priority_order: initialData?.priority_order || 1,
       available: initialData?.available ?? true,
+      active: initialData?.active ?? true,
       product_caroussel_images: initialData?.product_caroussel_images || [],
     },
   })
@@ -124,7 +126,7 @@ export function ProductForm({
         id_category: Number(values.id_category),
         priority_order: Number(values.priority_order),
         available: values.available,
-        // S'assurer que c'est bien un tableau, même si vide
+        active: values.active,
         product_caroussel_images: product_caroussel_images,
       }
 
@@ -529,6 +531,32 @@ export function ProductForm({
                             </FormItem>
                           )}
                         />
+
+                        <FormField
+                          name="active"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 mt-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">
+                                  Activation du produit
+                                </FormLabel>
+                                <FormDescription>
+                                  {field.value
+                                    ? "Le produit est visible et peut être acheté sur le site"
+                                    : "Le produit est masqué et ne peut pas être acheté"}
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  disabled={isSubmitting}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
                       </CardContent>
                       <CardFooter className="flex justify-between border-t pt-6">
                         <Button
@@ -797,6 +825,24 @@ export function ProductForm({
                         </span>
                       </div>
                     )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground mb-1">
+                        État du produit
+                      </p>
+                      {watchedValues.active ? (
+                        <div className="flex items-center gap-1 text-blue-600">
+                          <Power className="h-4 w-4" />
+                          <span className="text-sm font-medium">Actif</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-gray-500">
+                          <Power className="h-4 w-4" />
+                          <span className="text-sm font-medium">Inactif</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>

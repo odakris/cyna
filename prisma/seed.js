@@ -79,6 +79,7 @@ async function main() {
           "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 10, // Stock plus élevé
         id_category: prevention.id_category,
+        active: true,
       },
     })
 
@@ -97,6 +98,7 @@ async function main() {
           "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 5,
         id_category: prevention.id_category,
+        active: true,
       },
     })
 
@@ -115,6 +117,7 @@ async function main() {
           "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 15,
         id_category: prevention.id_category,
+        active: true,
       },
     })
 
@@ -133,6 +136,7 @@ async function main() {
           "https://images.unsplash.com/photo-1575467678930-c7acd65d6470?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 8,
         id_category: prevention.id_category,
+        active: true,
       },
     })
 
@@ -151,6 +155,7 @@ async function main() {
           "https://images.unsplash.com/photo-1551808525-51a94da548ce?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 8,
         id_category: protection.id_category,
+        active: true,
       },
     })
 
@@ -169,6 +174,7 @@ async function main() {
           "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 5,
         id_category: protection.id_category,
+        active: true,
       },
     })
 
@@ -187,6 +193,7 @@ async function main() {
           "https://images.unsplash.com/photo-1593642532973-d31b6557fa68?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 7,
         id_category: protection.id_category,
+        active: true,
       },
     })
 
@@ -205,6 +212,7 @@ async function main() {
           "https://images.unsplash.com/photo-1614064642639-e398cf05badb?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 6,
         id_category: protection.id_category,
+        active: true,
       },
     })
 
@@ -223,6 +231,7 @@ async function main() {
           "https://images.unsplash.com/photo-1563237023-b1e970526dcb?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 10,
         id_category: protection.id_category,
+        active: true,
       },
     })
 
@@ -241,6 +250,7 @@ async function main() {
           "https://images.unsplash.com/photo-1633265486501-0cf524a07213?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 3,
         id_category: reponse.id_category,
+        active: true,
       },
     })
 
@@ -259,6 +269,7 @@ async function main() {
           "https://images.unsplash.com/photo-1590856029826-c7a73142bbf1?q=80&w=1000",
         stock: Math.floor(Math.random() * 5) + 2,
         id_category: reponse.id_category,
+        active: true,
       },
     })
 
@@ -277,6 +288,7 @@ async function main() {
           "https://images.unsplash.com/photo-1598128558393-70ff21433be0?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 4,
         id_category: reponse.id_category,
+        active: true,
       },
     })
 
@@ -295,6 +307,7 @@ async function main() {
           "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=1000",
         stock: Math.floor(Math.random() * 5) + 2,
         id_category: reponse.id_category,
+        active: true,
       },
     })
 
@@ -1020,99 +1033,98 @@ async function main() {
 
     // Création des informations de paiement - STRUCTURE MISE À JOUR
     console.log("Création des informations de paiement...")
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Jean Dupont",
-    brand: "visa",
-    last_card_digits: "4242",
-    stripe_payment_id: "pm_visa_4242",
-    exp_month: 12,  // Mois d'expiration
-    exp_year: 2026, // Année d'expiration
-    is_default: true,
-    id_user: customer1.id_user,
-  },
-})
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Jean Dupont",
+        brand: "visa",
+        last_card_digits: "4242",
+        stripe_payment_id: "pm_visa_4242",
+        exp_month: 12, // Mois d'expiration
+        exp_year: 2026, // Année d'expiration
+        is_default: true,
+        id_user: customer1.id_user,
+      },
+    })
 
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Marie Martin",
-    brand: "visa",
-    last_card_digits: "4444",
-    stripe_payment_id: "pm_visa_4444",
-    exp_month: 11,  // Mois d'expiration
-    exp_year: 2025, // Année d'expiration
-    is_default: true,
-    id_user: customer2.id_user,
-  },
-})
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Marie Martin",
+        brand: "visa",
+        last_card_digits: "4444",
+        stripe_payment_id: "pm_visa_4444",
+        exp_month: 11, // Mois d'expiration
+        exp_year: 2025, // Année d'expiration
+        is_default: true,
+        id_user: customer2.id_user,
+      },
+    })
 
-// *** AJOUT : Plus d'informations de paiement ***
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Thomas Bernard",
-    brand: "mastercard",
-    last_card_digits: "5555",
-    stripe_payment_id: "pm_mastercard_5555",
-    exp_month: 6,   // Mois d'expiration
-    exp_year: 2027, // Année d'expiration
-    is_default: true,
-    id_user: customer3.id_user,
-  },
-})
+    // *** AJOUT : Plus d'informations de paiement ***
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Thomas Bernard",
+        brand: "mastercard",
+        last_card_digits: "5555",
+        stripe_payment_id: "pm_mastercard_5555",
+        exp_month: 6, // Mois d'expiration
+        exp_year: 2027, // Année d'expiration
+        is_default: true,
+        id_user: customer3.id_user,
+      },
+    })
 
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Jean Dupont Pro",
-    brand: "amex",
-    last_card_digits: "9876",
-    stripe_payment_id: "pm_amex_9876",
-    exp_month: 9,   // Mois d'expiration
-    exp_year: 2024, // Année d'expiration
-    is_default: false,
-    id_user: customer1.id_user,
-  },
-})
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Jean Dupont Pro",
+        brand: "amex",
+        last_card_digits: "9876",
+        stripe_payment_id: "pm_amex_9876",
+        exp_month: 9, // Mois d'expiration
+        exp_year: 2024, // Année d'expiration
+        is_default: false,
+        id_user: customer1.id_user,
+      },
+    })
 
-// Informations de paiement pour les nouveaux clients
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Alexandre Petit",
-    brand: "visa",
-    last_card_digits: "1234",
-    stripe_payment_id: "pm_visa_1234",
-    exp_month: 1,   // Mois d'expiration
-    exp_year: 2026, // Année d'expiration
-    is_default: true,
-    id_user: customer5.id_user,
-  },
-})
+    // Informations de paiement pour les nouveaux clients
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Alexandre Petit",
+        brand: "visa",
+        last_card_digits: "1234",
+        stripe_payment_id: "pm_visa_1234",
+        exp_month: 1, // Mois d'expiration
+        exp_year: 2026, // Année d'expiration
+        is_default: true,
+        id_user: customer5.id_user,
+      },
+    })
 
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Caroline Durand",
-    brand: "mastercard",
-    last_card_digits: "5678",
-    stripe_payment_id: "pm_mastercard_5678",
-    exp_month: 3,   // Mois d'expiration
-    exp_year: 2025, // Année d'expiration
-    is_default: true,
-    id_user: customer6.id_user,
-  },
-})
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Caroline Durand",
+        brand: "mastercard",
+        last_card_digits: "5678",
+        stripe_payment_id: "pm_mastercard_5678",
+        exp_month: 3, // Mois d'expiration
+        exp_year: 2025, // Année d'expiration
+        is_default: true,
+        id_user: customer6.id_user,
+      },
+    })
 
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Stéphane Moreau",
-    brand: "visa",
-    last_card_digits: "9012",
-    stripe_payment_id: "pm_visa_9012",
-    exp_month: 7,   // Mois d'expiration
-    exp_year: 2028, // Année d'expiration
-    is_default: true,
-    id_user: customer7.id_user,
-  },
-})
-
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Stéphane Moreau",
+        brand: "visa",
+        last_card_digits: "9012",
+        stripe_payment_id: "pm_visa_9012",
+        exp_month: 7, // Mois d'expiration
+        exp_year: 2028, // Année d'expiration
+        is_default: true,
+        id_user: customer7.id_user,
+      },
+    })
 
     // Création des commandes historiques (conserver celles existantes)
 

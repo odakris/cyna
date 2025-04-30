@@ -22,6 +22,7 @@ CREATE TABLE `Product` (
     `unit_price` FLOAT NOT NULL,
     `discount_price` FLOAT NULL,
     `available` BOOLEAN NOT NULL DEFAULT true,
+    `active` BOOLEAN NOT NULL DEFAULT true,
     `priority_order` INTEGER NOT NULL DEFAULT 1,
     `stock` INTEGER NOT NULL DEFAULT 0,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -32,6 +33,7 @@ CREATE TABLE `Product` (
     UNIQUE INDEX `Product_name_key`(`name`),
     INDEX `Product_id_category_idx`(`id_category`),
     INDEX `Product_available_idx`(`available`),
+    INDEX `Product_active_idx`(`active`),
     INDEX `Product_priority_order_idx`(`priority_order`),
     INDEX `Product_name_idx`(`name`),
     PRIMARY KEY (`id_product`)

@@ -131,6 +131,31 @@ export const remove = async (id: number): Promise<NextResponse> => {
 }
 
 /**
+ * Active ou désactive un produit.
+ * @param {number} id - Identifiant du produit à modifier.
+ * @returns {Promise<NextResponse>} La réponse contenant le produit mis à jour ou un message d'erreur.
+ */
+export const toggleProductStatus = async (
+  id: number
+): Promise<NextResponse> => {
+  try {
+    const product = await productService.toggleProductStatus(id)
+    return NextResponse.json(product)
+  } catch (error) {
+    console.error("Erreur lors du changement de statut du produit:", error)
+
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message === "Produit non trouvé" ? 404 : 400 }
+      )
+    }
+
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
+  }
+}
+
+/**
  * Contrôleur des produits regroupant toutes les fonctions pour une importation simplifiée.
  */
 const productController = {
@@ -139,6 +164,7 @@ const productController = {
   create,
   update,
   remove,
+  toggleProductStatus,
 }
 
 export default productController

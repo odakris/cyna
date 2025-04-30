@@ -76,6 +76,7 @@ export default function EditProductPage() {
     stock: product.stock,
     id_category: product.id_category,
     main_image: product.main_image,
+    active: product.active,
     product_caroussel_images: product.product_caroussel_images.map(
       image => image.url
     ),
