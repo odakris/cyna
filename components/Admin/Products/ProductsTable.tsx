@@ -17,12 +17,15 @@ import {
   Filter,
 } from "lucide-react"
 import { flexRender } from "@tanstack/react-table"
+import { memo } from "react"
 
 interface ProductsTableProps {
   table: TableType<ProductWithImages>
 }
 
-export default function ProductsTable({ table }: ProductsTableProps) {
+const ProductsTable = memo(function ProductsTable({
+  table,
+}: ProductsTableProps) {
   return (
     <div>
       <div className="rounded-md border">
@@ -156,4 +159,6 @@ export default function ProductsTable({ table }: ProductsTableProps) {
       </div>
     </div>
   )
-}
+})
+
+export default ProductsTable

@@ -77,7 +77,7 @@ export const create = async (data: ProductFormValues): Promise<Product> => {
           unit_price: data.unit_price,
           description: data.description.trim(),
           technical_specs: data.technical_specs.trim(),
-          available: true,
+          available: data.available,
           priority_order: data.priority_order,
           updated_at: new Date(),
           created_at: new Date(),

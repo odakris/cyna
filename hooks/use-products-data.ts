@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { ProductWithImages } from "@/types/Types"
 
 // Type pour les statistiques des produits
@@ -21,11 +21,19 @@ export function useProductsData() {
     lowStock: 0,
   })
 
+  // éviter les multiples requêtes
+  const isFirstLoadRef = useRef(true)
+
   // Fonction pour récupérer les produits
   const fetchProducts = useCallback(async () => {
     try {
-      setLoading(true)
-      const response = await fetch("/api/products")
+      // Ne pas afficher le loading si c'est un rechargement
+      if (isFirstLoadRef.current) {
+        setLoading(true)
+      }
+
+      // Ajouter un timestamp pour éviter le cache du navigateur sur /api/products
+      const response = await fetch(`/api/products?t=${Date.now()}`)
 
       if (!response.ok) {
         throw new Error(
@@ -45,6 +53,7 @@ export function useProductsData() {
       }
       setStats(newStats)
 
+      isFirstLoadRef.current = false
       setError(null)
     } catch (error: unknown) {
       console.error("Erreur fetchProducts:", error)

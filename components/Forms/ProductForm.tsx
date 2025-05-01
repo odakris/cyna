@@ -598,7 +598,6 @@ export function ProductForm({
                           control={form.control}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Image principale</FormLabel>
                               <ImageUploader
                                 field={field}
                                 disabled={isSubmitting}
@@ -619,7 +618,6 @@ export function ProductForm({
                           control={form.control}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Images du carrousel</FormLabel>
                               <ImageUploader
                                 field={field}
                                 disabled={isSubmitting}

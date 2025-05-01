@@ -19,22 +19,14 @@ export function useProductDetails(productId: string) {
       try {
         setLoading(true)
 
-        // Récupérer les données du produit
-        const productData: ProductWithImages = await fetch(
-          `/api/products/${productId}`
-        ).then(res => res.json())
+        // Une seule requête qui retourne à la fois le produit et sa catégorie
+        const productData: ProductWithImages & { category: Category } =
+          await fetch(`/api/products/${productId}`).then(res => res.json())
 
         if (!productData) throw new Error("Produit introuvable")
+
         setProduct(productData)
-
-        // Récupérer les données de la catégorie
-        const categoryData: Category | null = await fetch(
-          `/api/categories/${productData.id_category}`
-        ).then(res => res.json())
-
-        if (!categoryData) throw new Error("Catégorie introuvable")
-        setCategory(categoryData)
-
+        setCategory(productData.category)
         setErrorMessage(null)
       } catch (error) {
         console.error("Erreur fetchData:", error)
@@ -87,7 +79,6 @@ export function useProductDetails(productId: string) {
     }
   }
 
-  // Formateurs pour l'affichage
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR", {
       day: "numeric",
