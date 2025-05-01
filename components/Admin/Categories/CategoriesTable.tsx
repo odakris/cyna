@@ -1,5 +1,5 @@
 import { Table as TableType } from "@tanstack/react-table"
-import { ProductWithImages } from "@/types/Types"
+import { CategoryWithProduct } from "@/types/Types"
 import {
   Table,
   TableBody,
@@ -9,6 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 import {
   ChevronLeft,
   ChevronRight,
@@ -18,20 +19,23 @@ import {
 } from "lucide-react"
 import { flexRender } from "@tanstack/react-table"
 
-interface ProductsTableProps {
-  table: TableType<ProductWithImages>
+interface CategoriesTableProps {
+  table: TableType<CategoryWithProduct>
 }
 
-export default function ProductsTable({ table }: ProductsTableProps) {
+export default function CategoriesTable({ table }: CategoriesTableProps) {
   return (
     <div>
-      <div className="rounded-md border">
+      <div className="rounded-md border overflow-hidden">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-muted/50">
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map(header => (
-                  <TableHead key={header.id} className="text-center px-3">
+                  <TableHead
+                    key={header.id}
+                    className="text-center px-3 font-semibold"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -69,8 +73,13 @@ export default function ProductsTable({ table }: ProductsTableProps) {
                 >
                   <div className="flex flex-col items-center justify-center text-muted-foreground">
                     <Filter className="h-8 w-8 mb-2 opacity-50" />
-                    <p>Aucun produit trouvé.</p>
+                    <p>Aucune catégorie trouvée.</p>
                     <p className="text-sm">Essayez de modifier vos filtres.</p>
+                    <Button variant="link" size="sm" asChild className="mt-2">
+                      <Link href="/dashboard/categories/new">
+                        Créer une catégorie
+                      </Link>
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>
@@ -88,12 +97,12 @@ export default function ProductsTable({ table }: ProductsTableProps) {
           <span className="font-medium">
             {table.getFilteredRowModel().rows.length}
           </span>{" "}
-          produit(s) sélectionné(s).
+          catégorie(s) sélectionnée(s)
         </div>
 
         <div className="flex items-center space-x-6 lg:space-x-8">
           <div className="flex items-center space-x-2">
-            <p className="text-sm font-medium">Produits par page</p>
+            <p className="text-sm font-medium">Par page</p>
             <select
               className="h-8 w-16 rounded-md border border-input bg-transparent px-2 py-1 text-sm"
               value={table.getState().pagination.pageSize}
@@ -111,7 +120,7 @@ export default function ProductsTable({ table }: ProductsTableProps) {
 
           <div className="flex w-[100px] items-center justify-center text-sm font-medium">
             Page {table.getState().pagination.pageIndex + 1} sur{" "}
-            {table.getPageCount()}
+            {table.getPageCount() || 1}
           </div>
 
           <div className="flex items-center space-x-2">

@@ -143,11 +143,14 @@ export const deleteProduct = async (id: number): Promise<object> => {
 
 /**
  * Active ou désactive un produit.
+ * Empêche l'activation si la catégorie du produit est inactive.
  * @param {number} id - Identifiant du produit à modifier.
- * @returns {Promise<Product>} Le produit avec son statut mis à jour.
+ * @returns {Promise<{product: Product, blocked?: boolean, reason?: string}>} Le produit avec son statut mis à jour ou un message d'erreur.
  * @throws {Error} Si le produit n'existe pas.
  */
-export const toggleProductStatus = async (id: number): Promise<Product> => {
+export const toggleProductStatus = async (
+  id: number
+): Promise<{ product: Product; blocked?: boolean; reason?: string }> => {
   try {
     // Vérifier si le produit existe
     const product = await productRepository.findById(id)
@@ -157,7 +160,30 @@ export const toggleProductStatus = async (id: number): Promise<Product> => {
 
     // Inverser le statut actif
     const newStatus = !product.active
-    return await productRepository.updateActiveStatus(id, newStatus)
+
+    // Si on essaie d'activer le produit, vérifier que sa catégorie est active
+    if (newStatus) {
+      // Récupérer la catégorie du produit
+      const category = await categoryRepository.findById(product.id_category)
+
+      // Vérifier si la catégorie existe et est active
+      if (!category || !category.active) {
+        // Si la catégorie est inactive, bloquer l'activation du produit
+        return {
+          product,
+          blocked: true,
+          reason:
+            "Impossible d'activer ce produit car sa catégorie est inactive",
+        }
+      }
+    }
+
+    // Si tout est bon, mettre à jour le statut
+    const updatedProduct = await productRepository.updateActiveStatus(
+      id,
+      newStatus
+    )
+    return { product: updatedProduct }
   } catch (error) {
     console.error("Erreur lors du changement de statut du produit:", error)
     throw error

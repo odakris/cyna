@@ -4,17 +4,17 @@ import { useState } from "react"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 
-interface ProductActiveSwitchProps {
-  productId: number
+interface CategoryActiveSwitchProps {
+  categoryId: number
   initialActive: boolean
-  onStatusChange?: (newStatus: boolean) => void
+  onStatusChange?: (newStatus: boolean, productsUpdated: number) => void
 }
 
-export default function ProductActiveSwitch({
-  productId,
+export default function CategoryActiveSwitch({
+  categoryId,
   initialActive,
   onStatusChange,
-}: ProductActiveSwitchProps) {
+}: CategoryActiveSwitchProps) {
   const [active, setActive] = useState(initialActive)
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
@@ -23,40 +23,26 @@ export default function ProductActiveSwitch({
     try {
       setIsLoading(true)
 
-      const response = await fetch(`/api/products/${productId}/active`, {
+      const response = await fetch(`/api/categories/${categoryId}/active`, {
         method: "PATCH",
         headers: { "content-type": "application/json" },
       })
 
-      const data = await response.json()
-
-      // Vérifier si l'activation a été bloquée
-      if (data.blocked) {
-        // La catégorie est inactive, donc on ne peut pas activer le produit
-        toast({
-          title: "Activation impossible",
-          description:
-            data.reason || "La catégorie de ce produit est inactive.",
-          variant: "destructive",
-        })
-
-        // Ne pas mettre à jour l'état local
-        return
-      }
-
       if (!response.ok) throw new Error("Échec de la mise à jour")
 
-      // Mettre à jour l'état local avec le nouveau statut
+      const data = await response.json()
       setActive(data.active)
 
       // Appeler le callback si fourni
       if (onStatusChange) {
-        onStatusChange(data.active)
+        onStatusChange(data.active, data.productsUpdated || 0)
       }
 
       toast({
-        title: data.active ? "Produit activé" : "Produit désactivé",
-        description: `Le statut a été mis à jour avec succès.`,
+        title: data.active ? "Catégorie activée" : "Catégorie désactivée",
+        description: data.productsUpdated
+          ? `Le statut a été mis à jour avec succès. ${data.productsUpdated} produit(s) ont également été mis à jour.`
+          : `Le statut a été mis à jour avec succès.`,
       })
     } catch {
       toast({

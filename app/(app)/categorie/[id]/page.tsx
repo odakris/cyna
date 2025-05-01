@@ -38,6 +38,17 @@ export default function CategoryPage() {
     )
   }
 
+  // Vérification que le produit existe et est actif
+  if (!category || !category.active) {
+    return (
+      <div className="w-full p-4 sm:p-6 text-center">
+        <div className="rounded-lg bg-amber-50 p-4 text-amber-700 border border-amber-200">
+          <p className="text-sm font-medium">Catégorie non trouvé</p>
+        </div>
+      </div>
+    )
+  }
+
   if (!category) {
     return (
       <div className="w-full p-4 sm:p-6 text-center">

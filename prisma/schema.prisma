@@ -64,6 +64,7 @@ model Category {
   description    String    @db.Text
   image          String    @db.VarChar(255)
   priority_order Int       @default(1)
+  active         Boolean   @default(true)
   created_at     DateTime  @default(now())
   updated_at     DateTime  @updatedAt
   products       Product[]

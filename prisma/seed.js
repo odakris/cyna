@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid"
 
 const prisma = new PrismaClient()
 
-// const bcrypt = require("bcrypt")
+import bcrypt from "bcrypt"
 
 // Fonction utilitaire pour générer des dates récentes
 const getRecentDate = daysAgo => {
@@ -31,6 +31,7 @@ async function main() {
         image:
           "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=2070",
         priority_order: 1,
+        active: true,
         updated_at: new Date(),
         created_at: new Date(),
       },
@@ -44,6 +45,7 @@ async function main() {
         image:
           "https://images.unsplash.com/photo-1614064642639-e398cf05badb?q=80&w=2070",
         priority_order: 2,
+        active: true,
         updated_at: new Date(),
         created_at: new Date(),
       },
@@ -57,6 +59,7 @@ async function main() {
         image:
           "https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=2074",
         priority_order: 3,
+        active: true,
         updated_at: new Date(),
         created_at: new Date(),
       },
@@ -667,7 +670,7 @@ async function main() {
 
     // Création des utilisateurs
     console.log("Création des utilisateurs...")
-    // const salt = await bcrypt.genSalt(10)
+    const salt = await bcrypt.genSalt(10)
     // const hashedPassword = await bcrypt.hash("Password123!", salt)
     // const adminPassword = await bcrypt.hash("AdminSecure456!", salt)
 
@@ -677,7 +680,7 @@ async function main() {
         first_name: "Super",
         last_name: "Admin",
         email: "superadmin@cyna.fr",
-        password: "superAdminPassword",
+        password: await bcrypt.hash("superAdminPassword", salt),
         role: "SUPER_ADMIN", // Rôle SUPER_ADMIN
         email_verified: true,
         stripeCustomerId: "cus_super_admin",
@@ -689,7 +692,7 @@ async function main() {
         first_name: "Admin",
         last_name: "Système",
         email: "admin@cyna.fr",
-        password: "adminPassword",
+        password: await bcrypt.hash("adminPassword", salt),
         role: "ADMIN",
         email_verified: true,
         stripeCustomerId: "cus_admin",
@@ -702,7 +705,7 @@ async function main() {
         first_name: "Philippe",
         last_name: "Dubois",
         email: "philippe.dubois@cyna.fr",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "MANAGER",
         email_verified: true,
         stripeCustomerId: "cus_manager1",
@@ -714,7 +717,7 @@ async function main() {
         first_name: "Sophie",
         last_name: "Moreau",
         email: "sophie.moreau@cyna.fr",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "MANAGER",
         email_verified: true,
         stripeCustomerId: "cus_manager2",
@@ -726,7 +729,7 @@ async function main() {
         first_name: "Jean",
         last_name: "Dupont",
         email: "jean.dupont@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
         stripeCustomerId: "cus_customer1",
@@ -738,7 +741,7 @@ async function main() {
         first_name: "Marie",
         last_name: "Martin",
         email: "marie.martin@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
         stripeCustomerId: "cus_customer2",
@@ -750,7 +753,7 @@ async function main() {
         first_name: "Thomas",
         last_name: "Bernard",
         email: "thomas.bernard@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
         stripeCustomerId: "cus_customer3",
@@ -762,7 +765,7 @@ async function main() {
         first_name: "Émilie",
         last_name: "Leroy",
         email: "emilie.leroy@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: false, // Email non vérifié
         verify_token: "verify_emilie_token_123",
@@ -776,7 +779,7 @@ async function main() {
         first_name: "Alexandre",
         last_name: "Petit",
         email: "alexandre.petit@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
         stripeCustomerId: "cus_customer5",
@@ -788,7 +791,7 @@ async function main() {
         first_name: "Caroline",
         last_name: "Durand",
         email: "caroline.durand@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
         stripeCustomerId: "cus_customer6",
@@ -800,7 +803,7 @@ async function main() {
         first_name: "Stéphane",
         last_name: "Moreau",
         email: "stephane.moreau@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
         stripeCustomerId: "cus_customer7",

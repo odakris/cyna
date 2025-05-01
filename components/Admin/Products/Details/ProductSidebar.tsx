@@ -18,12 +18,14 @@ interface ProductSidebarProps {
   product: ProductWithImages
   category: Category | null
   formatDate: (dateString: string) => string
+  onStatusChange?: (newStatus: boolean) => void
 }
 
 export default function ProductSidebar({
   product,
   category,
   formatDate,
+  onStatusChange,
 }: ProductSidebarProps) {
   return (
     <div className="lg:col-span-1">
@@ -128,6 +130,7 @@ export default function ProductSidebar({
             <ProductActiveSwitch
               productId={product.id_product}
               initialActive={product.active}
+              onStatusChange={onStatusChange}
             />
           </div>
 

@@ -130,12 +130,41 @@ export const deleteCategory = async (id: number): Promise<object> => {
   }
 }
 
+/**
+ * Active ou désactive une catégorie et ses produits associés.
+ * @param {number} id - Identifiant de la catégorie à modifier.
+ * @returns {Promise<{active: boolean, productsUpdated: number}>} Statut actif et nombre de produits mis à jour.
+ */
+export const toggleCategoryStatus = async (
+  id: number
+): Promise<{ active: boolean; productsUpdated: number }> => {
+  try {
+    // Vérifier si la catégorie existe
+    const exists = await categoryRepository.exists(id)
+    if (!exists) {
+      throw new Error("Catégorie non trouvée")
+    }
+
+    // Mettre à jour le statut actif
+    const result = await categoryRepository.updateActiveStatus(id)
+
+    return {
+      active: result.category.active,
+      productsUpdated: result.productsUpdated,
+    }
+  } catch (error) {
+    console.error("Erreur lors du changement de statut de la catégorie:", error)
+    throw error
+  }
+}
+
 const categoryService = {
   getAllCategories,
   getCategoryById,
   createCategory,
   updateCategory,
   deleteCategory,
+  toggleCategoryStatus,
 }
 
 export default categoryService

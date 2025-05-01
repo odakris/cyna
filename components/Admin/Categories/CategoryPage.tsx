@@ -1,41 +1,40 @@
 "use client"
 
 import { useState } from "react"
-import ProductsHeader from "@/components/Admin/Products/ProductsHeader"
-import ProductsStats from "@/components/Admin/Products/ProductsStats"
-import ProductsFilters from "@/components/Admin/Products/ProductsFilters"
-import ProductsTable from "@/components/Admin/Products/ProductsTable"
-import DeleteDialog from "@/components/Admin/Products/DeleteDialog"
-import { useProductsData } from "@/hooks/use-products-data"
-import { useProductsTable } from "@/hooks/use-products-table"
+import CategoriesHeader from "@/components/Admin/Categories/CategoriesHeader"
+import CategoriesStats from "@/components/Admin/Categories/CategoriesStats"
+import CategoriesFilters from "@/components/Admin/Categories/CategoriesFilters"
+import CategoriesTable from "@/components/Admin/Categories/CategoriesTable"
+import DeleteDialog from "@/components/Admin/Categories/DeleteDialog"
+import { useCategoriesData } from "@/hooks/use-categories-data"
+import { useCategoriesTable } from "@/hooks/use-categories-table"
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { RefreshCw } from "lucide-react"
-import { ProductsHomeSkeleton } from "@/components/Skeletons/ProductSkeletons"
+import { RefreshCw, AlertTriangle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { AlertTriangle } from "lucide-react"
-import { CardTitle, CardDescription } from "@/components/ui/card"
-import { useCategories } from "@/hooks/use-categories"
+import { CategoryListSkeleton } from "@/components/Skeletons/CategorySkeletons"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
-export default function ProductsPage() {
+export default function CategoryPage() {
   // État et logique des données
   const {
-    products,
+    categories,
     loading,
     error,
-    fetchProducts,
-    deleteProducts,
+    setError,
+    fetchCategories,
+    deleteCategories,
     setActiveTab,
     activeTab,
     stats,
-  } = useProductsData()
-
-  const { categories } = useCategories()
+  } = useCategoriesData()
 
   // État et logique de la table de données
-  const { table, globalFilter, setGlobalFilter, stockOptions } =
-    useProductsTable(products, activeTab)
+  const { table, globalFilter, setGlobalFilter } = useCategoriesTable(
+    categories,
+    activeTab
+  )
 
   // État du dialog de suppression
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -44,51 +43,54 @@ export default function ProductsPage() {
   const handleDelete = async () => {
     const selectedIds = table
       .getSelectedRowModel()
-      .rows.map(row => row.original.id_product)
+      .rows.map(row => row.original.id_category)
 
     if (selectedIds.length === 0) return
 
     try {
-      await deleteProducts(selectedIds)
+      const result = await deleteCategories(selectedIds)
+      if (!result.success) {
+        setError(result.message || "Erreur lors de la suppression")
+      }
       setShowDeleteDialog(false)
       table.resetRowSelection()
     } catch (error) {
       console.error("Erreur handleDelete:", error)
+      setError("Erreur lors de la suppression des catégories")
     }
   }
 
   if (loading) {
-    return <ProductsHomeSkeleton />
+    return <CategoryListSkeleton />
   }
 
-  if (error) {
+  if (error && !categories.length) {
     return (
-      <Card className="mx-auto max-w-lg mt-8 border-red-200">
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-500" />
-            <CardTitle className="text-red-500">Erreur</CardTitle>
-          </div>
-          <CardDescription>{error}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex justify-center">
-          <Button onClick={fetchProducts}>Réessayer</Button>
-        </CardContent>
-      </Card>
+      <div className="container max-w-7xl mx-auto p-6">
+        <Alert variant="destructive" className="mb-6">
+          <AlertTriangle className="h-5 w-5" />
+          <AlertTitle>Erreur</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+
+        <Button onClick={fetchCategories} className="w-full sm:w-auto">
+          Réessayer
+        </Button>
+      </div>
     )
   }
 
   return (
     <div className="container mx-auto p-6 space-y-6 animate-in fade-in duration-300">
       {/* En-tête avec titre et actions */}
-      <ProductsHeader
-        productsCount={products.length}
+      <CategoriesHeader
+        categoriesCount={categories.length}
         selectedCount={table.getFilteredSelectedRowModel().rows.length}
         setShowDeleteDialog={setShowDeleteDialog}
       />
 
-      {/* Statistiques des produits */}
-      <ProductsStats stats={stats} />
+      {/* Statistiques des catégories */}
+      <CategoriesStats stats={stats} />
 
       {/* Filtres et tableau */}
       <Card className="border-border/40 shadow-sm">
@@ -99,34 +101,34 @@ export default function ProductsPage() {
             className="w-full"
           >
             <TabsList className="w-full sm:w-auto">
-              <TabsTrigger value="tous" className="flex-1 sm:flex-initial">
-                Tous
+              <TabsTrigger value="toutes" className="flex-1 sm:flex-initial">
+                Toutes
                 <Badge variant="secondary" className="ml-2">
                   {stats.total}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger
-                value="disponibles"
+                value="avec-produits"
                 className="flex-1 sm:flex-initial"
               >
-                Disponibles
+                Avec produits
                 <Badge
                   variant="secondary"
                   className="ml-2 bg-green-100 text-green-800"
                 >
-                  {stats.available}
+                  {stats.withProducts}
                 </Badge>
               </TabsTrigger>
               <TabsTrigger
-                value="indisponibles"
+                value="sans-produits"
                 className="flex-1 sm:flex-initial"
               >
-                Indisponibles
+                Sans produits
                 <Badge
                   variant="secondary"
                   className="ml-2 bg-gray-100 text-gray-800"
                 >
-                  {stats.unavailable}
+                  {stats.withoutProducts}
                 </Badge>
               </TabsTrigger>
             </TabsList>
@@ -134,29 +136,42 @@ export default function ProductsPage() {
         </CardHeader>
 
         <CardContent className="p-6">
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 ml-auto"
+                onClick={() => setError(null)}
+              >
+                Fermer
+              </Button>
+            </Alert>
+          )}
+
           {/* Filtres et options de recherche */}
-          <ProductsFilters
+          <CategoriesFilters
             table={table}
             globalFilter={globalFilter}
             setGlobalFilter={setGlobalFilter}
-            stockOptions={stockOptions}
-            fetchProducts={fetchProducts}
-            categories={categories}
+            fetchCategories={fetchCategories}
           />
 
-          {/* Tableau des produits */}
-          <ProductsTable table={table} />
+          {/* Tableau des catégories */}
+          <CategoriesTable table={table} />
         </CardContent>
 
         <CardFooter className="bg-muted/50 py-3 border-t flex justify-between items-center">
           <p className="text-sm text-muted-foreground">
-            Total des produits: <strong>{products.length}</strong> |
-            Disponibles:{" "}
-            <strong className="text-green-600">{stats.available}</strong> |
-            Stock faible:{" "}
-            <strong className="text-amber-600">{stats.lowStock}</strong>
+            Total des catégories: <strong>{stats.total}</strong> | Avec
+            produits:{" "}
+            <strong className="text-green-600">{stats.withProducts}</strong> |
+            Priorité haute:{" "}
+            <strong className="text-blue-600">{stats.highPriority}</strong>
           </p>
-          <Button variant="outline" size="sm" onClick={fetchProducts}>
+          <Button variant="outline" size="sm" onClick={fetchCategories}>
             <RefreshCw className="mr-2 h-3 w-3" />
             Actualiser
           </Button>

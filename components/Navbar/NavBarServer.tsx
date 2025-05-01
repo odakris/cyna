@@ -4,7 +4,9 @@ import NavbarClient from "./NavbarClient"
 import { Category } from "@prisma/client"
 
 export default async function NavbarServer() {
-  const categories: Category[] = await getAllCategories()
+  const categories: Category[] = (await getAllCategories()).filter(
+    cat => cat.active
+  )
 
   return <NavbarClient categories={categories} />
 }

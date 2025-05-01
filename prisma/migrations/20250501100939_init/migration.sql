@@ -5,6 +5,7 @@ CREATE TABLE `Category` (
     `description` TEXT NOT NULL,
     `image` VARCHAR(255) NOT NULL,
     `priority_order` INTEGER NOT NULL DEFAULT 1,
+    `active` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 

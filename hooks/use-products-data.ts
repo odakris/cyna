@@ -33,7 +33,8 @@ export function useProductsData() {
       }
 
       // Ajouter un timestamp pour éviter le cache du navigateur sur /api/products
-      const response = await fetch(`/api/products?t=${Date.now()}`)
+      // const response = await fetch(`/api/products?t=${Date.now()}`)
+      const response = await fetch(`/api/products`)
 
       if (!response.ok) {
         throw new Error(

@@ -135,12 +135,35 @@ export const remove = async (id: number): Promise<NextResponse> => {
   }
 }
 
+/**
+ * Active ou désactive une catégorie et met à jour les produits associés.
+ * @param {number} id - Identifiant de la catégorie à modifier.
+ * @returns {Promise<NextResponse>} Réponse JSON avec le statut mis à jour et le nombre de produits affectés.
+ */
+export const toggleCategoryStatus = async (
+  id: number
+): Promise<NextResponse> => {
+  try {
+    const result = await categoryService.toggleCategoryStatus(id)
+    return NextResponse.json(result)
+  } catch (error) {
+    console.error("Erreur lors du changement de statut de la catégorie:", error)
+
+    if (error instanceof Error) {
+      return NextResponse.json({ error: error.message }, { status: 404 })
+    }
+
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
+  }
+}
+
 const categoryController = {
   getAll,
   getById,
   create,
   update,
   remove,
+  toggleCategoryStatus,
 }
 
 export default categoryController

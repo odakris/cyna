@@ -2,6 +2,7 @@ import { Product, Order, OrderItem, Address, Category } from "@prisma/client"
 import { PrismaClient } from "@prisma/client"
 
 export interface ProductWithImages extends Product {
+  category: { name: string; id_category: number }
   product_caroussel_images: { url: string; alt: string }[]
 }
 
