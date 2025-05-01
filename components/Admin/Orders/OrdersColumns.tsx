@@ -1,41 +1,23 @@
-import * as React from "react"
 import { ColumnDef, Row } from "@tanstack/react-table"
-import {
-  ArrowUpDown,
-  CreditCard,
-  Tag,
-  Calendar,
-  Package,
-  Check,
-  X,
-  User,
-  Receipt,
-  CheckCircle,
-} from "lucide-react"
+import { ArrowUpDown, CheckCircle2, XCircle } from "lucide-react"
 import { Clock, Loader2, RefreshCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { OrderWithItems } from "@/types/Types"
 import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+import { format } from "date-fns"
+import { fr } from "date-fns/locale"
+import ActionsCell from "@/components/Admin/ActionCell"
+import { CreditCard, Tag, Calendar, Package, User, Receipt } from "lucide-react"
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
-import { FilterFn } from "@tanstack/react-table"
-import { cn } from "@/lib/utils"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale"
-import { OrderWithItems } from "@/types/Types"
-import ActionsCell from "../../../../components/Admin/ActionCell"
 
-declare module "@tanstack/react-table" {
-  interface FilterFns {
-    dateRange: FilterFn<OrderWithItems>
-  }
-}
-
-export const orderColumns: ColumnDef<OrderWithItems>[] = [
+export const OrderColumns: ColumnDef<OrderWithItems>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -115,7 +97,14 @@ export const orderColumns: ColumnDef<OrderWithItems>[] = [
         </TooltipProvider>
       )
     },
-    filterFn: "dateRange",
+    filterFn: (row, columnId, filterValue) => {
+      const date = new Date(row.getValue(columnId))
+      const [startDate, endDate] = filterValue || []
+      if (startDate && endDate) {
+        return date >= new Date(startDate) && date <= new Date(endDate)
+      }
+      return true
+    },
     enableSorting: true,
   },
   {
@@ -316,17 +305,17 @@ export const orderColumns: ColumnDef<OrderWithItems>[] = [
         ACTIVE: {
           label: "Active",
           class: "bg-blue-100 text-blue-800 border-blue-200",
-          icon: <CheckCircle className="mr-1 h-3 w-3" />,
+          icon: <CheckCircle2 className="mr-1 h-3 w-3" />,
         },
         COMPLETED: {
           label: "Terminée",
           class: "bg-green-100 text-green-800 border-green-200",
-          icon: <Check className="mr-1 h-3 w-3" />,
+          icon: <CheckCircle2 className="mr-1 h-3 w-3" />,
         },
         CANCELLED: {
           label: "Annulée",
           class: "bg-red-100 text-red-800 border-red-200",
-          icon: <X className="mr-1 h-3 w-3" />,
+          icon: <XCircle className="mr-1 h-3 w-3" />,
         },
         REFUNDED: {
           label: "Remboursée",
@@ -352,71 +341,6 @@ export const orderColumns: ColumnDef<OrderWithItems>[] = [
     },
     enableSorting: true,
   },
-  // {
-  //   id: "actions",
-  //   header: "Actions",
-  //   cell: ({ row }) => (
-  //     <div className="flex justify-center space-x-2">
-  //       <TooltipProvider>
-  //         <Tooltip>
-  //           <TooltipTrigger asChild>
-  //             <Link href={`/dashboard/orders/${row.original.id_order}`}>
-  //               <Button variant="ghost" size="icon" className="h-8 w-8">
-  //                 <Eye className="h-4 w-4" />
-  //                 <span className="sr-only">Voir</span>
-  //               </Button>
-  //             </Link>
-  //           </TooltipTrigger>
-  //           <TooltipContent>Voir les détails</TooltipContent>
-  //         </Tooltip>
-  //       </TooltipProvider>
-
-  //       <TooltipProvider>
-  //         <Tooltip>
-  //           <TooltipTrigger asChild>
-  //             <Link href={`/dashboard/orders/${row.original.id_order}/edit`}>
-  //               <Button variant="ghost" size="icon" className="h-8 w-8">
-  //                 <PencilLine className="h-4 w-4" />
-  //                 <span className="sr-only">Modifier</span>
-  //               </Button>
-  //             </Link>
-  //           </TooltipTrigger>
-  //           <TooltipContent>Modifier la commande</TooltipContent>
-  //         </Tooltip>
-  //       </TooltipProvider>
-
-  //       <TooltipProvider>
-  //         <Tooltip>
-  //           <TooltipTrigger asChild>
-  //             <Link
-  //               href={row.original.invoice_pdf_url || "#"}
-  //               target="_blank"
-  //               onClick={e =>
-  //                 !row.original.invoice_pdf_url && e.preventDefault()
-  //               }
-  //             >
-  //               <Button
-  //                 variant="ghost"
-  //                 size="icon"
-  //                 className="h-8 w-8"
-  //                 disabled={!row.original.invoice_pdf_url}
-  //               >
-  //                 <Receipt className="h-4 w-4" />
-  //                 <span className="sr-only">Facture</span>
-  //               </Button>
-  //             </Link>
-  //           </TooltipTrigger>
-  //           <TooltipContent>
-  //             {row.original.invoice_pdf_url
-  //               ? "Voir la facture"
-  //               : "Facture non disponible"}
-  //           </TooltipContent>
-  //         </Tooltip>
-  //       </TooltipProvider>
-  //     </div>
-  //   ),
-  //   enableHiding: false,
-  // },
   {
     id: "actions",
     header: "Actions",
@@ -424,7 +348,7 @@ export const orderColumns: ColumnDef<OrderWithItems>[] = [
       <ActionsCell
         actions={[
           { type: "view", tooltip: "Voir les détails" },
-          { type: "edit", tooltip: "Modifier la commande" },
+          // { type: "edit", tooltip: "Modifier la commande" },
           { type: "receipt", tooltip: "Voir sur la facture" },
         ]}
         basePath="/dashboard/orders"

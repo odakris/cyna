@@ -1,9 +1,13 @@
-"use client"
-
 import UserFormPage from "@/components/Forms/UserForm"
 import RoleGuard from "@/components/Auth/RoleGuard"
 import AccessDenied from "@/components/Auth/AccessDenied"
 import { Role } from "@prisma/client"
+import { Metadata } from "next"
+
+export const metadata: Metadata = {
+  title: "Créer un Utilisateur | CYNA Backoffice",
+  description: "Création d'un utilisateur CYNA",
+}
 
 export default function CreateUserPage() {
   return (
