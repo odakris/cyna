@@ -1,8 +1,26 @@
+import { endOfDay, endOfMonth, endOfYear, parseISO, startOfDay, startOfMonth, startOfYear } from "date-fns"
 import { prisma } from "../prisma"
 import orderRepository from "../repositories/order-repository"
 import { OrderInputValues, orderFormSchema } from "../validations/order-schema"
-import { Order, OrderStatus } from "@prisma/client"
+import { Order, OrderStatus, Prisma, SubscriptionStatus, SubscriptionType } from "@prisma/client"
 import { ZodError } from "zod"
+
+// Définir un type pour Order avec les relations incluses
+type OrderWithRelations = Prisma.OrderGetPayload<{
+    include: {
+        order_items: {
+            include: {
+                product: {
+                    select: {
+                        id_category: true;
+                        name: true;
+                    };
+                };
+            };
+        };
+        address: true;
+    };
+}>;
 
 /**
  * Récupère la liste complète des commandes depuis le dépôt de données.
@@ -275,9 +293,10 @@ export const getUserOrderHistory = async (
     userId: string,
     filters?: {
         year?: string;
-        subscriptionType?: string;
-        status?: string;
+        categoryIds?: string;
+        orderStatus?: string;
         search?: string;
+        orderDate?: string;
     }
 ): Promise<object[]> => {
     try {
@@ -286,62 +305,122 @@ export const getUserOrderHistory = async (
             throw new Error("User ID must be a valid positive number");
         }
 
-        // Valider et convertir subscriptionType
-        let subscriptionTypeFilter: SubscriptionType | { in: SubscriptionType[] } | undefined;
-        if (filters?.subscriptionType) {
-            const types = filters.subscriptionType.split(',') as SubscriptionType[];
-            const validTypes = Object.values(SubscriptionType);
-            const filteredTypes = types.filter(type => validTypes.includes(type));
+        // Valider et convertir categoryIds
+        let categoryIdFilter: number | { in: number[] } | undefined;
+        if (filters?.categoryIds) {
+            const ids = filters.categoryIds.split(",").map(id => parseInt(id));
+            const validIds = ids.filter(id => !isNaN(id) && id > 0);
 
-            if (filteredTypes.length === 0) {
-                throw new Error("Invalid subscription type provided");
+            if (validIds.length === 0) {
+                throw new Error("Invalid category IDs provided");
             }
 
-            subscriptionTypeFilter = filteredTypes.length === 1
-                ? filteredTypes[0]
-                : { in: filteredTypes };
+            categoryIdFilter =
+                validIds.length === 1
+                    ? validIds[0]
+                    : { in: validIds };
         }
 
-        // Valider et convertir status
-        let statusFilter: SubscriptionStatus | { in: SubscriptionStatus[] } | undefined;
-        if (filters?.status) {
-            const statuses = filters.status.split(',') as SubscriptionStatus[];
-            const validStatuses = Object.values(SubscriptionStatus);
-            const filteredStatuses = statuses.filter(status => validStatuses.includes(status));
+        // Valider et convertir orderStatus
+        let orderStatusFilter: OrderStatus | { in: OrderStatus[] } | undefined;
+        if (filters?.orderStatus) {
+            const statuses = filters.orderStatus.split(",") as OrderStatus[];
+            const validStatuses = Object.values(OrderStatus);
+            const filteredStatuses = statuses.filter((status) =>
+                validStatuses.includes(status)
+            );
 
             if (filteredStatuses.length === 0) {
-                throw new Error("Invalid subscription status provided");
+                throw new Error("Invalid order status provided");
             }
 
-            statusFilter = filteredStatuses.length === 1
-                ? filteredStatuses[0]
-                : { in: filteredStatuses };
+            orderStatusFilter =
+                filteredStatuses.length === 1
+                    ? filteredStatuses[0]
+                    : { in: filteredStatuses };
         }
 
-        const orders: OrderWithRelations[] = await prisma.order.findMany({
-            where: {
-                id_user: parsedUserId,
+        // Gérer le filtre par date (orderDate)
+        let dateFilter: { gte?: Date; lte?: Date } | undefined;
+        if (filters?.orderDate) {
+            const parsedDate = parseISO(filters.orderDate);
+            if (isNaN(parsedDate.getTime())) {
+                throw new Error("Invalid date format for order_date. Expected format: YYYY-MM-DD");
+            }
+
+            const dateStr = filters.orderDate;
+            if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                dateFilter = {
+                    gte: startOfDay(parsedDate),
+                    lte: endOfDay(parsedDate),
+                };
+            } else if (dateStr.match(/^\d{4}-\d{2}$/)) {
+                dateFilter = {
+                    gte: startOfMonth(parsedDate),
+                    lte: endOfMonth(parsedDate),
+                };
+            } else if (dateStr.match(/^\d{4}$/)) {
+                dateFilter = {
+                    gte: startOfYear(parsedDate),
+                    lte: endOfYear(parsedDate),
+                };
+            } else {
+                throw new Error("Unsupported date format for order_date. Use YYYY-MM-DD, YYYY-MM, or YYYY");
+            }
+        }
+
+        // Combiner les filtres de date (orderDate et year)
+        let combinedDateFilter: { gte?: Date; lte?: Date } | undefined;
+        if (filters?.year && dateFilter) {
+            combinedDateFilter = dateFilter;
+        } else if (filters?.year) {
+            combinedDateFilter = {
+                gte: new Date(`${filters.year}-01-01`),
+                lte: new Date(`${filters.year}-12-31`),
+            };
+        } else if (dateFilter) {
+            combinedDateFilter = dateFilter;
+        }
+
+        // Construire les conditions pour la recherche par nom de service
+        let searchFilter = {};
+        if (filters?.search) {
+            searchFilter = {
                 order_items: {
                     some: {
-                        subscription_type: subscriptionTypeFilter,
-                        subscription_status: statusFilter,
-                        renewal_date: filters?.year ? {
-                            gte: new Date(`${filters.year}-01-01`),
-                            lte: new Date(`${filters.year}-12-31`),
-                        } : undefined,
-                        product: filters?.search ? {
+                        product: {
                             name: {
                                 contains: filters.search,
-                                mode: 'insensitive',
-                            }
-                        } : undefined,
-                    }
-                }
+                                mode: "insensitive",
+                            },
+                            isNot: null, // S'assurer que product n'est pas null
+                        },
+                    },
+                },
+            };
+        }
+
+        // Construire les conditions de filtrage
+        const whereClause: Prisma.OrderWhereInput = {
+            id_user: parsedUserId,
+            order_date: combinedDateFilter,
+            order_status: orderStatusFilter,
+            order_items: {
+                some: {
+                    product: {
+                        id_category: categoryIdFilter,
+                    },
+                },
             },
+            ...(filters?.search ? searchFilter : {}),
+        };
+
+        const orders: OrderWithRelations[] = await prisma.order.findMany({
+            where: whereClause,
             include: {
                 order_items: {
                     include: {
-                        product: true,
+                        product: true, // Inclure toutes les propriétés de product
                     },
                 },
                 address: true,
@@ -362,15 +441,19 @@ export const getUserOrderHistory = async (
             last_card_digits: order.last_card_digits || "",
             invoice_number: order.invoice_number,
             invoice_pdf_url: order.invoice_pdf_url,
-            billing_address: order.address ? {
-                address1: order.address.address1,
-                address2: order.address.address2,
-                city: order.address.city,
-                postal_code: order.address.postal_code,
-                country: order.address.country,
-            } : undefined,
+            billing_address: order.address
+                ? {
+                    address1: order.address.address1,
+                    address2: order.address.address2,
+                    city: order.address.city,
+                    postal_code: order.address.postal_code,
+                    country: order.address.country,
+                }
+                : undefined,
             subscriptions: order.order_items.map((item) => ({
                 id_order_item: item.id_order_item,
+                id_product: item.id_product,
+                id_category: item.product?.id_category ?? null,
                 service_name: item.product?.name || "Nom de service indisponible",
                 subscription_type: item.subscription_type,
                 subscription_status: item.subscription_status,
@@ -381,7 +464,10 @@ export const getUserOrderHistory = async (
             })),
         }));
     } catch (error) {
-        console.error("Erreur lors de la récupération de l'historique des commandes", error || "Unknown error");
+        console.error(
+            "Erreur lors de la récupération de l'historique des commandes",
+            error || "Unknown error"
+        );
         throw new Error(
             error instanceof Error
                 ? `Erreur lors de la récupération des données: ${error.message}`
@@ -389,6 +475,7 @@ export const getUserOrderHistory = async (
         );
     }
 };
+
 
 const orderService = {
     getAllOrders,

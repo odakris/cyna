@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from "next/server"
-import orderService from "@/lib/services/order-service"
-import { orderInputSchema, statusSchema } from "@/lib/validations/order-schema"
-import { ZodError } from "zod"
+import { NextRequest, NextResponse } from "next/server";
+import orderService from "@/lib/services/order-service";
+import { orderInputSchema, statusSchema } from "@/lib/validations/order-schema";
+import { ZodError } from "zod";
 
 /**
  * Récupère la liste complète des commandes depuis la base de données.
@@ -9,10 +9,10 @@ import { ZodError } from "zod"
  */
 export const getAll = async (): Promise<NextResponse> => {
     try {
-        const orders = await orderService.getAllOrders()
-        return NextResponse.json({ orders, success: true }, { status: 200 })
+        const orders = await orderService.getAllOrders();
+        return NextResponse.json({ orders, success: true }, { status: 200 });
     } catch (error) {
-        console.error("Erreur lors de la récupération des commandes:", error)
+        console.error("Erreur lors de la récupération des commandes:", error);
         return NextResponse.json(
             {
                 success: false,
@@ -20,9 +20,9 @@ export const getAll = async (): Promise<NextResponse> => {
                 details: error instanceof Error ? error.message : "Erreur inconnue",
             },
             { status: 500 }
-        )
+        );
     }
-}
+};
 
 /**
  * Récupère une commande spécifique en fonction de son identifiant.
@@ -31,34 +31,27 @@ export const getAll = async (): Promise<NextResponse> => {
  */
 export const getById = async (id: number): Promise<NextResponse> => {
     try {
-        const order = await orderService.getOrderById(id)
-        return NextResponse.json({ order, success: true }, { status: 200 })
+        const order = await orderService.getOrderById(id);
+        return NextResponse.json({ order, success: true }, { status: 200 });
     } catch (error) {
-        console.error(
-            "Erreur lors de la récupération de la commande par ID:",
-            error
-        )
+        console.error("Erreur lors de la récupération de la commande par ID:", error);
 
         // Gestion des erreurs spécifiques
         if (error instanceof Error) {
-            // Commande non trouvée
             if (error.message.includes("non trouvée")) {
                 return NextResponse.json(
                     { success: false, message: error.message },
                     { status: 404 }
-                )
+                );
             }
-
-            // ID invalide
             if (error.message.includes("invalide")) {
                 return NextResponse.json(
                     { success: false, message: error.message },
                     { status: 400 }
-                )
+                );
             }
         }
 
-        // Erreurs génériques
         return NextResponse.json(
             {
                 success: false,
@@ -66,9 +59,9 @@ export const getById = async (id: number): Promise<NextResponse> => {
                 details: error instanceof Error ? error.message : "Erreur inconnue",
             },
             { status: 500 }
-        )
+        );
     }
-}
+};
 
 /**
  * Crée une nouvelle commande en validant les données reçues.
@@ -77,12 +70,11 @@ export const getById = async (id: number): Promise<NextResponse> => {
  */
 export const create = async (request: NextRequest): Promise<NextResponse> => {
     try {
-        const body = await request.json()
-        console.log("Données reçues pour création de commande:", body)
+        const body = await request.json();
+        console.log("Données reçues pour création de commande:", body);
 
-        // Valider les données d'entrée
-        const validatedData = orderInputSchema.parse(body)
-        const newOrder = await orderService.createOrder(validatedData)
+        const validatedData = orderInputSchema.parse(body);
+        const newOrder = await orderService.createOrder(validatedData);
 
         return NextResponse.json(
             {
@@ -91,15 +83,14 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
                 order: newOrder,
             },
             { status: 201 }
-        )
+        );
     } catch (error) {
-        console.error("Erreur lors de la création de la commande:", error)
+        console.error("Erreur lors de la création de la commande:", error);
 
-        // Erreurs de validation Zod
         if (error instanceof ZodError) {
             const validationErrors = error.errors
                 .map(e => `${e.path.join(".")}: ${e.message}`)
-                .join(", ")
+                .join(", ");
             return NextResponse.json(
                 {
                     success: false,
@@ -108,10 +99,9 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
                     details: validationErrors,
                 },
                 { status: 400 }
-            )
+            );
         }
 
-        // Autres erreurs (ex: utilisateur n'existe pas, produit non trouvé)
         if (error instanceof Error && error.message.includes("n'existe pas")) {
             return NextResponse.json(
                 {
@@ -120,11 +110,8 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
                     details: error.message,
                 },
                 { status: 400 }
-            )
-        } else if (
-            error instanceof Error &&
-            error.message.includes("Stock insuffisant")
-        ) {
+            );
+        } else if (error instanceof Error && error.message.includes("Stock insuffisant")) {
             return NextResponse.json(
                 {
                     success: false,
@@ -132,10 +119,9 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
                     details: error.message,
                 },
                 { status: 400 }
-            )
+            );
         }
 
-        // Erreur générique
         return NextResponse.json(
             {
                 success: false,
@@ -143,9 +129,9 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
                 details: error instanceof Error ? error.message : "Erreur inconnue",
             },
             { status: 500 }
-        )
+        );
     }
-}
+};
 
 /**
  * Met à jour une commande existante avec de nouvelles données.
@@ -153,20 +139,13 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
  * @param {number} id - Identifiant de la commande à mettre à jour.
  * @returns {Promise<NextResponse>} Réponse JSON avec la commande mise à jour ou une erreur de validation.
  */
-export const update = async (
-    request: NextRequest,
-    id: number
-): Promise<NextResponse> => {
+export const update = async (request: NextRequest, id: number): Promise<NextResponse> => {
     try {
-        const body = await request.json()
-        console.log(
-            `Données reçues pour mise à jour de la commande ID ${id}:`,
-            body
-        )
+        const body = await request.json();
+        console.log(`Données reçues pour mise à jour de la commande ID ${id}:`, body);
 
-        // Valider les données d'entrée
-        const validatedData = orderInputSchema.parse(body)
-        const updatedOrder = await orderService.updateOrder(id, validatedData)
+        const validatedData = orderInputSchema.parse(body);
+        const updatedOrder = await orderService.updateOrder(id, validatedData);
 
         return NextResponse.json(
             {
@@ -175,18 +154,14 @@ export const update = async (
                 order: updatedOrder,
             },
             { status: 200 }
-        )
+        );
     } catch (error) {
-        console.error(
-            `Erreur lors de la mise à jour de la commande ID ${id}:`,
-            error
-        )
+        console.error(`Erreur lors de la mise à jour de la commande ID ${id}:`, error);
 
-        // Erreurs de validation Zod
         if (error instanceof ZodError) {
             const validationErrors = error.errors
                 .map(e => `${e.path.join(".")}: ${e.message}`)
-                .join(", ")
+                .join(", ");
             return NextResponse.json(
                 {
                     success: false,
@@ -195,10 +170,9 @@ export const update = async (
                     details: validationErrors,
                 },
                 { status: 400 }
-            )
+            );
         }
 
-        // Commande non trouvée
         if (error instanceof Error && error.message.includes("non trouvée")) {
             return NextResponse.json(
                 {
@@ -206,10 +180,9 @@ export const update = async (
                     message: error.message,
                 },
                 { status: 404 }
-            )
+            );
         }
 
-        // ID invalide
         if (error instanceof Error && error.message.includes("invalide")) {
             return NextResponse.json(
                 {
@@ -217,10 +190,9 @@ export const update = async (
                     message: error.message,
                 },
                 { status: 400 }
-            )
+            );
         }
 
-        // Erreur générique
         return NextResponse.json(
             {
                 success: false,
@@ -228,9 +200,9 @@ export const update = async (
                 details: error instanceof Error ? error.message : "Erreur inconnue",
             },
             { status: 500 }
-        )
+        );
     }
-}
+};
 
 /**
  * Met à jour le statut d'une commande existante.
@@ -238,20 +210,12 @@ export const update = async (
  * @param {number} id - Identifiant de la commande à mettre à jour.
  * @returns {Promise<NextResponse>} Réponse JSON avec la commande mise à jour ou une erreur de validation.
  */
-export const updateStatus = async (
-    request: NextRequest,
-    id: number
-): Promise<NextResponse> => {
+export const updateStatus = async (request: NextRequest, id: number): Promise<NextResponse> => {
     try {
-        const body = await request.json()
-        // console.log(
-        //   `Données reçues pour mise à jour du statut de la commande ID ${id}:`,
-        //   body
-        // )
+        const body = await request.json();
 
-        // Valider les données d'entrée
-        const { order_status } = statusSchema.parse(body)
-        const updatedOrder = await orderService.updateOrderStatus(id, order_status)
+        const { order_status } = statusSchema.parse(body);
+        const updatedOrder = await orderService.updateOrderStatus(id, order_status);
 
         return NextResponse.json(
             {
@@ -260,18 +224,14 @@ export const updateStatus = async (
                 order: updatedOrder,
             },
             { status: 200 }
-        )
+        );
     } catch (error) {
-        console.error(
-            `Erreur lors de la mise à jour du statut de la commande ID ${id}:`,
-            error
-        )
+        console.error(`Erreur lors de la mise à jour du statut de la commande ID ${id}:`, error);
 
-        // Erreurs de validation Zod
         if (error instanceof ZodError) {
             const validationErrors = error.errors
                 .map(e => `${e.path.join(".")}: ${e.message}`)
-                .join(", ")
+                .join(", ");
             return NextResponse.json(
                 {
                     success: false,
@@ -280,10 +240,9 @@ export const updateStatus = async (
                     details: validationErrors,
                 },
                 { status: 400 }
-            )
+            );
         }
 
-        // Commande non trouvée
         if (error instanceof Error && error.message.includes("non trouvée")) {
             return NextResponse.json(
                 {
@@ -291,10 +250,9 @@ export const updateStatus = async (
                     message: error.message,
                 },
                 { status: 404 }
-            )
+            );
         }
 
-        // ID invalide
         if (error instanceof Error && error.message.includes("invalide")) {
             return NextResponse.json(
                 {
@@ -302,10 +260,9 @@ export const updateStatus = async (
                     message: error.message,
                 },
                 { status: 400 }
-            )
+            );
         }
 
-        // Erreur générique
         return NextResponse.json(
             {
                 success: false,
@@ -313,9 +270,9 @@ export const updateStatus = async (
                 details: error instanceof Error ? error.message : "Erreur inconnue",
             },
             { status: 500 }
-        )
+        );
     }
-}
+};
 
 /**
  * Supprime une commande existante en fonction de son identifiant.
@@ -324,21 +281,17 @@ export const updateStatus = async (
  */
 export const remove = async (id: number): Promise<NextResponse> => {
     try {
-        await orderService.deleteOrder(id)
+        await orderService.deleteOrder(id);
         return NextResponse.json(
             {
                 success: true,
                 message: `Commande ${id} supprimée avec succès`,
             },
             { status: 200 }
-        )
+        );
     } catch (error) {
-        console.error(
-            `Erreur lors de la suppression de la commande ID ${id}:`,
-            error
-        )
+        console.error(`Erreur lors de la suppression de la commande ID ${id}:`, error);
 
-        // Commande non trouvée
         if (error instanceof Error && error.message.includes("non trouvée")) {
             return NextResponse.json(
                 {
@@ -346,10 +299,9 @@ export const remove = async (id: number): Promise<NextResponse> => {
                     message: error.message,
                 },
                 { status: 404 }
-            )
+            );
         }
 
-        // ID invalide
         if (error instanceof Error && error.message.includes("invalide")) {
             return NextResponse.json(
                 {
@@ -357,10 +309,9 @@ export const remove = async (id: number): Promise<NextResponse> => {
                     message: error.message,
                 },
                 { status: 400 }
-            )
+            );
         }
 
-        // Contraintes d'intégrité
         if (
             error instanceof Error &&
             (error.message.includes("référencée") ||
@@ -373,11 +324,10 @@ export const remove = async (id: number): Promise<NextResponse> => {
                     error: "Impossible de supprimer cette commande",
                     details: error.message,
                 },
-                { status: 409 } // Conflict status
-            )
+                { status: 409 }
+            );
         }
 
-        // Erreur générique
         return NextResponse.json(
             {
                 success: false,
@@ -385,34 +335,37 @@ export const remove = async (id: number): Promise<NextResponse> => {
                 details: error instanceof Error ? error.message : "Erreur inconnue",
             },
             { status: 500 }
-        )
+        );
     }
-}
+};
 
 export const getUserOrders = async (id: string): Promise<NextResponse> => {
     if (!id) {
-        return NextResponse.json({ error: "User ID is required" }, { status: 400 })
+        return NextResponse.json({ error: "User ID is required" }, { status: 400 });
     }
 
     try {
-        const orders = await orderService.getUserOrders(id)
+        const orders = await orderService.getUserOrders(id);
 
         if (orders.length === 0) {
             return NextResponse.json(
                 { error: "Aucune commande trouvée" },
                 { status: 404 }
-            )
+            );
         }
 
-        return NextResponse.json(orders, { status: 200 })
+        return NextResponse.json(orders, { status: 200 });
     } catch (error) {
-        console.error("OrderController Error fetching orders:", error)
+        console.error("OrderController Error fetching orders:", error);
         return NextResponse.json(
-            { error: "Controller Error fetching orders" },
+            {
+                error: "Erreur lors de la récupération des commandes",
+                details: error instanceof Error ? error.message : "Erreur inconnue",
+            },
             { status: 500 }
-        )
+        );
     }
-}
+};
 
 /**
  * Récupère l'historique des commandes d'un utilisateur pour affichage.
@@ -437,9 +390,10 @@ export const getUserOrderHistoryForDisplay = async (id: string, req?: NextReques
             const url = new URL(req.url);
             filters = {
                 year: url.searchParams.get('year') || undefined,
-                subscriptionType: url.searchParams.get('subscription_type') || undefined,
-                status: url.searchParams.get('status') || undefined,
+                categoryIds: url.searchParams.get('category_ids') || undefined,
+                orderStatus: url.searchParams.get('order_status') || undefined,
                 search: url.searchParams.get('search') || undefined,
+                orderDate: url.searchParams.get('order_date') || undefined,
             };
         }
 
@@ -454,11 +408,11 @@ export const getUserOrderHistoryForDisplay = async (id: string, req?: NextReques
 
         return NextResponse.json(orders, { status: 200 });
     } catch (error) {
-        console.error("OrderController Error fetching order history:", error || "Unknown error");
+        console.error("OrderController Error fetching order history:", error);
         return NextResponse.json(
             {
-                error: "Controller Error fetching order history",
-                details: error instanceof Error ? error.message : "Unknown error"
+                error: "Erreur lors de la récupération de l'historique des commandes",
+                details: error instanceof Error ? error.message : "Erreur inconnue",
             },
             { status: 500 }
         );
