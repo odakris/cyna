@@ -25,7 +25,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { nanoid } from 'nanoid';
 import { useCart } from '@/context/CartContext';
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY!);
 
 interface CartItem {
   id: string;
@@ -58,7 +58,7 @@ interface PaymentInfo {
 
 function CheckoutContent() {
   const { data: session, status } = useSession();
-  const { cart, setCart } = useCart();
+  const { cart } = useCart();
   const router = useRouter();
   const stripe = useStripe();
   const elements = useElements();
@@ -84,113 +84,108 @@ function CheckoutContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-
-  const fetchUserData = async (userId: number) => {
-    console.log('[CheckoutPage] Récupération des données utilisateur:', { userId });
+  const fetchUserData = async (userId: string) => {
+    console.log('[Checkout] Récupération des données utilisateur:', { userId });
     try {
+      console.log('[Checkout] Envoi des requêtes API...');
       const [addressResponse, paymentResponse] = await Promise.all([
-        fetch(`/api/users/addresses?userId=${userId}`, {
-          headers: { 'x-user-id': userId.toString() },
+        fetch(`/api/users/addresses`, {
+          credentials: 'include',
         }),
-        fetch(`/api/users/payment-infos?userId=${userId}`, {
-          headers: { 'x-user-id': userId.toString() },
+        fetch(`/api/users/payment-infos`, {
+          credentials: 'include',
         }),
       ]);
 
+      console.log('[Checkout] Réponses reçues:', {
+        addressStatus: addressResponse.status,
+        paymentStatus: paymentResponse.status,
+      });
+
       if (addressResponse.ok) {
         const addressData = await addressResponse.json();
-        console.log('[CheckoutPage] Adresses récupérées:', addressData);
+        console.log('[Checkout] Adresses récupérées:', addressData);
         setAddresses(addressData);
       } else {
         const addressError = await addressResponse.text();
-        console.error('[CheckoutPage] Erreur adresses:', addressError);
-        setError(`Erreur lors du chargement des adresses: ${addressError}`);
+        console.error('[Checkout] Erreur adresses:', {
+          status: addressResponse.status,
+          error: addressError,
+        });
+        setError(`Erreur lors du chargement des adresses: ${addressResponse.status === 500 ? 'Erreur serveur interne' : addressError}`);
       }
 
       if (paymentResponse.ok) {
         const paymentData = await paymentResponse.json();
-        console.log('[CheckoutPage] Moyens de paiement récupérés:', paymentData);
+        console.log('[Checkout] Moyens de paiement récupérés:', paymentData);
         setPaymentInfos(paymentData);
       } else {
         const paymentError = await paymentResponse.text();
-        console.error('[CheckoutPage] Erreur moyens de paiement:', paymentError);
+        console.error('[Checkout] Erreur moyens de paiement:', {
+          status: paymentResponse.status,
+          error: paymentError,
+        });
         setError(`Erreur lors du chargement des moyens de paiement: ${paymentError}`);
       }
-    } catch (err: any) {
-      console.error('[CheckoutPage] Erreur réseau (user data):', err);
+    } catch (err) {
+      console.error('[Checkout] Erreur réseau:', err);
       setError('Erreur réseau lors du chargement des données utilisateur');
     }
   };
 
   const loadGuestData = () => {
-    console.log('[CheckoutPage] Chargement des données invité...');
+    console.log('[Checkout] Chargement des données invité');
     const storedAddresses = JSON.parse(localStorage.getItem('guestAddresses') || '[]');
     const storedPayments = JSON.parse(localStorage.getItem('guestPaymentInfos') || '[]');
-    console.log('[CheckoutPage] Données invité:', { storedAddresses, storedPayments });
+    console.log('[Checkout] Données invité:', { storedAddresses, storedPayments });
     setAddresses(storedAddresses);
     setPaymentInfos(storedPayments);
   };
 
-  const loadUserData = async (userId: string) => {
-    console.log('[CheckoutPage] Chargement des données utilisateur...');
-  
-    try {
-      // Récupérer les informations de l'utilisateur via une API ou une autre méthode
-      const userAddressesResponse = await fetch(`/api/user/${userId}/addresses`);
-      const userPaymentsResponse = await fetch(`/api/user/${userId}/payment-info`);
-  
-      if (!userAddressesResponse.ok || !userPaymentsResponse.ok) {
-        throw new Error('Erreur lors du chargement des données utilisateur.');
-      }
-  
-      const userAddresses = await userAddressesResponse.json();
-      const userPayments = await userPaymentsResponse.json();
-  
-      console.log('[CheckoutPage] Données utilisateur:', { userAddresses, userPayments });
-  
-      // Mise à jour de l'état avec les données récupérées
-      setAddresses(userAddresses);
-      setPaymentInfos(userPayments);
-    } catch (error) {
-      console.error('[CheckoutPage] Erreur lors du chargement des données utilisateur:', error);
-      // Si une erreur se produit, on pourrait peut-être définir des valeurs par défaut ou gérer l'erreur d'une autre manière
-    }
-  };
-  
-
   useEffect(() => {
-    console.log('[CheckoutPage] Session details:', {
-      userId: session?.user?.id,
-      session,
+    console.log('[Checkout] useEffect démarré', {
+      status,
+      session: session ? 'présente' : 'absente',
+      userId: session?.user?.id_user,
+      isGuest,
     });
-    if (status === 'loading') return;
+    if (status === 'loading') {
+      console.log('[Checkout] Statut en chargement, attente...');
+      return;
+    }
 
     if (!session && !isGuest) {
+      console.log('[Checkout] Pas de session ni mode invité, affichage formulaire');
       setLoading(false);
       return;
     }
 
-    const userId = session?.user?.id;
+    const userId = session?.user?.id_user;
     const guestId = localStorage.getItem('guestUserId');
     if (userId) {
-      fetchUserData(parseInt(userId));
+      console.log('[Checkout] Utilisateur connecté détecté', { userId });
+      fetchUserData(userId.toString());
     } else if (guestId) {
+      console.log('[Checkout] Mode invité détecté', { guestId });
       loadGuestData();
+    } else {
+      console.error('[Checkout] Aucun userId ou guestId trouvé');
+      setError('Erreur : utilisateur non identifié');
     }
     setLoading(false);
   }, [session, status, isGuest]);
 
-  const handleGuestCheckout = async () => {
-    console.log('[CheckoutPage] Tentative de checkout invité:', { guestEmail });
+  const handleGuestCheckout = () => {
+    console.log('[Checkout] Tentative de checkout invité:', { guestEmail });
     setError(null);
 
     if (!guestEmail) {
-      console.error('[CheckoutPage] E-mail vide');
+      console.error('[Checkout] E-mail vide');
       setError('Veuillez entrer un e-mail pour continuer en tant qu’invité');
       return;
     }
     if (!guestEmail.includes('@') || !guestEmail.includes('.')) {
-      console.error('[CheckoutPage] E-mail invalide:', guestEmail);
+      console.error('[Checkout] E-mail invalide:', guestEmail);
       setError('Veuillez entrer un e-mail valide');
       return;
     }
@@ -199,17 +194,19 @@ function CheckoutContent() {
     localStorage.setItem('guestCheckout', 'true');
     localStorage.setItem('guestUserId', guestId);
     localStorage.setItem('guestEmail', guestEmail);
-    console.log('[CheckoutPage] Invité initialisé:', { guestId, guestEmail });
+    localStorage.setItem('guestAddresses', JSON.stringify([]));
+    localStorage.setItem('guestPaymentInfos', JSON.stringify([]));
+    console.log('[Checkout] Invité initialisé:', { guestId, guestEmail });
 
     setIsGuest(true);
-    await useCart();
     loadGuestData();
   };
 
   const handleSaveNewAddress = async () => {
-    console.log('[CheckoutPage] Sauvegarde nouvelle adresse:', newAddress);
+    console.log('[Checkout] Sauvegarde nouvelle adresse:', newAddress);
     if (
       !newAddress.first_name ||
+      !newAddress.last_name ||
       !newAddress.address1 ||
       !newAddress.postal_code ||
       !newAddress.city ||
@@ -225,28 +222,29 @@ function CheckoutContent() {
       ...newAddress,
     };
 
-    if (session?.user?.id) {
+    if (session?.user?.id_user) {
       try {
         const response = await fetch('/api/users/addresses', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-user-id': session.user.id,
+            'x-user-id': session.user.id_user.toString(),
           },
-          body: JSON.stringify({ ...newAddress, userId: session.user.id }),
+          body: JSON.stringify({ ...newAddress, userId: session.user.id_user }),
         });
 
         if (response.ok) {
           const savedAddress = await response.json();
           setAddresses([...addresses, savedAddress]);
-          setSelectedAddress(savedAddress.id_address.toString());
+          setSelectedAddress(savedAddress.id_address);
+          console.log('[Checkout] Adresse enregistrée et sélectionnée:', savedAddress.id_address);
         } else {
           const errorData = await response.text();
-          console.error('[CheckoutPage] Erreur sauvegarde adresse:', errorData);
+          console.error('[Checkout] Erreur sauvegarde adresse:', errorData);
           setError(`Erreur lors de l'ajout de l'adresse: ${errorData}`);
         }
-      } catch (err: any) {
-        console.error('[CheckoutPage] Erreur réseau:', err);
+      } catch (err) {
+        console.error('[Checkout] Erreur réseau:', err);
         setError('Erreur réseau');
       }
     } else {
@@ -255,6 +253,7 @@ function CheckoutContent() {
       localStorage.setItem('guestAddresses', JSON.stringify(currentAddresses));
       setAddresses(currentAddresses);
       setSelectedAddress(addressId);
+      console.log('[Checkout] Adresse enregistrée et sélectionnée (invité):', addressId);
     }
 
     setNewAddress({
@@ -270,45 +269,73 @@ function CheckoutContent() {
   };
 
   const handleSaveNewPayment = async () => {
-    console.log('[CheckoutPage] Sauvegarde nouveau moyen de paiement:', {
+    console.log('[Checkout] Sauvegarde nouveau moyen de paiement:', {
       card_name: newPayment.card_name,
-      userId: session?.user?.id,
+      userId: session?.user?.id_user,
     });
     if (!stripe || !elements) {
-      console.error('[CheckoutPage] Stripe non chargé:', { stripe, elements });
+      console.error('[Checkout] Stripe non chargé:', { stripe, elements });
       setError('Stripe non chargé');
       return;
     }
 
     if (!newPayment.card_name) {
-      console.error('[CheckoutPage] Nom de carte manquant');
+      console.error('[Checkout] Nom de carte manquant');
       setError('Veuillez entrer un nom pour la carte');
       return;
     }
 
     const cardElement = elements.getElement(CardElement);
     if (!cardElement) {
-      console.error('[CheckoutPage] CardElement non trouvé');
+      console.error('[Checkout] CardElement non trouvé');
       setError('Erreur avec le formulaire de paiement');
       return;
     }
 
     try {
-      const { paymentMethod, error } = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardElement,
-        billing_details: { name: newPayment.card_name },
-      });
+      let attempts = 0;
+      const maxAttempts = 3;
+      let paymentMethod = null;
 
-      if (error) {
-        console.error('[CheckoutPage] Erreur Stripe:', error);
-        setError(error.message || 'Erreur lors de l’ajout du moyen de paiement');
-        return;
+      while (attempts < maxAttempts) {
+        try {
+          console.log('[Checkout] Création du PaymentMethod, tentative:', attempts + 1);
+          const result = await stripe.createPaymentMethod({
+            type: 'card',
+            card: cardElement,
+            billing_details: { name: newPayment.card_name },
+          });
+
+          if (result.error) {
+            throw new Error(result.error.message || 'Erreur lors de l’ajout du moyen de paiement');
+          }
+
+          paymentMethod = result.paymentMethod;
+          console.log('[Checkout] PaymentMethod créé:', {
+            id: paymentMethod.id,
+            last4: paymentMethod.card?.last4,
+            brand: paymentMethod.card?.brand,
+          });
+          break;
+        } catch (err) {
+          attempts++;
+          console.warn(`[Checkout] Tentative ${attempts} échouée:`, err);
+          if (attempts === maxAttempts) {
+            throw new Error('Échec de la création du moyen de paiement après plusieurs tentatives');
+          }
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
       }
 
       if (!paymentMethod?.id || !paymentMethod?.card?.last4 || !paymentMethod?.card?.brand) {
-        console.error('[CheckoutPage] Données Stripe incomplètes:', paymentMethod);
+        console.error('[Checkout] Données Stripe incomplètes:', paymentMethod);
         setError('Données de paiement Stripe incomplètes');
+        return;
+      }
+
+      if (!paymentMethod.id.startsWith('pm_')) {
+        console.error('[Checkout] ID de PaymentMethod invalide:', paymentMethod.id);
+        setError('Identifiant de paiement Stripe invalide');
         return;
       }
 
@@ -320,9 +347,9 @@ function CheckoutContent() {
         stripe_payment_id: paymentMethod.id,
       };
 
-      if (session?.user?.id) {
-        console.log('[CheckoutPage] Envoi à /api/users/payment-infos:', {
-          userId: session.user.id,
+      if (session?.user?.id_user) {
+        console.log('[Checkout] Envoi à /api/users/payment-infos:', {
+          userId: session.user.id_user,
           card_name: newPayment.card_name,
           stripe_payment_id: paymentMethod.id,
           last_card_digits: paymentMethod.card.last4,
@@ -332,10 +359,10 @@ function CheckoutContent() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-user-id': session.user.id,
+            'x-user-id': session.user.id_user.toString(),
           },
           body: JSON.stringify({
-            userId: session.user.id,
+            userId: session.user.id_user,
             card_name: newPayment.card_name,
             stripe_payment_id: paymentMethod.id,
             last_card_digits: paymentMethod.card.last4,
@@ -345,35 +372,70 @@ function CheckoutContent() {
 
         if (response.ok) {
           const savedPayment = await response.json();
-          console.log('[CheckoutPage] Moyen de paiement enregistré:', savedPayment);
+          console.log('[Checkout] Moyen de paiement enregistré:', savedPayment);
           setPaymentInfos([...paymentInfos, savedPayment]);
-          setSelectedPayment(savedPayment.id_payment_info.toString());
+          setSelectedPayment(savedPayment.id_payment_info);
+          console.log('[Checkout] Paiement sélectionné:', savedPayment.id_payment_info);
         } else {
           const errorData = await response.text();
-          console.error('[CheckoutPage] Erreur API:', errorData);
+          console.error('[Checkout] Erreur API:', errorData);
           setError(`Erreur lors de l'ajout du moyen de paiement: ${errorData}`);
+          return;
         }
       } else {
         const currentPayments = JSON.parse(localStorage.getItem('guestPaymentInfos') || '[]');
+        console.log('[Checkout] Données à enregistrer:', newPaymentData);
         currentPayments.push(newPaymentData);
         localStorage.setItem('guestPaymentInfos', JSON.stringify(currentPayments));
         setPaymentInfos(currentPayments);
         setSelectedPayment(paymentId);
+        console.log('[Checkout] Paiement enregistré et sélectionné (invité):', {
+          paymentId,
+          stripe_payment_id: paymentMethod.id,
+        });
       }
 
       setNewPayment({ card_name: '' });
       cardElement.clear();
-    } catch (err: any) {
-      console.error('[CheckoutPage] Erreur réseau:', err);
-      setError('Erreur réseau lors de l’ajout du moyen de paiement');
+    } catch (err) {
+      console.error('[Checkout] Erreur lors de l’ajout du moyen de paiement:', err);
+      setError('Erreur lors de l’ajout du moyen de paiement. Vérifiez votre connexion et réessayez.');
     }
   };
 
   const handleProceedToConfirmation = () => {
-    console.log('[CheckoutPage] Passage à la confirmation:', { selectedAddress, selectedPayment });
+    console.log('[Checkout] Passage à la confirmation:', { selectedAddress, selectedPayment });
     if (!selectedAddress || !selectedPayment) {
       setError('Veuillez sélectionner une adresse et un moyen de paiement');
       return;
+    }
+
+    if (!session) {
+      const guestAddresses = JSON.parse(localStorage.getItem('guestAddresses') || '[]');
+      const guestPayments = JSON.parse(localStorage.getItem('guestPaymentInfos') || '[]');
+      const addressExists = guestAddresses.some((addr: Address) => addr.id_address === selectedAddress);
+      const paymentExists = guestPayments.find((pay: PaymentInfo) => pay.id_payment_info === selectedPayment);
+
+      if (!addressExists) {
+        setError('Adresse sélectionnée non valide');
+        console.error('[Checkout] Adresse non trouvée:', { selectedAddress, guestAddresses });
+        return;
+      }
+
+      if (!paymentExists) {
+        setError('Moyen de paiement sélectionné non valide');
+        console.error('[Checkout] Paiement non trouvé:', { selectedPayment, guestPayments });
+        return;
+      }
+
+      if (!paymentExists.stripe_payment_id || !paymentExists.stripe_payment_id.startsWith('pm_')) {
+        setError('Le moyen de paiement sélectionné contient un identifiant Stripe invalide');
+        console.error('[Checkout] stripe_payment_id invalide:', {
+          selectedPayment,
+          stripe_payment_id: paymentExists.stripe_payment_id,
+        });
+        return;
+      }
     }
 
     router.push(`/checkout/confirmation?addressId=${selectedAddress}&paymentId=${selectedPayment}`);
@@ -429,6 +491,7 @@ function CheckoutContent() {
     }
     return sum + unitPrice * item.quantity;
   }, 0);
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Passer la commande</h1>
@@ -450,7 +513,7 @@ function CheckoutContent() {
                 <div key={item.uniqueId} className="mb-2">
                   <p>{item.name}</p>
                   <p>Quantité : {item.quantity}</p>
-                  <p>Abonnement : {item.subscription}</p>
+                  <p>Abonnement : {item.subscription || 'MONTHLY'}</p>
                   <p>
                     Total :{' '}
                     {(item.price * (item.subscription === 'YEARLY' ? 12 : 1) * item.quantity).toFixed(2)} €
@@ -481,7 +544,7 @@ function CheckoutContent() {
                 </SelectTrigger>
                 <SelectContent>
                   {addresses.map((address) => (
-                    <SelectItem key={address.id_address} value={address.id_address.toString()}>
+                    <SelectItem key={address.id_address} value={address.id_address}>
                       {address.address1}, {address.city}, {address.country}
                     </SelectItem>
                   ))}
@@ -560,7 +623,7 @@ function CheckoutContent() {
                 </SelectTrigger>
                 <SelectContent>
                   {paymentInfos.map((payment) => (
-                    <SelectItem key={payment.id_payment_info} value={payment.id_payment_info.toString()}>
+                    <SelectItem key={payment.id_payment_info} value={payment.id_payment_info}>
                       {payment.card_name} - **** {payment.last_card_digits}
                     </SelectItem>
                   ))}

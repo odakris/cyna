@@ -34,7 +34,9 @@ export type Permission =
 
 // Définition des permissions par rôle
 export const rolePermissions: Record<Role, Permission[]> = {
-    CUSTOMER: ["profile:edit"],
+    CUSTOMER: ["profile:edit",
+                "orders:create"
+    ],
     MANAGER: [
         "dashboard:view",
         "products:view",
