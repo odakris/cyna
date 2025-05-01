@@ -1,4 +1,3 @@
-// app/dashboard/contact-messages/contact-message-columns.tsx
 import * as React from "react"
 import { ColumnDef, Row } from "@tanstack/react-table"
 import {
@@ -61,7 +60,7 @@ const truncateText = (text: string, maxLength = 50) => {
   return text.substring(0, maxLength) + "..."
 }
 
-export const contactMessageColumns: ColumnDef<ContactMessage>[] = [
+export const ContactMessageColumns: ColumnDef<ContactMessage>[] = [
   {
     id: "select",
     header: ({ table }) => (

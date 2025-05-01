@@ -11,7 +11,7 @@ export default async function UserPage({ params }: { params: { id: string } }) {
   const resolvedParams = await params
   const id = validateId(resolvedParams.id)
   if (id === null) {
-    throw new Error("Invalid product ID")
+    throw new Error("Invalid user ID")
   }
   return <UserDetailsPage params={{ id: id.toString() }} />
 }
