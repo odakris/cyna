@@ -147,12 +147,11 @@ export default function OrdersPage() {
 
         // Gestion de la recherche
         if (search) {
-          // Essayer de parser la recherche comme une date
           const dateFormats = [
-            "dd/MM/yyyy", // 12/05/2024
-            "dd MMMM yyyy", // 12 mai 2024
-            "MMMM yyyy", // mai 2024
-            "yyyy", // 2024
+            "dd/MM/yyyy",
+            "dd MMMM yyyy",
+            "MMMM yyyy",
+            "yyyy",
           ]
 
           let parsedDate: Date | null = null
@@ -160,17 +159,16 @@ export default function OrdersPage() {
             try {
               parsedDate = parse(search, dateFormat, new Date(), { locale: fr })
               if (!isNaN(parsedDate.getTime())) break
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
             } catch (e) {
               continue
             }
           }
 
           if (parsedDate && !isNaN(parsedDate.getTime())) {
-            // Si la recherche est une date valide, formater pour l'API (format ISO)
             const formattedDate = format(parsedDate, "yyyy-MM-dd")
             params.append("order_date", formattedDate)
           } else {
-            // Sinon, considérer que c'est une recherche par nom de service
             params.append("search", search)
           }
         }
@@ -297,6 +295,7 @@ export default function OrdersPage() {
               ].map(status => (
                 <label key={status} className="flex items-center gap-2 text-sm">
                   <input
+                    className="h-4 w-4"
                     type="checkbox"
                     name={`status-${status}`}
                     value={status}
@@ -309,7 +308,6 @@ export default function OrdersPage() {
                           : prev.filter(s => s !== status)
                       )
                     }}
-                    className="h-4 w-4"
                   />
                   {status}
                 </label>
@@ -455,7 +453,13 @@ export default function OrdersPage() {
               {selectedOrder.billing_address && (
                 <p>
                   <strong>Adresse de facturation :</strong>{" "}
-                  {`${selectedOrder.billing_address.address1}${selectedOrder.billing_address.address2 ? ", " + selectedOrder.billing_address.address2 : ""}, ${selectedOrder.billing_address.city}, ${selectedOrder.billing_address.postal_code}, ${selectedOrder.billing_address.country}`}
+                  {`${selectedOrder.billing_address.address1}${
+                    selectedOrder.billing_address.address2
+                      ? ", " + selectedOrder.billing_address.address2
+                      : ""
+                  }, ${selectedOrder.billing_address.city}, ${
+                    selectedOrder.billing_address.postal_code
+                  }, ${selectedOrder.billing_address.country}`}
                 </p>
               )}
             </div>
@@ -527,9 +531,7 @@ export default function OrdersPage() {
                             ? format(
                                 new Date(item.renewal_date),
                                 "dd MMMM yyyy",
-                                {
-                                  locale: fr,
-                                }
+                                { locale: fr }
                               )
                             : "Non défini"}
                         </span>
@@ -541,16 +543,13 @@ export default function OrdersPage() {
             </div>
 
             <div className="mt-4">
-              {selectedOrder.invoice_pdf_url && (
-                <a
-                  href={selectedOrder.invoice_pdf_url}
-                  className="text-blue-600 hover:underline text-sm"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Télécharger la facture
-                </a>
-              )}
+              <a
+                href={`/api/invoices/${selectedOrder.id_order}`}
+                className="text-blue-600 hover:underline text-sm"
+                download
+              >
+                Télécharger la facture
+              </a>
             </div>
 
             <div className="mt-4 flex justify-end">
