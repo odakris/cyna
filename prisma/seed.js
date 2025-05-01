@@ -683,6 +683,7 @@ async function main() {
         password: await bcrypt.hash("superAdminPassword", salt),
         role: "SUPER_ADMIN", // Rôle SUPER_ADMIN
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_super_admin",
       },
     })
@@ -695,6 +696,7 @@ async function main() {
         password: await bcrypt.hash("adminPassword", salt),
         role: "ADMIN",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_admin",
       },
     })
@@ -708,6 +710,7 @@ async function main() {
         password: await bcrypt.hash("hashedPassword", salt),
         role: "MANAGER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_manager1",
       },
     })
@@ -720,6 +723,7 @@ async function main() {
         password: await bcrypt.hash("hashedPassword", salt),
         role: "MANAGER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_manager2",
       },
     })
@@ -732,6 +736,7 @@ async function main() {
         password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_customer1",
       },
     })
@@ -744,6 +749,7 @@ async function main() {
         password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_customer2",
       },
     })
@@ -756,6 +762,7 @@ async function main() {
         password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_customer3",
       },
     })
@@ -768,6 +775,7 @@ async function main() {
         password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: false, // Email non vérifié
+        active: true,
         verify_token: "verify_emilie_token_123",
         stripeCustomerId: "cus_customer4",
       },
@@ -782,6 +790,7 @@ async function main() {
         password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_customer5",
       },
     })
@@ -794,6 +803,7 @@ async function main() {
         password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_customer6",
       },
     })
@@ -806,6 +816,7 @@ async function main() {
         password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_customer7",
       },
     })

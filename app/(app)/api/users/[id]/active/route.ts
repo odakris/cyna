@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { checkPermission } from "@/lib/api-permissions"
 import { validateId } from "@/lib/utils/utils"
-import productController from "@/lib/controllers/product-controller"
+import userController from "@/lib/controllers/user-controller"
 
 /**
- * Active ou désactive un produit sans affecter ses autres propriétés.
+ * Active ou désactive un utilisateur
  *
  * @param {NextRequest} request - L'objet de requête HTTP.
  * @param {{ params: { id: string } }} context - L'objet contenant les paramètres de la requête.
- * @returns {Promise<NextResponse>} La réponse contenant le produit mis à jour ou un message d'erreur.
+ * @returns {Promise<NextResponse>} La réponse contenant l'utilisateur mis à jour ou un message d'erreur.
  */
 export async function PATCH(
   request: NextRequest,
@@ -16,7 +16,7 @@ export async function PATCH(
 ): Promise<NextResponse> {
   try {
     // Vérifier les permissions
-    const permissionCheck = await checkPermission("products:edit")
+    const permissionCheck = await checkPermission("users:edit")
     if (permissionCheck) return permissionCheck
 
     const resolvedParams = await params
@@ -29,10 +29,10 @@ export async function PATCH(
       )
     }
 
-    return await productController.toggleProductStatus(id)
+    return await userController.toggleUserStatus(id)
   } catch (error) {
     console.error(
-      `Erreur non gérée dans la route PATCH /products/${params.then(p => p.id)}/active:`,
+      `Erreur non gérée dans la route PATCH /users/${params.then(p => p.id)}/active:`,
       error
     )
     return NextResponse.json(

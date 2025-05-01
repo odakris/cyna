@@ -194,6 +194,7 @@ model User {
   email_verified        Boolean              @default(false)
   verify_token          String?              @db.VarChar(255)
   two_factor_enabled    Boolean              @default(false)
+  active                Boolean              @default(true)
   created_at            DateTime             @default(now())
   updated_at            DateTime             @updatedAt
   stripeCustomerId      String?

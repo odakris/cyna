@@ -366,7 +366,6 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
           productId={row.original.id_product}
           initialActive={row.original.active}
           onStatusChange={newStatus => {
-            // Mettre à jour directement la valeur dans la ligne
             row.original.active = newStatus
           }}
         />
