@@ -14,6 +14,7 @@ export const categoryFormSchema = z.object({
     .int("La priorité doit être un nombre entier.")
     .min(1, "La priorité doit être supérieure à 0."),
   image: z.string().nonempty("L'image est requise."),
+  active: z.boolean().optional(),
 })
 
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>

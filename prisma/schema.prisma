@@ -59,6 +59,7 @@ enum ConversationStatus {
 
 // Catégories de produits/services SaaS
 model Category {
+<<<<<<< HEAD
     id_category    Int       @id @default(autoincrement())
     name           String    @unique @db.VarChar(100)
     description    String    @db.Text
@@ -67,6 +68,17 @@ model Category {
     created_at     DateTime  @default(now())
     updated_at     DateTime  @updatedAt
     products       Product[]
+=======
+  id_category    Int       @id @default(autoincrement())
+  name           String    @unique @db.VarChar(100)
+  description    String    @db.Text
+  image          String    @db.VarChar(255)
+  priority_order Int       @default(1)
+  active         Boolean   @default(true)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  products       Product[]
+>>>>>>> 5f35460b47ccfb56b2f35d9b54eac5af9434b21b
 
     @@index([priority_order])
 }
@@ -183,6 +195,7 @@ model Order {
 
 // Utilisateurs du système
 model User {
+<<<<<<< HEAD
     id_user               Int                  @id @default(autoincrement())
     first_name            String?              @db.VarChar(100) // Optionnel pour invités
     last_name             String?              @db.VarChar(100) // Optionnel pour invités
@@ -205,6 +218,31 @@ model User {
     cartItems             CartItem[]
     ChatConversation      ChatConversation[]
     emailVerifications    EmailVerification[]  @relation // Ajout de la relation inverse
+=======
+  id_user               Int                  @id @default(autoincrement())
+  first_name            String?              @db.VarChar(100) // Optionnel pour invités
+  last_name             String?              @db.VarChar(100) // Optionnel pour invités
+  email                 String               @unique @db.VarChar(255)
+  password              String?              @db.VarChar(255) // Optionnel pour invités
+  role                  Role                 @default(CUSTOMER)
+  isGuest               Boolean              @default(false) // Nouveau champ pour invités
+  email_verified        Boolean              @default(false)
+  verify_token          String?              @db.VarChar(255)
+  two_factor_enabled    Boolean              @default(false)
+  active                Boolean              @default(true)
+  created_at            DateTime             @default(now())
+  updated_at            DateTime             @updatedAt
+  stripeCustomerId      String?
+  orders                Order[]
+  contact_messages      ContactMessage[]
+  payment_infos         PaymentInfo[]
+  addresses             Address[]
+  password_reset_tokens PasswordResetToken[]
+  sessions              Session[]
+  cartItems             CartItem[]
+  ChatConversation      ChatConversation[]
+  emailVerifications    EmailVerification[]  @relation // Ajout de la relation inverse
+>>>>>>> 5f35460b47ccfb56b2f35d9b54eac5af9434b21b
 
     @@index([email])
     @@index([role])

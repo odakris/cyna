@@ -1,0 +1,77 @@
+import { Card, CardContent } from "@/components/ui/card"
+import { Package, Sparkles, Layers, ShoppingBag } from "lucide-react"
+
+interface CategoriesStatsProps {
+  stats: {
+    total: number
+    withProducts: number
+    withoutProducts: number
+    highPriority: number
+  }
+}
+
+export default function CategoriesStats({ stats }: CategoriesStatsProps) {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      <Card>
+        <CardContent className="p-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">
+              Total Catégories
+            </p>
+            <p className="text-2xl font-bold">{stats.total}</p>
+          </div>
+          <Package className="h-8 w-8 text-primary opacity-80" />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">
+              Avec Produits
+            </p>
+            <p className="text-2xl font-bold text-green-600">
+              {stats.withProducts}
+            </p>
+          </div>
+          <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+            <ShoppingBag className="h-5 w-5 text-green-600" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">
+              Sans Produits
+            </p>
+            <p className="text-2xl font-bold text-gray-500">
+              {stats.withoutProducts}
+            </p>
+          </div>
+          <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+            <Layers className="h-5 w-5 text-gray-500" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-4 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium text-muted-foreground">
+              Priorité Haute
+            </p>
+            <p className="text-2xl font-bold text-blue-600">
+              {stats.highPriority}
+            </p>
+          </div>
+          <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+            <Sparkles className="h-5 w-5 text-blue-600" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

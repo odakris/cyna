@@ -1,10 +1,10 @@
 import * as React from "react"
-import { ColumnDef, Row } from "@tanstack/react-table"
+import { ColumnDef, Row, FilterFn } from "@tanstack/react-table"
 import { ArrowUpDown, CheckCircle2, XCircle, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import { User } from "@prisma/client"
+import { User, Role } from "@prisma/client"
 import {
   Tooltip,
   TooltipContent,
@@ -13,8 +13,34 @@ import {
 } from "@/components/ui/tooltip"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import ActionsCell from "@/components/Admin/ActionCell"
+import UserActiveSwitch from "@/components/Admin/Users/UserActiveSwitch"
+
+// Filtres existants
+export const emailVerifiedFilterFn: FilterFn<User> = (
+  row,
+  columnId,
+  filterValue
+) => {
+  if (filterValue === undefined) return true
+  const emailVerified = row.getValue(columnId) as boolean
+  return filterValue === emailVerified
+}
+
+export const roleFilterFn: FilterFn<User> = (row, columnId, filterValue) => {
+  if (filterValue === undefined || filterValue === "all") return true
+  const role = row.getValue(columnId) as string
+  return role === filterValue
+}
+
+// Nouveau filtre pour le statut actif
+export const activeFilterFn: FilterFn<User> = (row, columnId, filterValue) => {
+  if (filterValue === undefined) return true
+  const active = row.getValue(columnId) as boolean
+  return filterValue === active
+}
 
 export const usersColumns: ColumnDef<User>[] = [
+  // Colonnes existantes
   {
     id: "select",
     header: ({ table }) => (
@@ -132,22 +158,22 @@ export const usersColumns: ColumnDef<User>[] = [
       </div>
     ),
     cell: ({ row }) => {
-      const role = row.getValue("role") as string
+      const role = row.getValue("role") as Role
 
       // Utilisons des classes Tailwind personnalisées pour des couleurs plus vives
       let badgeClass = ""
 
       switch (role) {
-        case "SUPER_ADMIN":
+        case Role.SUPER_ADMIN:
           badgeClass = "bg-purple-100 text-purple-800 hover:bg-purple-200"
           break
-        case "ADMIN":
+        case Role.ADMIN:
           badgeClass = "bg-red-100 text-red-800 hover:bg-red-200"
           break
-        case "MANAGER":
+        case Role.MANAGER:
           badgeClass = "bg-blue-100 text-blue-800 hover:bg-blue-200"
           break
-        case "CUSTOMER":
+        case Role.CUSTOMER:
           badgeClass = "bg-green-100 text-green-800 hover:bg-green-200"
           break
       }
@@ -164,6 +190,7 @@ export const usersColumns: ColumnDef<User>[] = [
       )
     },
     enableSorting: true,
+    filterFn: roleFilterFn,
   },
   {
     accessorKey: "email_verified",
@@ -201,6 +228,22 @@ export const usersColumns: ColumnDef<User>[] = [
       )
     },
     enableSorting: true,
+    filterFn: emailVerifiedFilterFn,
+  },
+  {
+    accessorKey: "active",
+    header: "Actif",
+    cell: ({ row }) => (
+      <div className="flex justify-center">
+        <UserActiveSwitch
+          userId={row.original.id_user}
+          initialActive={row.original.active}
+          onStatusChange={newStatus => {
+            row.original.active = newStatus
+          }}
+        />
+      </div>
+    ),
   },
   {
     accessorKey: "created_at",
@@ -247,11 +290,10 @@ export const usersColumns: ColumnDef<User>[] = [
       <ActionsCell
         actions={[
           { type: "view", tooltip: "Voir les détails" },
-          { type: "edit", tooltip: "Modifier l'utilisateur'" },
+          { type: "edit", tooltip: "Modifier l'utilisateur" },
         ]}
         basePath="/dashboard/users"
         entityId={row.original.id_user}
-        externalBasePath="/users"
       />
     ),
     enableHiding: false,
@@ -265,11 +307,12 @@ export const usersColumnNamesInFrench: Record<string, string> = {
   email: "Email",
   role: "Rôle",
   email_verified: "Vérification Email",
+  active: "Statut Actif",
   created_at: "Date d'inscription",
   actions: "Actions",
 }
 
-// Fonction de filtrage global pour rechercher sur plusieurs colonnes
+// Fonction de filtrage global inchangée
 export const globalFilterFunction = (
   row: Row<User>,
   columnId: string,

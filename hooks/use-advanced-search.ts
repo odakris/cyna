@@ -13,8 +13,8 @@ export function useAdvancedSearch() {
   const [onlyAvailable, setOnlyAvailable] = useState(false)
 
   // État pour les produits
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]) // Produits filtrés (non triés)
-  const [displayedProducts, setDisplayedProducts] = useState<Product[]>([]) // Produits filtrés et triés
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
+  const [displayedProducts, setDisplayedProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false)
 
@@ -40,7 +40,6 @@ export function useAdvancedSearch() {
   const sortProducts = useCallback(
     (productsToSort: Product[], options = sortOptions) => {
       return [...productsToSort].sort((a, b) => {
-        // D'abord, comparer par disponibilité si les options le spécifient
         if (a.available !== b.available) {
           if (options.availability === "available") {
             return a.available ? -1 : 1
@@ -69,13 +68,11 @@ export function useAdvancedSearch() {
 
   // Mettre à jour les produits affichés quand les options de tri changent
   useEffect(() => {
-    // On met toujours à jour displayedProducts, même si c'est avec un tableau vide
     const sorted =
       filteredProducts.length > 0 ? sortProducts(filteredProducts) : []
     setDisplayedProducts(sorted)
   }, [sortOptions, filteredProducts, sortProducts])
 
-  // Pour déboguer - afficher les filtres actifs dans la console
   useEffect(() => {
     console.log("Filtres actifs:", activeFilters)
   }, [activeFilters])
@@ -123,13 +120,9 @@ export function useAdvancedSearch() {
         const data = await response.json()
         console.log(`Fetched ${data.length} products`)
 
-        // Stocker les produits filtrés (non triés)
         setFilteredProducts(data)
-
-        // Les produits triés seront automatiquement mis à jour par l'effet ci-dessus
       } catch (error) {
         console.error("Erreur lors de la récupération des produits:", error)
-        // En cas d'erreur, vider les listes de produits
         setFilteredProducts([])
         setDisplayedProducts([])
       } finally {

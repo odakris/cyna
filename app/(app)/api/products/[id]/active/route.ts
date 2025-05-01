@@ -1,4 +1,3 @@
-// app/(app)/api/products/[id]/active/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import { checkPermission } from "@/lib/api-permissions"
 import { validateId } from "@/lib/utils/utils"

@@ -37,7 +37,7 @@ export default function ProductInfo({
               height={300}
               src={product.main_image || "/placeholder.png"}
               alt={product.name}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover"
             />
           </div>
 

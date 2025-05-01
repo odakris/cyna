@@ -5,6 +5,7 @@ CREATE TABLE `Category` (
     `description` TEXT NOT NULL,
     `image` VARCHAR(255) NOT NULL,
     `priority_order` INTEGER NOT NULL DEFAULT 1,
+    `active` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
@@ -136,6 +137,7 @@ CREATE TABLE `User` (
     `email_verified` BOOLEAN NOT NULL DEFAULT false,
     `verify_token` VARCHAR(255) NULL,
     `two_factor_enabled` BOOLEAN NOT NULL DEFAULT false,
+    `active` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
     `stripeCustomerId` VARCHAR(191) NULL,

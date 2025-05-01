@@ -13,6 +13,10 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { RefreshCw } from "lucide-react"
 import { ProductsHomeSkeleton } from "@/components/Skeletons/ProductSkeletons"
+import { Badge } from "@/components/ui/badge"
+import { AlertTriangle } from "lucide-react"
+import { CardTitle, CardDescription } from "@/components/ui/card"
+import { useCategories } from "@/hooks/use-categories"
 
 export default function ProductsPage() {
   // État et logique des données
@@ -26,6 +30,8 @@ export default function ProductsPage() {
     activeTab,
     stats,
   } = useProductsData()
+
+  const { categories } = useCategories()
 
   // État et logique de la table de données
   const { table, globalFilter, setGlobalFilter, stockOptions } =
@@ -135,6 +141,7 @@ export default function ProductsPage() {
             setGlobalFilter={setGlobalFilter}
             stockOptions={stockOptions}
             fetchProducts={fetchProducts}
+            categories={categories}
           />
 
           {/* Tableau des produits */}
@@ -166,8 +173,3 @@ export default function ProductsPage() {
     </div>
   )
 }
-
-// Composant Badge à portée locale
-import { Badge } from "@/components/ui/badge"
-import { AlertTriangle } from "lucide-react"
-import { CardTitle, CardDescription } from "@/components/ui/card"

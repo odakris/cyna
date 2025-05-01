@@ -8,14 +8,14 @@ import { Badge } from "@/components/ui/badge"
 import { CategoryWithProductCount } from "@/types/frontend-types"
 
 export function CategoryGrid() {
-  const { categories, loading, error } = useCategories()
+  const { categories, loading, errorMessage } = useCategories()
 
-  if (error) {
+  if (errorMessage) {
     return (
       <div className="w-full p-6 text-center">
         <div className="rounded-lg bg-red-50 p-4 text-red-500 border border-red-200">
           <p className="text-sm font-medium">
-            {error ?? "Erreur lors du chargement des catégories"}
+            {errorMessage ?? "Erreur lors du chargement des catégories"}
           </p>
         </div>
       </div>
@@ -28,9 +28,11 @@ export function CategoryGrid() {
         ? Array.from({ length: 3 }).map((_, index) => (
             <Skeleton key={index} className="w-full h-60 rounded-lg" />
           ))
-        : categories.map(category => (
-            <CategoryCard key={category.id_category} category={category} />
-          ))}
+        : categories
+            .filter(cat => cat.active)
+            .map(category => (
+              <CategoryCard key={category.id_category} category={category} />
+            ))}
     </div>
   )
 }

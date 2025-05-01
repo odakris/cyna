@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Search, RefreshCw, Columns, ChevronDown } from "lucide-react"
 import { ProductWithImages } from "@/types/Types"
+import { Category } from "@prisma/client"
 import { productsColumnNamesInFrench } from "@/components/Admin/Products/ProductColumns"
 
 interface ProductsFiltersProps {
@@ -26,6 +27,7 @@ interface ProductsFiltersProps {
   setGlobalFilter: (value: string) => void
   stockOptions: { value: string; label: string }[]
   fetchProducts: () => Promise<void>
+  categories: Category[]
 }
 
 export default function ProductsFilters({
@@ -34,6 +36,7 @@ export default function ProductsFilters({
   setGlobalFilter,
   stockOptions,
   fetchProducts,
+  categories,
 }: ProductsFiltersProps) {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -67,6 +70,51 @@ export default function ProductsFilters({
               {stockOptions.map(option => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        {/* Nouveau filtre par catégorie */}
+        <Select
+          value={
+            table.getColumn("id_category")?.getFilterValue()
+              ? table.getColumn("id_category")?.getFilterValue()?.toString()
+              : "all"
+          }
+          onValueChange={(value: string) => {
+            table
+              .getColumn("id_category")
+              ?.setFilterValue(value === "all" ? undefined : parseInt(value))
+          }}
+        >
+          <SelectTrigger className="w-full sm:w-44">
+            <div className="flex items-center">
+              <SelectValue>
+                {(() => {
+                  const filterValue = table
+                    .getColumn("id_category")
+                    ?.getFilterValue()
+                  if (!filterValue) return "Toutes les catégories"
+                  const category = categories.find(
+                    cat => cat.id_category.toString() === filterValue.toString()
+                  )
+                  return category ? category.name : "Filtrer par catégorie"
+                })()}
+              </SelectValue>
+            </div>
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Catégories</SelectLabel>
+              <SelectItem value="all">Toutes les catégories</SelectItem>
+              {categories.map(category => (
+                <SelectItem
+                  key={category.id_category}
+                  value={category.id_category.toString()}
+                >
+                  {category.name}
                 </SelectItem>
               ))}
             </SelectGroup>

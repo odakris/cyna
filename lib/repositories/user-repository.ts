@@ -87,6 +87,7 @@ export const create = async (data: UserFormValues): Promise<User> => {
           role: data.role,
           email_verified: data.email_verified,
           two_factor_enabled: data.two_factor_enabled,
+          active: data.active,
           created_at: new Date(),
           updated_at: new Date(),
         },
@@ -143,6 +144,7 @@ export const update = async (
           role: data.role,
           email_verified: data.email_verified,
           two_factor_enabled: data.two_factor_enabled,
+          active: data.active,
           updated_at: new Date(),
         },
       })
@@ -208,6 +210,30 @@ export const exists = async (id: number): Promise<boolean> => {
 }
 
 /**
+ * Met à jour uniquement le statut actif d'un produit.
+ * @param {number} id - Identifiant du produit à mettre à jour.
+ * @param {boolean} active - Le nouveau statut actif du produit.
+ * @returns {Promise<User>} Le produit mis à jour.
+ */
+export const updateActiveStatus = async (
+  id: number,
+  active: boolean
+): Promise<User> => {
+  try {
+    return await prisma.user.update({
+      where: { id_user: id },
+      data: {
+        active,
+        updated_at: new Date(),
+      },
+    })
+  } catch (error) {
+    console.error("Erreur lors de la mise à jour du statut actif:", error)
+    throw error
+  }
+}
+
+/**
  * Dépôt de données (repository) pour la gestion des utilisateurs.
  */
 const userRepository = {
@@ -218,5 +244,6 @@ const userRepository = {
   update,
   remove,
   exists,
+  updateActiveStatus,
 }
 export default userRepository

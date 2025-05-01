@@ -598,7 +598,6 @@ export function ProductForm({
                           control={form.control}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Image principale</FormLabel>
                               <ImageUploader
                                 field={field}
                                 disabled={isSubmitting}
@@ -619,7 +618,6 @@ export function ProductForm({
                           control={form.control}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Images du carrousel</FormLabel>
                               <ImageUploader
                                 field={field}
                                 disabled={isSubmitting}
@@ -720,7 +718,7 @@ export function ProductForm({
                     height={500}
                     src={watchedValues.main_image}
                     alt={watchedValues.name || "Aperçu du produit"}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center text-muted-foreground p-4 text-center">

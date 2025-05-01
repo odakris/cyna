@@ -24,6 +24,7 @@ export function ProductDetailsPage({ id }: ProductDetailsPageProps) {
     setIsDeleteDialogOpen,
     handleEdit,
     handleDelete,
+    handleStatusChange,
     formatDate,
     formatPrice,
   } = useProductDetails(id)
@@ -64,6 +65,7 @@ export function ProductDetailsPage({ id }: ProductDetailsPageProps) {
           product={product}
           category={category}
           formatDate={formatDate}
+          onStatusChange={handleStatusChange}
         />
       </div>
 

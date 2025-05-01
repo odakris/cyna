@@ -23,7 +23,8 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { signIn } from "next-auth/react"
 import Link from "next/link"
-import { useRouter } from "next/navigation" // Ajout pour redirection
+import { useRouter } from "next/navigation"
+import { Mail, Lock, AlertCircle, Loader2 } from "lucide-react"
 
 const formSchema = z.object({
   email: z.string().min(1, "L'email est requis").email("Email invalide"),
@@ -35,7 +36,7 @@ type FormData = z.infer<typeof formSchema>
 const LoginForm: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter() // Ajout pour redirection
+  const router = useRouter()
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -45,7 +46,7 @@ const LoginForm: React.FC = () => {
   const handleSubmit = async (data: FormData) => {
     setErrorMessage(null)
     setIsLoading(true)
-    console.log("LoginForm - Données envoyées:", data) // Log des données
+    console.log("LoginForm - Données envoyées:", data)
 
     const result = await signIn("credentials", {
       redirect: false,
@@ -71,79 +72,101 @@ const LoginForm: React.FC = () => {
       }
       console.log("LoginForm - Erreur de connexion:", result.error)
     } else {
-      // Succès : rediriger vers une page (par exemple, la page d'accueil)
       console.log("LoginForm - Connexion réussie:", result)
-      router.push("/") // Redirection après succès
+      router.push("/")
     }
   }
 
   return (
-    <Card className="max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Connexion</CardTitle>
-        <CardDescription>Connectez-vous avec vos identifiants</CardDescription>
+    <Card className="border-2 border-gray-100 shadow-md hover:shadow-lg transition-all duration-300">
+      <CardHeader className="space-y-1 pb-4">
+        <CardTitle className="text-xl font-bold text-[#302082]">
+          Connexion
+        </CardTitle>
+        <CardDescription className="text-gray-500">
+          Connectez-vous à votre compte CYNA
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-6"
+            className="space-y-4"
           >
             {errorMessage && (
-              <p className="text-red-500 text-sm text-center">{errorMessage}</p>
+              <div className="bg-red-50 p-3 rounded-md flex items-start gap-2 text-red-600 text-sm border border-red-200">
+                <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <p>{errorMessage}</p>
+              </div>
             )}
+
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-white">
+                  <FormLabel className="text-sm font-semibold text-[#302082] flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
                     Email
                   </FormLabel>
                   <FormControl>
                     <Input
                       type="email"
-                      className="bg-slate-100 dark:bg-slate-500 border-0 focus-visible:ring-0 text-black"
-                      placeholder="Email"
+                      className="bg-gray-50 focus:bg-white border border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors"
+                      placeholder="votre@email.com"
                       disabled={isLoading}
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-white">
-                    Mot de passe
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="password"
-                      className="bg-slate-100 dark:bg-slate-500 border-0 focus-visible:ring-0 text-black"
-                      placeholder="Mot de passe"
-                      disabled={isLoading}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                  <div className="text-right">
+                  <div className="flex justify-between items-center">
+                    <FormLabel className="text-sm font-semibold text-[#302082] flex items-center gap-2">
+                      <Lock className="h-4 w-4" />
+                      Mot de passe
+                    </FormLabel>
                     <Link
                       href="/forgot-password"
-                      className="text-sm text-blue-500 hover:underline dark:text-blue-400"
+                      className="text-xs text-[#FF6B00] hover:text-[#302082] hover:underline transition-colors"
                     >
                       Mot de passe oublié ?
                     </Link>
                   </div>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      className="bg-gray-50 focus:bg-white border border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors"
+                      placeholder="••••••••••"
+                      disabled={isLoading}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
-            <Button className="w-full" variant="cyna" disabled={isLoading}>
-              {isLoading ? "Connexion en cours..." : "Connexion"}
+
+            <Button
+              className="w-full bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-2 border-transparent hover:border-[#FF6B00] hover:bg-white hover:text-[#FF6B00] transition-all duration-300 text-sm font-semibold py-5 mt-2"
+              disabled={isLoading}
+              type="submit"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Connexion en cours...
+                </>
+              ) : (
+                "Se connecter"
+              )}
             </Button>
           </form>
         </Form>

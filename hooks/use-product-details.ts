@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { ProductWithImages } from "@/types/Types"
@@ -13,44 +13,44 @@ export function useProductDetails(productId: string) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
-  // Charger les données du produit et de sa catégorie
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
+  // Chargement des données du produit et de sa catégorie
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true)
 
-        // Récupérer les données du produit
-        const productData: ProductWithImages = await fetch(
-          `/api/products/${productId}`
-        ).then(res => res.json())
+      // Récupérer les données du produit
+      const productData: ProductWithImages = await fetch(
+        `/api/products/${productId}`
+      ).then(res => res.json())
 
-        if (!productData) throw new Error("Produit introuvable")
-        setProduct(productData)
+      if (!productData) throw new Error("Produit introuvable")
+      setProduct(productData)
 
-        // Récupérer les données de la catégorie
-        const categoryData: Category | null = await fetch(
-          `/api/categories/${productData.id_category}`
-        ).then(res => res.json())
+      // Récupérer les données de la catégorie
+      const categoryData: Category | null = await fetch(
+        `/api/categories/${productData.id_category}`
+      ).then(res => res.json())
 
-        if (!categoryData) throw new Error("Catégorie introuvable")
-        setCategory(categoryData)
+      if (!categoryData) throw new Error("Catégorie introuvable")
+      setCategory(categoryData)
 
-        setErrorMessage(null)
-      } catch (error) {
-        console.error("Erreur fetchData:", error)
-        setErrorMessage("Erreur lors du chargement des données.")
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les données du produit.",
-          variant: "destructive",
-        })
-      } finally {
-        setLoading(false)
-      }
+      setErrorMessage(null)
+    } catch (error) {
+      console.error("Erreur fetchData:", error)
+      setErrorMessage("Erreur lors du chargement des données.")
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les données du produit.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
     }
-
-    fetchData()
   }, [productId, toast])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   // Gérer la navigation vers la page d'édition
   const handleEdit = () => {
@@ -87,6 +87,17 @@ export function useProductDetails(productId: string) {
     }
   }
 
+  // fonction pour mettre à jour le statut actif du produit
+  const handleStatusChange = (newStatus: boolean) => {
+    if (product) {
+      setProduct({
+        ...product,
+        active: newStatus,
+        updated_at: new Date(),
+      })
+    }
+  }
+
   // Formateurs pour l'affichage
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("fr-FR", {
@@ -114,6 +125,7 @@ export function useProductDetails(productId: string) {
     setIsDeleteDialogOpen,
     handleEdit,
     handleDelete,
+    handleStatusChange,
     formatDate,
     formatPrice,
   }
