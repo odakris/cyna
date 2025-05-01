@@ -63,6 +63,8 @@ function ConfirmationContent() {
   const addressId = searchParams.get('addressId');
   const paymentId = searchParams.get('paymentId');
 
+  console.log('[Confirmation] searchParams:', { addressId, paymentId });
+
   const totalCartPrice = cart.reduce((sum, item) => {
     let unitPrice = item.price;
     switch (item.subscription || 'MONTHLY') {
@@ -90,7 +92,7 @@ function ConfirmationContent() {
     console.log('[Confirmation] Début de fetchData', { addressId, paymentId, session: !!session, cartLength: cart.length });
     try {
       if (!addressId || !paymentId) {
-        throw new Error('addressId ou paymentId manquant');
+        throw new Error('addressId ou paymentId manquant dans les paramètres URL');
       }
 
       // Vérifier localStorage pour le mode invité
@@ -106,8 +108,11 @@ function ConfirmationContent() {
 
         console.log('[Confirmation] Données invité', { addressData, paymentData });
 
-        if (!addressData || !paymentData) {
-          throw new Error('Adresse ou moyen de paiement introuvable dans localStorage');
+        if (!addressData) {
+          throw new Error('Adresse introuvable dans localStorage');
+        }
+        if (!paymentData) {
+          throw new Error(`Moyen de paiement introuvable pour paymentId: ${paymentId}`);
         }
 
         setAddress(addressData);
@@ -116,9 +121,11 @@ function ConfirmationContent() {
       }
 
       // Mode connecté
-      const userId = session.user.id_user;
-      console.log('[Confirmation] Mode connecté, userId:', userId);
-      const headers = { 'x-user-id': userId.toString() };
+      if (!session.user?.id_user) {
+        throw new Error('ID utilisateur manquant dans la session');
+      }
+
+      const headers = { 'x-user-id': session.user.id_user.toString() };
       console.log('[Confirmation] Envoi des requêtes API', {
         addressUrl: `/api/users/addresses?addressId=${addressId}`,
         paymentUrl: `/api/users/payment-infos?paymentId=${paymentId}`,
@@ -160,18 +167,37 @@ function ConfirmationContent() {
   };
 
   const initiatePayment = async () => {
-    console.log('[Confirmation] Début de initiatePayment', { finalTotal });
-    try {
-      const userId = session?.user?.id_user || localStorage.getItem('guestUserId');
-      console.log('[Confirmation] initiatePayment userId', { userId });
+    console.log('[Confirmation] Début de initiatePayment', { finalTotal, addressId, paymentId });
 
+    // Validation de paymentId
+    if (!paymentId || typeof paymentId !== 'string' || paymentId.trim() === '') {
+      console.error('[Confirmation] paymentId invalide:', paymentId);
+      setError('L’identifiant de paiement est requis et doit être une chaîne non vide');
+      router.push(`/checkout?error=${encodeURIComponent('Identifiant de paiement invalide')}`);
+      return;
+    }
+
+    // Pour les utilisateurs connectés, paymentId doit être numérique
+    if (session && isNaN(parseInt(paymentId))) {
+      console.error('[Confirmation] paymentId non numérique pour utilisateur connecté:', paymentId);
+      setError('L’identifiant de paiement doit être numérique pour les utilisateurs connectés');
+      router.push(`/checkout?error=${encodeURIComponent('Identifiant de paiement non numérique')}`);
+      return;
+    }
+
+    try {
+      const guestUserId = localStorage.getItem('guestUserId');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
       if (session?.user?.id_user) {
         headers['x-user-id'] = session.user.id_user.toString();
-      } else if (userId) {
-        headers['x-guest-id'] = userId;
+        console.log('[Confirmation] Envoi de x-user-id:', session.user.id_user);
+      } else if (guestUserId) {
+        headers['x-guest-id'] = guestUserId;
+        console.log('[Confirmation] Envoi de x-guest-id:', guestUserId);
+      } else {
+        throw new Error('Aucun ID utilisateur ou invité disponible');
       }
 
       const response = await fetch('/api/checkout', {
@@ -182,18 +208,33 @@ function ConfirmationContent() {
           addressId,
           paymentId,
           totalAmount: finalTotal,
-          guestUserId: localStorage.getItem('guestUserId'),
-          guestEmail: localStorage.getItem('guestEmail'),
-          guestName: address ? `${address.first_name} ${address.last_name}` : undefined,
         }),
       });
 
+      console.log('[Confirmation] Statut de la réponse /api/checkout:', response.status);
+
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Erreur lors de l’initialisation du paiement: ${errorText}`);
+        let errorMessage = `Erreur serveur: ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          console.error('[Confirmation] Détails de l’erreur serveur:', errorData);
+          errorMessage = errorData.error || response.statusText;
+        } catch (jsonError) {
+          console.error('[Confirmation] Impossible de parser la réponse:', jsonError);
+          if (response.status === 405) {
+            errorMessage = 'Méthode non autorisée. Veuillez réessayer ou contacter le support.';
+          }
+        }
+        throw new Error(`Erreur lors de l’initialisation du paiement: ${errorMessage}`);
       }
 
       const data = await response.json();
+      console.log('[Confirmation] Données reçues du serveur', data);
+
+      if (!data.clientSecret) {
+        throw new Error('Le clientSecret est manquant dans la réponse du serveur');
+      }
+
       setClientSecret(data.clientSecret);
       console.log('[Confirmation] ClientSecret défini', { clientSecret: data.clientSecret });
     } catch (err) {
@@ -216,8 +257,8 @@ function ConfirmationContent() {
     }
 
     if (!addressId || !paymentId) {
-      console.log('[Confirmation] Redirection vers checkout');
-      router.push('/checkout');
+      console.log('[Confirmation] Redirection vers checkout avec erreur');
+      router.push('/checkout?error=Missing%20addressId%20or%20paymentId');
       return;
     }
 
@@ -367,7 +408,7 @@ function ConfirmationContent() {
       return;
     }
 
-    // Valider stripe_payment_id
+    console.log('[Confirmation] stripe_payment_id:', paymentInfo.stripe_payment_id);
     if (!paymentInfo.stripe_payment_id.startsWith('pm_')) {
       setError('Identifiant de paiement Stripe invalide');
       console.error('[Confirmation] stripe_payment_id invalide:', {
@@ -390,12 +431,7 @@ function ConfirmationContent() {
 
       if (result.error) {
         setError(result.error.message || 'Échec du paiement');
-        console.error('[Confirmation] Erreur de paiement', {
-          message: result.error.message,
-          type: result.error.type,
-          code: result.error.code,
-          decline_code: result.error.decline_code,
-        });
+        console.error('[Confirmation] Erreur de paiement', result.error);
         setTimeout(() => {
           router.push(`/checkout?error=${encodeURIComponent(result.error.message || 'Échec du paiement')}`);
         }, 2000);
@@ -413,35 +449,22 @@ function ConfirmationContent() {
 
       console.log('[Confirmation] Paiement réussi, création de la commande');
       const guestUserId = localStorage.getItem('guestUserId');
-      const userId = session?.user?.id_user?.toString() || guestUserId;
-      console.log('[Confirmation] Authentification pour /api/orders', {
-        userId,
-        sessionUser: session?.user,
-        guestUserId,
-      });
-
-      if (!userId) {
-        throw new Error('Aucun identifiant utilisateur disponible pour la création de la commande');
-      }
-
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
       if (session?.user?.id_user) {
         headers['x-user-id'] = session.user.id_user.toString();
+        console.log('[Confirmation] Envoi de x-user-id:', session.user.id_user);
       } else if (guestUserId) {
         headers['x-guest-id'] = guestUserId;
+        console.log('[Confirmation] Envoi de x-guest-id:', guestUserId);
+      } else {
+        throw new Error('Aucun ID utilisateur ou invité disponible');
       }
 
       console.log('[Confirmation] Envoi à /api/orders', {
         headers,
-        body: {
-          cartItems: cart,
-          addressId,
-          paymentId,
-          paymentIntentId: result.paymentIntent.id,
-          userId,
-        },
+        body: { cartItems: cart, addressId, paymentId, paymentIntentId: result.paymentIntent.id },
       });
 
       const response = await fetch('/api/orders', {
@@ -452,13 +475,12 @@ function ConfirmationContent() {
           addressId,
           paymentId,
           paymentIntentId: result.paymentIntent.id,
-          userId,
         }),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Erreur lors de la création de la commande: ${JSON.stringify(errorData)}`);
+        const errorText = await response.text();
+        throw new Error(`Erreur lors de la création de la commande: ${errorText}`);
       }
 
       const order = await response.json();
