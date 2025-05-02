@@ -43,7 +43,7 @@ export default function OrderCustomerInfo({ order }: OrderCustomerInfoProps) {
         </div>
         <Separator className="my-3" />
         <div className="mt-2">
-          <Button variant="outline" size="sm" className="w-full" asChild>
+          <Button className="w-full" asChild>
             <Link href={`/dashboard/users/${order.user.id_user}`}>
               <UserRound className="mr-2 h-4 w-4" />
               Voir le profil client

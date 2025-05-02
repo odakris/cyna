@@ -3,7 +3,7 @@ import OrderDetailPage from "@/components/Admin/Orders/Detail/OrderDetailPage"
 import { validateId } from "@/lib/utils/utils"
 
 export const metadata: Metadata = {
-  title: "Détails de la commande | CYNA Backoffice",
+  title: "Détails de la Commande | CYNA Backoffice",
   description: "Détails de la commande",
 }
 

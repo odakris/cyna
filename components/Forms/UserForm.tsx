@@ -219,14 +219,17 @@ export default function UserForm({ userId }: UserFormPageProps) {
                 </CardContent>
                 <CardFooter className="flex justify-end gap-2 pt-4 border-t">
                   <Button
-                    variant="outline"
                     type="button"
                     disabled={isSubmitting}
                     onClick={() => router.push("/dashboard/users")}
                   >
                     Annuler
                   </Button>
-                  <Button type="submit" disabled={isSubmitting}>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    variant={"cyna"}
+                  >
                     {isSubmitting ? (
                       <span className="flex items-center gap-1">
                         Enregistrement...

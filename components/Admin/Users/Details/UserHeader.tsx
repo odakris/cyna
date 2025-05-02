@@ -27,7 +27,7 @@ export default function UserHeader({
       </div>
       <div className="flex gap-2">
         <PermissionGuard permission="users:edit">
-          <Button variant="outline" onClick={handleEdit}>
+          <Button onClick={handleEdit}>
             <Edit className="mr-2 h-4 w-4" />
             Modifier
           </Button>

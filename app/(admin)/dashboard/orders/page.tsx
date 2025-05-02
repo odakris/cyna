@@ -5,7 +5,7 @@ import AccessDenied from "@/components/Auth/AccessDenied"
 import OrdersPage from "@/components/Admin/Orders/OrdersPage"
 
 export const metadata: Metadata = {
-  title: "Gestion des commandes | CYNA Backoffice",
+  title: "Gestion des Commandes | CYNA Backoffice",
   description: "Interface de gestion des commandes CYNA",
 }
 

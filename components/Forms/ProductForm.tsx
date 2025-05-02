@@ -6,7 +6,6 @@ import { useForm, Controller } from "react-hook-form"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import Image from "next/image"
-
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -388,10 +387,9 @@ export function ProductForm({
                           />
                         </div>
                       </CardContent>
-                      <CardFooter className="flex justify-between border-t pt-6">
+                      <CardFooter className="flex justify-end gap-2 pt-4 border-t">
                         <Button
                           type="button"
-                          variant="outline"
                           onClick={() => router.push("/dashboard/products")}
                           disabled={isSubmitting}
                         >
@@ -401,6 +399,7 @@ export function ProductForm({
                           type="button"
                           onClick={() => setActiveTab("details")}
                           className="gap-2"
+                          variant={"cyna"}
                         >
                           Suivant
                           <ArrowRight className="h-4 w-4" />
@@ -558,10 +557,9 @@ export function ProductForm({
                           )}
                         />
                       </CardContent>
-                      <CardFooter className="flex justify-between border-t pt-6">
+                      <CardFooter className="flex justify-end gap-2 pt-4 border-t">
                         <Button
                           type="button"
-                          variant="outline"
                           onClick={() => setActiveTab("basic")}
                           className="gap-2"
                         >
@@ -572,6 +570,7 @@ export function ProductForm({
                           type="button"
                           onClick={() => setActiveTab("images")}
                           className="gap-2"
+                          variant={"cyna"}
                         >
                           Suivant
                           <ArrowRight className="h-4 w-4" />
@@ -643,10 +642,9 @@ export function ProductForm({
                           </AlertDescription>
                         </Alert>
                       </CardContent>
-                      <CardFooter className="flex justify-between border-t pt-6">
+                      <CardFooter className="flex justify-end gap-2 pt-4 border-t">
                         <Button
                           type="button"
-                          variant="outline"
                           onClick={() => setActiveTab("details")}
                           className="gap-2"
                         >
@@ -657,31 +655,10 @@ export function ProductForm({
                           type="submit"
                           disabled={isSubmitting}
                           className="gap-2"
+                          variant={"cyna"}
                         >
                           {isSubmitting ? (
-                            <>
-                              <svg
-                                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                              >
-                                <circle
-                                  className="opacity-25"
-                                  cx="12"
-                                  cy="12"
-                                  r="10"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                ></circle>
-                                <path
-                                  className="opacity-75"
-                                  fill="currentColor"
-                                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                ></path>
-                              </svg>
-                              Enregistrement...
-                            </>
+                            <>Enregistrement...</>
                           ) : (
                             <>
                               <Save className="h-4 w-4" />

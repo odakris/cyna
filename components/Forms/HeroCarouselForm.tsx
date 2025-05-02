@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2, PencilLine } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -43,15 +42,16 @@ import {
 interface HeroCarouselFormProps {
   initialData?: HeroCarouselFormValues & { id_hero_slide?: number }
   isEditing?: boolean
+  onSubmit: (data: HeroCarouselFormValues) => Promise<void>
 }
 
 export function HeroCarouselForm({
   initialData,
   isEditing = false,
+  onSubmit,
 }: HeroCarouselFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const { toast } = useToast()
 
   // Initialiser le formulaire
   const form = useForm<HeroCarouselFormValues>({
@@ -63,63 +63,16 @@ export function HeroCarouselForm({
       button_text: initialData?.button_text || "",
       button_link: initialData?.button_link || "",
       active: initialData?.active ?? true,
-      priority_order: initialData?.priority_order || 999,
+      priority_order: initialData?.priority_order || 1,
     },
   })
 
-  // Soumettre le formulaire
-  const onSubmit = async (data: HeroCarouselFormValues) => {
+  const handleSubmit = async (data: HeroCarouselFormValues) => {
+    setIsSubmitting(true)
     try {
-      setIsSubmitting(true)
-
-      // Nettoyer les données si nécessaire
-      const formattedData = {
-        ...data,
-        description: data.description || null,
-        button_text: data.button_text || null,
-        button_link: data.button_link || null,
-        priority_order: Number(data.priority_order),
-      }
-
-      const endpoint = isEditing
-        ? `/api/hero-carousel/${initialData?.id_hero_slide}`
-        : "/api/hero-carousel"
-
-      const method = isEditing ? "PUT" : "POST"
-
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formattedData),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Une erreur est survenue")
-      }
-
-      toast({
-        title: isEditing ? "Slide mis à jour" : "Slide créé",
-        description: isEditing
-          ? "Le slide a été mis à jour avec succès."
-          : "Le nouveau slide a été créé avec succès.",
-      })
-
-      // Rediriger vers la liste des slides
-      router.push("/dashboard/hero-carousel")
-      router.refresh()
+      await onSubmit(data)
     } catch (error) {
       console.error("Erreur lors de la soumission du formulaire:", error)
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Une erreur inconnue est survenue",
-      })
     } finally {
       setIsSubmitting(false)
     }
@@ -127,7 +80,8 @@ export function HeroCarouselForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+        {/* Reste du formulaire inchangé */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Colonne principale */}
           <div className="lg:col-span-2 space-y-6">
@@ -143,6 +97,7 @@ export function HeroCarouselForm({
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Champs de formulaire inchangés */}
                 <FormField
                   control={form.control}
                   name="title"
@@ -336,6 +291,7 @@ export function HeroCarouselForm({
                 <Button
                   type="submit"
                   className="w-full"
+                  variant={"cyna"}
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -351,7 +307,6 @@ export function HeroCarouselForm({
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
                   className="w-full"
                   onClick={() => router.push("/dashboard/hero-carousel")}
                   disabled={isSubmitting}

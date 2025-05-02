@@ -57,10 +57,8 @@ export const categoryFilterFn: FilterFn<ProductWithImages> = (
 ) => {
   if (filterValue === undefined || filterValue === "all") return true
 
-  // Récupérer l'ID de catégorie du produit
   const categoryId = row.original.id_category
 
-  // Filtrer selon la catégorie sélectionnée
   return String(categoryId) === String(filterValue)
 }
 
@@ -68,18 +66,22 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
   {
     id: "select",
     header: ({ table }) => (
-      <Checkbox
-        checked={table.getIsAllPageRowsSelected()}
-        onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Sélectionner tout"
-      />
+      <div className="flex justify-center items-center">
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Sélectionner tout"
+        />
+      </div>
     ),
     cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={value => row.toggleSelected(!!value)}
-        aria-label="Sélectionner la ligne"
-      />
+      <div className="flex justify-center items-center">
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={value => row.toggleSelected(!!value)}
+          aria-label="Sélectionner la ligne"
+        />
+      </div>
     ),
     enableSorting: false,
     enableHiding: false,
@@ -87,7 +89,7 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
   {
     id: "product",
     header: ({ column }) => (
-      <div className="text-center">
+      <div className="flex justify-center items-center">
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -99,7 +101,7 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
       </div>
     ),
     cell: ({ row }) => {
-      const name = row.getValue("name") as string
+      const name = row.getValue("product") as string
       const imageUrl = row.original.main_image
 
       return (
@@ -129,18 +131,9 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "name",
-    header: "Nom",
-    size: 0,
-    enableHiding: true,
-    meta: {
-      hidden: true,
-    },
-  },
-  {
     accessorKey: "id_category",
     header: ({ column }) => (
-      <div className="text-center">
+      <div className="flex justify-center items-center">
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -153,7 +146,6 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
       </div>
     ),
     cell: ({ row }) => {
-      // const categoryId = row.getValue("id_category") as number
       const categoryName = row.original.category?.name || "Non catégorisé"
 
       return (
@@ -173,7 +165,7 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
   {
     accessorKey: "priority_order",
     header: ({ column }) => (
-      <div className="text-center">
+      <div className="flex justify-center items-center">
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -223,7 +215,7 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
   {
     accessorKey: "unit_price",
     header: ({ column }) => (
-      <div className="text-center">
+      <div className="flex justify-center items-center">
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -237,7 +229,6 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
     ),
     cell: ({ row }) => {
       const price = parseFloat(row.getValue("unit_price"))
-      // Formatter le prix avec séparateur de milliers et 2 décimales
       const formattedPrice = new Intl.NumberFormat("fr-FR", {
         style: "currency",
         currency: "EUR",
@@ -264,7 +255,7 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
   {
     accessorKey: "stock",
     header: ({ column }) => (
-      <div className="text-center">
+      <div className="flex justify-center items-center">
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -324,7 +315,7 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
   {
     accessorKey: "available",
     header: ({ column }) => (
-      <div className="text-center">
+      <div className="flex justify-center items-center">
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -361,7 +352,7 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
     accessorKey: "active",
     header: "Actif",
     cell: ({ row }) => (
-      <div className="flex justify-center">
+      <div className="flex justify-center items-center">
         <ProductActiveSwitch
           productId={row.original.id_product}
           initialActive={row.original.active}
@@ -376,16 +367,18 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
     id: "actions",
     header: "Actions",
     cell: ({ row }) => (
-      <ActionsCell
-        actions={[
-          { type: "view", tooltip: "Voir les détails" },
-          { type: "edit", tooltip: "Modifier le produit" },
-          { type: "external", tooltip: "Voir sur le site" },
-        ]}
-        basePath="/dashboard/products"
-        entityId={row.original.id_product}
-        externalBasePath="/produit"
-      />
+      <div className="flex justify-center items-center">
+        <ActionsCell
+          actions={[
+            { type: "view", tooltip: "Voir les détails" },
+            { type: "edit", tooltip: "Modifier le produit" },
+            { type: "external", tooltip: "Voir sur le site" },
+          ]}
+          basePath="/dashboard/products"
+          entityId={row.original.id_product}
+          externalBasePath="/produit"
+        />
+      </div>
     ),
     enableHiding: false,
   },
@@ -394,7 +387,6 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
 export const productsColumnNamesInFrench: Record<string, string> = {
   product: "Produit",
   priority_order: "Priorité",
-  name: "Nom",
   unit_price: "Prix unitaire",
   stock: "Stock",
   available: "Statut",
@@ -413,8 +405,8 @@ export const globalFilterFunction = (
 
   // Recherche dans le nom
   if (
-    row.getValue("name") &&
-    String(row.getValue("name")).toLowerCase().includes(searchTerm)
+    row.original.name &&
+    String(row.original.name).toLowerCase().includes(searchTerm)
   ) {
     return true
   }

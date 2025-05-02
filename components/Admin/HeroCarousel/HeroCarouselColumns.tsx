@@ -1,7 +1,6 @@
 import * as React from "react"
 import { ColumnDef, Row } from "@tanstack/react-table"
 import { ArrowUpDown, BarChart3, Link2, SlidersHorizontal } from "lucide-react"
-
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -13,11 +12,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { Switch } from "@/components/ui/switch"
 import { HeroCarouselSlide } from "@prisma/client"
 import ActionsCell from "@/components/Admin/ActionCell"
+import HeroCarouselActiveSwitch from "@/components/Admin/HeroCarousel/HeroCarouselActiveSwitch"
 
-export const heroCarouselColumns: ColumnDef<HeroCarouselSlide>[] = [
+export const HeroCarouselColumns: ColumnDef<HeroCarouselSlide>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -204,9 +203,13 @@ export const heroCarouselColumns: ColumnDef<HeroCarouselSlide>[] = [
 
       return (
         <div className="flex justify-center">
-          <Switch
-            checked={active}
-            aria-label={active ? "Désactiver" : "Activer"}
+          <HeroCarouselActiveSwitch
+            slideId={row.original.id_hero_slide}
+            initialActive={active}
+            onStatusChange={newStatus => {
+              // Mettre à jour la donnée dans la ligne du tableau
+              row.original.active = newStatus
+            }}
           />
         </div>
       )

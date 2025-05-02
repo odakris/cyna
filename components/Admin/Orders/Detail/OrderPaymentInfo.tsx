@@ -70,7 +70,7 @@ export default function OrderPaymentInfo({
       </CardContent>
       {order.invoice_pdf_url && (
         <CardFooter>
-          <Button variant="outline" className="w-full" asChild>
+          <Button className="w-full" asChild>
             <a
               href={order.invoice_pdf_url}
               target="_blank"

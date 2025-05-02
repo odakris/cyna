@@ -169,7 +169,7 @@ export default function ViewMainMessagePage() {
                 Voir sur le site
               </Link>
             </Button>
-            <Button asChild variant="outline" size="sm">
+            <Button asChild>
               <Link href={`/dashboard/main-message/${id}/edit`}>
                 <PencilLine className="mr-2 h-4 w-4" />
                 Modifier
@@ -177,7 +177,6 @@ export default function ViewMainMessagePage() {
             </Button>
             <Button
               variant="destructive"
-              size="sm"
               onClick={() => setShowDeleteDialog(true)}
             >
               <Trash2 className="mr-2 h-4 w-4" />

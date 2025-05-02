@@ -5,7 +5,7 @@ import AccessDenied from "@/components/Auth/AccessDenied"
 import UsersPage from "@/components/Admin/Users/UsersPage"
 
 export const metadata: Metadata = {
-  title: "Gestion des utilisateurs | CYNA Backoffice",
+  title: "Gestion des Utilisateurs | CYNA Backoffice",
   description: "Interface de gestion des utilisateurs CYNA",
 }
 

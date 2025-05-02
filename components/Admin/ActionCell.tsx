@@ -1,4 +1,3 @@
-// components/Admin/ActionsCellComponent.tsx
 "use client"
 
 import { useSession } from "next-auth/react"
@@ -23,7 +22,15 @@ import { Role } from "@prisma/client"
 import { Permission } from "@/lib/permissions"
 
 export interface ActionConfig {
-  type: "view" | "edit" | "delete" | "external" | "reply" | "receipt" | "custom"
+  type:
+    | "view"
+    | "edit"
+    | "delete"
+    | "external"
+    | "external_main"
+    | "reply"
+    | "receipt"
+    | "custom"
   href?: string
   externalPath?: string
   onClick?: () => void
@@ -61,6 +68,7 @@ const ActionsCell = ({
     delete: <Trash2 className="h-4 w-4" />,
     reply: <Reply className="h-4 w-4" />,
     external: <ExternalLink className="h-4 w-4" />,
+    external_main: <ExternalLink className="h-4 w-4" />,
     receipt: <Receipt className="h-4 w-4" />,
   }
 
@@ -72,6 +80,7 @@ const ActionsCell = ({
     reply: `${section}:respond` as Permission,
     receipt: `${section}:view` as Permission,
     external: undefined, // Pas de permission requise pour voir sur le site
+    external_main: undefined, // Pas de permission requise pour voir sur le site
     custom: undefined,
   })
 
@@ -107,6 +116,8 @@ const ActionsCell = ({
         return `${basePath}/${entityId}/edit`
       case "external":
         return `${externalBasePath || `/${section.slice(0, -1)}`}/${entityId}`
+      case "external_main":
+        return `/`
       case "reply":
         return `${basePath}/${entityId}/respond`
       case "receipt":
@@ -130,6 +141,8 @@ const ActionsCell = ({
       case "delete":
         return "Supprimer"
       case "external":
+        return "Voir sur le site"
+      case "external_main":
         return "Voir sur le site"
       case "reply":
         return "Répondre"
