@@ -13,7 +13,6 @@ import {
   XCircle,
   Mail,
   Clock,
-  User,
   MessageSquare,
   CornerDownRight,
 } from "lucide-react"
@@ -53,14 +52,6 @@ export default function ContactMessageContent({
             </Avatar>
             <div>
               <CardTitle className="text-xl">{message.subject}</CardTitle>
-              <div className="flex items-center mt-1 space-x-2">
-                <User className="h-3.5 w-3.5 text-muted-foreground" />
-                <CardDescription className="text-base">
-                  {message.user?.firstname && message.user?.lastname
-                    ? `${message.user.firstname} ${message.user.lastname}`
-                    : message.email}
-                </CardDescription>
-              </div>
               <div className="flex items-center mt-1 space-x-2">
                 <Mail className="h-3.5 w-3.5 text-muted-foreground" />
                 <CardDescription className="text-base">

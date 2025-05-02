@@ -11,6 +11,9 @@ export type Permission =
   | "categories:create"
   | "categories:edit"
   | "categories:delete"
+  | "conversations:view"
+  | "conversations:edit"
+  | "conversations:delete"
   | "users:view"
   | "users:create"
   | "users:edit"
@@ -39,9 +42,15 @@ export const rolePermissions: Record<Role, Permission[]> = {
     "dashboard:view",
     "products:view",
     "categories:view",
+    "conversations:view",
+    "conversations:edit",
     "orders:view",
     "contact:view",
     "contact:respond",
+    "main-message:view",
+    "main-message:create",
+    "main-message:edit",
+    "main-message:delete",
   ],
   ADMIN: [
     "dashboard:view",
@@ -53,6 +62,9 @@ export const rolePermissions: Record<Role, Permission[]> = {
     "categories:create",
     "categories:edit",
     "categories:delete",
+    "conversations:view",
+    "conversations:edit",
+    "conversations:delete",
     "users:view",
     "users:edit",
     "orders:view",
@@ -95,6 +107,9 @@ export const rolePermissions: Record<Role, Permission[]> = {
     "contact:view",
     "contact:respond",
     "contact:delete",
+    "conversations:view",
+    "conversations:edit",
+    "conversations:delete",
   ],
 }
 

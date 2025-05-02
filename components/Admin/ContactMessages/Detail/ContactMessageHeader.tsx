@@ -25,7 +25,7 @@ export default function ContactMessageHeader({
 
       <div className="flex gap-2">
         <PermissionGuard permission="contact:respond">
-          <Button variant="outline" asChild>
+          <Button asChild>
             <Link href={`/dashboard/contact/${messageId}/respond`}>
               <Reply className="mr-2 h-4 w-4" />
               Répondre

@@ -90,6 +90,7 @@ export default function OrderDetailHeader({
               disabled={
                 !updateStatus || updateStatus === order.order_status || updating
               }
+              variant={"cyna"}
             >
               {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Mettre à jour

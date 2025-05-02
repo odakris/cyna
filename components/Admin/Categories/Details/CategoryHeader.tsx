@@ -33,19 +33,19 @@ export default function CategoryHeader({
         </div>
 
         <div className="flex flex-wrap gap-3">
-          <PermissionGuard permission="categories:edit">
-            <Button variant="outline" onClick={handleEdit}>
-              <Edit className="mr-2 h-4 w-4" />
-              Modifier
-            </Button>
-          </PermissionGuard>
-
           <Button asChild variant="outline">
             <Link href={`/categories/${category.id_category}`} target="_blank">
               <ExternalLink className="mr-2 h-4 w-4" />
               Voir sur le site
             </Link>
           </Button>
+
+          <PermissionGuard permission="categories:edit">
+            <Button onClick={handleEdit}>
+              <Edit className="mr-2 h-4 w-4" />
+              Modifier
+            </Button>
+          </PermissionGuard>
 
           <PermissionGuard permission="categories:delete">
             <Button

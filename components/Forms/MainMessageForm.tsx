@@ -44,7 +44,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
   MainMessageFormValues,
   mainMessageSchema,
-} from "../../lib/validations/main-message-schema"
+} from "@/lib/validations/main-message-schema"
 
 interface MainMessageFormProps {
   initialData?: {
@@ -458,6 +458,7 @@ export function MainMessageForm({
                 <Button
                   type="submit"
                   className="w-full"
+                  variant={"cyna"}
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -476,7 +477,6 @@ export function MainMessageForm({
                 </Button>
                 <Button
                   type="button"
-                  variant="outline"
                   className="w-full"
                   onClick={() => router.push("/dashboard/main-message")}
                   disabled={isSubmitting}

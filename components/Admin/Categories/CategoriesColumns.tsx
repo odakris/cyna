@@ -29,10 +29,8 @@ export const productsFilterFn: FilterFn<CategoryWithProduct> = (
   const productsCount = row.original.products?.length || 0
 
   if (filterValue === true) {
-    // Filtre pour catégories avec produits
     return productsCount > 0
   } else if (filterValue === false) {
-    // Filtre pour catégories sans produits
     return productsCount === 0
   }
 
@@ -64,7 +62,7 @@ export const categoriesColumns: ColumnDef<CategoryWithProduct>[] = [
   {
     id: "category",
     header: ({ column }) => (
-      <div className="text-center">
+      <div className="flex justify-center items-center">
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -77,7 +75,7 @@ export const categoriesColumns: ColumnDef<CategoryWithProduct>[] = [
       </div>
     ),
     cell: ({ row }) => {
-      const name = row.getValue("name") as string
+      const name = row.getValue("category") as string
       const imageUrl = row.original.image
 
       return (
@@ -107,18 +105,9 @@ export const categoriesColumns: ColumnDef<CategoryWithProduct>[] = [
     enableSorting: true,
   },
   {
-    accessorKey: "name",
-    header: "Nom",
-    size: 0,
-    enableHiding: true,
-    meta: {
-      hidden: true,
-    },
-  },
-  {
     accessorKey: "priority_order",
     header: ({ column }) => (
-      <div className="text-center">
+      <div className="flex justify-center items-center">
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -184,7 +173,7 @@ export const categoriesColumns: ColumnDef<CategoryWithProduct>[] = [
   {
     accessorKey: "products",
     header: ({ column }) => (
-      <div className="text-center">
+      <div className="flex justify-center items-center">
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -221,7 +210,7 @@ export const categoriesColumns: ColumnDef<CategoryWithProduct>[] = [
   {
     accessorKey: "description",
     header: ({ column }) => (
-      <div className="text-center">
+      <div className="flex justify-center items-center">
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -237,7 +226,7 @@ export const categoriesColumns: ColumnDef<CategoryWithProduct>[] = [
       const description = row.original.description || ""
 
       return (
-        <div className="max-w-xs text-left truncate" title={description}>
+        <div className="truncate text-center" title={description}>
           {description.length > 50
             ? description.substring(0, 50) + "..."
             : description || (
@@ -287,7 +276,6 @@ export const categoriesColumnNamesInFrench: Record<string, string> = {
   category: "Catégorie",
   priority_order: "Priorité",
   image: "Image",
-  name: "Nom",
   description: "Description",
   products: "Produits",
   actions: "Actions",
@@ -303,8 +291,8 @@ export const globalFilterFunction = (
 
   // Recherche dans le nom
   if (
-    row.getValue("name") &&
-    String(row.getValue("name")).toLowerCase().includes(searchTerm)
+    row.original.name &&
+    String(row.original.name).toLowerCase().includes(searchTerm)
   ) {
     return true
   }

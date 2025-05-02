@@ -127,7 +127,7 @@ export default function UserDetailsPage({
           <div className="md:col-span-2 space-y-6">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">Accès et sécurité</h3>
-              <Button variant="outline" size="sm">
+              <Button>
                 <Key className="mr-2 h-4 w-4" />
                 Réinitialiser le mot de passe
               </Button>

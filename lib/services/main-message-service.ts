@@ -69,7 +69,14 @@ export const updatePartialMessage = async (
       throw new Error(`Message avec l'ID ${id} non trouvé`)
     }
 
-    return await mainMessageRepository.updatePartial(id, partialData)
+    // Si on active un message, désactiver tous les autres
+    if (partialData.active === true) {
+      // Cette partie est exécutée uniquement si on active le message
+      return await mainMessageRepository.updatePartial(id, partialData)
+    } else {
+      // Si on désactive le message ou modifie d'autres propriétés, pas besoin de logique spéciale
+      return await mainMessageRepository.updatePartial(id, partialData)
+    }
   } catch (error) {
     console.error(
       `Service - Error partially updating message with id ${id}:`,

@@ -52,7 +52,7 @@ export default function ProductHeader({
           </Button>
 
           <PermissionGuard permission="products:edit">
-            <Button variant="outline" onClick={handleEdit}>
+            <Button onClick={handleEdit}>
               <Edit className="mr-2 h-4 w-4" />
               Modifier
             </Button>

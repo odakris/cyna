@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/app/(app)/api/auth/[...nextauth]/route"
 import { ConversationStatus, Role } from "@prisma/client"
+import { validateId } from "@/lib/utils/utils"
 
 // Récupérer une conversation spécifique avec ses messages
 export async function GET(
@@ -11,18 +12,12 @@ export async function GET(
 ): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions)
-    const conversationId = parseInt(params.id)
-
-    if (isNaN(conversationId)) {
-      return NextResponse.json(
-        { error: "Invalid conversation ID" },
-        { status: 400 }
-      )
-    }
+    const resolvedParams = await params
+    const conversationId = validateId(resolvedParams.id)
 
     // Vérifier les permissions
     const conversation = await prisma.chatConversation.findUnique({
-      where: { id_conversation: conversationId },
+      where: { id_conversation: conversationId ?? undefined },
       include: { user: true },
     })
 
@@ -40,14 +35,14 @@ export async function GET(
         .toString()
         .includes(session.user.role as string) &&
         conversation.id_user !==
-          (session.user.id ? parseInt(session.user.id) : null))
+          (session.user.id_user ? session.user.id_user : null))
     ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 
     // Récupérer les messages de la conversation
     const messages = await prisma.chatMessage.findMany({
-      where: { id_conversation: conversationId },
+      where: { id_conversation: conversationId ?? undefined },
       orderBy: { created_at: "asc" },
     })
 
@@ -71,9 +66,10 @@ export async function PATCH(
 ): Promise<NextResponse> {
   try {
     const session = await getServerSession(authOptions)
-    const conversationId = parseInt(params.id)
+    const resolvedParams = await params
+    const conversationId = validateId(resolvedParams.id)
 
-    if (isNaN(conversationId)) {
+    if (conversationId === null || isNaN(conversationId)) {
       return NextResponse.json(
         { error: "Invalid conversation ID" },
         { status: 400 }

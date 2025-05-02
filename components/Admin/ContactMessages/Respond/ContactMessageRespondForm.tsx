@@ -27,7 +27,6 @@ import {
   MessageSquare,
   Mail,
   Clock,
-  User,
   Send,
 } from "lucide-react"
 import { Separator } from "@/components/ui/separator"
@@ -73,14 +72,6 @@ export default function ContactMessageRespondForm({
             <div>
               <CardTitle className="text-xl mb-1">{message.subject}</CardTitle>
               <div className="flex flex-col sm:flex-row sm:gap-4">
-                <div className="flex items-center space-x-2">
-                  <User className="h-3.5 w-3.5 text-muted-foreground" />
-                  <CardDescription className="text-sm">
-                    {message.user?.firstname && message.user?.lastname
-                      ? `${message.user.firstname} ${message.user.lastname}`
-                      : message.email}
-                  </CardDescription>
-                </div>
                 <div className="flex items-center space-x-2">
                   <Mail className="h-3.5 w-3.5 text-muted-foreground" />
                   <CardDescription className="text-sm">
@@ -156,6 +147,7 @@ export default function ContactMessageRespondForm({
                 <Button
                   type="submit"
                   className="px-6"
+                  variant={"cyna"}
                   disabled={form.formState.isSubmitting}
                 >
                   {form.formState.isSubmitting ? (

@@ -173,8 +173,8 @@ export const ContactMessageColumns: ColumnDef<ContactMessage>[] = [
 
       return (
         <div className="flex items-start gap-2">
-          <Mail className="h-4 w-4 text-muted-foreground mt-1" />
-          <div className="flex flex-col">
+          {/* <Mail className="h-4 w-4 text-muted-foreground mt-1" /> */}
+          <div className="flex flex-col w-full">
             {user?.firstname && user?.lastname ? (
               <>
                 <span className="font-medium">
@@ -194,7 +194,7 @@ export const ContactMessageColumns: ColumnDef<ContactMessage>[] = [
   {
     accessorKey: "subject",
     header: ({ column }) => (
-      <div className="text-center">
+      <div className="flex justify-center items-center">
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
@@ -211,10 +211,13 @@ export const ContactMessageColumns: ColumnDef<ContactMessage>[] = [
 
       return (
         <div
-          className={cn("max-w-md", !row.original.is_read ? "font-medium" : "")}
+          className={cn(
+            "flex flex-col items-center justify-center",
+            !row.original.is_read ? "font-medium" : ""
+          )}
         >
           <div className="text-base">{subject}</div>
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground text-center">
             {truncateText(message, 60)}
           </div>
         </div>

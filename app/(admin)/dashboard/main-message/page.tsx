@@ -56,11 +56,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from "@/components/ui/hover-card"
+import { HoverCard, HoverCardContent } from "@/components/ui/hover-card"
 import {
   ColumnFiltersState,
   SortingState,
@@ -422,12 +418,12 @@ export default function MainMessageDashboard() {
             </PermissionGuard>
 
             <HoverCard>
-              <HoverCardTrigger asChild>
+              {/* <HoverCardTrigger asChild>
                 <Button variant="outline" onClick={fetchMessages}>
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Actualiser
                 </Button>
-              </HoverCardTrigger>
+              </HoverCardTrigger> */}
               <HoverCardContent className="w-80">
                 <div className="flex justify-between space-x-4">
                   <div className="space-y-1">

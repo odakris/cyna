@@ -9,6 +9,7 @@ import {
   SlidersHorizontal,
   MessageSquareText,
   Mail,
+  BotMessageSquare,
 } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
@@ -72,7 +73,7 @@ export default function AdminSideBar() {
     {
       name: "Chatbot",
       href: "/dashboard/conversations",
-      icon: <Mail className="h-5 w-5" />,
+      icon: <BotMessageSquare className="h-5 w-5" />,
       exact: false,
     },
   ]
