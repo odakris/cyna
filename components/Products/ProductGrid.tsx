@@ -15,13 +15,14 @@ export function ProductGrid({
   loading = false,
   emptyMessage = "Aucun produit trouvé dans cette catégorie.",
 }: ProductGridProps) {
+  const filteredProducts = products.filter(product => product.active)
   return (
     <BaseProductGrid
       loading={loading}
       isEmpty={products.length === 0}
       emptyMessage={emptyMessage}
     >
-      {products.map(product => (
+      {filteredProducts.map(product => (
         <ProductCard key={product.id_product} {...product} />
       ))}
     </BaseProductGrid>

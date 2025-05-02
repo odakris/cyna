@@ -4,8 +4,8 @@ import { userFormSchema } from "@/lib/validations/user-schema"
 import { ZodError } from "zod"
 
 /**
- * Récupère la liste complète des produits depuis la base de données.
- * @returns {Promise<NextResponse>} Réponse JSON contenant la liste des produits ou une erreur serveur.
+ * Récupère la liste complète des utilisateurs depuis la base de données.
+ * @returns {Promise<NextResponse>} Réponse JSON contenant la liste des utilisateurs ou une erreur serveur.
  */
 export const getAll = async (): Promise<NextResponse> => {
   try {
@@ -148,11 +148,49 @@ export const remove = async (id: number): Promise<NextResponse> => {
   }
 }
 
+/**
+ * Active ou désactive un utilisateur.
+ * @param {number} id - Identifiant du utilisateur à modifier.
+ * @returns {Promise<NextResponse>} La réponse avec le statut mis à jour ou un message d'erreur.
+ */
+export const toggleUserStatus = async (id: number): Promise<NextResponse> => {
+  try {
+    const result = await userService.toggleUserStatus(id)
+
+    // Si l'activation a été bloquée
+    if (result.blocked) {
+      return NextResponse.json(
+        {
+          active: result.user.active,
+          blocked: true,
+          reason: result.reason,
+        },
+        { status: 422 }
+      )
+    }
+
+    // Sinon renvoyer l'utilisateur mis à jour
+    return NextResponse.json(result.user)
+  } catch (error) {
+    console.error("Erreur lors du changement de statut l'utilisateur", error)
+
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message === "Produit non trouvé" ? 404 : 400 }
+      )
+    }
+
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
+  }
+}
+
 const userController = {
   getAll,
   getById,
   create,
   update,
   remove,
+  toggleUserStatus,
 }
 export default userController

@@ -118,7 +118,9 @@ export default function AdvancedSearch({ categories }: AdvancedSearchProps) {
           <SortOptions
             sortOptions={sortOptions}
             updateSort={updateSort}
-            productsCount={displayedProducts.length}
+            productsCount={
+              displayedProducts.filter(product => product.active).length
+            }
           />
 
           {/* Résultats de recherche */}
@@ -126,9 +128,11 @@ export default function AdvancedSearch({ categories }: AdvancedSearchProps) {
             loading={loading}
             isEmpty={displayedProducts.length === 0}
           >
-            {displayedProducts.map(product => (
-              <ProductCard key={product.id_product} {...product} />
-            ))}
+            {displayedProducts
+              .filter(product => product.active)
+              .map(product => (
+                <ProductCard key={product.id_product} {...product} />
+              ))}
           </BaseProductGrid>
         </div>
       </div>

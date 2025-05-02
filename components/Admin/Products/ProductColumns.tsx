@@ -1,13 +1,13 @@
 import * as React from "react"
-import { ColumnDef, FilterFn, Row } from "@tanstack/react-table"
+import { ColumnDef, Row, FilterFn } from "@tanstack/react-table"
 import {
   ArrowUpDown,
   Layers,
   Tag,
   BarChart3,
   Package,
-  Check,
-  X,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,9 @@ import {
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import ActionsCell from "@/components/Admin/ActionCell"
+import ProductActiveSwitch from "@/components/Admin/Products/ProductActiveSwitch"
 
+// Fonction de filtrage personnalisée pour les stocks
 export const productsFilterFn: FilterFn<ProductWithImages> = (
   row,
   columnId,
@@ -45,6 +47,21 @@ export const productsFilterFn: FilterFn<ProductWithImages> = (
     default:
       return true
   }
+}
+
+// Fonction de filtrage personnalisée pour les catégories
+export const categoryFilterFn: FilterFn<ProductWithImages> = (
+  row,
+  columnId,
+  filterValue
+) => {
+  if (filterValue === undefined || filterValue === "all") return true
+
+  // Récupérer l'ID de catégorie du produit
+  const categoryId = row.original.id_category
+
+  // Filtrer selon la catégorie sélectionnée
+  return String(categoryId) === String(filterValue)
 }
 
 export const productColumns: ColumnDef<ProductWithImages>[] = [
@@ -94,7 +111,7 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
                 src={imageUrl}
                 width={64}
                 height={64}
-                className="object-contain w-full h-full"
+                className="object-cover w-full h-full"
                 style={{ aspectRatio: "1/1" }}
               />
             </div>
@@ -119,6 +136,39 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
     meta: {
       hidden: true,
     },
+  },
+  {
+    accessorKey: "id_category",
+    header: ({ column }) => (
+      <div className="text-center">
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="px-2"
+        >
+          <Layers className="mr-2 h-4 w-4 text-muted-foreground" />
+          Catégorie
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    ),
+    cell: ({ row }) => {
+      // const categoryId = row.getValue("id_category") as number
+      const categoryName = row.original.category?.name || "Non catégorisé"
+
+      return (
+        <div className="text-center">
+          <Badge
+            variant="outline"
+            className="bg-sky-100 text-sky-700 hover:bg-sky-200 border-sky-200"
+          >
+            {categoryName}
+          </Badge>
+        </div>
+      )
+    },
+    enableSorting: true,
+    filterFn: categoryFilterFn,
   },
   {
     accessorKey: "priority_order",
@@ -292,20 +342,35 @@ export const productColumns: ColumnDef<ProductWithImages>[] = [
         <div className="text-center">
           {available ? (
             <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white border-0">
-              <Check className="mr-1 h-3 w-3" /> Disponible
+              <CheckCircle2 className="mr-1 h-3 w-3" /> Disponible
             </Badge>
           ) : (
             <Badge
               variant="outline"
               className="bg-slate-100 text-slate-800 border-slate-200"
             >
-              <X className="mr-1 h-3 w-3" /> Indisponible
+              <XCircle className="mr-1 h-3 w-3" /> Indisponible
             </Badge>
           )}
         </div>
       )
     },
     enableSorting: true,
+  },
+  {
+    accessorKey: "active",
+    header: "Actif",
+    cell: ({ row }) => (
+      <div className="flex justify-center">
+        <ProductActiveSwitch
+          productId={row.original.id_product}
+          initialActive={row.original.active}
+          onStatusChange={newStatus => {
+            row.original.active = newStatus
+          }}
+        />
+      </div>
+    ),
   },
   {
     id: "actions",
@@ -333,6 +398,8 @@ export const productsColumnNamesInFrench: Record<string, string> = {
   unit_price: "Prix unitaire",
   stock: "Stock",
   available: "Statut",
+  id_category: "Catégorie",
+  active: "Activer/Désactiver",
   actions: "Actions",
 }
 

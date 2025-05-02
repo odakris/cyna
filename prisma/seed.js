@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid"
 
 const prisma = new PrismaClient()
 
-// const bcrypt = require("bcrypt")
+import bcrypt from "bcrypt"
 
 // Fonction utilitaire pour générer des dates récentes
 const getRecentDate = daysAgo => {
@@ -31,6 +31,7 @@ async function main() {
         image:
           "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=2070",
         priority_order: 1,
+        active: true,
         updated_at: new Date(),
         created_at: new Date(),
       },
@@ -44,6 +45,7 @@ async function main() {
         image:
           "https://images.unsplash.com/photo-1614064642639-e398cf05badb?q=80&w=2070",
         priority_order: 2,
+        active: true,
         updated_at: new Date(),
         created_at: new Date(),
       },
@@ -57,6 +59,7 @@ async function main() {
         image:
           "https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=2074",
         priority_order: 3,
+        active: true,
         updated_at: new Date(),
         created_at: new Date(),
       },
@@ -79,6 +82,7 @@ async function main() {
           "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 10, // Stock plus élevé
         id_category: prevention.id_category,
+        active: true,
       },
     })
 
@@ -97,6 +101,7 @@ async function main() {
           "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 5,
         id_category: prevention.id_category,
+        active: true,
       },
     })
 
@@ -115,6 +120,7 @@ async function main() {
           "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 15,
         id_category: prevention.id_category,
+        active: true,
       },
     })
 
@@ -133,6 +139,7 @@ async function main() {
           "https://images.unsplash.com/photo-1575467678930-c7acd65d6470?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 8,
         id_category: prevention.id_category,
+        active: true,
       },
     })
 
@@ -151,6 +158,7 @@ async function main() {
           "https://images.unsplash.com/photo-1551808525-51a94da548ce?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 8,
         id_category: protection.id_category,
+        active: true,
       },
     })
 
@@ -169,6 +177,7 @@ async function main() {
           "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 5,
         id_category: protection.id_category,
+        active: true,
       },
     })
 
@@ -187,6 +196,7 @@ async function main() {
           "https://images.unsplash.com/photo-1593642532973-d31b6557fa68?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 7,
         id_category: protection.id_category,
+        active: true,
       },
     })
 
@@ -205,6 +215,7 @@ async function main() {
           "https://images.unsplash.com/photo-1614064642639-e398cf05badb?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 6,
         id_category: protection.id_category,
+        active: true,
       },
     })
 
@@ -223,6 +234,7 @@ async function main() {
           "https://images.unsplash.com/photo-1563237023-b1e970526dcb?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 10,
         id_category: protection.id_category,
+        active: true,
       },
     })
 
@@ -241,6 +253,7 @@ async function main() {
           "https://images.unsplash.com/photo-1633265486501-0cf524a07213?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 3,
         id_category: reponse.id_category,
+        active: true,
       },
     })
 
@@ -259,6 +272,7 @@ async function main() {
           "https://images.unsplash.com/photo-1590856029826-c7a73142bbf1?q=80&w=1000",
         stock: Math.floor(Math.random() * 5) + 2,
         id_category: reponse.id_category,
+        active: true,
       },
     })
 
@@ -277,6 +291,7 @@ async function main() {
           "https://images.unsplash.com/photo-1598128558393-70ff21433be0?q=80&w=1000",
         stock: Math.floor(Math.random() * 10) + 4,
         id_category: reponse.id_category,
+        active: true,
       },
     })
 
@@ -295,6 +310,7 @@ async function main() {
           "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=1000",
         stock: Math.floor(Math.random() * 5) + 2,
         id_category: reponse.id_category,
+        active: true,
       },
     })
 
@@ -654,7 +670,7 @@ async function main() {
 
     // Création des utilisateurs
     console.log("Création des utilisateurs...")
-    // const salt = await bcrypt.genSalt(10)
+    const salt = await bcrypt.genSalt(10)
     // const hashedPassword = await bcrypt.hash("Password123!", salt)
     // const adminPassword = await bcrypt.hash("AdminSecure456!", salt)
 
@@ -664,9 +680,10 @@ async function main() {
         first_name: "Super",
         last_name: "Admin",
         email: "superadmin@cyna.fr",
-        password: "superAdminPassword",
+        password: await bcrypt.hash("superAdminPassword", salt),
         role: "SUPER_ADMIN", // Rôle SUPER_ADMIN
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_super_admin",
       },
     })
@@ -676,9 +693,10 @@ async function main() {
         first_name: "Admin",
         last_name: "Système",
         email: "admin@cyna.fr",
-        password: "adminPassword",
+        password: await bcrypt.hash("adminPassword", salt),
         role: "ADMIN",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_admin",
       },
     })
@@ -689,9 +707,10 @@ async function main() {
         first_name: "Philippe",
         last_name: "Dubois",
         email: "philippe.dubois@cyna.fr",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "MANAGER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_manager1",
       },
     })
@@ -701,9 +720,10 @@ async function main() {
         first_name: "Sophie",
         last_name: "Moreau",
         email: "sophie.moreau@cyna.fr",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "MANAGER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_manager2",
       },
     })
@@ -713,9 +733,10 @@ async function main() {
         first_name: "Jean",
         last_name: "Dupont",
         email: "jean.dupont@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_customer1",
       },
     })
@@ -725,9 +746,10 @@ async function main() {
         first_name: "Marie",
         last_name: "Martin",
         email: "marie.martin@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_customer2",
       },
     })
@@ -737,9 +759,10 @@ async function main() {
         first_name: "Thomas",
         last_name: "Bernard",
         email: "thomas.bernard@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_customer3",
       },
     })
@@ -749,9 +772,10 @@ async function main() {
         first_name: "Émilie",
         last_name: "Leroy",
         email: "emilie.leroy@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: false, // Email non vérifié
+        active: true,
         verify_token: "verify_emilie_token_123",
         stripeCustomerId: "cus_customer4",
       },
@@ -763,9 +787,10 @@ async function main() {
         first_name: "Alexandre",
         last_name: "Petit",
         email: "alexandre.petit@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_customer5",
       },
     })
@@ -775,9 +800,10 @@ async function main() {
         first_name: "Caroline",
         last_name: "Durand",
         email: "caroline.durand@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_customer6",
       },
     })
@@ -787,9 +813,10 @@ async function main() {
         first_name: "Stéphane",
         last_name: "Moreau",
         email: "stephane.moreau@example.com",
-        password: "hashedPassword",
+        password: await bcrypt.hash("hashedPassword", salt),
         role: "CUSTOMER",
         email_verified: true,
+        active: true,
         stripeCustomerId: "cus_customer7",
       },
     })
@@ -1020,99 +1047,98 @@ async function main() {
 
     // Création des informations de paiement - STRUCTURE MISE À JOUR
     console.log("Création des informations de paiement...")
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Jean Dupont",
-    brand: "visa",
-    last_card_digits: "4242",
-    stripe_payment_id: "pm_visa_4242",
-    exp_month: 12,  // Mois d'expiration
-    exp_year: 2026, // Année d'expiration
-    is_default: true,
-    id_user: customer1.id_user,
-  },
-})
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Jean Dupont",
+        brand: "visa",
+        last_card_digits: "4242",
+        stripe_payment_id: "pm_visa_4242",
+        exp_month: 12, // Mois d'expiration
+        exp_year: 2026, // Année d'expiration
+        is_default: true,
+        id_user: customer1.id_user,
+      },
+    })
 
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Marie Martin",
-    brand: "visa",
-    last_card_digits: "4444",
-    stripe_payment_id: "pm_visa_4444",
-    exp_month: 11,  // Mois d'expiration
-    exp_year: 2025, // Année d'expiration
-    is_default: true,
-    id_user: customer2.id_user,
-  },
-})
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Marie Martin",
+        brand: "visa",
+        last_card_digits: "4444",
+        stripe_payment_id: "pm_visa_4444",
+        exp_month: 11, // Mois d'expiration
+        exp_year: 2025, // Année d'expiration
+        is_default: true,
+        id_user: customer2.id_user,
+      },
+    })
 
-// *** AJOUT : Plus d'informations de paiement ***
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Thomas Bernard",
-    brand: "mastercard",
-    last_card_digits: "5555",
-    stripe_payment_id: "pm_mastercard_5555",
-    exp_month: 6,   // Mois d'expiration
-    exp_year: 2027, // Année d'expiration
-    is_default: true,
-    id_user: customer3.id_user,
-  },
-})
+    // *** AJOUT : Plus d'informations de paiement ***
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Thomas Bernard",
+        brand: "mastercard",
+        last_card_digits: "5555",
+        stripe_payment_id: "pm_mastercard_5555",
+        exp_month: 6, // Mois d'expiration
+        exp_year: 2027, // Année d'expiration
+        is_default: true,
+        id_user: customer3.id_user,
+      },
+    })
 
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Jean Dupont Pro",
-    brand: "amex",
-    last_card_digits: "9876",
-    stripe_payment_id: "pm_amex_9876",
-    exp_month: 9,   // Mois d'expiration
-    exp_year: 2024, // Année d'expiration
-    is_default: false,
-    id_user: customer1.id_user,
-  },
-})
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Jean Dupont Pro",
+        brand: "amex",
+        last_card_digits: "9876",
+        stripe_payment_id: "pm_amex_9876",
+        exp_month: 9, // Mois d'expiration
+        exp_year: 2024, // Année d'expiration
+        is_default: false,
+        id_user: customer1.id_user,
+      },
+    })
 
-// Informations de paiement pour les nouveaux clients
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Alexandre Petit",
-    brand: "visa",
-    last_card_digits: "1234",
-    stripe_payment_id: "pm_visa_1234",
-    exp_month: 1,   // Mois d'expiration
-    exp_year: 2026, // Année d'expiration
-    is_default: true,
-    id_user: customer5.id_user,
-  },
-})
+    // Informations de paiement pour les nouveaux clients
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Alexandre Petit",
+        brand: "visa",
+        last_card_digits: "1234",
+        stripe_payment_id: "pm_visa_1234",
+        exp_month: 1, // Mois d'expiration
+        exp_year: 2026, // Année d'expiration
+        is_default: true,
+        id_user: customer5.id_user,
+      },
+    })
 
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Caroline Durand",
-    brand: "mastercard",
-    last_card_digits: "5678",
-    stripe_payment_id: "pm_mastercard_5678",
-    exp_month: 3,   // Mois d'expiration
-    exp_year: 2025, // Année d'expiration
-    is_default: true,
-    id_user: customer6.id_user,
-  },
-})
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Caroline Durand",
+        brand: "mastercard",
+        last_card_digits: "5678",
+        stripe_payment_id: "pm_mastercard_5678",
+        exp_month: 3, // Mois d'expiration
+        exp_year: 2025, // Année d'expiration
+        is_default: true,
+        id_user: customer6.id_user,
+      },
+    })
 
-await prisma.paymentInfo.create({
-  data: {
-    card_name: "Stéphane Moreau",
-    brand: "visa",
-    last_card_digits: "9012",
-    stripe_payment_id: "pm_visa_9012",
-    exp_month: 7,   // Mois d'expiration
-    exp_year: 2028, // Année d'expiration
-    is_default: true,
-    id_user: customer7.id_user,
-  },
-})
-
+    await prisma.paymentInfo.create({
+      data: {
+        card_name: "Stéphane Moreau",
+        brand: "visa",
+        last_card_digits: "9012",
+        stripe_payment_id: "pm_visa_9012",
+        exp_month: 7, // Mois d'expiration
+        exp_year: 2028, // Année d'expiration
+        is_default: true,
+        id_user: customer7.id_user,
+      },
+    })
 
     // Création des commandes historiques (conserver celles existantes)
 

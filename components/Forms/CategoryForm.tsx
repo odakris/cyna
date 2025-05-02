@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, Controller } from "react-hook-form"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
-
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 import {
@@ -51,7 +50,9 @@ import {
   FileQuestion,
   ArrowRight,
   PencilLine,
+  Power,
 } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
 
 interface CategoryFormProps {
   initialData?: CategoryFormValues
@@ -76,6 +77,7 @@ export function CategoryForm({
       description: initialData?.description || "",
       image: initialData?.image || "",
       priority_order: initialData?.priority_order || 1,
+      active: initialData?.active ?? true,
     },
   })
 
@@ -88,6 +90,7 @@ export function CategoryForm({
 
       const formattedValues = {
         ...values,
+        active: values.active,
         priority_order: Number(values.priority_order),
       }
 
@@ -257,6 +260,32 @@ export function CategoryForm({
                                 élevée dans les listes
                               </FormDescription>
                               <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          name="active"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 mt-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">
+                                  Activation de la catégorie
+                                </FormLabel>
+                                <FormDescription>
+                                  {field.value
+                                    ? "La catégorie et ses produits associés sont visibles"
+                                    : "La catégorie et ses produits associés ne sont pas visibles"}
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  disabled={isSubmitting}
+                                />
+                              </FormControl>
                             </FormItem>
                           )}
                         />
@@ -448,6 +477,27 @@ export function CategoryForm({
                     </div>
                   </div>
                   <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground mb-1">
+                    État du produit
+                  </p>
+                  {watchedValues.active ? (
+                    <div className="flex items-center gap-1 text-blue-600">
+                      <Power className="h-4 w-4" />
+                      <span className="text-sm font-medium">Actif</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1 text-gray-500">
+                      <Power className="h-4 w-4" />
+                      <span className="text-sm font-medium">Inactif</span>
+                    </div>
+                  )}
                 </div>
               </div>
 

@@ -1,139 +1,187 @@
-import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { PrismaClient } from '@prisma/client';
+import { NextRequest, NextResponse } from "next/server";
+import orderController from "@/lib/controllers/order-controller";
+import { checkPermission } from "@/lib/api-permissions";
 
-const prisma = new PrismaClient();
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2023-10-16' });
-
-export async function POST(request: Request) {
-  const headers = request.headers;
-  const userId = headers.get('x-user-id');
-  const guestId = headers.get('x-guest-id');
-
-  let cartItems, addressId, paymentId, totalAmount;
+export async function GET(): Promise<NextResponse> {
   try {
-    const body = await request.json();
-    cartItems = body.cartItems;
-    addressId = body.addressId;
-    paymentId = body.paymentId;
-    totalAmount = body.totalAmount;
+    const permissionCheck = await checkPermission("orders:view");
+    if (permissionCheck) return permissionCheck;
+
+    return await orderController.getAll();
   } catch (error) {
-    console.error('[API/Checkout] Erreur de parsing JSON:', error);
+    console.error(
+      "[API Orders] Erreur non gérée lors de la récupération des commandes:",
+      error
+    );
     return NextResponse.json(
-      { error: 'Données invalides', details: 'Corps de la requête mal formé' },
-      { status: 400 }
+      {
+        success: false,
+        error: "Erreur serveur inattendue",
+        details: error instanceof Error ? error.message : "Erreur inconnue",
+      },
+      { status: 500 }
     );
   }
+}
 
-  console.log('[API/Checkout] Requête reçue:', { userId, guestId, paymentId, totalAmount });
-
-  if (!userId && !guestId) {
-    return NextResponse.json(
-      { error: 'Authentification requise', details: 'x-user-id ou x-guest-id manquant' },
-      { status: 401 }
-    );
-  }
-
-  if (!paymentId || typeof paymentId !== 'string' || paymentId.trim() === '') {
-    return NextResponse.json(
-      { error: 'Données invalides', details: 'paymentId est requis et doit être une chaîne non vide' },
-      { status: 400 }
-    );
-  }
-
-  if (!addressId || !cartItems || !totalAmount || totalAmount <= 0) {
-    return NextResponse.json(
-      { error: 'Données invalides', details: 'addressId, cartItems, et totalAmount sont requis' },
-      { status: 400 }
-    );
-  }
-
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
-    if (userId) {
-      if (isNaN(parseInt(paymentId))) {
-        return NextResponse.json(
-          {
-            error: 'Données invalides',
-            details: 'paymentId doit être une chaîne numérique pour les utilisateurs connectés',
-          },
-          { status: 400 }
-        );
-      }
+    const userId = request.headers.get("x-user-id");
+    const guestId = request.headers.get("x-guest-id");
 
-      const paymentInfo = await prisma.paymentInfo.findFirst({
-        where: {
-          id_payment_info: parseInt(paymentId),
-          id_user: parseInt(userId),
+    console.log("[API Orders] Requête reçue", {
+      userId,
+      guestId,
+      method: request.method,
+      headers: Object.fromEntries(request.headers.entries()),
+    });
+
+    if (!userId && !guestId) {
+      console.error("[API Orders] Aucun identifiant fourni");
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Authentification requise",
+          details: "x-user-id ou x-guest-id manquant",
         },
-      });
-
-      if (!paymentInfo || !paymentInfo.stripe_payment_id) {
-        return NextResponse.json(
-          {
-            error: 'Moyen de paiement introuvable',
-            details: `Aucun moyen de paiement trouvé pour paymentId: ${paymentId}`,
-          },
-          { status: 404 }
-        );
-      }
-
-      console.log('[API/Checkout] PaymentInfo récupéré:', {
-        paymentId,
-        stripe_payment_id: paymentInfo.stripe_payment_id,
-      });
-
-      // Optionnel : récupérer le customer lié au paymentMethod
-      const paymentMethod = await stripe.paymentMethods.retrieve(paymentInfo.stripe_payment_id);
-      const customerId = paymentMethod.customer as string | null;
-
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(totalAmount * 100),
-        currency: 'eur',
-        payment_method_types: ['card'],
-        payment_method: paymentInfo.stripe_payment_id,
-        customer: customerId || undefined,
-        confirmation_method: 'automatic',
-        confirm: false,
-      });
-
-      console.log('[API/Checkout] PaymentIntent créé:', {
-        id: paymentIntent.id,
-        status: paymentIntent.status,
-      });
-
-      return NextResponse.json(
-        { clientSecret: paymentIntent.client_secret, paymentIntentId: paymentIntent.id },
-        { status: 200 }
+        { status: 401 }
       );
-    } else {
-      // Mode invité
-      const paymentIntent = await stripe.paymentIntents.create({
-        amount: Math.round(totalAmount * 100),
-        currency: 'eur',
-        payment_method_types: ['card'],
-        confirmation_method: 'automatic',
-        confirm: false,
-      });
-
-      console.log('[API/Checkout] PaymentIntent créé (invité):', {
-        clientSecret: paymentIntent.client_secret,
-      });
-
-      return NextResponse.json({ clientSecret: paymentIntent.client_secret }, { status: 200 });
     }
-  } catch (error: any) {
-    console.error('[API/Checkout] Erreur:', error);
-    if (error.type === 'StripeInvalidRequestError') {
+
+    if (userId) {
+      console.log("[API Orders] Vérification des permissions pour orders:create", { userId });
+      const permissionCheck = await checkPermission("orders:create");
+      console.log("[API Orders] Résultat de checkPermission", { permissionCheck: permissionCheck?.status || "aucune réponse" });
+
+      if (permissionCheck) {
+        console.error("[API Orders] Échec de la vérification des permissions", {
+          userId,
+          status: permissionCheck.status,
+          response: await permissionCheck.json().catch(() => ({ error: "Impossible de parser la réponse" })),
+        });
+        return permissionCheck;
+      }
+    }
+
+    let body;
+    try {
+      body = await request.json();
+      console.log("[API Orders] Corps de la requête brut", JSON.stringify(body, null, 2));
+    } catch (error) {
+      console.error("[API Orders] Erreur lors de la lecture du corps de la requête", error);
       return NextResponse.json(
-        { error: 'Erreur Stripe', details: error.message },
+        {
+          success: false,
+          error: "Corps de la requête invalide",
+          details: "Impossible de parser le JSON",
+        },
         { status: 400 }
       );
     }
+
+    const { cartItems, addressId, paymentId, paymentIntentId, guestId: bodyGuestId } = body;
+
+    console.log("[API Orders] Données extraites", {
+      cartItems: cartItems?.length,
+      addressId,
+      paymentId,
+      paymentIntentId,
+      bodyGuestId,
+    });
+
+    if (!body || typeof body !== "object") {
+      console.error("[API Orders] Corps de la requête vide ou invalide", { body });
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Données invalides",
+          details: "Le corps de la requête doit être un objet non vide",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+      console.error("[API Orders] Données cartItems invalides", { cartItems });
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Données invalides",
+          details: "cartItems doit être un tableau non vide",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!addressId || typeof addressId !== "string") {
+      console.error("[API Orders] addressId invalide", { addressId });
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Données invalides",
+          details: "addressId est requis et doit être une chaîne",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!paymentId || typeof paymentId !== "string") {
+      console.error("[API Orders] paymentId invalide", { paymentId });
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Données invalides",
+          details: "paymentId est requis et doit être une chaîne",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (!paymentIntentId || typeof paymentIntentId !== "string") {
+      console.error("[API Orders] paymentIntentId invalide", { paymentIntentId });
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Données invalides",
+          details: "paymentIntentId est requis et doit être une chaîne",
+        },
+        { status: 400 }
+      );
+    }
+
+    const data = { cartItems, addressId, paymentId, paymentIntentId };
+    console.log("[API Orders] Données envoyées à orderController.createWithParams:", JSON.stringify(data, null, 2));
+
+    if (!data || typeof data !== "object") {
+      console.error("[API Orders] Données data invalides", { data });
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Données invalides",
+          details: "Les données envoyées à orderController doivent être un objet",
+        },
+        { status: 400 }
+      );
+    }
+
+    const orderResponse = await orderController.createWithParams(data, userId, guestId || bodyGuestId);
+
+    console.log("[API Orders] Commande créée avec succès", {
+      orderId: orderResponse?.json?.order?.id,
+      userId,
+      guestId: guestId || bodyGuestId,
+    });
+
+    return orderResponse;
+  } catch (error) {
+    console.error("[API Orders] Erreur non gérée lors de la création de la commande:", error);
     return NextResponse.json(
-      { error: 'Erreur serveur', details: error.message },
+      {
+        success: false,
+        error: "Erreur serveur inattendue",
+        details: error instanceof Error ? error.message : "Erreur inconnue",
+      },
       { status: 500 }
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

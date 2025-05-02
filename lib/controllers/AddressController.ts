@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { AddressService } from "../../lib/services/addressService";
+import { AddressService } from "../services/AddressService"
 
 export class AddressController {
     static async getUserAddresses(id: string) {

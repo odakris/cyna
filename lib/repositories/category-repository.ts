@@ -1,7 +1,7 @@
 import { prisma } from "../prisma"
 import { CategoryFormValues } from "@/lib/validations/category-schema"
 import { Category } from "@prisma/client"
-import { TransactionClient } from "../../types/Types"
+import { TransactionClient } from "@/types/Types"
 
 /**
  * Récupère la liste complète des catégories.
@@ -66,6 +66,7 @@ export const create = async (data: CategoryFormValues): Promise<Category> => {
           description: data.description.trim(),
           image: data.image,
           priority_order: data.priority_order,
+          active: data.active,
           updated_at: new Date(),
           created_at: new Date(),
         },
@@ -117,6 +118,7 @@ export const update = async (
           description: data.description.trim(),
           image: data.image,
           priority_order: data.priority_order,
+          active: data.active,
           updated_at: new Date(),
         },
       })
@@ -161,6 +163,11 @@ export const remove = async (id: number): Promise<Category> => {
   }
 }
 
+/**
+ * Vérifie si une catégorie existe dans la base de données.
+ * @param {number} id - Identifiant de la catégorie à vérifier.
+ * @returns {Promise<boolean>} Retourne true si la catégorie existe, sinon false.
+ */
 export const exists = async (id: number): Promise<boolean> => {
   try {
     const category = await prisma.category.findUnique({
@@ -176,6 +183,71 @@ export const exists = async (id: number): Promise<boolean> => {
   }
 }
 
+/**
+ * Met à jour uniquement le statut actif d'une catégorie et de ses produits associés.
+ * @param {number} id - Identifiant de la catégorie à mettre à jour.
+ * @returns {Promise<{category: Category, productsUpdated: number}>} La catégorie mise à jour et le nombre de produits modifiés.
+ */
+export const updateActiveStatus = async (
+  id: number
+): Promise<{ category: Category; productsUpdated: number }> => {
+  try {
+    return await prisma.$transaction(async (tx: TransactionClient) => {
+      // Vérifier si la catégorie existe
+      const category = await tx.category.findUnique({
+        where: { id_category: id },
+      })
+
+      if (!category) {
+        throw new Error(`La catégorie avec l'ID ${id} n'existe pas`)
+      }
+
+      // Inverser le statut actif
+      const newStatus = !category.active
+
+      // Mettre à jour la catégorie
+      const updatedCategory = await tx.category.update({
+        where: { id_category: id },
+        data: {
+          active: newStatus,
+          updated_at: new Date(),
+        },
+      })
+
+      let productsUpdated = 0
+
+      // Si la catégorie est désactivée, désactiver également tous les produits associés
+      if (!newStatus) {
+        const result = await tx.product.updateMany({
+          where: {
+            id_category: id,
+            active: true,
+          },
+          data: {
+            active: false,
+            updated_at: new Date(),
+          },
+        })
+
+        productsUpdated = result.count
+      }
+
+      return {
+        category: updatedCategory,
+        productsUpdated,
+      }
+    })
+  } catch (error) {
+    console.error(
+      "Impossible de mettre à jour le statut de la catégorie:",
+      error
+    )
+    throw new Error(
+      `Impossible de mettre à jour le statut de la catégorie avec l'ID ${id}`
+    )
+  }
+}
+
 const categoryRepository = {
   findAll,
   findById,
@@ -183,6 +255,7 @@ const categoryRepository = {
   update,
   remove,
   exists,
+  updateActiveStatus,
 }
 
 export default categoryRepository

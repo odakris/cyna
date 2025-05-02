@@ -16,6 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { CategoryWithProduct } from "@/types/Types"
 import ActionsCell from "@/components/Admin/ActionCell"
+import CategoryActiveSwitch from "./CategoryActiveSwitch"
 
 // Fonction de filtrage personnalisée pour les produits
 export const productsFilterFn: FilterFn<CategoryWithProduct> = (
@@ -88,7 +89,7 @@ export const categoriesColumns: ColumnDef<CategoryWithProduct>[] = [
                 src={imageUrl}
                 width={64}
                 height={64}
-                className="object-contain w-full h-full"
+                className="object-cover w-full h-full"
                 style={{ aspectRatio: "1/1" }}
               />
             </div>
@@ -249,6 +250,21 @@ export const categoriesColumns: ColumnDef<CategoryWithProduct>[] = [
     },
   },
   {
+    id: "active",
+    header: "Actif",
+    cell: ({ row }) => (
+      <div className="flex justify-center">
+        <CategoryActiveSwitch
+          categoryId={row.original.id_category}
+          initialActive={row.original.active}
+          onStatusChange={newStatus => {
+            row.original.active = newStatus
+          }}
+        />
+      </div>
+    ),
+  },
+  {
     id: "actions",
     header: "Actions",
     cell: ({ row }) => (
@@ -260,7 +276,7 @@ export const categoriesColumns: ColumnDef<CategoryWithProduct>[] = [
         ]}
         basePath="/dashboard/categories"
         entityId={row.original.id_category}
-        externalBasePath="/categories"
+        externalBasePath="/categorie"
       />
     ),
     enableHiding: false,

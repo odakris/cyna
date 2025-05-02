@@ -5,6 +5,7 @@ CREATE TABLE `Category` (
     `description` TEXT NOT NULL,
     `image` VARCHAR(255) NOT NULL,
     `priority_order` INTEGER NOT NULL DEFAULT 1,
+    `active` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
@@ -22,6 +23,7 @@ CREATE TABLE `Product` (
     `unit_price` FLOAT NOT NULL,
     `discount_price` FLOAT NULL,
     `available` BOOLEAN NOT NULL DEFAULT true,
+    `active` BOOLEAN NOT NULL DEFAULT true,
     `priority_order` INTEGER NOT NULL DEFAULT 1,
     `stock` INTEGER NOT NULL DEFAULT 0,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -32,6 +34,7 @@ CREATE TABLE `Product` (
     UNIQUE INDEX `Product_name_key`(`name`),
     INDEX `Product_id_category_idx`(`id_category`),
     INDEX `Product_available_idx`(`available`),
+    INDEX `Product_active_idx`(`active`),
     INDEX `Product_priority_order_idx`(`priority_order`),
     INDEX `Product_name_idx`(`name`),
     PRIMARY KEY (`id_product`)
@@ -134,6 +137,7 @@ CREATE TABLE `User` (
     `email_verified` BOOLEAN NOT NULL DEFAULT false,
     `verify_token` VARCHAR(255) NULL,
     `two_factor_enabled` BOOLEAN NOT NULL DEFAULT false,
+    `active` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
     `stripeCustomerId` VARCHAR(191) NULL,
