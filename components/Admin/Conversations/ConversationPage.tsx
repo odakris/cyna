@@ -1,7 +1,7 @@
 "use client"
 
-import { useConversationsData } from "@/hooks/use-conversations-data"
-import { useConversationsTable } from "@/hooks/use-conversations-table"
+import { useConversationsData } from "@/hooks/chatbot/use-conversations-data"
+import { useConversationsTable } from "@/hooks/chatbot/use-conversations-table"
 import ConversationHeader from "@/components/Admin/Conversations/ConversationHeader"
 import ConversationStats from "@/components/Admin/Conversations/ConversationStats"
 import ConversationFilters from "@/components/Admin/Conversations/ConversationFilters"

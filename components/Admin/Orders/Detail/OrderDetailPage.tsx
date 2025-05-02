@@ -3,7 +3,7 @@
 import React from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { OrderDetailSkeleton } from "@/components/Skeletons/OrderSkeletons"
-import { useOrderDetail } from "@/hooks/use-order-detail"
+import { useOrderDetail } from "@/hooks/order/use-order-detail"
 import {
   CalendarIcon,
   CreditCard,

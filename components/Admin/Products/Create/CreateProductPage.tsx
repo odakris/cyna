@@ -8,7 +8,7 @@ import { Role } from "@prisma/client"
 import RoleGuard from "@/components/Auth/RoleGuard"
 import AccessDenied from "@/components/Auth/AccessDenied"
 import { ProductFormSkeleton } from "@/components/Skeletons/ProductSkeletons"
-import { useCategories } from "@/hooks/use-categories"
+import { useCategories } from "@/hooks/category/use-categories"
 
 export function CreateProductPage() {
   const { categories, loading, errorMessage } = useCategories()

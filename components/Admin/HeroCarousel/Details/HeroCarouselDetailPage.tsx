@@ -1,6 +1,6 @@
 "use client"
 
-import { useHeroCarouselDetails } from "@/hooks/use-hero-carousel-details"
+import { useHeroCarouselDetails } from "@/hooks/hero-carousel/use-hero-carousel-details"
 import { HeroCarouselDetailSkeleton } from "@/components/Skeletons/HeroCarouselSkeletons"
 import HeroCarouselHeader from "@/components/Admin/HeroCarousel/Details/HeroCarouselHeader"
 import SlidePreview from "@/components/Admin/HeroCarousel/Details/SlidePreview"

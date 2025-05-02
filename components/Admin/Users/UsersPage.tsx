@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useUsersData } from "@/hooks/use-users-data"
-import { useUsersTable } from "@/hooks/use-users-table"
+import { useUsersData } from "@/hooks/user/use-users-data"
+import { useUsersTable } from "@/hooks/user/use-users-table"
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"

@@ -8,7 +8,7 @@ import { Role } from "@prisma/client"
 import RoleGuard from "@/components/Auth/RoleGuard"
 import AccessDenied from "@/components/Auth/AccessDenied"
 import { CategoryFormSkeleton } from "@/components/Skeletons/CategorySkeletons"
-import { useCategoryForm } from "@/hooks/use-category-form"
+import { useCategoryForm } from "@/hooks/category/use-category-form"
 import {
   Card,
   CardContent,

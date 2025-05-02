@@ -4,7 +4,7 @@ import { CategoryDetailsSkeleton } from "@/components/Skeletons/CategorySkeleton
 import ErrorDisplay from "@/components/Admin/Categories/Details/ErrorDisplay"
 import CategoryHeader from "@/components/Admin/Categories/Details/CategoryHeader"
 import DeleteDialog from "@/components/Admin/Categories/Details/DeleteDialog"
-import { useCategoryDetails } from "@/hooks/use-category-details"
+import { useCategoryDetails } from "@/hooks/category/use-category-details"
 import Image from "next/image"
 import {
   Card,

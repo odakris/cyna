@@ -18,9 +18,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
-import { Switch } from "@/components/ui/switch"
 import { MainMessage } from "@prisma/client"
 import ActionsCell from "@/components/Admin/ActionCell"
+import MainMessageActiveSwitch from "./MainMessageActiveSwitch"
+import MainMessageBackgroundSwitch from "./MainMessageBackgroundSwitch"
 
 // Fonction pour formater la date
 const formatDate = (dateString: string) => {
@@ -81,9 +82,10 @@ export const mainMessageColumns: ColumnDef<MainMessage>[] = [
             }`}
           >
             <p
-              className={
+              className={cn(
+                "font-bold",
                 message.text_color ? message.text_color : "text-foreground"
-              }
+              )}
             >
               {message.content.length > 100
                 ? `${message.content.substring(0, 100)}...`
@@ -114,8 +116,9 @@ export const mainMessageColumns: ColumnDef<MainMessage>[] = [
         </Button>
       </div>
     ),
-    cell: ({ row }) => {
-      const active = row.getValue("active") as boolean
+    cell: ({ row, table }) => {
+      // On récupère la fonction toggleMessageActive depuis le meta de la table
+      const toggleMessageActive = table.options.meta?.toggleMessageActive
 
       return (
         <div className="flex justify-center">
@@ -123,24 +126,21 @@ export const mainMessageColumns: ColumnDef<MainMessage>[] = [
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
-                  <Switch
-                    checked={active}
-                    onCheckedChange={() => {
-                      document.dispatchEvent(
-                        new CustomEvent("toggle-message-active", {
-                          detail: {
-                            id: row.original.id_main_message,
-                            currentState: active,
-                          },
-                        })
+                  <MainMessageActiveSwitch
+                    messageId={row.original.id_main_message}
+                    active={row.original.active}
+                    toggleMessageActive={toggleMessageActive}
+                    onStatusChange={newStatus => {
+                      // Pour d'éventuels effets locaux supplémentaires
+                      console.log(
+                        `Message ${row.original.id_main_message} status changed: ${newStatus}`
                       )
                     }}
-                    aria-label={active ? "Désactiver" : "Activer"}
                   />
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {active ? "Message activé" : "Message désactivé"}
+                {row.original.active ? "Message activé" : "Message désactivé"}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -180,23 +180,12 @@ export const mainMessageColumns: ColumnDef<MainMessage>[] = [
             <Tooltip>
               <TooltipTrigger asChild>
                 <div>
-                  <Switch
-                    checked={hasBackground}
-                    onCheckedChange={() => {
-                      document.dispatchEvent(
-                        new CustomEvent("toggle-message-background", {
-                          detail: {
-                            id: row.original.id_main_message,
-                            currentState: hasBackground,
-                          },
-                        })
-                      )
+                  <MainMessageBackgroundSwitch
+                    messageId={row.original.id_main_message}
+                    initialHasBackground={hasBackground}
+                    onBackgroundChange={newStatus => {
+                      row.original.has_background = newStatus
                     }}
-                    aria-label={
-                      hasBackground
-                        ? "Désactiver l'arrière-plan"
-                        : "Activer l'arrière-plan"
-                    }
                   />
                 </div>
               </TooltipTrigger>
@@ -210,7 +199,10 @@ export const mainMessageColumns: ColumnDef<MainMessage>[] = [
 
           <div className="flex gap-1">
             {hasBackground && bgColor && (
-              <Badge variant="outline" className={cn("text-xs", bgColor)}>
+              <Badge
+                variant="outline"
+                className={cn("text-xs", bgColor, "text-slate-500")}
+              >
                 Fond
               </Badge>
             )}
@@ -268,11 +260,11 @@ export const mainMessageColumns: ColumnDef<MainMessage>[] = [
         actions={[
           { type: "view", tooltip: "Voir les détails" },
           { type: "edit", tooltip: "Modifier le message" },
-          { type: "external", tooltip: "Voir sur le site" },
+          { type: "external_main", tooltip: "Voir sur le site" },
         ]}
         basePath="/dashboard/main-message"
         entityId={row.original.id_main_message}
-        externalBasePath="/main-message"
+        externalBasePath="/"
       />
     ),
     enableHiding: false,

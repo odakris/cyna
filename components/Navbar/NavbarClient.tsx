@@ -253,7 +253,7 @@ export default function NavbarClient({ categories }: NavbarProps) {
         </div>
       </div>
 
-      {/* DESKTOP NAVIGATION - Complètement repensée */}
+      {/* DESKTOP NAVIGATION */}
       <nav className="hidden lg:block">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-8">

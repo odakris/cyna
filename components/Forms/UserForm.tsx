@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
-import { useUserForm } from "@/hooks/use-user-form"
+import { useUserForm } from "@/hooks/user/use-user-form"
 import { Button } from "@/components/ui/button"
 import { Form } from "@/components/ui/form"
 import {

@@ -8,7 +8,7 @@ import { Role } from "@prisma/client"
 import RoleGuard from "@/components/Auth/RoleGuard"
 import AccessDenied from "@/components/Auth/AccessDenied"
 import { ProductFormSkeleton } from "@/components/Skeletons/ProductSkeletons"
-import { useProductForm } from "@/hooks/use-product-form"
+import { useProductForm } from "@/hooks/product/use-product-form"
 
 interface EditProductPageProps {
   id: string

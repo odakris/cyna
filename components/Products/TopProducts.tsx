@@ -1,5 +1,5 @@
 import React from "react"
-import { useTopProducts } from "@/hooks/use-top-products"
+import { useTopProducts } from "@/hooks/product/use-top-products"
 import { BaseProductGrid } from "@/components/Products/BaseProductGrid"
 import { TopProductCard } from "./TopProductCard"
 

@@ -1,6 +1,6 @@
 "use client"
 
-import { useProductDetails } from "@/hooks/use-product-details"
+import { useProductDetails } from "@/hooks/product/use-product-details"
 import { ProductDetailSkeleton } from "@/components/Skeletons/ProductSkeletons"
 import ProductHeader from "@/components/Admin/Products/Details/ProductHeader"
 import ProductInfo from "@/components/Admin/Products/Details/ProductInfo"

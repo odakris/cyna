@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { useContactMessagesData } from "@/hooks/use-contact-messages-data"
-import { useContactMessagesTable } from "@/hooks/use-contact-messages-table"
+import { useContactMessagesData } from "@/hooks/contact-messages/use-contact-messages-data"
+import { useContactMessagesTable } from "@/hooks/contact-messages/use-contact-messages-table"
 import ContactMessageHeader from "@/components/Admin/ContactMessages/ContactMessageHeader"
 import ContactMessageStats from "@/components/Admin/ContactMessages/ContactMessageStats"
 import ContactMessageFilters from "@/components/Admin/ContactMessages/ContactMessageFilters"

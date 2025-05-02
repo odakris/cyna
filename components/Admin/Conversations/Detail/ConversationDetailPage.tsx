@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useConversationDetails } from "@/hooks/use-conversation-details"
+import { useConversationDetails } from "@/hooks/chatbot/use-conversation-details"
 import { useRouter } from "next/navigation"
 import ConversationDetailHeader from "./ConversationDetailHeader"
 import ConversationMessages from "./ConversationMessages"

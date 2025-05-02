@@ -1,31 +1,15 @@
-"use client"
-
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { MainMessageForm } from "@/components/Forms/MainMessageForm"
-import { ArrowLeft } from "lucide-react"
+import NewMainMessagePage from "@/components/Admin/MainMessage/Create/NewMainMessagePage"
 import RoleGuard from "@/components/Auth/RoleGuard"
 import AccessDenied from "@/components/Auth/AccessDenied"
 import { Role } from "@prisma/client"
-import { MainMessageFormSkeleton } from "@/components/Skeletons/MainMessageSkeletons"
+import { Metadata } from "next"
 
-export default function NewMainMessagePage() {
-  const [loading, setLoading] = useState(true)
+export const metadata: Metadata = {
+  title: "Créer un nouveau message | CYNA Backoffice",
+  description: "Créer un nouveau message principal pour le site CYNA",
+}
 
-  // Simuler un court temps de chargement pour montrer le skeleton
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false)
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (loading) {
-    return <MainMessageFormSkeleton />
-  }
-
+export default function NewMessagePage() {
   return (
     <RoleGuard
       requiredRole={Role.ADMIN}
@@ -33,17 +17,7 @@ export default function NewMainMessagePage() {
         <AccessDenied message="Vous n'avez pas la permission de créer un message." />
       }
     >
-      <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
-        <div className="flex items-center gap-2">
-          <Button asChild variant="ghost" size="icon" className="rounded-full">
-            <Link href="/dashboard/main-message">
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-          </Button>
-          <h1 className="text-3xl font-bold">Créer un Nouveau Message</h1>
-        </div>
-        <MainMessageForm />
-      </div>
+      <NewMainMessagePage />
     </RoleGuard>
   )
 }

@@ -9,7 +9,7 @@ import RoleGuard from "@/components/Auth/RoleGuard"
 import AccessDenied from "@/components/Auth/AccessDenied"
 import { Role } from "@prisma/client"
 import { HeroCarouselFormSkeleton } from "@/components/Skeletons/HeroCarouselSkeletons"
-import { useHeroCarouselForm } from "@/hooks/use-hero-carousel-form"
+import { useHeroCarouselForm } from "@/hooks/hero-carousel/use-hero-carousel-form"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface HeroCarouselFormPageProps {

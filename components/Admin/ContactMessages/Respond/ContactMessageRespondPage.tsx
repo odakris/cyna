@@ -1,6 +1,6 @@
 "use client"
 
-import { useContactMessageRespond } from "@/hooks/use-contact-messages-respond"
+import { useContactMessageRespond } from "@/hooks/contact-messages/use-contact-messages-respond"
 import { ContactMessageRespondSkeleton } from "@/components/Skeletons/ContactMessageSkeletons"
 import ContactMessageRespondHeader from "./ContactMessageRespondHeader"
 import ContactMessageRespondError from "./ContactMessageRespondError"

@@ -1,6 +1,6 @@
 "use client"
 
-import { useContactMessageDetails } from "@/hooks/use-contact-messages-details"
+import { useContactMessageDetails } from "@/hooks/contact-messages/use-contact-messages-details"
 import { ContactMessageDetailSkeleton } from "@/components/Skeletons/ContactMessageSkeletons"
 import ContactMessageHeader from "./ContactMessageHeader"
 import ContactMessageContent from "./ContactMessageContent"

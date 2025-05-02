@@ -1,6 +1,6 @@
 "use client"
 
-import { useUserDetails } from "@/hooks/use-user-details"
+import { useUserDetails } from "@/hooks/user/use-user-details"
 import { UserDetailSkeleton } from "@/components/Skeletons/UserSkeletons"
 import {
   Card,
