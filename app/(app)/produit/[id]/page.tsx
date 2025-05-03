@@ -209,7 +209,7 @@ export default function ProductPage() {
         </Link>
         <span>/</span>
         <Link
-          href="/recherche"
+          href="/produit"
           className="hover:text-[#302082] transition-colors"
         >
           Produits
@@ -847,7 +847,7 @@ export default function ProductPage() {
             variant="outline"
             className="hidden sm:flex border-[#302082] text-[#302082] hover:bg-[#302082] hover:text-white"
           >
-            <Link href="/recherche">
+            <Link href="/produit">
               Voir tous les produits <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

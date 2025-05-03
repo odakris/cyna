@@ -167,6 +167,16 @@ export default function Home() {
           </p>
         </div>
         <CategoryGrid />
+        <div className="flex justify-center mt-8">
+          <Button
+            asChild
+            className="bg-transparent text-[#302082] border-2 border-[#302082] hover:bg-[#302082] hover:text-white transition-colors"
+          >
+            <Link href="/categorie">
+              Voir toutes nos catégories <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </section>
 
       {/* TESTIMONIALS / TRUST SIGNALS */}
@@ -228,7 +238,7 @@ export default function Home() {
             asChild
             className="bg-transparent text-[#302082] border-2 border-[#302082] hover:bg-[#302082] hover:text-white transition-colors"
           >
-            <Link href="/recherche">
+            <Link href="/produit">
               Voir tous nos produits <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

@@ -15,6 +15,7 @@ import {
   Tag,
   FileText,
   AlertTriangle,
+  ArrowRight,
 } from "lucide-react"
 
 export default function CategoryPage() {
@@ -136,6 +137,13 @@ export default function CategoryPage() {
             Accueil
           </Link>
           <span className="text-white/50">/</span>
+          <Link
+            href="/categorie"
+            className="hover:text-white transition-colors text-sm"
+          >
+            Catégories
+          </Link>
+          <span className="text-white/50">/</span>
           <span className="text-white text-sm font-medium">
             {category.name}
           </span>
@@ -243,6 +251,16 @@ export default function CategoryPage() {
             </div>
           </div>
         )}
+        <div className="flex justify-center mt-8">
+          <Button
+            asChild
+            className="bg-transparent text-[#302082] border-2 border-[#302082] hover:bg-[#302082] hover:text-white transition-colors"
+          >
+            <Link href="/produit">
+              Voir tous nos produits <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {/* Section CTA */}
