@@ -65,6 +65,7 @@ export default function ContactForm() {
       reset()
       toast({
         title: "Succès",
+        variant: "success",
         description: "Votre message a été envoyé avec succès.",
       })
 

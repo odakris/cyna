@@ -85,7 +85,8 @@ export function useContactMessagesData() {
       await fetchStats()
 
       toast({
-        title: "Succès",
+        title: "Messages supprimés",
+        variant: "success",
         description: `${messageIds.length} message(s) supprimé(s)`,
       })
 

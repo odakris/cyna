@@ -105,6 +105,7 @@ export default function UserForm({ userId }: UserFormPageProps) {
         }
 
         toast({
+          variant: "success",
           title: "Utilisateur mis à jour avec succès !",
           description: "Les informations ont été mises à jour.",
         })
@@ -130,6 +131,7 @@ export default function UserForm({ userId }: UserFormPageProps) {
         const newUser = await response.json()
 
         toast({
+          variant: "success",
           title: "Utilisateur créé avec succès !",
           description: "Un nouvel utilisateur a été ajouté au système.",
         })

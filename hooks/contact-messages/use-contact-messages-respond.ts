@@ -88,7 +88,8 @@ export function useContactMessageRespond(messageId: string) {
       setIsSubmitted(true)
       form.reset()
       toast({
-        title: "Succès",
+        variant: "success",
+        title: "Réponse envoyée",
         description: "Votre réponse a été envoyée avec succès.",
       })
 

@@ -73,6 +73,7 @@ export function useProductDetails(productId: string) {
 
       toast({
         title: "Produit supprimé",
+        variant: "success",
         description: "Le produit a été supprimé avec succès.",
       })
 

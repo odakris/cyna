@@ -61,6 +61,7 @@ export function useHeroCarouselDetails(id: string) {
 
       toast({
         title: "Slide supprimé",
+        variant: "success",
         description: "Le slide a été supprimé avec succès.",
       })
 
@@ -99,7 +100,8 @@ export function useHeroCarouselDetails(id: string) {
       setSlide(updatedSlide)
 
       toast({
-        title: "Succès",
+        title: "Slide mis à jour",
+        variant: "success",
         description: `Le slide a été ${updatedSlide.active ? "activé" : "désactivé"}`,
       })
     } catch (error) {

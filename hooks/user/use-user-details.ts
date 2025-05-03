@@ -58,6 +58,7 @@ export function useUserDetails(id: string) {
 
       toast({
         title: "Utilisateur supprimé",
+        variant: "success",
         description: "L'utilisateur a été supprimé avec succès.",
       })
 

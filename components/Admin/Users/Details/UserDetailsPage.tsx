@@ -9,9 +9,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Key } from "lucide-react"
 
 // Composants factorisés
 import UserHeader from "@/components/Admin/Users/Details/UserHeader"
@@ -21,6 +19,7 @@ import UserDeleteDialog from "@/components/Admin/Users/Details/UserDeleteDialog"
 import ErrorDisplay from "@/components/Admin/Users/Details/ErrorDisplay"
 import { Separator } from "@/components/ui/separator"
 import UserActiveSwitch from "@/components/Admin/Users/UserActiveSwitch"
+import { ResendVerificationButton } from "@/components/Admin/Users/Details/ResendVerificationButton"
 
 export default function UserDetailsPage({
   params,
@@ -127,10 +126,12 @@ export default function UserDetailsPage({
           <div className="md:col-span-2 space-y-6">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold">Accès et sécurité</h3>
-              <Button>
-                <Key className="mr-2 h-4 w-4" />
-                Réinitialiser le mot de passe
-              </Button>
+              <div className="flex space-x-3">
+                <ResendVerificationButton
+                  email={user.email}
+                  userId={user.id_user}
+                />
+              </div>
             </div>
           </div>
         </CardContent>

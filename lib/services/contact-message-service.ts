@@ -1,7 +1,7 @@
 // lib/services/contact-message-service.ts
 import { ContactMessage } from "@prisma/client"
 import contactMessageRepository from "@/lib/repositories/contact-message-repository"
-import { sendEmail } from "@/lib/email/email-service"
+import { sendEmail } from "@/lib/services/email-service"
 
 export const getAllMessages = async (): Promise<ContactMessage[]> => {
   try {

@@ -74,6 +74,7 @@ export function useMainMessagesData() {
 
       toast({
         title: "Succès",
+        variant: "success",
         description: `${messageIds.length} message(s) supprimé(s)`,
       })
 

@@ -58,6 +58,7 @@ export function useMainMessageDetail(messageId: string) {
 
       toast({
         title: "Message supprimé",
+        variant: "success",
         description: "Le message a été supprimé avec succès.",
       })
 
@@ -103,6 +104,7 @@ export function useMainMessageDetail(messageId: string) {
 
       toast({
         title: newStatus ? "Message activé" : "Message désactivé",
+        variant: newStatus ? "success" : "destructive",
         description: `Le message est maintenant ${newStatus ? "actif" : "inactif"}.`,
       })
     } catch (error) {

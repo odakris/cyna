@@ -98,7 +98,8 @@ export function useConversationsData() {
       await fetchConversations()
 
       toast({
-        title: "Succès",
+        title: "Conversations supprimées",
+        variant: "success",
         description: `${conversationIds.length} conversation(s) supprimée(s)`,
       })
 

@@ -179,11 +179,11 @@ export default function ProductPage() {
     toast({
       title: "Produit ajouté au panier",
       description: `${quantity} × ${product.name} (${subscriptionType.toLowerCase().replace("_", " ")})`,
+      variant: "success",
       action: (
         <Button
           asChild
           variant="outline"
-          size="sm"
           className="border-[#302082] text-[#302082]"
         >
           <Link href="/panier">Voir le panier</Link>

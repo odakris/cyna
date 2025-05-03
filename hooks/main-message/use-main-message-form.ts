@@ -105,6 +105,7 @@ export function useMainMessageForm(messageId?: string) {
 
         toast({
           title: "Message mis à jour",
+          variant: "success",
           description: "Le message a été mis à jour avec succès.",
         })
       } else {
@@ -126,6 +127,7 @@ export function useMainMessageForm(messageId?: string) {
 
         toast({
           title: "Message créé",
+          variant: "success",
           description: "Le nouveau message a été créé avec succès.",
         })
       }

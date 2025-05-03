@@ -47,6 +47,7 @@ export default function HeroCarouselActiveSwitch({
 
       toast({
         title: updatedSlide.active ? "Slide activé" : "Slide désactivé",
+        variant: updatedSlide.active ? "success" : "destructive",
         description: "Le statut a été mis à jour avec succès.",
       })
     } catch (error) {

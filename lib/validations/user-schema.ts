@@ -13,22 +13,15 @@ export const userFormSchema = z.object({
     .string()
     .email("L'adresse email n'est pas valide.")
     .max(255, "L'email ne peut pas dépasser 255 caractères."),
-  password: z.string(),
-  // .min(8, "Le mot de passe doit contenir au moins 8 caractères.")
-  // .max(255, "Le mot de passe ne peut pas dépasser 255 caractères.")
-  // .regex(
-  //   /[A-Z]/,
-  //   "Le mot de passe doit contenir au moins une lettre majuscule."
-  // )
-  // .regex(
-  //   /[a-z]/,
-  //   "Le mot de passe doit contenir au moins une lettre minuscule."
-  // )
-  // .regex(/[0-9]/, "Le mot de passe doit contenir au moins un chiffre.")
-  // .regex(
-  //   /[^A-Za-z0-9]/,
-  //   "Le mot de passe doit contenir au moins un caractère spécial."
-  // ),
+  password: z
+    .string()
+    .min(8, "Le mot de passe doit avoir au moins 8 caractères.")
+    .max(255, "Le mot de passe ne peut pas dépasser 255 caractères.")
+    .regex(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      "Le mot de passe doit contenir au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial (@$!%*?&)."
+    )
+    .nonempty("Le mot de passe est requis."),
   role: z
     .enum(["SUPER_ADMIN", "ADMIN", "CUSTOMER", "MANAGER"])
     .default("CUSTOMER"),

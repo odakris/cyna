@@ -40,6 +40,7 @@ export default function CategoryActiveSwitch({
 
       toast({
         title: data.active ? "Catégorie activée" : "Catégorie désactivée",
+        variant: data.active ? "success" : "destructive",
         description: data.productsUpdated
           ? `Le statut a été mis à jour avec succès. ${data.productsUpdated} produit(s) ont également été mis à jour.`
           : `Le statut a été mis à jour avec succès.`,

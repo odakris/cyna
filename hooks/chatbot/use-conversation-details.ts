@@ -107,6 +107,7 @@ export function useConversationDetails(conversationId: string) {
 
       toast({
         title: "Statut mis à jour",
+        variant: "success",
         description: `La conversation est maintenant ${
           status === ConversationStatus.ACTIVE
             ? "active"
@@ -176,6 +177,7 @@ export function useConversationDetails(conversationId: string) {
       }
 
       toast({
+        variant: "success",
         title: "Message envoyé",
         description: "Votre réponse a été envoyée avec succès",
       })
@@ -212,6 +214,7 @@ export function useConversationDetails(conversationId: string) {
       }
 
       toast({
+        variant: "success",
         title: "Conversation supprimée",
         description: "La conversation a été supprimée avec succès",
       })
