@@ -348,12 +348,11 @@ export const OrderColumns: ColumnDef<OrderWithItems>[] = [
       <ActionsCell
         actions={[
           { type: "view", tooltip: "Voir les détails" },
-          // { type: "edit", tooltip: "Modifier la commande" },
-          { type: "receipt", tooltip: "Voir sur la facture" },
+          { type: "download_receipt", tooltip: "Télécharger la facture" },
         ]}
         basePath="/dashboard/orders"
         entityId={row.original.id_order}
-        invoicePdfUrl={row.original.invoice_pdf_url || "#"}
+        invoicePdfUrl={`/api/invoices/${row.original.id_order}` || "#"}
         externalBasePath="/orders"
       />
     ),
