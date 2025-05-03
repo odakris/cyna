@@ -81,20 +81,20 @@ export const createUser = async (data: UserFormValues): Promise<User> => {
 
     if (existingUser) {
       throw new Error(
-        `Un utilisateur avec l'email ${data.email.trim()} existe déjà`
+        `EMAIL_EXISTS:Un utilisateur avec l'email '${data.email.trim()}' existe déjà`
       )
     }
 
     return await userRepository.create(data)
   } catch (error) {
     if (error instanceof Error) {
-      // Si c'est une erreur spécifique concernant un email déjà utilisé
+      // Si c'est une erreur spécifique avec un format connu
       if (
-        error.message.includes("existe déjà") ||
+        error.message.startsWith("EMAIL_EXISTS:") ||
         (error.message.includes("mot de passe") &&
           error.message.includes("requis"))
       ) {
-        throw new Error(error.message)
+        throw error
       }
     }
 

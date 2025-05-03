@@ -1,4 +1,3 @@
-// app/api/contact-message/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import contactMessageController from "@/lib/controllers/contact-message-controller"
 import { checkPermission } from "@/lib/api-permissions"

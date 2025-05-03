@@ -114,7 +114,9 @@ export function ProductForm({
       const product_caroussel_images = Array.isArray(
         values.product_caroussel_images
       )
-        ? values.product_caroussel_images
+        ? values.product_caroussel_images.filter(
+            img => img && img.trim() !== ""
+          )
         : []
 
       // Formatage des valeurs avec gestion correcte des images du carrousel

@@ -133,7 +133,7 @@ export default function ProductPage() {
               variant="outline"
               className="mt-4 border-amber-300 text-amber-700 hover:bg-amber-50"
             >
-              <Link href="/categories">
+              <Link href="/produit">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Voir nos produits disponibles
               </Link>

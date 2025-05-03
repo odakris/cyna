@@ -96,7 +96,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({ items }) => {
                 className="bg-[#302082] hover:bg-[#302082]/90"
                 onClick={() => setIsOpen(false)}
               >
-                <Link href="/categories">Découvrir nos produits</Link>
+                <Link href="/produit">Découvrir nos produits</Link>
               </Button>
             </div>
           ) : (

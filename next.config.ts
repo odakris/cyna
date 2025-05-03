@@ -2,11 +2,14 @@ import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   /* config options here */
-  reactStrictMode: true,
+  reactStrictMode: true, // Désactiver temporairement pour le développement
   images: {
-    domains: [
-      "images.unsplash.com",
-      // Ajoutez ici tous les autres domaines que vous utilisez pour les images
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        pathname: "/**",
+      },
     ],
   },
 }
