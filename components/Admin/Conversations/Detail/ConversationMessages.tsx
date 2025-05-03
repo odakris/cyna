@@ -2,24 +2,24 @@ import { useRef, useEffect } from "react"
 import {
   Card,
   CardDescription,
-  CardFooter,
+  // CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+// import { Button } from "@/components/ui/button"
+// import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   User,
   Bot,
-  Send,
+  // Send,
   Shield,
-  XCircle,
-  Loader2,
-  CheckCircle,
+  // XCircle,
+  // Loader2,
+  // CheckCircle,
 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+// import { Badge } from "@/components/ui/badge"
 import { MessageType, ConversationStatus } from "@prisma/client"
 
 interface Message {
@@ -44,13 +44,13 @@ interface ConversationMessagesProps {
 export default function ConversationMessages({
   messages,
   formatMessageTime,
-  status,
-  updateStatus,
-  statusUpdating,
-  input,
-  setInput,
-  handleSendMessage,
-  sending,
+  // status,
+  // updateStatus,
+  // statusUpdating,
+  // input,
+  // setInput,
+  // handleSendMessage,
+  // sending,
 }: ConversationMessagesProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -60,12 +60,12 @@ export default function ConversationMessages({
   }, [messages])
 
   // Gérer la touche Entrée pour envoyer le message
-  const handleKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault()
-      handleSendMessage()
-    }
-  }
+  // const handleKeyDown = (event: React.KeyboardEvent) => {
+  //   if (event.key === "Enter" && !event.shiftKey) {
+  //     event.preventDefault()
+  //     handleSendMessage()
+  //   }
+  // }
 
   // Rendu de l'avatar en fonction du type de message
   const renderAvatar = (type: MessageType) => {
@@ -110,7 +110,7 @@ export default function ConversationMessages({
       <CardHeader className="pb-4">
         <div className="flex justify-between items-center">
           <CardTitle className="text-xl">Conversation</CardTitle>
-          <Badge
+          {/* <Badge
             variant={
               status === "ACTIVE"
                 ? "default"
@@ -125,7 +125,7 @@ export default function ConversationMessages({
             )}
             {status === "CLOSED" && <XCircle className="mr-1 h-3 w-3" />}
             {status}
-          </Badge>
+          </Badge> */}
         </div>
         <CardDescription>
           {messages.length} message{messages.length > 1 ? "s" : ""}
@@ -177,7 +177,7 @@ export default function ConversationMessages({
         </div>
       </ScrollArea>
 
-      <CardFooter className="pt-6 pb-8 border-t">
+      {/* <CardFooter className="pt-6 pb-8 border-t">
         {status === "CLOSED" ? (
           <div className="w-full text-center py-4 text-muted-foreground">
             <XCircle className="mx-auto h-6 w-6 mb-2 opacity-70" />
@@ -214,7 +214,7 @@ export default function ConversationMessages({
             </Button>
           </div>
         )}
-      </CardFooter>
+      </CardFooter> */}
     </Card>
   )
 }

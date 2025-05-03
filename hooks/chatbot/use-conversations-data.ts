@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { Conversation } from "@/components/Admin/Conversations/ConversationColumns"
 import { useToast } from "@/hooks/use-toast"
-import { ConversationStatus } from "@prisma/client"
+// import { ConversationStatus } from "@prisma/client"
 
 // Type pour les statistiques des conversations
 type ConversationStats = {
@@ -48,10 +48,9 @@ export function useConversationsData() {
 
       const newStats = {
         total: data.length,
-        active: data.filter(c => c.status === ConversationStatus.ACTIVE).length,
-        pending: data.filter(c => c.status === ConversationStatus.PENDING_ADMIN)
-          .length,
-        closed: data.filter(c => c.status === ConversationStatus.CLOSED).length,
+        active: 0,
+        pending: 0,
+        closed: 0,
         today: data.filter(
           c => new Date(c.created_at).getTime() >= today.getTime()
         ).length,

@@ -3,9 +3,9 @@ import { ColumnDef, Row } from "@tanstack/react-table"
 import {
   ArrowUpDown,
   Calendar,
-  CheckCircle,
-  XCircle,
-  MessageSquare,
+  // CheckCircle,
+  // XCircle,
+  // MessageSquare,
   Clock,
   User,
 } from "lucide-react"
@@ -13,19 +13,20 @@ import {
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+// import {
+//   Tooltip,
+//   TooltipContent,
+//   TooltipProvider,
+//   TooltipTrigger,
+// } from "@/components/ui/tooltip"
 import ActionsCell from "@/components/Admin/ActionCell"
-import { ConversationStatus, MessageType } from "@prisma/client"
+// import { ConversationStatus, MessageType } from "@prisma/client"
+import { MessageType } from "@prisma/client"
 
 // Type pour les conversations
 export interface Conversation {
   id_conversation: number
-  status: ConversationStatus
+  // status: ConversationStatus
   created_at: string | Date
   updated_at: string | Date
   email: string | null
@@ -78,30 +79,30 @@ export const getLastMessage = (conversation: Conversation) => {
 }
 
 // Fonction pour rendre le badge de statut
-export const renderStatusBadge = (status: ConversationStatus) => {
-  switch (status) {
-    case ConversationStatus.ACTIVE:
-      return (
-        <Badge variant="outline" className="bg-green-100 text-green-800">
-          <CheckCircle className="mr-1 h-3 w-3 text-green-600" /> Actif
-        </Badge>
-      )
-    case ConversationStatus.PENDING_ADMIN:
-      return (
-        <Badge className="bg-amber-500">
-          <Clock className="mr-1 h-3 w-3" /> En attente
-        </Badge>
-      )
-    case ConversationStatus.CLOSED:
-      return (
-        <Badge variant="outline" className="bg-slate-100 text-slate-800">
-          <XCircle className="mr-1 h-3 w-3 text-slate-600" /> Fermé
-        </Badge>
-      )
-    default:
-      return <Badge variant="outline">{status}</Badge>
-  }
-}
+// export const renderStatusBadge = (status: ConversationStatus) => {
+//   switch (status) {
+//     case ConversationStatus.ACTIVE:
+//       return (
+//         <Badge variant="outline" className="bg-green-100 text-green-800">
+//           <CheckCircle className="mr-1 h-3 w-3 text-green-600" /> Actif
+//         </Badge>
+//       )
+//     case ConversationStatus.PENDING_ADMIN:
+//       return (
+//         <Badge className="bg-amber-500">
+//           <Clock className="mr-1 h-3 w-3" /> En attente
+//         </Badge>
+//       )
+//     case ConversationStatus.CLOSED:
+//       return (
+//         <Badge variant="outline" className="bg-slate-100 text-slate-800">
+//           <XCircle className="mr-1 h-3 w-3 text-slate-600" /> Fermé
+//         </Badge>
+//       )
+//     default:
+//       return <Badge variant="outline">{status}</Badge>
+//   }
+// }
 
 export const ConversationColumns: ColumnDef<Conversation>[] = [
   {
@@ -123,49 +124,49 @@ export const ConversationColumns: ColumnDef<Conversation>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-  {
-    accessorKey: "status",
-    header: ({ column }) => (
-      <div className="text-center">
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="px-2"
-        >
-          <MessageSquare className="mr-2 h-4 w-4 text-muted-foreground" />
-          Statut
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-    ),
-    cell: ({ row }) => {
-      const status = row.getValue("status") as ConversationStatus
+  // {
+  //   accessorKey: "status",
+  //   header: ({ column }) => (
+  //     <div className="text-center">
+  //       <Button
+  //         variant="ghost"
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+  //         className="px-2"
+  //       >
+  //         <MessageSquare className="mr-2 h-4 w-4 text-muted-foreground" />
+  //         Statut
+  //         <ArrowUpDown className="ml-2 h-4 w-4" />
+  //       </Button>
+  //     </div>
+  //   ),
+  //   cell: ({ row }) => {
+  //     const status = row.getValue("status") as ConversationStatus
 
-      return (
-        <div className="flex justify-center">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>{renderStatusBadge(status)}</div>
-              </TooltipTrigger>
-              <TooltipContent>
-                {status === ConversationStatus.ACTIVE
-                  ? "Conversation active"
-                  : status === ConversationStatus.PENDING_ADMIN
-                    ? "En attente d'un conseiller"
-                    : "Conversation fermée"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      )
-    },
-    filterFn: (row, id, value) => {
-      if (value === "all") return true
-      return row.getValue(id) === value
-    },
-    enableSorting: true,
-  },
+  //     return (
+  //       <div className="flex justify-center">
+  //         <TooltipProvider>
+  //           <Tooltip>
+  //             <TooltipTrigger asChild>
+  //               <div>{renderStatusBadge(status)}</div>
+  //             </TooltipTrigger>
+  //             <TooltipContent>
+  //               {status === ConversationStatus.ACTIVE
+  //                 ? "Conversation active"
+  //                 : status === ConversationStatus.PENDING_ADMIN
+  //                   ? "En attente d'un conseiller"
+  //                   : "Conversation fermée"}
+  //             </TooltipContent>
+  //           </Tooltip>
+  //         </TooltipProvider>
+  //       </div>
+  //     )
+  //   },
+  //   filterFn: (row, id, value) => {
+  //     if (value === "all") return true
+  //     return row.getValue(id) === value
+  //   },
+  //   enableSorting: true,
+  // },
   {
     accessorKey: "user",
     header: ({ column }) => (
@@ -330,7 +331,7 @@ export const ConversationColumns: ColumnDef<Conversation>[] = [
 ]
 
 export const conversationColumnNamesInFrench: Record<string, string> = {
-  status: "Statut",
+  // status: "Statut",
   user: "Client",
   messages: "Dernier message",
   created_at: "Création",

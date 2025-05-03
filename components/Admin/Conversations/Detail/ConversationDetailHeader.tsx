@@ -1,13 +1,13 @@
 import Link from "next/link"
 import { ArrowLeft, Clock, Trash } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select"
+// import {
+//   Select,
+//   SelectTrigger,
+//   SelectValue,
+//   SelectContent,
+//   SelectItem,
+// } from "@/components/ui/select"
 import { ConversationStatus } from "@prisma/client"
 import PermissionGuard from "@/components/Auth/PermissionGuard"
 
@@ -21,8 +21,8 @@ interface ConversationDetailHeaderProps {
 }
 
 export default function ConversationDetailHeader({
-  status,
-  updateStatus,
+  // status,
+  // updateStatus,
   statusUpdating,
   setShowDeleteDialog,
 }: ConversationDetailHeaderProps) {
@@ -42,7 +42,7 @@ export default function ConversationDetailHeader({
           <Clock className="h-4 w-4 animate-spin" />
         ) : (
           <>
-            <Select
+            {/* <Select
               value={status}
               onValueChange={val => updateStatus(val as ConversationStatus)}
               disabled={statusUpdating}
@@ -55,7 +55,7 @@ export default function ConversationDetailHeader({
                 <SelectItem value="PENDING_ADMIN">En attente</SelectItem>
                 <SelectItem value="CLOSED">Fermé</SelectItem>
               </SelectContent>
-            </Select>
+            </Select> */}
 
             {setShowDeleteDialog && (
               <PermissionGuard permission="contact:delete">
