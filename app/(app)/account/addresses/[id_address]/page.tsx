@@ -1,86 +1,123 @@
-"use client"
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '../../auth/[...nextauth]/route';
 
-import { useEffect, useState } from "react"
-import { useRouter, useParams } from "next/navigation"
-import { useSession } from "next-auth/react"
-import { AddressForm } from "@/components/Account/AdresseForm"
-import { AddressFormValues } from "@/lib/validations/address-schema"
+export async function GET(request: Request) {
+  try {
+    console.log('[API Addresses] Début de la requête GET');
+    console.log('[API Addresses] Headers reçus:', Object.fromEntries(request.headers));
 
-export default function EditAddressPage() {
-  const router = useRouter()
-  const { id_address } = useParams() // Récupérer l'ID depuis l'URL
-  const { data: session } = useSession()
+    const session = await getServerSession(authOptions);
+    console.log('[API Addresses] Session:', {
+      userId: session?.user?.id_user,
+      sessionExists: !!session,
+    });
 
-  const [address, setAddress] = useState<AddressFormValues | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    const fetchAddress = async () => {
-      if (id_address && session?.user?.id_user) {
-        try {
-          const response = await fetch(
-            `/api/users/${session.user.id_user}/addresses/${id_address}`,
-            {
-              credentials: "include",
-            }
-          )
-          if (!response.ok) {
-            throw new Error("Échec de la récupération de l'adresse")
-          }
-          const data = await response.json()
-          setAddress(data)
-        } catch (err: any) {
-          setError(err.message || "Une erreur est survenue")
-        }
-      }
+    if (!session?.user?.id_user) {
+      console.error('[API Addresses] Utilisateur non connecté');
+      return NextResponse.json(
+        { message: 'Utilisateur non connecté. Veuillez vous connecter pour accéder à vos adresses.' },
+        { status: 401 }
+      );
     }
 
-    fetchAddress()
-  }, [id_address, session?.user?.id_user])
-
-  const handleUpdate = async (updatedAddress: AddressFormValues) => {
-    setLoading(true)
-    setError(null)
-    try {
-      const response = await fetch(
-        `/api/users/${session?.user?.id_user}/addresses/${id_address}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify(updatedAddress),
-        }
-      )
-
-      if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ message: "Erreur inconnue" }))
-        throw new Error(errorData.message || "Échec de la mise à jour")
-      }
-
-      router.push("/account/settings")
-    } catch (err: any) {
-      setError(err.message || "Une erreur est survenue lors de la mise à jour")
-    } finally {
-      setLoading(false)
+    const userId = parseInt(session.user.id_user);
+    if (isNaN(userId)) {
+      console.error('[API Addresses] userId invalide:', { userId: session.user.id_user });
+      return NextResponse.json(
+        { message: 'ID utilisateur invalide' },
+        { status: 400 }
+      );
     }
+
+    const addresses = await prisma.address.findMany({
+      where: { id_user: userId },
+    });
+
+    console.log('[API Addresses] Adresses récupérées:', {
+      count: addresses.length,
+      addresses,
+    });
+
+    if (addresses.length === 0) {
+      console.warn('[API Addresses] Aucune adresse trouvée pour l’utilisateur:', { userId });
+    }
+
+    return NextResponse.json(addresses, { status: 200 });
+  } catch (error: any) {
+    console.error('[API Addresses] Erreur:', {
+      message: error.message,
+      stack: error.stack,
+    });
+    return NextResponse.json(
+      { message: 'Erreur lors de la récupération des adresses', error: error.message },
+      { status: 500 }
+    );
   }
+}
 
-  if (error) return <div className="text-red-500 p-6">{error}</div>
-  if (!address) return <div className="p-6">Chargement...</div>
+export async function POST(request: Request) {
+  try {
+    console.log('[API Addresses] Début de la requête POST');
+    const session = await getServerSession(authOptions);
+    console.log('[API Addresses] Session:', {
+      userId: session?.user?.id_user,
+      sessionExists: !!session,
+    });
 
-  return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Modifier l&apos;adresse</h1>
-      <AddressForm
-        initialData={address}
-        onSubmit={handleUpdate}
-        loading={loading}
-      />
-    </div>
-  )
+    if (!session?.user?.id_user) {
+      console.error('[API Addresses] Utilisateur non connecté');
+      return NextResponse.json(
+        { message: 'Utilisateur non connecté. Veuillez vous connecter pour ajouter une adresse.' },
+        { status: 401 }
+      );
+    }
+
+    const userId = parseInt(session.user.id_user);
+    if (isNaN(userId)) {
+      console.error('[API Addresses] userId invalide:', { userId: session.user.id_user });
+      return NextResponse.json(
+        { message: 'ID utilisateur invalide' },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json();
+    const { first_name, last_name, address1, address2, postal_code, city, country, mobile_phone } = body;
+
+    if (!first_name || !last_name || !address1 || !postal_code || !city || !country || !mobile_phone) {
+      console.error('[API Addresses] Champs obligatoires manquants:', body);
+      return NextResponse.json(
+        { message: 'Tous les champs obligatoires doivent être remplis' },
+        { status: 400 }
+      );
+    }
+
+    const newAddress = await prisma.address.create({
+      data: {
+        id_user: userId,
+        first_name,
+        last_name,
+        address1,
+        address2,
+        postal_code,
+        city,
+        country,
+        mobile_phone,
+      },
+    });
+
+    console.log('[API Addresses] Adresse créée:', newAddress);
+    return NextResponse.json(newAddress, { status: 201 });
+  } catch (error: any) {
+    console.error('[API Addresses] Erreur:', {
+      message: error.message,
+      stack: error.stack,
+    });
+    return NextResponse.json(
+      { message: 'Erreur lors de la création de l’adresse', error: error.message },
+      { status: 500 }
+    );
+  }
 }
