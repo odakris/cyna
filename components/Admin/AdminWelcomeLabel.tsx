@@ -68,7 +68,7 @@ export default function AdminWelcomeLabel() {
   if (!hasLoaded && status === "loading") {
     return (
       <Card className="mb-6">
-        <CardContent className="flex items-center justify-between p-6">
+        <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:p-6 gap-4">
           <div className="flex items-center space-x-4">
             <Skeleton className="h-12 w-12 rounded-full" />
             <div>
@@ -86,7 +86,7 @@ export default function AdminWelcomeLabel() {
   if (!session) {
     return (
       <Card className="mb-6">
-        <CardContent className="flex items-center justify-between p-6">
+        <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:p-6 gap-4">
           <div className="flex items-center space-x-4">
             <Avatar className="h-12 w-12 border">
               <AvatarFallback>?</AvatarFallback>
@@ -98,7 +98,7 @@ export default function AdminWelcomeLabel() {
               </p>
             </div>
           </div>
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild className="mt-4 md:mt-0">
             <a href="/login">Se connecter</a>
           </Button>
         </CardContent>
@@ -109,7 +109,7 @@ export default function AdminWelcomeLabel() {
   // Affichage normal avec session
   return (
     <Card className="mb-6">
-      <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-6 gap-4">
+      <CardContent className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 md:p-6 gap-4">
         <div className="flex items-center space-x-4">
           <Avatar className="h-12 w-12 border">
             <AvatarImage
@@ -130,14 +130,22 @@ export default function AdminWelcomeLabel() {
             </p>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full sm:w-auto">
-          <div className="text-sm text-muted-foreground flex items-center gap-1 sm:mr-3">
+        <div className="flex flex-col md:flex-row md:items-center gap-2 w-full md:w-auto mt-4 md:mt-0">
+          <div className="text-sm text-muted-foreground flex items-center gap-1 md:mr-3 order-2 md:order-1">
             <CalendarClock className="h-4 w-4" />
-            <span className="capitalize">{formatDate()}</span>
+            <span className="capitalize hidden sm:inline">{formatDate()}</span>
+            <span className="capitalize inline sm:hidden">
+              {new Intl.DateTimeFormat("fr-FR", {
+                day: "numeric",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit",
+              }).format(currentDate)}
+            </span>
           </div>
           <Badge
             variant="outline"
-            className={`px-3 py-1 ${
+            className={`px-3 py-1 order-1 md:order-2 self-start md:self-auto ${
               session.user?.role?.toLowerCase() === "admin"
                 ? "bg-red-100 text-red-800 border-red-200"
                 : session.user?.role?.toLowerCase() === "super_admin"

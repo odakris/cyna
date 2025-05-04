@@ -9,11 +9,9 @@ import DeleteDialog from "@/components/Admin/Products/DeleteDialog"
 import { useProductsData } from "@/hooks/product/use-products-data"
 import { useProductsTable } from "@/hooks/product/use-products-table"
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { RefreshCw } from "lucide-react"
 import { ProductsHomeSkeleton } from "@/components/Skeletons/ProductSkeletons"
-import { Badge } from "@/components/ui/badge"
 import { AlertTriangle } from "lucide-react"
 import { CardTitle, CardDescription } from "@/components/ui/card"
 import { useCategories } from "@/hooks/category/use-categories"
@@ -79,7 +77,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6 animate-in fade-in duration-300">
+    <div className="container mx-auto p-0 sm:p-3 md:p-6 space-y-4 sm:space-y-6 animate-in fade-in duration-300">
       {/* En-tête avec titre et actions */}
       <ProductsHeader
         productsCount={products.length}
@@ -92,48 +90,7 @@ export default function ProductsPage() {
 
       {/* Filtres et tableau */}
       <Card className="border-border/40 shadow-sm">
-        <CardHeader className="pb-3">
-          <Tabs
-            value={activeTab}
-            onValueChange={setActiveTab}
-            className="w-full"
-          >
-            <TabsList className="w-full sm:w-auto">
-              <TabsTrigger value="tous" className="flex-1 sm:flex-initial">
-                Tous
-                <Badge variant="secondary" className="ml-2">
-                  {stats.total}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger
-                value="disponibles"
-                className="flex-1 sm:flex-initial"
-              >
-                Disponibles
-                <Badge
-                  variant="secondary"
-                  className="ml-2 bg-green-100 text-green-800"
-                >
-                  {stats.available}
-                </Badge>
-              </TabsTrigger>
-              <TabsTrigger
-                value="indisponibles"
-                className="flex-1 sm:flex-initial"
-              >
-                Indisponibles
-                <Badge
-                  variant="secondary"
-                  className="ml-2 bg-gray-100 text-gray-800"
-                >
-                  {stats.unavailable}
-                </Badge>
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </CardHeader>
-
-        <CardContent className="p-6">
+        <CardContent className="p-3 sm:p-6">
           {/* Filtres et options de recherche */}
           <ProductsFilters
             table={table}
@@ -142,21 +99,28 @@ export default function ProductsPage() {
             stockOptions={stockOptions}
             fetchProducts={fetchProducts}
             categories={categories}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            stats={stats}
           />
 
           {/* Tableau des produits */}
           <ProductsTable table={table} />
         </CardContent>
 
-        <CardFooter className="bg-muted/50 py-3 border-t flex justify-between items-center">
-          <p className="text-sm text-muted-foreground">
-            Total des produits: <strong>{products.length}</strong> |
-            Disponibles:{" "}
+        <CardFooter className="bg-muted/50 py-3 border-t flex flex-col sm:flex-row justify-between items-center">
+          <p className="text-sm text-muted-foreground text-center sm:text-left mb-2 sm:mb-0">
+            Total: <strong>{products.length}</strong> | Disponibles:{" "}
             <strong className="text-green-600">{stats.available}</strong> |
             Stock faible:{" "}
             <strong className="text-amber-600">{stats.lowStock}</strong>
           </p>
-          <Button variant="outline" size="sm" onClick={fetchProducts}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchProducts}
+            className="w-full sm:w-auto"
+          >
             <RefreshCw className="mr-2 h-3 w-3" />
             Actualiser
           </Button>
