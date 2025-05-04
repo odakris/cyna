@@ -1,4 +1,3 @@
-// lib/email/email-service.ts
 import { Resend } from "resend"
 
 // Types d'emails supportés par le service

@@ -1,3 +1,4 @@
+// components/Admin/AdminSideBar.tsx
 "use client"
 import { usePathname } from "next/navigation"
 import {
@@ -17,9 +18,12 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import DisconnectButton from "../DisconnectButton/DisconnectButton"
+import { useUnreadMessagesNotification } from "@/hooks/contact-messages/use-unread-messages-notification"
+import { Badge } from "@/components/ui/badge"
 
 export default function AdminSideBar() {
   const pathname = usePathname()
+  const { unreadCount, hasNewMessages } = useUnreadMessagesNotification()
 
   const navLinks = [
     {
@@ -69,6 +73,9 @@ export default function AdminSideBar() {
       href: "/dashboard/contact",
       icon: <Mail className="h-5 w-5" />,
       exact: false,
+      notification: unreadCount > 0,
+      notificationCount: unreadCount,
+      hasNewMessages: hasNewMessages,
     },
     {
       name: "Chatbot",
@@ -103,7 +110,7 @@ export default function AdminSideBar() {
               <Button
                 variant={isActive(item) ? "secondary" : "ghost"}
                 className={cn(
-                  "w-full justify-start h-12 mb-1 px-4",
+                  "w-full justify-start h-12 mb-1 px-4 relative",
                   isActive(item)
                     ? "font-medium"
                     : "font-normal text-muted-foreground hover:text-foreground"
@@ -111,6 +118,21 @@ export default function AdminSideBar() {
               >
                 {item.icon}
                 <span className="ml-3">{item.name}</span>
+
+                {/* Badge de notification */}
+                {item.notification && (
+                  <Badge
+                    variant="destructive"
+                    className={cn(
+                      "absolute -top-1 -right-1 px-1.5 h-5 min-w-[20px] flex items-center justify-center",
+                      item.hasNewMessages && "animate-pulse bg-blue-500"
+                    )}
+                  >
+                    {item.notificationCount > 99
+                      ? "99+"
+                      : item.notificationCount}
+                  </Badge>
+                )}
               </Button>
             </Link>
           ))}

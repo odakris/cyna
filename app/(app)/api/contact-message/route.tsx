@@ -24,9 +24,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Vérifier les permissions
-    const permissionCheck = await checkPermission("contact:respond")
-    if (permissionCheck) return permissionCheck
+    // // Vérifier les permissions
+    // const permissionCheck = await checkPermission("contact:respond")
+    // if (permissionCheck) return permissionCheck
 
     return await contactMessageController.create(request)
   } catch (error) {

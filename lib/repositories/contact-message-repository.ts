@@ -71,6 +71,8 @@ export const findUnread = async (): Promise<ContactMessage[]> => {
 }
 
 export const create = async (data: {
+  first_name: string
+  last_name: string
   email: string
   subject: string
   message: string
@@ -79,6 +81,8 @@ export const create = async (data: {
   try {
     return prisma.contactMessage.create({
       data: {
+        first_name: data.first_name.trim(),
+        last_name: data.last_name.trim(),
         email: data.email.trim(),
         subject: data.subject.trim(),
         message: data.message.trim(),

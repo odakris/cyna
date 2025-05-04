@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react"
-import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
@@ -15,7 +14,6 @@ export function useContactMessageRespond(messageId: string) {
   const [error, setError] = useState<string | null>(null)
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
   const { toast } = useToast()
-  const router = useRouter()
 
   const form = useForm<ContactMessageResponseValues>({
     resolver: zodResolver(contactMessageResponseSchema),
@@ -94,9 +92,9 @@ export function useContactMessageRespond(messageId: string) {
       })
 
       // Redirect back to dashboard after a delay
-      setTimeout(() => {
-        router.push("/dashboard/contact")
-      }, 2000)
+      // setTimeout(() => {
+      //   router.push("/dashboard/contact")
+      // }, 2000)
     } catch (error) {
       console.error("Erreur lors de l'envoi:", error)
       toast({

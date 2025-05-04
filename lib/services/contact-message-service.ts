@@ -1,7 +1,8 @@
 // lib/services/contact-message-service.ts
 import { ContactMessage } from "@prisma/client"
 import contactMessageRepository from "@/lib/repositories/contact-message-repository"
-import { sendEmail } from "@/lib/services/email-service"
+
+import { emailService } from "@/lib/services/email-service"
 
 export const getAllMessages = async (): Promise<ContactMessage[]> => {
   try {
@@ -48,10 +49,12 @@ export const getUnreadMessages = async (): Promise<ContactMessage[]> => {
 }
 
 export const createMessage = async (data: {
+  first_name: string
+  last_name: string
   email: string
   subject: string
   message: string
-  id_user?: number | null
+  id_user?: number | null | undefined
 }): Promise<ContactMessage> => {
   try {
     return await contactMessageRepository.create(data)
@@ -106,30 +109,12 @@ export const respondToMessage = async (
 
     // Envoyer l'email de réponse si le service d'email est disponible
     try {
-      await sendEmail({
+      await emailService.sendEmail({
+        type: "generic",
         to: message.email,
+        firstName: message.first_name || "Utilisateur",
         subject: `RE: ${message.subject}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2>Réponse à votre message</h2>
-            <div style="padding: 20px; border-radius: 5px; background-color: #f9f9f9;">
-              ${response.replace(/\n/g, "<br>")}
-            </div>
-            <p style="margin-top: 20px;">Cordialement,<br>${adminSignature}<br>${process.env.NEXT_PUBLIC_SITE_NAME || "Notre équipe"}</p>
-            <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;" />
-            <h3>Votre message original</h3>
-            <div style="padding: 10px; border-left: 3px solid #ccc;">
-              <strong>Sujet:</strong> ${message.subject}<br>
-              <strong>Date:</strong> ${new Date(message.sent_date).toLocaleString("fr-FR")}<br>
-              <p>${message.message.replace(/\n/g, "<br>")}</p>
-            </div>
-            <p style="color: #777; font-size: 12px; margin-top: 30px;">
-              Ceci est une réponse à votre message envoyé via notre formulaire de contact. 
-              Si vous avez d'autres questions, n'hésitez pas à nous contacter.
-            </p>
-          </div>
-        `,
-        text: `Réponse à votre message:\n\n${response}\n\nCordialement,\n${adminSignature}\n${process.env.NEXT_PUBLIC_SITE_NAME || "Notre équipe"}\n\n---\n\nVotre message original:\nSujet: ${message.subject}\nDate: ${new Date(message.sent_date).toLocaleString("fr-FR")}\n\n${message.message}`,
+        message: `${response}\n\nCordialement,\n${adminSignature}\n${process.env.NEXT_PUBLIC_SITE_NAME || "CYNA"}`,
       })
     } catch (emailError) {
       // Consignez l'erreur mais ne la propagez pas, car nous avons déjà mis à jour la base de données
