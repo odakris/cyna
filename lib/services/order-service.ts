@@ -61,17 +61,16 @@ type OrderForInvoice = {
  */
 export const getAllOrders = async (): Promise<Order[]> => {
     try {
-        const orders = await orderRepository.findAll()
-        return orders
+        const orders = await orderRepository.findAll();
+        return orders;
     } catch (error) {
-        console.error("Erreur lors de la récupération des commandes :", error)
-        // Propager l'erreur originale si elle existe
+        console.error("Erreur lors de la récupération des commandes :", error);
         if (error instanceof Error) {
-            throw error
+            throw error;
         }
-        throw new Error("Erreur lors de la récupération des commandes")
+        throw new Error("Erreur lors de la récupération des commandes");
     }
-}
+};
 
 /**
  * Récupère une commande spécifique en fonction de son identifiant.
@@ -81,29 +80,28 @@ export const getAllOrders = async (): Promise<Order[]> => {
  */
 export const getOrderById = async (id: number): Promise<Order> => {
     if (!id || isNaN(Number(id)) || id <= 0) {
-        throw new Error("ID de commande invalide")
+        throw new Error("ID de commande invalide");
     }
 
     try {
-        const order = await orderRepository.findById(id)
+        const order = await orderRepository.findById(id);
 
         if (!order) {
-            throw new Error(`Commande avec l'ID ${id} non trouvée`)
+            throw new Error(`Commande avec l'ID ${id} non trouvée`);
         }
 
-        return order
+        return order;
     } catch (error) {
         console.error(
             `Erreur lors de la récupération de la commande ID ${id} :`,
             error
-        )
-        // Propager l'erreur originale si c'est notre erreur personnalisée
+        );
         if (error instanceof Error && error.message.includes("non trouvée")) {
-            throw error
+            throw error;
         }
-        throw new Error(`Erreur lors de la récupération de la commande ID ${id}`)
+        throw new Error(`Erreur lors de la récupération de la commande ID ${id}`);
     }
-}
+};
 
 /**
  * Crée une nouvelle commande en base de données.
@@ -113,41 +111,35 @@ export const getOrderById = async (id: number): Promise<Order> => {
  */
 export const createOrder = async (data: OrderInputValues): Promise<Order> => {
     try {
-        // Valider et transformer les données d'entrée
-        const processedData = orderFormSchema.parse(data)
-
-        // Créer la commande avec les données transformées
-        const newOrder = await orderRepository.create(processedData)
-        return newOrder
+        const processedData = orderFormSchema.parse(data);
+        const newOrder = await orderRepository.create(processedData);
+        return newOrder;
     } catch (error) {
-        console.error("Erreur lors de la création de la commande :", error)
+        console.error("Erreur lors de la création de la commande :", error);
 
-        // Erreurs de validation Zod
         if (error instanceof ZodError) {
             const validationErrors = error.errors
                 .map(e => `${e.path.join(".")}: ${e.message}`)
-                .join(", ")
-            throw new Error(`Validation échouée: ${validationErrors}`)
+                .join(", ");
+            throw new Error(`Validation échouée: ${validationErrors}`);
         }
 
-        // Autres types d'erreurs
         if (error instanceof Error) {
-            // Préserver les erreurs de contraintes (comme utilisateur ou produit non trouvé)
             if (
                 error.message.startsWith("Stock insuffisant") ||
                 error.message.includes("n'existe pas") ||
                 error.message.includes("non trouvée")
             ) {
-                throw error
+                throw error;
             }
             throw new Error(
                 `Erreur lors de la création de la commande: ${error.message}`
-            )
+            );
         }
 
-        throw new Error("Erreur inconnue lors de la création de la commande")
+        throw new Error("Erreur inconnue lors de la création de la commande");
     }
-}
+};
 
 /**
  * Met à jour une commande existante avec de nouvelles informations.
@@ -161,60 +153,52 @@ export const updateOrder = async (
     data: OrderInputValues
 ): Promise<Order> => {
     if (!id || isNaN(Number(id)) || id <= 0) {
-        throw new Error("ID de commande invalide")
+        throw new Error("ID de commande invalide");
     }
 
     try {
-        // Vérifier si la commande existe
-        const exists = await orderRepository.exists(id)
+        const exists = await orderRepository.exists(id);
         if (!exists) {
-            throw new Error(`Commande avec l'ID ${id} non trouvée`)
+            throw new Error(`Commande avec l'ID ${id} non trouvée`);
         }
 
-        // Obtenir la commande existante pour préserver certains champs
-        const existingOrder = await orderRepository.findById(id)
+        const existingOrder = await orderRepository.findById(id);
         if (!existingOrder) {
-            throw new Error(`Commande avec l'ID ${id} non trouvée`)
+            throw new Error(`Commande avec l'ID ${id} non trouvée`);
         }
 
-        // Fusionner les données et conserver le numéro de facture
         const mergedData = {
             ...data,
             invoice_number: existingOrder.invoice_number,
-        }
+        };
 
-        // Transformer et valider les données
-        const processedData = orderFormSchema.parse(mergedData)
-
-        // Mettre à jour la commande
-        const updatedOrder = await orderRepository.update(id, processedData)
-        return updatedOrder
+        const processedData = orderFormSchema.parse(mergedData);
+        const updatedOrder = await orderRepository.update(id, processedData);
+        return updatedOrder;
     } catch (error) {
         console.error(
             `Erreur lors de la mise à jour de la commande ID ${id} :`,
             error
-        )
+        );
 
-        // Erreurs de validation Zod
         if (error instanceof ZodError) {
             const validationErrors = error.errors
                 .map(e => `${e.path.join(".")}: ${e.message}`)
-                .join(", ")
-            throw new Error(`Validation échouée: ${validationErrors}`)
+                .join(", ");
+            throw new Error(`Validation échouée: ${validationErrors}`);
         }
 
-        // Préserver les erreurs personnalisées
         if (
             error instanceof Error &&
             (error.message.includes("non trouvée") ||
                 error.message.startsWith("Stock insuffisant"))
         ) {
-            throw error
+            throw error;
         }
 
-        throw new Error(`Erreur lors de la mise à jour de la commande ID ${id}`)
+        throw new Error(`Erreur lors de la mise à jour de la commande ID ${id}`);
     }
-}
+};
 
 /**
  * Met à jour le statut d'une commande existante.
@@ -228,31 +212,29 @@ export const updateOrderStatus = async (
     status: OrderStatus
 ): Promise<Order> => {
     if (!id || isNaN(Number(id)) || id <= 0) {
-        throw new Error("ID de commande invalide")
+        throw new Error("ID de commande invalide");
     }
 
     try {
-        // Vérifier si la commande existe
-        const exists = await orderRepository.exists(id)
+        const exists = await orderRepository.exists(id);
         if (!exists) {
-            throw new Error(`Commande avec l'ID ${id} non trouvée`)
+            throw new Error(`Commande avec l'ID ${id} non trouvée`);
         }
 
-        // Mettre à jour le statut
-        const updatedOrder = await orderRepository.updateStatus(id, status)
-        return updatedOrder
+        const updatedOrder = await orderRepository.updateStatus(id, status);
+        return updatedOrder;
     } catch (error) {
         console.error(
             `Erreur lors de la mise à jour du statut de la commande ID ${id} :`,
             error
-        )
+        );
         throw error instanceof Error
             ? error
             : new Error(
                 `Erreur lors de la mise à jour du statut de la commande ID ${id}`
-            )
+            );
     }
-}
+};
 
 /**
  * Supprime une commande de la base de données.
@@ -262,31 +244,27 @@ export const updateOrderStatus = async (
  */
 export const deleteOrder = async (id: number): Promise<object> => {
     if (!id || isNaN(Number(id)) || id <= 0) {
-        throw new Error("ID de commande invalide")
+        throw new Error("ID de commande invalide");
     }
 
     try {
-        // Vérifier si la commande existe
-        const exists = await orderRepository.exists(id)
+        const exists = await orderRepository.exists(id);
         if (!exists) {
-            throw new Error(`Commande avec l'ID ${id} non trouvée`)
+            throw new Error(`Commande avec l'ID ${id} non trouvée`);
         }
 
-        // Supprimer la commande
-        await orderRepository.remove(id)
-        return { success: true, message: `Commande ${id} supprimée avec succès` }
+        await orderRepository.remove(id);
+        return { success: true, message: `Commande ${id} supprimée avec succès` };
     } catch (error) {
         console.error(
             `Erreur lors de la suppression de la commande ID ${id} :`,
             error
-        )
+        );
 
-        // Préserver les erreurs personnalisées
         if (error instanceof Error && error.message.includes("non trouvée")) {
-            throw error
+            throw error;
         }
 
-        // Erreurs potentielles de contrainte d'intégrité
         if (
             error instanceof Error &&
             (error.message.includes("constraint") ||
@@ -294,13 +272,18 @@ export const deleteOrder = async (id: number): Promise<object> => {
         ) {
             throw new Error(
                 `Impossible de supprimer la commande ID ${id} car elle est référencée par d'autres entités`
-            )
+            );
         }
 
-        throw new Error(`Erreur lors de la suppression de la commande ID ${id}`)
+        throw new Error(`Erreur lors de la suppression de la commande ID ${id}`);
     }
-}
+};
 
+/**
+ * Récupère les commandes d'un utilisateur spécifique.
+ * @param {string} userId - Identifiant de l'utilisateur.
+ * @returns {Promise<object[]>} Liste des commandes formatées.
+ */
 export const getUserOrders = async (userId: string): Promise<object[]> => {
     const orders: OrderWithRelations[] = await orderRepository.getOrdersByUserId(userId);
 
@@ -321,6 +304,12 @@ export const getUserOrders = async (userId: string): Promise<object[]> => {
     }));
 };
 
+/**
+ * Récupère l'historique des commandes d'un utilisateur avec filtres.
+ * @param {string} userId - Identifiant de l'utilisateur.
+ * @param {object} filters - Filtres pour la recherche (année, catégories, statut, recherche, date).
+ * @returns {Promise<object[]>} Liste des commandes formatées.
+ */
 export const getUserOrderHistory = async (
     userId: string,
     filters?: {
@@ -337,7 +326,6 @@ export const getUserOrderHistory = async (
             throw new Error("User ID must be a valid positive number");
         }
 
-        // Valider et convertir categoryIds
         let categoryIdFilter: number | { in: number[] } | undefined;
         if (filters?.categoryIds) {
             const ids = filters.categoryIds.split(",").map(id => parseInt(id));
@@ -353,7 +341,6 @@ export const getUserOrderHistory = async (
                     : { in: validIds };
         }
 
-        // Valider et convertir orderStatus
         let orderStatusFilter: OrderStatus | { in: OrderStatus[] } | undefined;
         if (filters?.orderStatus) {
             const statuses = filters.orderStatus.split(",") as OrderStatus[];
@@ -372,7 +359,6 @@ export const getUserOrderHistory = async (
                     : { in: filteredStatuses };
         }
 
-        // Gérer le filtre par date (orderDate)
         let dateFilter: { gte?: Date; lte?: Date } | undefined;
         if (filters?.orderDate) {
             const parsedDate = parseISO(filters.orderDate);
@@ -401,7 +387,6 @@ export const getUserOrderHistory = async (
             }
         }
 
-        // Combiner les filtres de date (orderDate et year)
         let combinedDateFilter: { gte?: Date; lte?: Date } | undefined;
         if (filters?.year && dateFilter) {
             combinedDateFilter = dateFilter;
@@ -414,7 +399,6 @@ export const getUserOrderHistory = async (
             combinedDateFilter = dateFilter;
         }
 
-        // Construire les conditions pour la recherche par nom de service
         let searchFilter = {};
         if (filters?.search) {
             searchFilter = {
@@ -425,14 +409,13 @@ export const getUserOrderHistory = async (
                                 contains: filters.search,
                                 mode: "insensitive",
                             },
-                            isNot: null, // S'assurer que product n'est pas null
+                            isNot: null,
                         },
                     },
                 },
             };
         }
 
-        // Construire les conditions de filtrage
         const whereClause: Prisma.OrderWhereInput = {
             id_user: parsedUserId,
             order_date: combinedDateFilter,
@@ -452,7 +435,7 @@ export const getUserOrderHistory = async (
             include: {
                 order_items: {
                     include: {
-                        product: true, // Inclure toutes les propriétés de product
+                        product: true,
                     },
                 },
                 address: true,
@@ -585,6 +568,7 @@ export const getOrderByIdForInvoice = async (
 
 
 const orderService = {
+    create,
     getAllOrders,
     getOrderById,
     createOrder,
