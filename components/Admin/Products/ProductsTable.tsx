@@ -1,5 +1,3 @@
-"use client"
-
 import { Table as TableType } from "@tanstack/react-table"
 import { ProductWithImages } from "@/types/Types"
 import {
@@ -24,7 +22,6 @@ import {
   CheckCircle2,
   XCircle,
   Package,
-  Power,
 } from "lucide-react"
 import {
   Select,
@@ -33,6 +30,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import ProductActiveSwitch from "@/components/Admin/Products/ProductActiveSwitch"
+import ActionsCell from "@/components/Admin/ActionCell"
 
 interface ProductsTableProps {
   table: TableType<ProductWithImages>
@@ -96,18 +95,20 @@ export default function ProductsTable({ table }: ProductsTableProps) {
         </Table>
       </div>
 
-      {/* Vue mobile en liste de cartes - NOUVEAU */}
+      {/* Vue mobile en liste de cartes  */}
       <div className="md:hidden space-y-3">
         {table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map(row => (
-            <Link
-              href={`/dashboard/products/${row.original.id_product}`}
+            <div
               key={row.id}
-              className="block"
+              className="bg-white border rounded-lg shadow-sm hover:shadow-md transition-all"
             >
-              <div className="bg-white border rounded-lg shadow-sm hover:shadow-md transition-all">
-                {/* En-tête de carte avec image et nom */}
-                <div className="flex items-center gap-3 p-3 border-b">
+              {/* En-tête de carte avec image et nom - partie cliquable */}
+              <Link
+                href={`/dashboard/products/${row.original.id_product}`}
+                className="block"
+              >
+                <div className="flex items-center gap-3 p-3 border-b bg-[#F2F2F2]">
                   <div className="w-14 h-14 border rounded-md overflow-hidden flex-shrink-0 bg-slate-50">
                     <Image
                       src={row.original.main_image || "/placeholder.png"}
@@ -135,23 +136,24 @@ export default function ProductsTable({ table }: ProductsTableProps) {
                     </div>
                   </div>
                 </div>
+              </Link>
 
-                {/* Corps de la carte avec prix et statuts */}
-                <div className="p-3">
-                  <div className="flex justify-between items-center mb-3">
-                    <div className="flex items-baseline gap-1">
-                      <span className="font-semibold text-lg">
-                        {new Intl.NumberFormat("fr-FR", {
-                          style: "currency",
-                          currency: "EUR",
-                        }).format(row.original.unit_price)}
-                      </span>
-                      <span className="text-xs text-muted-foreground">TTC</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        variant="outline"
-                        className={`
+              {/* Corps de la carte avec détails et statuts - partie non cliquable */}
+              <div className="p-3">
+                <div className="flex justify-between items-center mb-3">
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-semibold text-lg">
+                      {new Intl.NumberFormat("fr-FR", {
+                        style: "currency",
+                        currency: "EUR",
+                      }).format(row.original.unit_price)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">TTC</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge
+                      variant="outline"
+                      className={`
                   ${
                     row.original.stock === 0
                       ? "bg-red-100 text-red-800 border-red-300"
@@ -160,14 +162,22 @@ export default function ProductsTable({ table }: ProductsTableProps) {
                         : "bg-green-100 text-green-800 border-green-300"
                   }
                 `}
-                      >
-                        <Package className="mr-1 h-3 w-3" />
-                        {row.original.stock}
-                      </Badge>
-                    </div>
+                    >
+                      <Package className="mr-1 h-3 w-3" />
+                      {row.original.stock}
+                    </Badge>
                   </div>
+                </div>
 
-                  {/* Statut du produit */}
+                {/* Description tronquée */}
+                <p className="text-xs text-muted-foreground line-clamp-2">
+                  {row.original.description || (
+                    <span className="italic">Aucune description</span>
+                  )}
+                </p>
+
+                {/* Statuts et switch */}
+                <div className="flex justify-between items-center mt-3">
                   <div className="flex flex-wrap gap-2">
                     {row.original.available ? (
                       <Badge className="bg-emerald-500 text-white border-emerald-600">
@@ -181,26 +191,31 @@ export default function ProductsTable({ table }: ProductsTableProps) {
                         <XCircle className="mr-1 h-3 w-3" /> Indisponible
                       </Badge>
                     )}
-
-                    {row.original.active ? (
-                      <Badge
-                        variant="outline"
-                        className="bg-blue-100 text-blue-700 border-blue-200"
-                      >
-                        <Power className="mr-1 h-3 w-3" /> Actif
-                      </Badge>
-                    ) : (
-                      <Badge
-                        variant="outline"
-                        className="bg-gray-100 text-gray-600 border-gray-200"
-                      >
-                        <Power className="mr-1 h-3 w-3" /> Inactif
-                      </Badge>
-                    )}
+                  </div>
+                  <div className="flex items-center">
+                    <ProductActiveSwitch
+                      productId={row.original.id_product}
+                      initialActive={row.original.active}
+                      onStatusChange={() => {}}
+                    />
                   </div>
                 </div>
+
+                {/* Actions rapides */}
+                <div className="flex justify-end mt-3">
+                  <ActionsCell
+                    actions={[
+                      { type: "view", tooltip: "Voir les détails" },
+                      { type: "edit", tooltip: "Modifier le produit" },
+                      { type: "external", tooltip: "Voir sur le site" },
+                    ]}
+                    basePath="/dashboard/products"
+                    entityId={row.original.id_product}
+                    externalBasePath="/produit"
+                  />
+                </div>
               </div>
-            </Link>
+            </div>
           ))
         ) : (
           <div className="text-center p-8 border rounded-md">

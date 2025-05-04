@@ -30,7 +30,6 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-
 import { ImageUploader } from "@/components/Forms/ImageUploader"
 import {
   categoryFormSchema,
@@ -81,7 +80,6 @@ export function CategoryForm({
     },
   })
 
-  // Obtenir les valeurs actuelles pour la prévisualisation
   const watchedValues = form.watch()
 
   const onSubmit = async (values: CategoryFormValues) => {
@@ -96,33 +94,50 @@ export function CategoryForm({
 
       console.log("formattedValues:", formattedValues)
 
+      let response
       if (isEditing && categoryId) {
-        await fetch(`/api/categories/${categoryId}`, {
+        response = await fetch(`/api/categories/${categoryId}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(formattedValues),
         })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(
+            errorData.message || "Erreur lors de la mise à jour de la catégorie"
+          )
+        }
+
+        toast({
+          title: "Catégorie mise à jour avec succès !",
+          description: "Les modifications ont été enregistrées.",
+          variant: "success",
+        })
       } else {
-        await fetch("/api/categories", {
+        response = await fetch("/api/categories", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(formattedValues),
         })
-      }
 
-      toast({
-        title: isEditing
-          ? "Catégorie mise à jour avec succès !"
-          : "Catégorie créée avec succès !",
-        description: isEditing
-          ? "Les modifications ont été enregistrées."
-          : `La catégorie "${values.name}" a été ajoutée au système.`,
-        variant: "success",
-      })
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(
+            errorData.message || "Erreur lors de la création de la catégorie"
+          )
+        }
+
+        toast({
+          title: "Catégorie créée avec succès !",
+          description: `La catégorie "${values.name}" a été ajoutée au système.`,
+          variant: "success",
+        })
+      }
 
       router.push("/dashboard/categories")
     } catch (error) {
@@ -141,9 +156,8 @@ export function CategoryForm({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Colonne principale avec le formulaire */}
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -156,40 +170,45 @@ export function CategoryForm({
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger
                     value="basic"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm py-1.5 sm:py-2"
                   >
-                    <Info className="h-4 w-4" />
-                    Informations de base
+                    <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">
+                      Informations de base
+                    </span>
+                    <span className="sm:hidden">Infos</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="image"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm py-1.5 sm:py-2"
                   >
-                    <FileImage className="h-4 w-4" />
-                    Image
+                    <FileImage className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span>Image</span>
                   </TabsTrigger>
                 </TabsList>
 
-                <div className="mt-6">
-                  <TabsContent value="basic" className="space-y-6">
+                <div className="mt-4 sm:mt-6">
+                  <TabsContent value="basic" className="space-y-4 sm:space-y-6">
                     <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <PencilLine className="h-5 w-5" />
+                      <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+                        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                          <PencilLine className="h-4 w-4 sm:h-5 sm:w-5" />
                           Détails de la catégorie
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="text-xs sm:text-sm">
                           Informations principales de la catégorie qui seront
                           visibles par les utilisateurs
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-6">
+                      <CardContent className="space-y-4 sm:space-y-6 px-3 sm:px-6">
                         <FormField
                           name="name"
                           control={form.control}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Nom de la catégorie</FormLabel>
+                              <FormLabel className="text-sm sm:text-base">
+                                Nom de la catégorie
+                              </FormLabel>
                               <FormControl>
                                 <div className="relative">
                                   <Tag className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -197,15 +216,15 @@ export function CategoryForm({
                                     placeholder="Entrez le nom..."
                                     {...field}
                                     disabled={isSubmitting}
-                                    className="pl-9"
+                                    className="pl-9 text-sm sm:text-base h-9 sm:h-10"
                                   />
                                 </div>
                               </FormControl>
-                              <FormDescription>
+                              <FormDescription className="text-xs sm:text-sm">
                                 Nom unique qui identifie cette catégorie de
                                 produits
                               </FormDescription>
-                              <FormMessage />
+                              <FormMessage className="text-xs sm:text-sm" />
                             </FormItem>
                           )}
                         />
@@ -215,7 +234,9 @@ export function CategoryForm({
                           control={form.control}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Description</FormLabel>
+                              <FormLabel className="text-sm sm:text-base">
+                                Description
+                              </FormLabel>
                               <FormControl>
                                 <div className="relative">
                                   <BookText className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -223,15 +244,15 @@ export function CategoryForm({
                                     placeholder="Décrivez cette catégorie..."
                                     {...field}
                                     disabled={isSubmitting}
-                                    className="pl-9 pt-2 min-h-32"
+                                    className="pl-9 pt-2 min-h-24 sm:min-h-32 text-sm sm:text-base"
                                   />
                                 </div>
                               </FormControl>
-                              <FormDescription>
+                              <FormDescription className="text-xs sm:text-sm">
                                 Description détaillée de la catégorie visible
                                 par les utilisateurs
                               </FormDescription>
-                              <FormMessage />
+                              <FormMessage className="text-xs sm:text-sm" />
                             </FormItem>
                           )}
                         />
@@ -241,7 +262,9 @@ export function CategoryForm({
                           control={form.control}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Priorité d&apos;affichage</FormLabel>
+                              <FormLabel className="text-sm sm:text-base">
+                                Priorité d&apos;affichage
+                              </FormLabel>
                               <FormControl>
                                 <div className="relative">
                                   <SortAsc className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -252,15 +275,15 @@ export function CategoryForm({
                                     placeholder="1"
                                     {...field}
                                     disabled={isSubmitting}
-                                    className="pl-9 w-full md:w-1/3"
+                                    className="pl-9 text-sm sm:text-base h-9 sm:h-10 w-full sm:w-1/3"
                                   />
                                 </div>
                               </FormControl>
-                              <FormDescription>
+                              <FormDescription className="text-xs sm:text-sm">
                                 Un nombre plus petit donne une priorité plus
                                 élevée dans les listes
                               </FormDescription>
-                              <FormMessage />
+                              <FormMessage className="text-xs sm:text-sm" />
                             </FormItem>
                           )}
                         />
@@ -269,12 +292,12 @@ export function CategoryForm({
                           name="active"
                           control={form.control}
                           render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 mt-4">
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 sm:p-4 mt-4">
                               <div className="space-y-0.5">
-                                <FormLabel className="text-base">
+                                <FormLabel className="text-sm sm:text-base">
                                   Activation de la catégorie
                                 </FormLabel>
-                                <FormDescription>
+                                <FormDescription className="text-xs sm:text-sm">
                                   {field.value
                                     ? "La catégorie et ses produits associés sont visibles"
                                     : "La catégorie et ses produits associés ne sont pas visibles"}
@@ -291,80 +314,90 @@ export function CategoryForm({
                           )}
                         />
                       </CardContent>
-                      <CardFooter className="flex justify-end gap-2 pt-4 border-t">
+                      <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t px-3 sm:px-6">
                         <Button
                           type="button"
                           onClick={() => router.push("/dashboard/categories")}
                           disabled={isSubmitting}
+                          className="w-full sm:w-auto text-sm sm:text-base"
                         >
                           Annuler
                         </Button>
                         <Button
                           type="button"
                           onClick={() => setActiveTab("image")}
-                          className="gap-2"
+                          className="gap-2 w-full sm:w-auto text-sm sm:text-base"
                           variant={"cyna"}
                         >
                           Suivant
-                          <ArrowRight className="h-4 w-4" />
+                          <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </Button>
                       </CardFooter>
                     </Card>
                   </TabsContent>
 
-                  <TabsContent value="image" className="space-y-6">
+                  <TabsContent value="image" className="space-y-4 sm:space-y-6">
                     <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <ImageIcon className="h-5 w-5" />
+                      <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+                        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                          <ImageIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                           Image de la catégorie
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="text-xs sm:text-sm">
                           Image principale qui représente cette catégorie
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-6">
+                      <CardContent className="space-y-4 sm:space-y-6 px-3 sm:px-6">
                         <Controller
                           name="image"
                           control={form.control}
                           render={({ field }) => (
-                            <ImageUploader
-                              field={field}
-                              disabled={isSubmitting}
-                              existingImage={initialData?.image}
-                            />
+                            <FormItem>
+                              <ImageUploader
+                                field={field}
+                                disabled={isSubmitting}
+                                existingImage={initialData?.image}
+                                multiple={false}
+                                label="Image de la catégorie"
+                                helpText="Cette image sera utilisée pour représenter la catégorie."
+                              />
+                              <FormMessage className="text-xs sm:text-sm" />
+                            </FormItem>
                           )}
                         />
 
                         <Alert className="mt-4 bg-muted">
-                          <FileQuestion className="h-4 w-4" />
-                          <AlertTitle>Conseils pour l&apos;image</AlertTitle>
-                          <AlertDescription>
+                          <FileQuestion className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          <AlertTitle className="text-sm sm:text-base">
+                            Conseils pour l&apos;image
+                          </AlertTitle>
+                          <AlertDescription className="text-xs sm:text-sm">
                             Utilisez une image au format 16:9 d&apos;au moins
                             800x450 pixels pour un affichage optimal. Les
                             formats supportés sont JPG, JPEG, PNG et WebP.
                           </AlertDescription>
                         </Alert>
                       </CardContent>
-                      <CardFooter className="flex justify-end gap-2 pt-4 border-t">
+                      <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t px-3 sm:px-6">
                         <Button
                           type="button"
                           onClick={() => setActiveTab("basic")}
+                          className="gap-2 w-full sm:w-auto text-sm sm:text-base"
                         >
-                          <ArrowLeft className="mr-2 h-4 w-4" />
+                          <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           Retour
                         </Button>
                         <Button
                           type="submit"
                           disabled={isSubmitting}
-                          className="gap-2"
+                          className="gap-2 w-full sm:w-auto text-sm sm:text-base"
                           variant={"cyna"}
                         >
                           {isSubmitting ? (
                             <>Enregistrement...</>
                           ) : (
                             <>
-                              <Save className="h-4 w-4" />
+                              <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               {isEditing
                                 ? "Mettre à jour"
                                 : "Créer la catégorie"}
@@ -380,19 +413,18 @@ export function CategoryForm({
           </Form>
         </div>
 
-        {/* Colonne d'aperçu */}
-        <div className="lg:col-span-1">
+        <div className="hidden lg:block lg:col-span-1">
           <Card className="sticky top-6">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Pencil className="h-4 w-4" />
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Pencil className="h-4 w-4 sm:h-5 sm:w-5" />
                 Aperçu de la catégorie
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm">
                 Prévisualisation des informations
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 sm:space-y-6">
               <div className="aspect-video rounded-lg overflow-hidden bg-muted relative flex items-center justify-center border">
                 {watchedValues.image ? (
                   <Image
@@ -404,9 +436,11 @@ export function CategoryForm({
                   />
                 ) : (
                   <div className="flex flex-col items-center justify-center text-muted-foreground p-4 text-center">
-                    <ImageIcon className="h-10 w-10 mb-2" />
-                    <p>Aucune image sélectionnée</p>
-                    <p className="text-xs mt-1">
+                    <ImageIcon className="h-8 w-8 sm:h-10 sm:w-10 mb-2" />
+                    <p className="text-sm sm:text-base">
+                      Aucune image sélectionnée
+                    </p>
+                    <p className="text-xs sm:text-sm mt-1">
                       L&apos;image sera affichée ici
                     </p>
                   </div>
@@ -418,7 +452,7 @@ export function CategoryForm({
                   <p className="text-sm font-medium text-muted-foreground mb-1">
                     Nom
                   </p>
-                  <h3 className="text-xl font-semibold">
+                  <h3 className="text-lg sm:text-xl font-semibold">
                     {watchedValues.name || "Nom de la catégorie"}
                   </h3>
                 </div>
@@ -429,7 +463,7 @@ export function CategoryForm({
                   <p className="text-sm font-medium text-muted-foreground mb-1">
                     Description
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground line-clamp-3">
                     {watchedValues.description ||
                       "Description de la catégorie..."}
                   </p>
@@ -446,7 +480,7 @@ export function CategoryForm({
                       <Badge variant="outline">
                         {watchedValues.priority_order || 1}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs sm:text-sm text-muted-foreground">
                         {Number(watchedValues.priority_order) === 1
                           ? "(Priorité maximale)"
                           : Number(watchedValues.priority_order) < 5
@@ -455,37 +489,41 @@ export function CategoryForm({
                       </span>
                     </div>
                   </div>
-                  <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                  <ArrowUpDown className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
                 </div>
-              </div>
 
-              <Separator />
+                <Separator />
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-1">
-                    État du produit
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">
+                      État de la catégorie
+                    </p>
+                    {watchedValues.active ? (
+                      <div className="flex items-center gap-1 text-blue-600">
+                        <Power className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-sm sm:text-base font-medium">
+                          Actif
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <Power className="h-4 w-4 sm:h-5 sm:w-5" />
+                        <span className="text-sm sm:text-base font-medium">
+                          Inactif
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-4">
+                  <p className="text-xs sm:text-sm text-muted-foreground text-center">
+                    {isEditing
+                      ? "Mise à jour de la catégorie"
+                      : "Création d'une nouvelle catégorie"}
                   </p>
-                  {watchedValues.active ? (
-                    <div className="flex items-center gap-1 text-blue-600">
-                      <Power className="h-4 w-4" />
-                      <span className="text-sm font-medium">Actif</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-1 text-gray-500">
-                      <Power className="h-4 w-4" />
-                      <span className="text-sm font-medium">Inactif</span>
-                    </div>
-                  )}
                 </div>
-              </div>
-
-              <div className="pt-4">
-                <p className="text-xs text-muted-foreground text-center">
-                  {isEditing
-                    ? "Mise à jour de la catégorie"
-                    : "Création d'une nouvelle catégorie"}
-                </p>
               </div>
             </CardContent>
           </Card>
