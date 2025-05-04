@@ -67,7 +67,8 @@ export function useContactMessageDetails(messageId: string) {
       }
       setShowDeleteDialog(false)
       toast({
-        title: "Succès",
+        title: "",
+        variant: "success",
         description: "Message supprimé",
       })
       router.push("/dashboard/contact")

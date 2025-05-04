@@ -121,6 +121,7 @@ export function CategoryForm({
         description: isEditing
           ? "Les modifications ont été enregistrées."
           : `La catégorie "${values.name}" a été ajoutée au système.`,
+        variant: "success",
       })
 
       router.push("/dashboard/categories")

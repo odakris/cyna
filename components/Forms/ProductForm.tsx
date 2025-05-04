@@ -114,7 +114,9 @@ export function ProductForm({
       const product_caroussel_images = Array.isArray(
         values.product_caroussel_images
       )
-        ? values.product_caroussel_images
+        ? values.product_caroussel_images.filter(
+            img => img && img.trim() !== ""
+          )
         : []
 
       // Formatage des valeurs avec gestion correcte des images du carrousel
@@ -155,6 +157,8 @@ export function ProductForm({
         }
 
         toast({
+          variant: "success",
+          description: "Le produit a été mis à jour avec succès.",
           title: "Produit mis à jour avec succès !",
         })
 
@@ -181,6 +185,8 @@ export function ProductForm({
         const newProduct = await response.json()
 
         toast({
+          variant: "success",
+          description: "Le produit a été créé avec succès.",
           title: "Produit créé avec succès !",
         })
 

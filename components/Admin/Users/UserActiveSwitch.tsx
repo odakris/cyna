@@ -44,6 +44,7 @@ export default function UserActiveSwitch({
 
       toast({
         title: data.active ? "Utilisateur activé" : "Utilisateur désactivé",
+        variant: data.active ? "success" : "destructive",
         description: `Le statut a été mis à jour avec succès.`,
       })
     } catch {

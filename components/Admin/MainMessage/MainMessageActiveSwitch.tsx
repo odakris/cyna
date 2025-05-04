@@ -32,6 +32,7 @@ export default function MainMessageActiveSwitch({
       // Notification utilisateur
       toast({
         title: !active ? "Message activé" : "Message désactivé",
+        variant: !active ? "success" : "destructive",
         description: `Le statut a été mis à jour avec succès.`,
       })
 

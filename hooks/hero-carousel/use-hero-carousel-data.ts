@@ -77,6 +77,7 @@ export function useHeroCarouselData() {
 
       toast({
         title: "Succès",
+        variant: "success",
         description: `${slideIds.length} slide(s) supprimé(s)`,
       })
 

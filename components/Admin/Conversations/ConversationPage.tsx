@@ -8,10 +8,10 @@ import ConversationFilters from "@/components/Admin/Conversations/ConversationFi
 import ConversationTable from "@/components/Admin/Conversations/ConversationTable"
 import ConversationDeleteDialog from "@/components/Admin/Conversations/ConversationDeleteDialog"
 import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+// import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { RefreshCw } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+// import { Badge } from "@/components/ui/badge"
 import { AlertTriangle } from "lucide-react"
 import { CardTitle, CardDescription } from "@/components/ui/card"
 import { ConversationsListSkeleton } from "@/components/Skeletons/ConversationSkeletons"
@@ -25,7 +25,7 @@ export default function ConversationPage() {
     fetchConversations,
     deleteConversations,
     activeTab,
-    setActiveTab,
+    // setActiveTab,
     stats,
     showDeleteDialog,
     setShowDeleteDialog,
@@ -89,7 +89,7 @@ export default function ConversationPage() {
 
       {/* Filtres et tableau */}
       <Card className="border-border/40 shadow-sm">
-        <CardHeader className="pb-3">
+        {/* <CardHeader className="pb-3">
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
@@ -134,7 +134,7 @@ export default function ConversationPage() {
               </TabsTrigger>
             </TabsList>
           </Tabs>
-        </CardHeader>
+        </CardHeader> */}
 
         <CardContent className="p-6">
           {/* Filtres et options de recherche */}

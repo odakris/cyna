@@ -18,13 +18,13 @@ export default function Home() {
     cta: false,
   })
 
-  const sectionRefs = {
-    mainMessage: useRef<HTMLElement>(null),
-    categories: useRef<HTMLElement>(null),
-    features: useRef<HTMLElement>(null),
-    products: useRef<HTMLElement>(null),
-    cta: useRef<HTMLElement>(null),
-  }
+  const sectionRefs = useRef({
+    mainMessage: React.createRef<HTMLElement>(),
+    categories: React.createRef<HTMLElement>(),
+    features: React.createRef<HTMLElement>(),
+    products: React.createRef<HTMLElement>(),
+    cta: React.createRef<HTMLElement>(),
+  }).current
 
   useEffect(() => {
     const observerOptions = {
@@ -54,7 +54,7 @@ export default function Home() {
     return () => {
       observer.disconnect()
     }
-  }, [])
+  }, [sectionRefs])
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen md:space-y-16">

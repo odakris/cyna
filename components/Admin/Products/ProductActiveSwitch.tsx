@@ -56,6 +56,7 @@ export default function ProductActiveSwitch({
 
       toast({
         title: data.active ? "Produit activé" : "Produit désactivé",
+        variant: data.active ? "success" : "destructive",
         description: `Le statut a été mis à jour avec succès.`,
       })
     } catch {

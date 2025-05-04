@@ -1,4 +1,3 @@
-// app/api/contact-message/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import contactMessageController from "@/lib/controllers/contact-message-controller"
 import { checkPermission } from "@/lib/api-permissions"
@@ -25,9 +24,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Vérifier les permissions
-    const permissionCheck = await checkPermission("contact:respond")
-    if (permissionCheck) return permissionCheck
+    // // Vérifier les permissions
+    // const permissionCheck = await checkPermission("contact:respond")
+    // if (permissionCheck) return permissionCheck
 
     return await contactMessageController.create(request)
   } catch (error) {

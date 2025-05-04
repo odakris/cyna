@@ -74,7 +74,7 @@ export const create = async (data: UserFormValues): Promise<User> => {
 
       if (existingUser) {
         throw new Error(
-          `Un utilisateur avec l'email '${data.email.trim()}' existe déjà`
+          `EMAIL_EXISTS:Un utilisateur avec l'email '${data.email.trim()}' existe déjà`
         )
       }
 
@@ -94,6 +94,9 @@ export const create = async (data: UserFormValues): Promise<User> => {
       })
     })
   } catch (error) {
+    if (error instanceof Error && error.message.startsWith("EMAIL_EXISTS:")) {
+      throw error
+    }
     console.error("Impossible de créer l'utilisateur:", error)
     throw new Error("Impossible de créer l'utilisateur")
   }

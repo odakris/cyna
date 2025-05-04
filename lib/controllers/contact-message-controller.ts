@@ -51,14 +51,22 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
     const body = await request.json()
 
     // Validation simple
-    if (!body.email || !body.subject || !body.message) {
+    if (
+      !body.first_name ||
+      !body.last_name ||
+      !body.email ||
+      !body.subject ||
+      !body.message
+    ) {
       return NextResponse.json(
-        { error: "Email, sujet et message sont requis" },
+        { error: "Prénom, nom, email, sujet et message sont requis" },
         { status: 400 }
       )
     }
 
     const createdMessage = await contactMessageService.createMessage({
+      first_name: body.first_name,
+      last_name: body.last_name,
       email: body.email,
       subject: body.subject,
       message: body.message,

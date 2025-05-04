@@ -44,6 +44,7 @@ export default function MainMessageBackgroundSwitch({
           ? "Arrière-plan activé"
           : "Arrière-plan désactivé",
         description: `Le statut de l'arrière-plan a été mis à jour avec succès.`,
+        variant: !hasBackground ? "success" : "destructive",
       })
     } catch {
       toast({

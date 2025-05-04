@@ -2,6 +2,14 @@
 import { z } from "zod"
 
 export const contactMessageSchema = z.object({
+  first_name: z
+    .string()
+    .min(1, "Le prénom est requis")
+    .max(100, "Le prénom ne peut pas dépasser 100 caractères"),
+  last_name: z
+    .string()
+    .min(1, "Le nom est requis")
+    .max(100, "Le nom ne peut pas dépasser 100 caractères"),
   email: z
     .string()
     .min(1, "L'email est requis")

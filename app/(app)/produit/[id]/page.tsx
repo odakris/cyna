@@ -133,7 +133,7 @@ export default function ProductPage() {
               variant="outline"
               className="mt-4 border-amber-300 text-amber-700 hover:bg-amber-50"
             >
-              <Link href="/categories">
+              <Link href="/produit">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Voir nos produits disponibles
               </Link>
@@ -179,11 +179,11 @@ export default function ProductPage() {
     toast({
       title: "Produit ajouté au panier",
       description: `${quantity} × ${product.name} (${subscriptionType.toLowerCase().replace("_", " ")})`,
+      variant: "success",
       action: (
         <Button
           asChild
           variant="outline"
-          size="sm"
           className="border-[#302082] text-[#302082]"
         >
           <Link href="/panier">Voir le panier</Link>

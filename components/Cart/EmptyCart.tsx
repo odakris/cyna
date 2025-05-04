@@ -19,7 +19,7 @@ const EmptyCart: React.FC = () => {
         adaptées aux besoins de votre entreprise.
       </p>
       <Button asChild className="bg-[#302082] hover:bg-[#302082]/90">
-        <Link href="/categories">
+        <Link href="/produit">
           Découvrir nos produits <ArrowRight className="ml-2 h-4 w-4" />
         </Link>
       </Button>

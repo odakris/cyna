@@ -34,7 +34,7 @@ export default function CategoryHeader({
 
         <div className="flex flex-wrap gap-3">
           <Button asChild variant="outline">
-            <Link href={`/categories/${category.id_category}`} target="_blank">
+            <Link href={`/categorie/${category.id_category}`} target="_blank">
               <ExternalLink className="mr-2 h-4 w-4" />
               Voir sur le site
             </Link>

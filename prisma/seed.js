@@ -79,7 +79,7 @@ async function main() {
         available: true,
         priority_order: 1,
         main_image:
-          "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1000",
+          "https://images.pexels.com/photos/60504/security-protection-anti-virus-software-60504.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
         stock: Math.floor(Math.random() * 10) + 10, // Stock plus élevé
         id_category: prevention.id_category,
         active: true,
@@ -98,7 +98,7 @@ async function main() {
         available: true,
         priority_order: 2,
         main_image:
-          "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000",
+          "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5",
         stock: Math.floor(Math.random() * 10) + 5,
         id_category: prevention.id_category,
         active: true,
@@ -117,7 +117,7 @@ async function main() {
         available: true,
         priority_order: 3,
         main_image:
-          "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1000",
+          "https://images.unsplash.com/photo-1524178232363-1fb2b075b655",
         stock: Math.floor(Math.random() * 10) + 15,
         id_category: prevention.id_category,
         active: true,
@@ -136,7 +136,7 @@ async function main() {
         available: true,
         priority_order: 4,
         main_image:
-          "https://images.unsplash.com/photo-1575467678930-c7acd65d6470?q=80&w=1000",
+          "https://images.unsplash.com/photo-1577563908411-5077b6dc7624",
         stock: Math.floor(Math.random() * 10) + 8,
         id_category: prevention.id_category,
         active: true,
@@ -154,8 +154,7 @@ async function main() {
         discount_price: null,
         available: true,
         priority_order: 1,
-        main_image:
-          "https://images.unsplash.com/photo-1551808525-51a94da548ce?q=80&w=1000",
+        main_image: "https://images.unsplash.com/photo-1551434678-e076c223a692",
         stock: Math.floor(Math.random() * 10) + 8,
         id_category: protection.id_category,
         active: true,
@@ -174,7 +173,7 @@ async function main() {
         available: true,
         priority_order: 2,
         main_image:
-          "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=1000",
+          "https://images.pexels.com/photos/31862218/pexels-photo-31862218/free-photo-of-jeune-homme-dans-une-piece-sombre-travaillant-sur-la-configuration-d-un-ordinateur.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
         stock: Math.floor(Math.random() * 10) + 5,
         id_category: protection.id_category,
         active: true,
@@ -193,7 +192,7 @@ async function main() {
         available: true,
         priority_order: 3,
         main_image:
-          "https://images.unsplash.com/photo-1593642532973-d31b6557fa68?q=80&w=1000",
+          "https://images.unsplash.com/photo-1617802690658-1173a812650d",
         stock: Math.floor(Math.random() * 10) + 7,
         id_category: protection.id_category,
         active: true,
@@ -212,7 +211,7 @@ async function main() {
         available: true,
         priority_order: 4,
         main_image:
-          "https://images.unsplash.com/photo-1614064642639-e398cf05badb?q=80&w=1000",
+          "https://images.pexels.com/photos/5473956/pexels-photo-5473956.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
         stock: Math.floor(Math.random() * 10) + 6,
         id_category: protection.id_category,
         active: true,
@@ -231,7 +230,7 @@ async function main() {
         available: true,
         priority_order: 5,
         main_image:
-          "https://images.unsplash.com/photo-1563237023-b1e970526dcb?q=80&w=1000",
+          "https://images.pexels.com/photos/211151/pexels-photo-211151.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
         stock: Math.floor(Math.random() * 10) + 10,
         id_category: protection.id_category,
         active: true,
@@ -250,7 +249,7 @@ async function main() {
         available: true,
         priority_order: 1,
         main_image:
-          "https://images.unsplash.com/photo-1633265486501-0cf524a07213?q=80&w=1000",
+          "https://images.unsplash.com/photo-1633419461186-7d40a38105ec",
         stock: Math.floor(Math.random() * 10) + 3,
         id_category: reponse.id_category,
         active: true,
@@ -269,7 +268,7 @@ async function main() {
         available: true,
         priority_order: 2,
         main_image:
-          "https://images.unsplash.com/photo-1590856029826-c7a73142bbf1?q=80&w=1000",
+          "https://images.pexels.com/photos/5380655/pexels-photo-5380655.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
         stock: Math.floor(Math.random() * 5) + 2,
         id_category: reponse.id_category,
         active: true,
@@ -288,7 +287,7 @@ async function main() {
         available: true,
         priority_order: 3,
         main_image:
-          "https://images.unsplash.com/photo-1598128558393-70ff21433be0?q=80&w=1000",
+          "https://images.unsplash.com/photo-1585079374502-415f8516dcc3",
         stock: Math.floor(Math.random() * 10) + 4,
         id_category: reponse.id_category,
         active: true,
@@ -307,7 +306,7 @@ async function main() {
         available: true,
         priority_order: 4,
         main_image:
-          "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=1000",
+          "https://images.pexels.com/photos/5380596/pexels-photo-5380596.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
         stock: Math.floor(Math.random() * 5) + 2,
         id_category: reponse.id_category,
         active: true,
@@ -320,286 +319,286 @@ async function main() {
       data: [
         // Diagnostic Cyber
         {
-          url: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=1000",
+          url: "https://images.pexels.com/photos/430208/pexels-photo-430208.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
           alt: "Diagnostic Cyber - Vue d'ensemble",
           id_product: diagnosticCyber.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1597733336794-12d05021d510?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1551808525-51a94da548ce",
           alt: "Tableau de bord principal du diagnostic cyber",
           id_product: diagnosticCyber.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1614064643227-88dbbd80dd0c?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1573164713988-8665fc963095",
           alt: "Interface d'analyse des vulnérabilités",
           id_product: diagnosticCyber.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1504639725590-34d0984388bd",
           alt: "Rapport de diagnostic et cartographie des risques",
           id_product: diagnosticCyber.id_product,
         },
 
         // Test d'intrusion
         {
-          url: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1548092372-0d1bd40894a3",
           alt: "Test d'intrusion - Vue d'ensemble",
           id_product: testIntrusion.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1526374870839-e155464bb9b2?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1580927752452-89d86da3fa0a",
           alt: "Console de pentesting en action",
           id_product: testIntrusion.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1541728472741-03e45a58cf88?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1607799279861-4dd421887fb3",
           alt: "Analyse des vulnérabilités découvertes",
           id_product: testIntrusion.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1607798748738-b15c38a842b7?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1510915228340-29c85a43dcfe",
           alt: "Rapport détaillé des failles identifiées",
           id_product: testIntrusion.id_product,
         },
 
         // Formation Cybersécurité
         {
-          url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1523240795612-9a054b0db644",
           alt: "Formation Cybersécurité - Vue d'ensemble",
           id_product: formationCybersecurite.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
           alt: "Plateforme de formation en ligne",
           id_product: formationCybersecurite.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0",
           alt: "Session de formation pratique",
           id_product: formationCybersecurite.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1531482615713-2afd69097998",
           alt: "Simulation de phishing pour formation",
           id_product: formationCybersecurite.id_product,
         },
 
         // Audit RGPD
         {
-          url: "https://images.unsplash.com/photo-1575467678930-c7acd65d6470?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3",
           alt: "Audit RGPD - Vue d'ensemble",
           id_product: auditRGPD.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1568992688065-536aad8a12f6",
           alt: "Interface d'analyse de conformité RGPD",
           id_product: auditRGPD.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1569235186275-626cb53b83ce?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1507925921958-8a62f3d1a50d",
           alt: "Cartographie des traitements de données",
           id_product: auditRGPD.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f",
           alt: "Plan d'action correctif RGPD",
           id_product: auditRGPD.id_product,
         },
 
         // Micro SOC
         {
-          url: "https://images.unsplash.com/photo-1551808525-51a94da548ce?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1489875347897-49f64b51c1f8",
           alt: "Micro SOC - Vue d'ensemble",
           id_product: microSOC.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f",
           alt: "Tableau de bord du Centre d'Opérations de Sécurité",
           id_product: microSOC.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1610018556010-6a11691bc905?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d",
           alt: "Interface de monitoring temps réel",
           id_product: microSOC.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1544890225-2f3faec4cd60?q=80&w=1000",
+          url: "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
           alt: "Analyse des logs et alertes de sécurité",
           id_product: microSOC.id_product,
         },
 
         // SOC Managé
         {
-          url: "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
           alt: "SOC Managé - Vue d'ensemble",
           id_product: socManage.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1569025690938-a00729c9e1f9",
           alt: "Centre d'opérations de sécurité 24/7",
           id_product: socManage.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1557838429-a6e1f668bf3f?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7",
           alt: "Tableau de bord avancé de monitoring",
           id_product: socManage.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1569028639620-79befdb5c3ed?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1555099962-4199c345e5dd",
           alt: "Analyse des menaces en temps réel",
           id_product: socManage.id_product,
         },
 
         // EDR Solution
         {
-          url: "https://images.unsplash.com/photo-1593642532973-d31b6557fa68?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1555949963-aa79dcee981c",
           alt: "EDR - Vue d'ensemble",
           id_product: edrSolution.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1562813733-b31f71025d54",
           alt: "Tableau de bord de détection des menaces sur endpoints",
           id_product: edrSolution.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1558050032-160f36233a07?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1610018556010-6a11691bc905",
           alt: "Interface d'analyse comportementale en temps réel",
           id_product: edrSolution.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1542546068979-b6affb46ea8f?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1579403124614-197f69d8187b",
           alt: "Visualisation de la chaîne d'attaque sur endpoint",
           id_product: edrSolution.id_product,
         },
 
         // XDR Platform
         {
-          url: "https://images.unsplash.com/photo-1614064642639-e398cf05badb?q=80&w=1000",
+          url: "https://images.pexels.com/photos/5380607/pexels-photo-5380607.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
           alt: "XDR - Vue d'ensemble",
           id_product: xdrPlatform.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1593062096033-9a26b09da705?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
           alt: "Plateforme unifiée d'analyse multi-vecteur",
           id_product: xdrPlatform.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1601056639638-c53c50e13ead?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1515879218367-8466d910aaa4",
           alt: "Visualisation avancée des menaces corrélées",
           id_product: xdrPlatform.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1527689368864-3a821dbccc34?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1478826160983-e6db8c7d537a",
           alt: "Interface de réponse orchestrée aux incidents",
           id_product: xdrPlatform.id_product,
         },
 
         // Anti-Phishing
         {
-          url: "https://images.unsplash.com/photo-1563237023-b1e970526dcb?q=80&w=1000",
+          url: "https://images.pexels.com/photos/6963098/pexels-photo-6963098.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
           alt: "Protection Email & Anti-Phishing - Vue d'ensemble",
           id_product: antiPhishing.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1614332287897-cdc485fa562d?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1596526131083-e8c633c948d2",
           alt: "Interface de filtrage des emails malveillants",
           id_product: antiPhishing.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1526374870839-e155464bb9b2",
           alt: "Tableau de bord des tentatives de phishing bloquées",
           id_product: antiPhishing.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1590103514966-5e2a11c13e21?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d",
           alt: "Plateforme de simulation et sensibilisation au phishing",
           id_product: antiPhishing.id_product,
         },
 
         // Investigation
         {
-          url: "https://images.unsplash.com/photo-1633265486501-0cf524a07213?q=80&w=1000",
+          url: "https://images.pexels.com/photos/5475750/pexels-photo-5475750.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
           alt: "Investigation, éradication, remédiation - Vue d'ensemble",
           id_product: investigation.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1503551723145-6c040742065b-v2?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1609743522653-52354461eb27",
           alt: "Interface d'analyse forensique numérique",
           id_product: investigation.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1510511459019-5dda7724fd87?q=80&w=1000",
+          url: "https://images.pexels.com/photos/5935791/pexels-photo-5935791.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
           alt: "Visualisation des indicateurs de compromission",
           id_product: investigation.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1504639725590-34d0984388bd?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1579621970795-87facc2f976d",
           alt: "Tableau de bord de remédiation des menaces",
           id_product: investigation.id_product,
         },
 
         // Crisis Management
         {
-          url: "https://images.unsplash.com/photo-1590856029826-c7a73142bbf1?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1542744095-291d1f67b221",
           alt: "Gestion de crise cybersécurité - Vue d'ensemble",
           id_product: crisisManagement.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1496096265110-f83ad7f96608?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1517048676732-d65bc937f952",
           alt: "Interface de coordination de crise",
           id_product: crisisManagement.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1574944985070-8f3ebc6b79d2?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1588681664899-f142ff2dc9b1",
           alt: "Tableau de bord de communication en situation de crise",
           id_product: crisisManagement.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1573497620053-ea5300f94f21?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1556761175-5973dc0f32e7",
           alt: "Plan de continuité d'activité post-incident",
           id_product: crisisManagement.id_product,
         },
 
         // Cyber Threat Intelligence
         {
-          url: "https://images.unsplash.com/photo-1598128558393-70ff21433be0?q=80&w=1000",
+          url: "https://images.pexels.com/photos/3260626/pexels-photo-3260626.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
           alt: "Cyber Threat Intelligence - Vue d'ensemble",
           id_product: cyberThreatIntelligence.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1510511336377-1a9d3abcbd61?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1553877522-43269d4ea984",
           alt: "Plateforme d'analyse des menaces",
           id_product: cyberThreatIntelligence.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1489875347897-49f64b51c1f8",
           alt: "Dashboard de veille sur les menaces émergentes",
           id_product: cyberThreatIntelligence.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1563237023-b1e970526dcb?q=80&w=1000",
+          url: "https://images.pexels.com/photos/1933900/pexels-photo-1933900.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
           alt: "Visualisation des acteurs de menace par secteur",
           id_product: cyberThreatIntelligence.id_product,
         },
 
         // Red Team
         {
-          url: "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1573511860302-28c524319d2a",
           alt: "Red Team - Simulation d'attaques avancées - Vue d'ensemble",
           id_product: redTeam.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1548092372-0d1bd40894a3?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1504270997636-07ddfbd48945",
           alt: "Interface de planification d'opérations Red Team",
           id_product: redTeam.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1563291589-4e9a1757428d?q=80&w=1000",
+          url: "https://images.unsplash.com/photo-1523961131990-5ea7c61b2107",
           alt: "Tableau de bord de simulation d'attaque en cours",
           id_product: redTeam.id_product,
         },
         {
-          url: "https://images.unsplash.com/photo-1550439062-609e1531270e?q=80&w=1000",
+          url: "https://images.pexels.com/photos/8720589/pexels-photo-8720589.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
           alt: "Rapport d'analyse post-simulation d'attaque",
           id_product: redTeam.id_product,
         },
@@ -637,7 +636,7 @@ async function main() {
           description:
             "Surveillance continue et réponse immédiate aux menaces pour une protection optimale",
           image_url:
-            "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=1920",
+            "https://images.pexels.com/photos/2061168/pexels-photo-2061168.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
           button_text: "Découvrir le service",
           button_link: "/produit/4",
           active: true,
@@ -1753,6 +1752,8 @@ async function main() {
     console.log("Création des messages de contact...")
     await prisma.contactMessage.create({
       data: {
+        first_name: "Jean",
+        last_name: "Dupont",
         email: "jean.dupont@example.com",
         subject: "Question sur le diagnostic cyber",
         message:
@@ -1769,6 +1770,8 @@ async function main() {
 
     await prisma.contactMessage.create({
       data: {
+        first_name: "Marie",
+        last_name: "Martin",
         email: "marie.martin@example.com",
         subject: "Demande de devis personnalisé",
         message:
@@ -1782,6 +1785,8 @@ async function main() {
 
     await prisma.contactMessage.create({
       data: {
+        first_name: "Michel",
+        last_name: "Dupuis",
         email: "contact@entreprise-xyz.fr",
         subject: "Demande d'information",
         message:
@@ -1795,6 +1800,8 @@ async function main() {
     // Messages récents
     await prisma.contactMessage.create({
       data: {
+        first_name: "Alexandre",
+        last_name: "Petit",
         email: "alexandre.petit@example.com",
         subject: "Question technique sur le Micro SOC",
         message:
@@ -1811,6 +1818,8 @@ async function main() {
 
     await prisma.contactMessage.create({
       data: {
+        first_name: "Caroline",
+        last_name: "Durand",
         email: "caroline.durand@example.com",
         subject: "Renouvellement de contrat",
         message:

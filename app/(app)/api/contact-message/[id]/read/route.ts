@@ -1,4 +1,3 @@
-// app/api/contact-message/[id]/read/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import contactMessageController from "@/lib/controllers/contact-message-controller"
 import { validateId } from "@/lib/utils/utils"

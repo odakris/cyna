@@ -9,7 +9,6 @@ import {
   DialogClose,
 } from "@/components/ui/dialog"
 import { Trash2 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 
 interface DeleteDialogProps {
   showDeleteDialog: boolean
@@ -30,11 +29,7 @@ export default function DeleteDialog({
         <DialogHeader>
           <DialogTitle>Confirmer la suppression</DialogTitle>
           <DialogDescription>
-            Vous êtes sur le point de supprimer{" "}
-            <Badge variant="outline" className="font-semibold mx-1">
-              {selectedCount}
-            </Badge>
-            utilisateur
+            Vous êtes sur le point de supprimer {selectedCount} utilisateur
             {selectedCount > 1 ? "s" : ""}. Cette action ne peut pas être
             annulée.
           </DialogDescription>

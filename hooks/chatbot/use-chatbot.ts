@@ -11,6 +11,17 @@ interface Message {
   type: MessageType
 }
 
+interface MessageData {
+  response: string
+  needsHumanSupport: boolean
+  collectedData?: {
+    email?: string
+    subject?: string
+    message?: string
+  }
+  context?: string
+}
+
 export function useChatbot() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -61,7 +72,7 @@ export function useChatbot() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            userId: session?.user?.id || null,
+            userId: session?.user?.id_user || null,
             email: session?.user?.email || null,
           }),
         })
@@ -192,8 +203,7 @@ export function useChatbot() {
     }
   }
 
-  // Traiter la réponse du chatbot (factorisation du code commun)
-  const handleMessageResponse = (messageData: any) => {
+  const handleMessageResponse = (messageData: MessageData) => {
     // Ajouter la réponse du bot
     setMessages(prev => [
       ...prev,
@@ -289,7 +299,9 @@ export function useChatbot() {
           email: finalEmail,
           subject: `[Via Chatbot IA] ${subject}`,
           message: message,
-          id_user: session?.user?.id ? parseInt(session.user.id) : null,
+          id_user: session?.user?.id_user
+            ? parseInt(session.user.id_user.toString())
+            : null,
         }),
       })
 
@@ -317,6 +329,7 @@ export function useChatbot() {
       ])
 
       toast({
+        variant: "success",
         title: "Demande envoyée",
         description: "Votre demande a été transmise à notre équipe.",
       })

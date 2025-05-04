@@ -105,6 +105,7 @@ export default function UserForm({ userId }: UserFormPageProps) {
         }
 
         toast({
+          variant: "success",
           title: "Utilisateur mis à jour avec succès !",
           description: "Les informations ont été mises à jour.",
         })
@@ -120,16 +121,30 @@ export default function UserForm({ userId }: UserFormPageProps) {
           body: JSON.stringify(formattedValues),
         })
 
+        // Lire le corps de la réponse UNE SEULE FOIS et stocker le résultat
+        const responseData = await response.json()
+
+        // Vérifier le statut de la réponse APRÈS avoir lu le corps
         if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(
-            errorData.message || "Erreur lors de la création de l'utilisateur"
-          )
+          // Utiliser les informations d'erreur du corps de la réponse
+          if (
+            responseData.error &&
+            responseData.error.includes("existe déjà")
+          ) {
+            throw new Error(`Email déjà utilisé: ${responseData.error}`)
+          } else {
+            throw new Error(
+              responseData.error ||
+                "Erreur lors de la création de l'utilisateur"
+            )
+          }
         }
 
-        const newUser = await response.json()
+        // Si la réponse est OK, utiliser les données déjà extraites
+        const newUser = responseData
 
         toast({
+          variant: "success",
           title: "Utilisateur créé avec succès !",
           description: "Un nouvel utilisateur a été ajouté au système.",
         })
@@ -141,15 +156,27 @@ export default function UserForm({ userId }: UserFormPageProps) {
         }
       }
     } catch (error) {
-      console.error("Erreur onSubmit:", error)
-      toast({
-        title: "Erreur",
-        description:
-          error instanceof Error
-            ? error.message
-            : `Erreur lors de la ${isEditing ? "mise à jour" : "création"} de l'utilisateur.`,
-        variant: "destructive",
-      })
+      if (error instanceof Error) {
+        if (error.message.includes("Email déjà utilisé")) {
+          toast({
+            title: "Email déjà utilisé",
+            description: error.message.replace("Email déjà utilisé: ", ""),
+            variant: "destructive",
+          })
+        } else {
+          toast({
+            title: "Erreur",
+            description: error.message,
+            variant: "destructive",
+          })
+        }
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Une erreur inconnue s'est produite",
+          variant: "destructive",
+        })
+      }
     } finally {
       setIsSubmitting(false)
     }
