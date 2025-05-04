@@ -1,4 +1,3 @@
-// components/Admin/AdminSideBar.tsx
 "use client"
 import { usePathname } from "next/navigation"
 import {
@@ -24,8 +23,14 @@ import { useUnreadMessagesNotification } from "@/hooks/contact-messages/use-unre
 import { Badge } from "@/components/ui/badge"
 import { useEffect, useState } from "react"
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet"
+import { hasPermission, Permission } from "@/lib/permissions"
+import { Role } from "@prisma/client"
 
-export default function AdminSideBar() {
+interface AdminSideBarProps {
+  role?: Role
+}
+
+export default function AdminSideBar({ role }: AdminSideBarProps) {
   const pathname = usePathname()
   const { unreadCount, hasNewMessages } = useUnreadMessagesNotification()
   const [isMobile, setIsMobile] = useState(false)
@@ -52,65 +57,80 @@ export default function AdminSideBar() {
     return () => window.removeEventListener("resize", checkScreenSize)
   }, [])
 
+  // Navigation links with required permissions
   const navLinks = [
     {
       name: "Dashboard",
       href: "/dashboard",
       icon: <Home className="h-5 w-5" />,
       exact: true,
+      requiredPermissions: ["dashboard:view"] as Permission[],
     },
     {
       name: "Message Principal",
       href: "/dashboard/main-message",
       icon: <MessageSquareText className="h-5 w-5" />,
       exact: false,
+      requiredPermissions: ["main-message:view"] as Permission[],
     },
     {
       name: "Hero Carousel",
       href: "/dashboard/hero-carousel",
       icon: <SlidersHorizontal className="h-5 w-5" />,
       exact: false,
+      requiredPermissions: ["hero-carousel:view"] as Permission[],
     },
     {
       name: "Produits",
       href: "/dashboard/products",
       icon: <Package className="h-5 w-5" />,
       exact: false,
+      requiredPermissions: ["products:view"] as Permission[],
     },
     {
       name: "Catégories",
       href: "/dashboard/categories",
       icon: <List className="h-5 w-5" />,
       exact: false,
+      requiredPermissions: ["categories:view"] as Permission[],
     },
     {
       name: "Utilisateurs",
       href: "/dashboard/users",
       icon: <Users className="h-5 w-5" />,
       exact: false,
+      requiredPermissions: ["users:view"] as Permission[],
     },
     {
       name: "Commandes",
       href: "/dashboard/orders",
       icon: <ShoppingCart className="h-5 w-5" />,
       exact: false,
+      requiredPermissions: ["orders:view"] as Permission[],
     },
     {
       name: "Contact",
       href: "/dashboard/contact",
       icon: <Mail className="h-5 w-5" />,
       exact: false,
-      notification: unreadCount > 0,
+      notification: unreadCount > 0 && hasPermission(role, "contact:view"),
       notificationCount: unreadCount,
       hasNewMessages: hasNewMessages,
+      requiredPermissions: ["contact:view"] as Permission[],
     },
     {
       name: "Chatbot",
       href: "/dashboard/conversations",
       icon: <BotMessageSquare className="h-5 w-5" />,
       exact: false,
+      requiredPermissions: ["conversations:view"] as Permission[],
     },
   ]
+
+  // Filter navigation links based on user permissions
+  const authorizedNavLinks = navLinks.filter(item =>
+    item.requiredPermissions.some(permission => hasPermission(role, permission))
+  )
 
   const isActive = (item: { href: string; exact: boolean }) => {
     if (item.exact) {
@@ -119,7 +139,7 @@ export default function AdminSideBar() {
     return pathname === item.href || pathname.startsWith(`${item.href}/`)
   }
 
-  // Mobile toggle button that reste fixe et toujours accessible pendant le défilement
+  // Mobile toggle button that remains fixed and accessible during scrolling
   const MobileToggle = () => (
     <Button
       variant="secondary"
@@ -145,43 +165,48 @@ export default function AdminSideBar() {
       </div>
       <Separator />
       <ScrollArea className="flex-1 py-2">
-        <nav className="space-y-1 px-3">
-          {navLinks.map(item => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className="block"
-              onClick={() => isMobile && setIsOpen(false)}
-            >
-              <Button
-                variant={isActive(item) ? "secondary" : "ghost"}
-                className={cn(
-                  "w-full justify-start h-12 mb-1 px-4 relative",
-                  isActive(item)
-                    ? "font-medium"
-                    : "font-normal text-muted-foreground hover:text-foreground"
-                )}
+        {authorizedNavLinks.length > 0 ? (
+          <nav className="space-y-1 px-3">
+            {authorizedNavLinks.map(item => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className="block"
+                onClick={() => isMobile && setIsOpen(false)}
               >
-                {item.icon}
-                <span className="ml-3">{item.name}</span>
-
-                {item.notification && (
-                  <Badge
-                    variant="destructive"
-                    className={cn(
-                      "absolute -top-1 -right-1 px-1.5 h-5 min-w-[20px] flex items-center justify-center",
-                      item.hasNewMessages && "animate-pulse bg-blue-500"
-                    )}
-                  >
-                    {item.notificationCount > 99
-                      ? "99+"
-                      : item.notificationCount}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
-          ))}
-        </nav>
+                <Button
+                  variant={isActive(item) ? "secondary" : "ghost"}
+                  className={cn(
+                    "w-full justify-start h-12 mb-1 px-4 relative",
+                    isActive(item)
+                      ? "font-medium"
+                      : "font-normal text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {item.icon}
+                  <span className="ml-3">{item.name}</span>
+                  {item.notification && (
+                    <Badge
+                      variant="destructive"
+                      className={cn(
+                        "absolute -top-1 -right-1 px-1.5 h-5 min-w-[20px] flex items-center justify-center",
+                        item.hasNewMessages && "animate-pulse bg-blue-500"
+                      )}
+                    >
+                      {item.notificationCount > 99
+                        ? "99+"
+                        : item.notificationCount}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
+            ))}
+          </nav>
+        ) : (
+          <div className="p-4 text-center text-muted-foreground">
+            Aucun accès autorisé
+          </div>
+        )}
       </ScrollArea>
     </>
   )
@@ -189,7 +214,6 @@ export default function AdminSideBar() {
   return (
     <>
       <MobileToggle />
-
       {/* Mobile sidebar using Sheet component from shadcn */}
       {isMobile ? (
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
