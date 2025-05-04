@@ -592,80 +592,21 @@ function CheckoutContent() {
 
       const responseData = await response.json();
 
-      if (!response.ok) {
+      if (response.ok) {
+        console.log('[CheckoutPage] Paiement réussi:', {
+          orderId: responseData.orderId,
+          paymentIntentId: responseData.paymentIntentId,
+        });
+        setCart([]);
+        router.push(`/checkout/success?orderId=${responseData.orderId}`);
+      } else {
         console.error('[CheckoutPage] Échec du paiement:', responseData);
         setError(
           responseData.error.includes('Moyen de paiement')
             ? 'Le moyen de paiement sélectionné est invalide ou non configuré. Veuillez en ajouter un nouveau.'
             : `Paiement échoué : ${responseData.error || 'Erreur inconnue'}`
         );
-        return;
       }
-
-      console.log('[CheckoutPage] Paiement réussi:', {
-        orderId: responseData.orderId,
-        paymentIntentId: responseData.paymentIntentId,
-      });
-
-      // Appel à /api/checkout/confirmation
-      console.log('[CheckoutPage] Tentative d’appel à /api/checkout/confirmation:', {
-        paymentIntentId: responseData.paymentIntentId,
-        addressId: addressIdToSend,
-        paymentId: paymentIdToSend,
-        guestId: isGuest ? userId : undefined,
-        userId,
-      });
-
-      const confirmationResponse = await fetch(
-        `/api/checkout/confirmation?payment_intent_id=${responseData.paymentIntentId}&addressId=${addressIdToSend}&paymentId=${paymentIdToSend}${isGuest ? `&guestId=${userId}` : ''}`,
-        {
-          method: 'POST',
-          headers: { 'x-user-id': userId.toString() },
-        }
-      );
-
-      if (!confirmationResponse.ok) {
-        const errorData = await confirmationResponse.json();
-        console.error('[CheckoutPage] Erreur /api/checkout/confirmation:', errorData);
-        setError(`Erreur lors de la confirmation de la commande: ${errorData.error || 'Erreur inconnue'}`);
-        return;
-      }
-
-      const confirmationData = await confirmationResponse.json();
-      console.log('[CheckoutPage] Réponse de confirmation:', {
-        orderId: confirmationData.id_order,
-        invoice_number: confirmationData.invoice_number,
-        invoice_pdf_url: confirmationData.invoice_pdf_url,
-      });
-
-      // Télécharger la facture
-      console.log('[CheckoutPage] Tentative de téléchargement de la facture:', {
-        invoice_number: confirmationData.invoice_number,
-      });
-
-      const invoiceResponse = await fetch(`/api/invoice/download?invoice_number=${confirmationData.invoice_number}`, {
-        method: 'GET',
-      });
-
-      if (invoiceResponse.ok) {
-        const pdfBlob = await invoiceResponse.blob();
-        const url = window.URL.createObjectURL(pdfBlob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `facture-${confirmationData.invoice_number}.pdf`;
-        link.click();
-        window.URL.revokeObjectURL(url);
-        console.log('[CheckoutPage] Facture téléchargée avec succès:', {
-          invoice_number: confirmationData.invoice_number,
-        });
-      } else {
-        const errorData = await invoiceResponse.json();
-        console.error('[CheckoutPage] Erreur génération facture:', errorData);
-        setError(`Erreur lors de la génération de la facture: ${errorData.error || 'Erreur inconnue'}`);
-      }
-
-      setCart([]);
-      router.push(`/checkout/success?orderId=${responseData.orderId}`);
     } catch (err) {
       console.error('[CheckoutPage] Erreur réseau:', err);
       setError('Erreur réseau lors du traitement du paiement');
