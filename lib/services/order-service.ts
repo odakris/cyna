@@ -1,18 +1,9 @@
-<<<<<<< HEAD
-import { endOfDay, endOfMonth, endOfYear, parseISO, startOfDay, startOfMonth, startOfYear } from "date-fns";
-import { prisma } from "../prisma";
-import orderRepository from "../repositories/order-repository";
-import { OrderInputValues, orderFormSchema, orderInputSchema } from "../validations/order-schema";
-import { Order, OrderStatus, Prisma, SubscriptionStatus, SubscriptionType } from "@prisma/client";
-import { ZodError } from "zod";
-=======
 import { endOfDay, endOfMonth, endOfYear, parseISO, startOfDay, startOfMonth, startOfYear } from "date-fns"
 import { prisma } from "../prisma"
 import orderRepository from "../repositories/order-repository"
 import { OrderInputValues, orderFormSchema } from "../validations/order-schema"
 import { Order, OrderStatus, Prisma } from "@prisma/client"
 import { ZodError } from "zod"
->>>>>>> af48fcfe10517eab37a005109f937cf9a2f02dc0
 
 // Définir un type pour Order avec les relations incluses
 type OrderWithRelations = Prisma.OrderGetPayload<{
@@ -500,8 +491,6 @@ export const getUserOrderHistory = async (
     }
 };
 
-<<<<<<< HEAD
-=======
 export const getOrderByIdForInvoice = async (
     orderId: number,
     userId?: string
@@ -578,7 +567,6 @@ export const getOrderByIdForInvoice = async (
 };
 
 
->>>>>>> af48fcfe10517eab37a005109f937cf9a2f02dc0
 const orderService = {
     create,
     getAllOrders,

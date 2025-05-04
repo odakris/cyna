@@ -64,7 +64,7 @@ export class AddressRepository {
                 address2: data.address2,
                 postal_code: data.postal_code,
                 city: data.city,
-                region: data.region,
+                region: data.region || "",
                 country: data.country,
                 mobile_phone: data.mobile_phone,
                 is_default_billing: !!data.is_default_billing,

@@ -1045,99 +1045,107 @@ async function main() {
     })
 
     // Création des informations de paiement - STRUCTURE MISE À JOUR
-    console.log("Création des informations de paiement...")
-    await prisma.paymentInfo.create({
-      data: {
-        card_name: "Jean Dupont",
-        brand: "visa",
-        last_card_digits: "4242",
-        stripe_payment_id: "pm_visa_4242",
-        exp_month: 12, // Mois d'expiration
-        exp_year: 2026, // Année d'expiration
-        is_default: true,
-        id_user: customer1.id_user,
-      },
-    })
+console.log("Création des informations de paiement...");
 
-    await prisma.paymentInfo.create({
-      data: {
-        card_name: "Marie Martin",
-        brand: "visa",
-        last_card_digits: "4444",
-        stripe_payment_id: "pm_visa_4444",
-        exp_month: 11, // Mois d'expiration
-        exp_year: 2025, // Année d'expiration
-        is_default: true,
-        id_user: customer2.id_user,
-      },
-    })
+await prisma.paymentInfo.create({
+  data: {
+    card_name: "Jean Dupont",
+    brand: "visa",
+    last_card_digits: "4242",
+    stripe_payment_id: "pm_visa_4242",
+    exp_month: 12, // Mois d'expiration
+    exp_year: 2026, // Année d'expiration
+    is_default: true,
+    id_user: customer1.id_user,
+    stripe_customer_id: customer1.stripe_customer_id, // Ajout du stripe_customer_id
+  },
+});
 
-    // *** AJOUT : Plus d'informations de paiement ***
-    await prisma.paymentInfo.create({
-      data: {
-        card_name: "Thomas Bernard",
-        brand: "mastercard",
-        last_card_digits: "5555",
-        stripe_payment_id: "pm_mastercard_5555",
-        exp_month: 6, // Mois d'expiration
-        exp_year: 2027, // Année d'expiration
-        is_default: true,
-        id_user: customer3.id_user,
-      },
-    })
+await prisma.paymentInfo.create({
+  data: {
+    card_name: "Marie Martin",
+    brand: "visa",
+    last_card_digits: "4444",
+    stripe_payment_id: "pm_visa_4444",
+    exp_month: 11, // Mois d'expiration
+    exp_year: 2025, // Année d'expiration
+    is_default: true,
+    id_user: customer2.id_user,
+    stripe_customer_id: customer2.stripe_customer_id, // Ajout du stripe_customer_id
+  },
+});
 
-    await prisma.paymentInfo.create({
-      data: {
-        card_name: "Jean Dupont Pro",
-        brand: "amex",
-        last_card_digits: "9876",
-        stripe_payment_id: "pm_amex_9876",
-        exp_month: 9, // Mois d'expiration
-        exp_year: 2024, // Année d'expiration
-        is_default: false,
-        id_user: customer1.id_user,
-      },
-    })
+// *** AJOUT : Plus d'informations de paiement ***
+await prisma.paymentInfo.create({
+  data: {
+    card_name: "Thomas Bernard",
+    brand: "mastercard",
+    last_card_digits: "5555",
+    stripe_payment_id: "pm_mastercard_5555",
+    exp_month: 6, // Mois d'expiration
+    exp_year: 2027, // Année d'expiration
+    is_default: true,
+    id_user: customer3.id_user,
+    stripe_customer_id: customer3.stripe_customer_id, // Ajout du stripe_customer_id
+  },
+});
 
-    // Informations de paiement pour les nouveaux clients
-    await prisma.paymentInfo.create({
-      data: {
-        card_name: "Alexandre Petit",
-        brand: "visa",
-        last_card_digits: "1234",
-        stripe_payment_id: "pm_visa_1234",
-        exp_month: 1, // Mois d'expiration
-        exp_year: 2026, // Année d'expiration
-        is_default: true,
-        id_user: customer5.id_user,
-      },
-    })
+await prisma.paymentInfo.create({
+  data: {
+    card_name: "Jean Dupont Pro",
+    brand: "amex",
+    last_card_digits: "9876",
+    stripe_payment_id: "pm_amex_9876",
+    exp_month: 9, // Mois d'expiration
+    exp_year: 2024, // Année d'expiration
+    is_default: false,
+    id_user: customer1.id_user,
+    stripe_customer_id: customer1.stripe_customer_id, // Ajout du stripe_customer_id
+  },
+});
 
-    await prisma.paymentInfo.create({
-      data: {
-        card_name: "Caroline Durand",
-        brand: "mastercard",
-        last_card_digits: "5678",
-        stripe_payment_id: "pm_mastercard_5678",
-        exp_month: 3, // Mois d'expiration
-        exp_year: 2025, // Année d'expiration
-        is_default: true,
-        id_user: customer6.id_user,
-      },
-    })
+// Informations de paiement pour les nouveaux clients
+await prisma.paymentInfo.create({
+  data: {
+    card_name: "Alexandre Petit",
+    brand: "visa",
+    last_card_digits: "1234",
+    stripe_payment_id: "pm_visa_1234",
+    exp_month: 1, // Mois d'expiration
+    exp_year: 2026, // Année d'expiration
+    is_default: true,
+    id_user: customer5.id_user,
+    stripe_customer_id: customer5.stripe_customer_id, // Ajout du stripe_customer_id
+  },
+});
 
-    await prisma.paymentInfo.create({
-      data: {
-        card_name: "Stéphane Moreau",
-        brand: "visa",
-        last_card_digits: "9012",
-        stripe_payment_id: "pm_visa_9012",
-        exp_month: 7, // Mois d'expiration
-        exp_year: 2028, // Année d'expiration
-        is_default: true,
-        id_user: customer7.id_user,
-      },
-    })
+await prisma.paymentInfo.create({
+  data: {
+    card_name: "Caroline Durand",
+    brand: "mastercard",
+    last_card_digits: "5678",
+    stripe_payment_id: "pm_mastercard_5678",
+    exp_month: 3, // Mois d'expiration
+    exp_year: 2025, // Année d'expiration
+    is_default: true,
+    id_user: customer6.id_user,
+    stripe_customer_id: customer6.stripe_customer_id, // Ajout du stripe_customer_id
+  },
+});
+
+await prisma.paymentInfo.create({
+  data: {
+    card_name: "Stéphane Moreau",
+    brand: "visa",
+    last_card_digits: "9012",
+    stripe_payment_id: "pm_visa_9012",
+    exp_month: 7, // Mois d'expiration
+    exp_year: 2028, // Année d'expiration
+    is_default: true,
+    id_user: customer7.id_user,
+    stripe_customer_id: customer7.stripe_customer_id, // Ajout du stripe_customer_id
+  },
+});
 
     // Création des commandes historiques (conserver celles existantes)
 

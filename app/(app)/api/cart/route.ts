@@ -32,11 +32,11 @@ export async function GET(request: NextRequest) {
           product: true,
         },
       });
-    } else {
+    } else if (guestId) {
       // Récupérer le panier pour un invité
       cartItems = await prisma.cartItem.findMany({
         where: {
-          sessionId_session: guestId,
+          sessionId_session: parseInt(guestId),
         },
         include: {
           product: true,

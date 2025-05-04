@@ -37,71 +37,6 @@ export type Permission =
 
 // Définition des permissions par rôle
 export const rolePermissions: Record<Role, Permission[]> = {
-<<<<<<< HEAD
-    CUSTOMER: ["profile:edit",
-                "orders:create"
-    ],
-    MANAGER: [
-        "dashboard:view",
-        "products:view",
-        "categories:view",
-        "orders:view",
-        "contact:view",
-        "contact:respond",
-    ],
-    ADMIN: [
-        "dashboard:view",
-        "products:view",
-        "products:create",
-        "products:edit",
-        "products:delete",
-        "categories:view",
-        "categories:create",
-        "categories:edit",
-        "categories:delete",
-        "users:view",
-        "users:edit",
-        "orders:view",
-        "hero-carousel:view",
-        "hero-carousel:create",
-        "hero-carousel:edit",
-        "hero-carousel:delete",
-        "main-message:view",
-        "main-message:create",
-        "main-message:edit",
-        "main-message:delete",
-        "contact:view",
-        "contact:respond",
-        "contact:delete",
-    ],
-    SUPER_ADMIN: [
-        "dashboard:view",
-        "products:view",
-        "products:create",
-        "products:edit",
-        "products:delete",
-        "categories:view",
-        "categories:create",
-        "categories:edit",
-        "categories:delete",
-        "users:view",
-        "users:create",
-        "users:edit",
-        "users:delete",
-        "orders:view",
-        "hero-carousel:view",
-        "hero-carousel:create",
-        "hero-carousel:edit",
-        "hero-carousel:delete",
-        "main-message:view",
-        "main-message:create",
-        "main-message:edit",
-        "main-message:delete",
-        "contact:view",
-        "contact:respond",
-        "contact:delete",
-    ],
-=======
   CUSTOMER: ["profile:edit"],
   MANAGER: [
     "dashboard:view",
@@ -176,7 +111,6 @@ export const rolePermissions: Record<Role, Permission[]> = {
     "conversations:edit",
     "conversations:delete",
   ],
->>>>>>> af48fcfe10517eab37a005109f937cf9a2f02dc0
 }
 
 // Fonction utilitaire pour vérifier si un rôle possède une permission

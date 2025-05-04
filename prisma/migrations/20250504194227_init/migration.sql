@@ -211,6 +211,7 @@ CREATE TABLE `PaymentInfo` (
     `brand` VARCHAR(50) NOT NULL,
     `last_card_digits` VARCHAR(4) NOT NULL,
     `stripe_payment_id` VARCHAR(255) NOT NULL,
+    `stripe_customer_id` VARCHAR(191) NOT NULL,
     `exp_month` INTEGER NOT NULL,
     `exp_year` INTEGER NOT NULL,
     `is_default` BOOLEAN NOT NULL DEFAULT false,
