@@ -27,19 +27,19 @@ export default function UserFormBasicInfo({
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Prénom</FormLabel>
+              <FormLabel className="text-sm sm:text-base">Prénom</FormLabel>
               <FormControl>
                 <div className="relative">
                   <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     {...field}
                     disabled={isSubmitting}
-                    className="pl-9"
+                    className="pl-9 text-sm sm:text-base h-9 sm:h-10"
                     placeholder="Prénom de l'utilisateur"
                   />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xs sm:text-sm" />
             </FormItem>
           )}
         />
@@ -49,19 +49,19 @@ export default function UserFormBasicInfo({
           control={form.control}
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Nom</FormLabel>
+              <FormLabel className="text-sm sm:text-base">Nom</FormLabel>
               <FormControl>
                 <div className="relative">
                   <UserCog className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     {...field}
                     disabled={isSubmitting}
-                    className="pl-9"
+                    className="pl-9 text-sm sm:text-base h-9 sm:h-10"
                     placeholder="Nom de famille"
                   />
                 </div>
               </FormControl>
-              <FormMessage />
+              <FormMessage className="text-xs sm:text-sm" />
             </FormItem>
           )}
         />
@@ -72,20 +72,20 @@ export default function UserFormBasicInfo({
         control={form.control}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Email</FormLabel>
+            <FormLabel className="text-sm sm:text-base">Email</FormLabel>
             <FormControl>
               <div className="relative">
                 <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   {...field}
                   disabled={isSubmitting}
-                  className="pl-9"
+                  className="pl-9 text-sm sm:text-base h-9 sm:h-10"
                   placeholder="adresse@exemple.com"
                   type="email"
                 />
               </div>
             </FormControl>
-            <FormMessage />
+            <FormMessage className="text-xs sm:text-sm" />
           </FormItem>
         )}
       />

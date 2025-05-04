@@ -30,7 +30,6 @@ export const ResendVerificationButton = ({
         headers: {
           "Content-Type": "application/json",
         },
-        // Ajouter les données nécessaires dans le corps de la requête
         body: JSON.stringify({
           userId,
           email,
@@ -59,32 +58,38 @@ export const ResendVerificationButton = ({
       })
     } finally {
       setIsLoading(false)
-      // Réinitialiser le statut après 3 secondes
       setTimeout(() => setStatus("idle"), 3000)
     }
   }
 
   return (
-    <Button onClick={handleResendVerification} disabled={isLoading}>
+    <Button
+      onClick={handleResendVerification}
+      disabled={isLoading}
+      className="h-9 sm:h-10 text-xs sm:text-sm"
+    >
       {isLoading ? (
         <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Envoi en cours...
+          <Loader2 className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
+          <span className="sm:inline">Envoi en cours...</span>
         </>
       ) : status === "success" ? (
         <>
-          <CheckCircle className="mr-2 h-4 w-4" />
-          Email envoyé
+          <CheckCircle className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="sm:inline">Email envoyé</span>
         </>
       ) : status === "error" ? (
         <>
-          <XCircle className="mr-2 h-4 w-4" />
-          Échec de l&apos;envoi
+          <XCircle className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="sm:inline">Échec de l&apos;envoi</span>
         </>
       ) : (
         <>
-          <Mail className="mr-2 h-4 w-4" />
-          Renvoyer l&apos;email de vérification
+          <Mail className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          <span className="hidden sm:inline">
+            Renvoyer l&apos;email de vérification
+          </span>
+          <span className="sm:hidden">Renvoyer</span>
         </>
       )}
     </Button>

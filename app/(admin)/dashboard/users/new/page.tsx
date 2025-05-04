@@ -17,7 +17,7 @@ export default function CreateUserPage() {
         <AccessDenied message="Vous n'avez pas la permission de créer des utilisateurs." />
       }
     >
-      <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
+      <div className="mx-auto p-3 sm:p-6 space-y-4 sm:space-y-8 animate-in fade-in duration-300">
         <UserFormPage />
       </div>
     </RoleGuard>

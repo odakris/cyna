@@ -50,9 +50,11 @@ export default function OrderDetailHeader({
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-2xl font-bold">Commande #{order.id_order}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">
+            Commande #{order.id_order}
+          </h1>
           <Badge
-            className={`ml-2 ${orderStatusConfig[order.order_status]?.bgColor} ${orderStatusConfig[order.order_status]?.color}`}
+            className={`ml-2 ${orderStatusConfig[order.order_status]?.bgColor} ${orderStatusConfig[order.order_status]?.color} text-xs`}
           >
             {orderStatusConfig[order.order_status]?.icon}
             <span className="ml-1">
@@ -61,17 +63,19 @@ export default function OrderDetailHeader({
             </span>
           </Badge>
         </div>
-        <p className="text-muted-foreground ml-10">Passée le {formattedDate}</p>
+        <p className="text-xs sm:text-sm text-muted-foreground ml-10">
+          Passée le {formattedDate}
+        </p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
         <PermissionGuard permission="orders:edit">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
             <Select
               value={updateStatus || order.order_status}
               onValueChange={setUpdateStatus}
             >
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="h-9 w-full sm:w-[180px] text-xs sm:text-sm">
                 <SelectValue placeholder="Changer le statut" />
               </SelectTrigger>
               <SelectContent>
@@ -91,28 +95,30 @@ export default function OrderDetailHeader({
                 !updateStatus || updateStatus === order.order_status || updating
               }
               variant={"cyna"}
+              className="h-9 text-xs sm:text-sm"
             >
-              {updating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {updating && (
+                <Loader2 className="mr-2 h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
+              )}
               Mettre à jour
             </Button>
           </div>
-          {/* <Button variant="outline" asChild>
-          <Link href={`/dashboard/orders/${order.id_order}/edit`}>
-            <Edit className="mr-2 h-4 w-4" />
-            Modifier
-          </Link>
-        </Button> */}
         </PermissionGuard>
 
         {order.invoice_pdf_url && (
-          <Button variant="outline" asChild>
+          <Button
+            variant="outline"
+            asChild
+            className="h-9 text-xs sm:text-sm w-full sm:w-auto"
+          >
             <a
               href={order.invoice_pdf_url}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <Download className="mr-2 h-4 w-4" />
-              Télécharger la facture
+              <Download className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="sm:inline">Télécharger</span>
+              <span className="hidden sm:inline"> la facture</span>
             </a>
           </Button>
         )}

@@ -71,16 +71,21 @@ export default function UsersPage() {
     return <UsersHomeSkeleton />
   }
 
-  if (error) {
+  if (error && !users.length) {
     return (
-      <div className="container max-w-7xl mx-auto p-6">
+      <div className="container max-w-7xl mx-auto p-3 sm:p-6">
         <Alert variant="destructive" className="mb-6">
-          <AlertTriangle className="h-5 w-5" />
-          <AlertTitle>Erreur</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+          <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
+          <AlertTitle className="text-sm sm:text-base">Erreur</AlertTitle>
+          <AlertDescription className="text-xs sm:text-sm">
+            {error}
+          </AlertDescription>
         </Alert>
 
-        <Button onClick={fetchUsers} className="w-full sm:w-auto">
+        <Button
+          onClick={fetchUsers}
+          className="w-full sm:w-auto text-xs sm:text-sm"
+        >
           Réessayer
         </Button>
       </div>
@@ -94,7 +99,7 @@ export default function UsersPage() {
         <AccessDenied message="Vous n'avez pas la permission d'accéder à cette page." />
       }
     >
-      <div className="container mx-auto p-6 space-y-6 animate-in fade-in duration-300">
+      <div className="container mx-auto p-0 sm:p-3 md:p-6 space-y-4 sm:space-y-6 animate-in fade-in duration-300">
         {/* En-tête avec titre et actions */}
         <UsersHeader
           usersCount={users.length}
@@ -107,52 +112,57 @@ export default function UsersPage() {
 
         {/* Filtres et tableau */}
         <Card className="border-border/40 shadow-sm">
-          <CardHeader className="pb-3">
-            <Tabs
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full mt-3"
-            >
-              <TabsList className="w-full sm:w-auto">
-                <TabsTrigger value="tous" className="flex-1 sm:flex-initial">
-                  Tous
-                  <Badge variant="secondary" className="ml-2">
-                    {stats.total}
-                  </Badge>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="verifies"
-                  className="flex-1 sm:flex-initial"
-                >
-                  Vérifiés
-                  <Badge
-                    variant="secondary"
-                    className="ml-2 bg-green-100 text-green-800"
+          <CardHeader className="pb-0 sm:pb-3 px-3 sm:px-6 pt-3 sm:pt-6">
+            {/* Version desktop des onglets - inchangée */}
+            <div className="hidden md:block">
+              <Tabs
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="w-full sm:w-auto">
+                  <TabsTrigger value="tous" className="flex-1 sm:flex-initial">
+                    Tous
+                    <Badge variant="secondary" className="ml-2">
+                      {stats.total}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="verifies"
+                    className="flex-1 sm:flex-initial"
                   >
-                    {stats.verified}
-                  </Badge>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="non-verifies"
-                  className="flex-1 sm:flex-initial"
-                >
-                  Non vérifiés
-                  <Badge
-                    variant="secondary"
-                    className="ml-2 bg-amber-100 text-amber-800"
+                    Vérifiés
+                    <Badge
+                      variant="secondary"
+                      className="ml-2 bg-green-100 text-green-800"
+                    >
+                      {stats.verified}
+                    </Badge>
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="non-verifies"
+                    className="flex-1 sm:flex-initial"
                   >
-                    {stats.unverified}
-                  </Badge>
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+                    Non vérifiés
+                    <Badge
+                      variant="secondary"
+                      className="ml-2 bg-amber-100 text-amber-800"
+                    >
+                      {stats.unverified}
+                    </Badge>
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </CardHeader>
 
-          <CardContent className="p-6">
+          <CardContent className="p-3 sm:p-6">
             {error && (
-              <Alert variant="destructive" className="mb-6">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+              <Alert variant="destructive" className="mb-4 sm:mb-6">
+                <AlertTriangle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <AlertDescription className="text-xs sm:text-sm">
+                  {error}
+                </AlertDescription>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -170,20 +180,28 @@ export default function UsersPage() {
               globalFilter={globalFilter}
               setGlobalFilter={setGlobalFilter}
               fetchUsers={fetchUsers}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              stats={stats}
             />
 
             {/* Tableau des utilisateurs */}
             <UsersTable table={table} />
           </CardContent>
 
-          <CardFooter className="bg-muted/50 py-3 border-t flex justify-between items-center">
-            <p className="text-sm text-muted-foreground">
-              Total des utilisateurs: <strong>{stats.total}</strong> | Vérifiés:{" "}
+          <CardFooter className="bg-muted/50 py-3 border-t flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0 px-3 sm:px-6">
+            <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
+              Total: <strong>{stats.total}</strong> | Vérifiés:{" "}
               <strong className="text-green-600">{stats.verified}</strong> |
               Administrateurs:{" "}
               <strong className="text-blue-600">{stats.adminCount}</strong>
             </p>
-            <Button variant="outline" size="sm" onClick={fetchUsers}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchUsers}
+              className="w-full sm:w-auto text-xs sm:text-sm"
+            >
               <RefreshCw className="mr-2 h-3 w-3" />
               Actualiser
             </Button>

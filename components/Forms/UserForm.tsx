@@ -198,12 +198,15 @@ export default function UserForm({ userId }: UserFormPageProps) {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Colonne principale avec formulaire */}
         <div className="lg:col-span-2">
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-4 sm:space-y-6"
+            >
               <UserFormHeader
                 isEditing={isEditing}
                 userName={
@@ -212,27 +215,29 @@ export default function UserForm({ userId }: UserFormPageProps) {
               />
 
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
                     Informations personnelles
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Informations de base de l&apos;utilisateur
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="px-3 sm:px-6">
                   <UserFormBasicInfo form={form} isSubmitting={isSubmitting} />
                 </CardContent>
               </Card>
 
               <Card>
-                <CardHeader>
-                  <CardTitle>Sécurité et accès</CardTitle>
-                  <CardDescription>
+                <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    Sécurité et accès
+                  </CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">
                     Paramètres de sécurité et niveau d&apos;accès
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-4 sm:space-y-6 px-3 sm:px-6">
                   <UserFormSecurity
                     form={form}
                     isSubmitting={isSubmitting}
@@ -244,11 +249,12 @@ export default function UserForm({ userId }: UserFormPageProps) {
                     getRoleBadgeColor={getRoleBadgeColor}
                   />
                 </CardContent>
-                <CardFooter className="flex justify-end gap-2 pt-4 border-t">
+                <CardFooter className="flex justify-end gap-2 pt-4 border-t px-3 sm:px-6 py-3 sm:py-4 flex-col sm:flex-row">
                   <Button
                     type="button"
                     disabled={isSubmitting}
                     onClick={() => router.push("/dashboard/users")}
+                    className="w-full sm:w-auto text-xs sm:text-sm"
                   >
                     Annuler
                   </Button>
@@ -256,6 +262,7 @@ export default function UserForm({ userId }: UserFormPageProps) {
                     type="submit"
                     disabled={isSubmitting}
                     variant={"cyna"}
+                    className="w-full sm:w-auto text-xs sm:text-sm"
                   >
                     {isSubmitting ? (
                       <span className="flex items-center gap-1">
@@ -263,7 +270,7 @@ export default function UserForm({ userId }: UserFormPageProps) {
                       </span>
                     ) : (
                       <span className="flex items-center gap-1">
-                        <Save className="h-4 w-4" />
+                        <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         {isEditing ? "Mettre à jour" : "Créer l'utilisateur"}
                       </span>
                     )}
@@ -275,15 +282,17 @@ export default function UserForm({ userId }: UserFormPageProps) {
         </div>
 
         {/* Colonne d'aperçu */}
-        <div className="lg:col-span-1">
+        <div className="hidden lg:block lg:col-span-1">
           <Card>
-            <CardHeader>
-              <CardTitle>Aperçu du profil</CardTitle>
-              <CardDescription>
+            <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+              <CardTitle className="text-base sm:text-lg">
+                Aperçu du profil
+              </CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
                 Prévisualisation de l&apos;utilisateur
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="sm:px-6">
               <UserFormPreview
                 firstName={watchedFirstName}
                 lastName={watchedLastName}

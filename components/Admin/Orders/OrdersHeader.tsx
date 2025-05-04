@@ -19,8 +19,8 @@ export default function OrdersHeader({
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
       <div>
         <div className="flex items-center gap-2">
-          <ShoppingCartIcon className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">
+          <ShoppingCartIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Gestion des Commandes
           </h1>
         </div>
@@ -28,32 +28,35 @@ export default function OrdersHeader({
           <Badge variant="outline" className="font-normal">
             {ordersCount} commande{ordersCount > 1 ? "s" : ""}
           </Badge>
+          {/* Badge de sélection - uniquement visible sur desktop */}
           <Badge
             variant="secondary"
-            className="font-normal"
-            title="Sélectionnés"
+            className="font-normal hidden md:inline-flex"
+            title="Sélectionnées"
           >
-            {selectedCount} sélectionné
-            {selectedCount > 1 ? "s" : ""}
+            {selectedCount} sélectionnée{selectedCount > 1 ? "s" : ""}
           </Badge>
         </div>
       </div>
 
       <div className="flex flex-wrap gap-3">
         <PermissionGuard permission="orders:create">
-          <Button asChild>
+          <Button asChild className="flex-1 sm:flex-auto">
             <Link href="/dashboard/orders/new">
               <Plus className="mr-2 h-4 w-4" />
-              Créer une commande
+              <span className="sm:inline">Ajouter</span>
+              <span className="hidden sm:inline"> une commande</span>
             </Link>
           </Button>
         </PermissionGuard>
 
+        {/* Bouton supprimer - uniquement visible sur desktop */}
         <PermissionGuard permission="orders:delete">
           <Button
             variant="destructive"
             disabled={selectedCount === 0}
             onClick={() => setShowDeleteDialog(true)}
+            className="hidden md:flex"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Supprimer ({selectedCount})
