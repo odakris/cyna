@@ -274,6 +274,7 @@ model PaymentInfo {
     brand             String   @db.VarChar(50)
     last_card_digits  String   @db.VarChar(4)
     stripe_payment_id String   @db.VarChar(255) // <-- l'ID du paymentMethod chez Stripe
+    stripe_customer_id String
     exp_month         Int
     exp_year          Int
     is_default        Boolean  @default(false)
