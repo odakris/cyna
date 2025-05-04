@@ -30,27 +30,34 @@ export default function ProductSidebar({
   return (
     <div className="lg:col-span-1">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ShoppingBag className="h-5 w-5" />
+        <CardHeader className="py-4 sm:py-6">
+          <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+            <ShoppingBag className="h-4 w-4 sm:h-5 sm:w-5" />
             Informations
           </CardTitle>
-          <CardDescription>Détails techniques du produit</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
+            Détails techniques du produit
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6">
+          {/* Les sections de détails - espacements réduits sur mobile */}
           <div>
-            <p className="text-sm font-medium text-muted-foreground">Stock</p>
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+              Stock
+            </p>
             <div className="flex items-center justify-between">
-              <p className="font-semibold">{product.stock} unités</p>
+              <p className="font-semibold text-sm sm:text-base">
+                {product.stock} unités
+              </p>
               <Badge
                 variant={product.stock > 0 ? "outline" : "destructive"}
-                className={
+                className={`text-xs ${
                   product.stock > 0
                     ? product.stock <= 5
                       ? "bg-amber-100 text-amber-800 border-amber-200"
                       : "bg-green-100 text-green-800 border-green-200"
                     : ""
-                }
+                }`}
               >
                 {product.stock === 0
                   ? "Rupture"
@@ -64,7 +71,6 @@ export default function ProductSidebar({
           </div>
 
           <Separator />
-
           <div>
             <p className="text-sm font-medium text-muted-foreground">
               Catégorie

@@ -12,24 +12,40 @@ interface UserHeaderProps {
 }
 
 export default function UserHeader({
+  user,
   handleEdit,
   setIsDeleteDialogOpen,
 }: UserHeaderProps) {
   return (
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
       <div className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="icon" className="rounded-full">
+        <Button
+          asChild
+          variant="ghost"
+          size="icon"
+          className="rounded-full h-8 w-8 sm:h-10 sm:w-10"
+        >
           <Link href="/dashboard/users">
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold">Détails de l&apos;Utilisateur</h1>
+        <div>
+          <h1 className="text-xl sm:text-3xl font-bold">
+            Détails de l&apos;Utilisateur
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground truncate max-w-[200px] sm:max-w-none">
+            {user.first_name} {user.last_name}
+          </p>
+        </div>
       </div>
       <div className="flex gap-2">
         <PermissionGuard permission="users:edit">
-          <Button variant="outline" onClick={handleEdit}>
-            <Edit className="mr-2 h-4 w-4" />
-            Modifier
+          <Button
+            onClick={handleEdit}
+            className="flex-1 sm:flex-auto text-xs sm:text-sm h-9"
+          >
+            <Edit className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span className="sm:inline">Modifier</span>
           </Button>
         </PermissionGuard>
 
@@ -37,9 +53,10 @@ export default function UserHeader({
           <Button
             variant="destructive"
             onClick={() => setIsDeleteDialogOpen(true)}
+            className="flex-1 sm:flex-auto text-xs sm:text-sm h-9"
           >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Supprimer
+            <Trash2 className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+            <span className="sm:inline">Supprimer</span>
           </Button>
         </PermissionGuard>
       </div>

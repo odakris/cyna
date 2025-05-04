@@ -19,9 +19,8 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
-import { ChevronDown, ChevronUp, Search, SlidersHorizontal } from "lucide-react"
-import { formatEuro } from "@/lib/utils/format"
 import { MobileFilterPanelProps } from "@/types/Types"
+import { formatEuro } from "@/lib/utils/format"
 
 export function MobileFilterPanel({
   title,
@@ -37,33 +36,83 @@ export function MobileFilterPanel({
   handlers,
 }: MobileFilterPanelProps) {
   return (
-    <div className="mb-4 lg:hidden">
+    <div className="mb-6 lg:hidden">
       <Collapsible open={isFilterMenuOpen} onOpenChange={setIsFilterMenuOpen}>
         <div className="flex justify-between items-center mb-2">
           <CollapsibleTrigger asChild>
             <Button
               variant="outline"
-              className="w-full flex justify-between items-center"
+              className="w-full flex justify-between items-center bg-white border border-gray-200 shadow-sm hover:border-[#302082]/50 transition-all"
             >
-              <span className="flex items-center">
-                <SlidersHorizontal className="mr-2 h-5 w-5" /> Filtres
+              <span className="flex items-center text-[#302082] font-medium">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mr-2 h-5 w-5"
+                >
+                  <line x1="4" x2="20" y1="21" y2="21"></line>
+                  <line x1="4" x2="20" y1="12" y2="12"></line>
+                  <line x1="4" x2="20" y1="3" y2="3"></line>
+                  <line x1="8" x2="8" y1="21" y2="16"></line>
+                  <line x1="12" x2="12" y1="12" y2="7"></line>
+                  <line x1="16" x2="16" y1="3" y2="8"></line>
+                </svg>
+                Filtres de recherche
               </span>
               {isFilterMenuOpen ? (
-                <ChevronUp className="h-4 w-4" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <path d="m18 15-6-6-6 6"></path>
+                </svg>
               ) : (
-                <ChevronDown className="h-4 w-4" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-4 w-4"
+                >
+                  <path d="m6 9 6 6 6-6"></path>
+                </svg>
               )}
             </Button>
           </CollapsibleTrigger>
         </div>
         <CollapsibleContent>
-          <Card>
-            <CardContent className="p-4">
+          <Card className="border-0 shadow-md mb-4">
+            <CardContent className="p-4 bg-white border border-gray-100 rounded-xl">
               <form onSubmit={handlers.handleSearch} className="space-y-4">
                 {/* Version mobile des filtres */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="title-mobile">Titre</Label>
+                    <Label
+                      htmlFor="title-mobile"
+                      className="font-medium text-gray-700"
+                    >
+                      Titre
+                    </Label>
                     <Input
                       id="title-mobile"
                       value={title}
@@ -74,7 +123,12 @@ export function MobileFilterPanel({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="description-mobile">Description</Label>
+                    <Label
+                      htmlFor="description-mobile"
+                      className="font-medium text-gray-700"
+                    >
+                      Description
+                    </Label>
                     <Input
                       id="description-mobile"
                       value={description}
@@ -86,7 +140,10 @@ export function MobileFilterPanel({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="features-mobile">
+                  <Label
+                    htmlFor="features-mobile"
+                    className="font-medium text-gray-700"
+                  >
                     Caractéristiques techniques
                   </Label>
                   <Input
@@ -99,10 +156,12 @@ export function MobileFilterPanel({
                 </div>
 
                 <div className="space-y-4">
-                  <Label>
-                    Prix: {formatEuro(priceRange[0])} -{" "}
-                    {formatEuro(priceRange[1])}
-                  </Label>
+                  <div className="flex justify-between items-center">
+                    <Label className="font-medium text-gray-700">Prix</Label>
+                    <span className="text-sm text-[#302082] font-medium">
+                      {formatEuro(priceRange[0])} - {formatEuro(priceRange[1])}
+                    </span>
+                  </div>
                   <div className="pt-2 px-1">
                     <Slider
                       value={priceRange}
@@ -115,7 +174,10 @@ export function MobileFilterPanel({
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="minPrice-mobile" className="text-xs">
+                      <Label
+                        htmlFor="minPrice-mobile"
+                        className="text-xs text-gray-500"
+                      >
                         Min
                       </Label>
                       <Input
@@ -128,7 +190,10 @@ export function MobileFilterPanel({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="maxPrice-mobile" className="text-xs">
+                      <Label
+                        htmlFor="maxPrice-mobile"
+                        className="text-xs text-gray-500"
+                      >
                         Max
                       </Label>
                       <Input
@@ -145,7 +210,12 @@ export function MobileFilterPanel({
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="category-mobile">Catégorie</Label>
+                    <Label
+                      htmlFor="category-mobile"
+                      className="font-medium text-gray-700"
+                    >
+                      Catégorie
+                    </Label>
                     <Select
                       value={selectedCategory}
                       onValueChange={handlers.setSelectedCategory}
@@ -179,10 +249,11 @@ export function MobileFilterPanel({
                       onCheckedChange={checked =>
                         handlers.setOnlyAvailable(checked as boolean)
                       }
+                      className="text-[#302082] border-[#302082]/50"
                     />
                     <Label
                       htmlFor="onlyAvailable-mobile"
-                      className="cursor-pointer"
+                      className="cursor-pointer text-gray-700"
                     >
                       Uniquement services disponibles
                     </Label>
@@ -193,17 +264,31 @@ export function MobileFilterPanel({
                   <Button
                     type="button"
                     variant="outline"
-                    size="sm"
                     onClick={handlers.resetFilters}
-                    className="text-gray-500"
+                    className="border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors"
                   >
                     Réinitialiser
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-[#302082] hover:bg-[#302082]/90"
+                    className="bg-[#302082] hover:bg-[#302082]/90 text-white shadow-sm hover:shadow-md transition-all"
                   >
-                    <Search className="mr-2 h-4 w-4" /> Rechercher
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="24"
+                      height="24"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="mr-2 h-4 w-4"
+                    >
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <path d="m21 21-4.3-4.3"></path>
+                    </svg>
+                    Rechercher
                   </Button>
                 </div>
               </form>

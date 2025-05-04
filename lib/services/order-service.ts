@@ -1,9 +1,18 @@
+<<<<<<< HEAD
 import { endOfDay, endOfMonth, endOfYear, parseISO, startOfDay, startOfMonth, startOfYear } from "date-fns";
 import { prisma } from "../prisma";
 import orderRepository from "../repositories/order-repository";
 import { OrderInputValues, orderFormSchema, orderInputSchema } from "../validations/order-schema";
 import { Order, OrderStatus, Prisma, SubscriptionStatus, SubscriptionType } from "@prisma/client";
 import { ZodError } from "zod";
+=======
+import { endOfDay, endOfMonth, endOfYear, parseISO, startOfDay, startOfMonth, startOfYear } from "date-fns"
+import { prisma } from "../prisma"
+import orderRepository from "../repositories/order-repository"
+import { OrderInputValues, orderFormSchema } from "../validations/order-schema"
+import { Order, OrderStatus, Prisma } from "@prisma/client"
+import { ZodError } from "zod"
+>>>>>>> af48fcfe10517eab37a005109f937cf9a2f02dc0
 
 // Définir un type pour Order avec les relations incluses
 type OrderWithRelations = Prisma.OrderGetPayload<{
@@ -22,43 +31,36 @@ type OrderWithRelations = Prisma.OrderGetPayload<{
     };
 }>;
 
-// Nouvelle fonction pour supporter ta route API
-export const create = async (data: OrderInputValues): Promise<Order> => {
-  console.log('[OrderService] Création de la commande avec données:', JSON.stringify(data, null, 2));
-
-  try {
-    // Valider et transformer les données avec orderFormSchema pour inclure subtotal, taxes, total_amount, invoice_number
-    const processedData = orderFormSchema.parse(data);
-    console.log('[OrderService] Données transformées:', JSON.stringify(processedData, null, 2));
-
-    // Créer la commande avec orderRepository
-    const newOrder = await orderRepository.create(processedData);
-    console.log('[OrderService] Commande créée:', JSON.stringify(newOrder, null, 2));
-
-    return newOrder;
-  } catch (error) {
-    console.error('[OrderService] Erreur lors de la création de la commande:', error);
-
-    if (error instanceof ZodError) {
-      const validationErrors = error.errors
-        .map(e => `${e.path.join(".")}: ${e.message}`)
-        .join(", ");
-      throw new Error(`Validation échouée: ${validationErrors}`);
-    }
-
-    if (error instanceof Error) {
-      if (
-        error.message.startsWith("Stock insuffisant") ||
-        error.message.includes("n'existe pas") ||
-        error.message.includes("non trouvée")
-      ) {
-        throw error;
-      }
-      throw new Error(`Erreur lors de la création de la commande: ${error.message}`);
-    }
-
-    throw new Error("Erreur inconnue lors de la création de la commande");
-  }
+type OrderForInvoice = {
+    id_order: number;
+    id_user: number; // Ajout pour vérifier l'appartenance
+    order_date: string;
+    total_amount: number;
+    subtotal: number;
+    order_status: string;
+    payment_method: string;
+    last_card_digits: string;
+    invoice_number: string;
+    invoice_pdf_url: string | null;
+    billing_address?: {
+        address1: string;
+        address2: string | null;
+        city: string;
+        postal_code: string;
+        country: string;
+    };
+    subscriptions: {
+        id_order_item: number;
+        id_product: number;
+        id_category: number | null;
+        service_name: string;
+        subscription_type: string;
+        subscription_status: string;
+        subscription_duration: number;
+        renewal_date: string | null;
+        quantity: number;
+        unit_price: number;
+    }[];
 };
 
 /**
@@ -498,6 +500,85 @@ export const getUserOrderHistory = async (
     }
 };
 
+<<<<<<< HEAD
+=======
+export const getOrderByIdForInvoice = async (
+    orderId: number,
+    userId?: string
+): Promise<OrderForInvoice> => {
+    if (!orderId || isNaN(orderId) || orderId <= 0) {
+        throw new Error("Invalid order ID");
+    }
+
+    try {
+        const order = await prisma.order.findUnique({
+            where: { id_order: orderId },
+            include: {
+                order_items: {
+                    include: {
+                        product: true,
+                    },
+                },
+                address: true,
+            },
+        });
+
+        if (!order) {
+            throw new Error("Order not found");
+        }
+
+        // Vérifier que la commande appartient à l'utilisateur si userId est fourni
+        if (userId) {
+            const parsedUserId = parseInt(userId);
+            if (isNaN(parsedUserId) || parsedUserId <= 0) {
+                throw new Error("Invalid user ID");
+            }
+            if (order.id_user !== parsedUserId) {
+                throw new Error("Unauthorized access to this order");
+            }
+        }
+
+        return {
+            id_order: order.id_order,
+            id_user: order.id_user, // Ajout pour vérification
+            order_date: order.order_date.toISOString(),
+            total_amount: order.total_amount,
+            subtotal: order.subtotal,
+            order_status: order.order_status,
+            payment_method: order.payment_method,
+            last_card_digits: order.last_card_digits || "",
+            invoice_number: order.invoice_number,
+            invoice_pdf_url: order.invoice_pdf_url,
+            billing_address: order.address
+                ? {
+                    address1: order.address.address1,
+                    address2: order.address.address2,
+                    city: order.address.city,
+                    postal_code: order.address.postal_code,
+                    country: order.address.country,
+                }
+                : undefined,
+            subscriptions: order.order_items.map((item) => ({
+                id_order_item: item.id_order_item,
+                id_product: item.id_product,
+                id_category: item.product?.id_category ?? null,
+                service_name: item.product?.name || "Nom de service indisponible",
+                subscription_type: item.subscription_type,
+                subscription_status: item.subscription_status,
+                subscription_duration: item.subscription_duration,
+                renewal_date: item.renewal_date?.toISOString() || null,
+                quantity: item.quantity,
+                unit_price: item.unit_price,
+            })),
+        };
+    } catch (error) {
+        console.error("Error fetching order for invoice:", error);
+        throw error instanceof Error ? error : new Error("Failed to fetch order");
+    }
+};
+
+
+>>>>>>> af48fcfe10517eab37a005109f937cf9a2f02dc0
 const orderService = {
     create,
     getAllOrders,
@@ -508,6 +589,7 @@ const orderService = {
     deleteOrder,
     getUserOrders,
     getUserOrderHistory,
+    getOrderByIdForInvoice
 };
 
 export default orderService;

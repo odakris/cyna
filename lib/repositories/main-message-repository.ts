@@ -126,6 +126,7 @@ export const updatePartial = async (
       }
 
       // Si le message est activé, désactiver tous les autres messages
+      // Mais uniquement si data.active est défini et true
       if (data.active === true) {
         await tx.mainMessage.updateMany({
           where: {

@@ -11,14 +11,14 @@ export default function UserFormError({
   isEditing,
 }: UserFormErrorProps) {
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-6">
-      <h1 className="text-3xl font-bold">
+    <div className="max-w-4xl mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
+      <h1 className="text-xl sm:text-3xl font-bold">
         {isEditing ? "Modifier l'utilisateur" : "Créer un Nouvel Utilisateur"}
       </h1>
-      <p className="text-red-500">
+      <p className="text-red-500 text-sm sm:text-base">
         {errorMessage || "Utilisateur introuvable"}
       </p>
-      <Button asChild variant="outline">
+      <Button asChild variant="outline" className="text-xs sm:text-sm">
         <Link href="/dashboard/users">Retour</Link>
       </Button>
     </div>

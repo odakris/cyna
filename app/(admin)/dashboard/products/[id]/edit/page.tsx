@@ -1,6 +1,6 @@
 import { Metadata } from "next"
 import { EditProductPage } from "@/components/Admin/Products/Edit/EditProductPage"
-import { validateId } from "../../../../../../lib/utils/utils"
+import { validateId } from "@/lib/utils/utils"
 
 export const metadata: Metadata = {
   title: "Modifier le Produit | CYNA Backoffice",

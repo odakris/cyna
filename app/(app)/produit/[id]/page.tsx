@@ -6,7 +6,7 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
-import { useProduct } from "@/hooks/use-product"
+import { useProduct } from "@/hooks/product/use-product"
 import { useCart, CartItem } from "@/context/CartContext"
 import { TopProducts } from "@/components/Products/TopProducts"
 import { formatEuro } from "@/lib/utils/format"
@@ -133,7 +133,7 @@ export default function ProductPage() {
               variant="outline"
               className="mt-4 border-amber-300 text-amber-700 hover:bg-amber-50"
             >
-              <Link href="/categories">
+              <Link href="/produit">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Voir nos produits disponibles
               </Link>
@@ -179,11 +179,11 @@ export default function ProductPage() {
     toast({
       title: "Produit ajouté au panier",
       description: `${quantity} × ${product.name} (${subscriptionType.toLowerCase().replace("_", " ")})`,
+      variant: "success",
       action: (
         <Button
           asChild
           variant="outline"
-          size="sm"
           className="border-[#302082] text-[#302082]"
         >
           <Link href="/panier">Voir le panier</Link>
@@ -209,7 +209,7 @@ export default function ProductPage() {
         </Link>
         <span>/</span>
         <Link
-          href="/recherche"
+          href="/produit"
           className="hover:text-[#302082] transition-colors"
         >
           Produits
@@ -847,7 +847,7 @@ export default function ProductPage() {
             variant="outline"
             className="hidden sm:flex border-[#302082] text-[#302082] hover:bg-[#302082] hover:text-white"
           >
-            <Link href="/recherche">
+            <Link href="/produit">
               Voir tous les produits <ArrowRight className="ml-2 h-4 w-4" />
             </Link>
           </Button>

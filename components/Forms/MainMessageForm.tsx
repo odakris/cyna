@@ -1,18 +1,8 @@
 "use client"
 
-import React, { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
+import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
-import {
-  Loader2,
-  ArrowLeft,
-  Save,
-  Palette,
-  AlertCircle,
-  PencilLine,
-} from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useForm } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import {
   Form,
@@ -23,15 +13,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import {
   Select,
   SelectContent,
@@ -39,456 +20,467 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import {
-  MainMessageFormValues,
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
+import { Switch } from "@/components/ui/switch"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  MessageSquareText,
+  Save,
+  Palette,
+  SlidersHorizontal,
+} from "lucide-react"
+import Link from "next/link"
+import {
   mainMessageSchema,
-} from "../../lib/validations/main-message-schema"
+  MainMessageFormValues,
+} from "@/lib/validations/main-message-schema"
+import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
+
+// Définition des options de couleur d'arrière-plan
+const backgroundColorOptions = [
+  { value: "Par défaut", label: "Par défaut" },
+  // Couleurs CYNA
+  { value: "bg-[#302082]", label: "CYNA Primaire (Violet)" },
+  { value: "bg-[#302082]/90", label: "CYNA Primaire (90%)" },
+  { value: "bg-[#302082]/75", label: "CYNA Primaire (75%)" },
+  { value: "bg-[#302082]/50", label: "CYNA Primaire (50%)" },
+  { value: "bg-[#302082]/25", label: "CYNA Primaire (25%)" },
+  { value: "bg-[#302082]/10", label: "CYNA Primaire (10%)" },
+  { value: "bg-[#FF6B00]", label: "CYNA Secondaire (Orange)" },
+  { value: "bg-[#FF6B00]/90", label: "CYNA Secondaire (90%)" },
+  { value: "bg-[#FF6B00]/75", label: "CYNA Secondaire (75%)" },
+  { value: "bg-[#FF6B00]/50", label: "CYNA Secondaire (50%)" },
+  { value: "bg-[#FF6B00]/25", label: "CYNA Secondaire (25%)" },
+  { value: "bg-[#FF6B00]/10", label: "CYNA Secondaire (10%)" },
+  { value: "bg-[#F2F2F2]", label: "CYNA Tertiaire (Gris clair)" },
+  // Couleurs standards
+  { value: "bg-white", label: "Blanc" },
+  { value: "bg-black", label: "Noir" },
+  { value: "bg-gray-50", label: "Gris très clair" },
+  { value: "bg-gray-100", label: "Gris clair" },
+  { value: "bg-gray-200", label: "Gris" },
+  { value: "bg-gray-300", label: "Gris moyen" },
+  { value: "bg-gray-400", label: "Gris foncé" },
+  // Autres couleurs
+  { value: "bg-blue-100", label: "Bleu clair" },
+  { value: "bg-green-100", label: "Vert clair" },
+  { value: "bg-red-100", label: "Rouge clair" },
+  { value: "bg-yellow-100", label: "Jaune clair" },
+  { value: "bg-indigo-100", label: "Indigo clair" },
+  { value: "bg-purple-100", label: "Violet clair" },
+  { value: "bg-pink-100", label: "Rose clair" },
+]
+
+// Définition des options de couleur de texte
+const textColorOptions = [
+  { value: "Par défaut", label: "Par défaut" },
+  // Couleurs CYNA
+  { value: "text-[#302082]", label: "CYNA Primaire (Violet)" },
+  { value: "text-[#302082]/90", label: "CYNA Primaire (90%)" },
+  { value: "text-[#302082]/75", label: "CYNA Primaire (75%)" },
+  { value: "text-[#302082]/50", label: "CYNA Primaire (50%)" },
+  { value: "text-[#FF6B00]", label: "CYNA Secondaire (Orange)" },
+  { value: "text-[#FF6B00]/90", label: "CYNA Secondaire (90%)" },
+  { value: "text-[#FF6B00]/75", label: "CYNA Secondaire (75%)" },
+  { value: "text-[#FF6B00]/50", label: "CYNA Secondaire (50%)" },
+  // Couleurs standards
+  { value: "text-white", label: "Blanc" },
+  { value: "text-black", label: "Noir" },
+  { value: "text-gray-50", label: "Gris très clair" },
+  { value: "text-gray-400", label: "Gris moyen" },
+  { value: "text-gray-500", label: "Gris" },
+  { value: "text-gray-600", label: "Gris foncé" },
+  { value: "text-gray-700", label: "Gris très foncé" },
+  { value: "text-gray-900", label: "Presque noir" },
+  // Autres couleurs
+  { value: "text-blue-600", label: "Bleu" },
+  { value: "text-green-600", label: "Vert" },
+  { value: "text-red-600", label: "Rouge" },
+  { value: "text-yellow-600", label: "Jaune" },
+  { value: "text-indigo-600", label: "Indigo" },
+  { value: "text-purple-600", label: "Violet" },
+  { value: "text-pink-600", label: "Rose" },
+]
 
 interface MainMessageFormProps {
-  initialData?: {
-    id_main_message?: number
-    content: string
-    active: boolean
-    has_background: boolean
-    background_color: string | null
-    text_color: string | null
-  }
+  initialData?: MainMessageFormValues
   isEditing?: boolean
+  isSubmitting?: boolean
+  onSubmit: (data: MainMessageFormValues) => Promise<void>
 }
 
-// Liste des couleurs disponibles pour l'arrière-plan et le texte
-const backgroundColors = [
-  { label: "Aucun", value: "none" },
-  { label: "Bleu clair", value: "bg-blue-100" },
-  { label: "Vert clair", value: "bg-green-100" },
-  { label: "Rouge clair", value: "bg-red-100" },
-  { label: "Jaune clair", value: "bg-yellow-100" },
-  { label: "Orange clair", value: "bg-orange-100" },
-  { label: "Violet clair", value: "bg-purple-100" },
-  { label: "Gris clair", value: "bg-gray-100" },
-  { label: "Primaire (10%)", value: "bg-primary/10" },
-]
-
-const textColors = [
-  { label: "Aucun", value: "none" },
-  { label: "Noir", value: "text-black" },
-  { label: "Blanc", value: "text-white" },
-  { label: "Bleu", value: "text-blue-700" },
-  { label: "Vert", value: "text-green-700" },
-  { label: "Rouge", value: "text-red-700" },
-  { label: "Jaune", value: "text-yellow-700" },
-  { label: "Orange", value: "text-orange-700" },
-  { label: "Violet", value: "text-purple-700" },
-  { label: "Gris", value: "text-gray-700" },
-  { label: "Primaire", value: "text-primary" },
-]
-
-export function MainMessageForm({
+export default function MainMessageForm({
   initialData,
   isEditing = false,
+  isSubmitting = false,
+  onSubmit,
 }: MainMessageFormProps) {
-  const router = useRouter()
-  const { toast } = useToast()
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [previewStyle, setPreviewStyle] = useState({
-    content: initialData?.content || "",
-    backgroundColor:
-      initialData?.has_background && initialData?.background_color
-        ? initialData.background_color
-        : "bg-primary/10",
-    textColor: initialData?.text_color || "text-foreground",
-  })
+  const [activeTab, setActiveTab] = useState("content")
 
-  // Initialiser le formulaire
+  const defaultValues: MainMessageFormValues = {
+    content: "",
+    active: true,
+    has_background: false,
+    background_color: "Par défaut",
+    text_color: "Par défaut",
+  }
+
   const form = useForm<MainMessageFormValues>({
     resolver: zodResolver(mainMessageSchema),
-    defaultValues: {
-      content: initialData?.content || "",
-      active: initialData?.active ?? true,
-      has_background: initialData?.has_background ?? false,
-      background_color: initialData?.background_color || "",
-      text_color: initialData?.text_color || "",
-    },
+    defaultValues: initialData || defaultValues,
   })
 
-  // Mise à jour de l'aperçu en temps réel
-  const updatePreview = React.useCallback(
-    (field: keyof typeof previewStyle, value: string) => {
-      setPreviewStyle(prev => ({
-        ...prev,
-        [field]: value,
-      }))
-    },
-    []
-  )
+  const watchedValues = form.watch()
 
-  // Surveiller les changements de formulaire pour mettre à jour l'aperçu
-  React.useEffect(() => {
-    const { watch } = form
-    const subscription = watch((value, { name }) => {
-      if (name === "content") {
-        updatePreview("content", value.content || "")
-      }
-      if (name === "background_color") {
-        updatePreview(
-          "backgroundColor",
-          value.background_color || "bg-primary/10"
-        )
-      }
-      if (name === "text_color") {
-        updatePreview("textColor", value.text_color || "text-foreground")
-      }
-    })
-    return () => subscription.unsubscribe()
-  }, [form, updatePreview])
-
-  // Soumettre le formulaire
-  const onSubmit = async (data: MainMessageFormValues) => {
-    try {
-      setIsSubmitting(true)
-
-      const endpoint = isEditing
-        ? `/api/main-message/${initialData?.id_main_message}`
-        : "/api/main-message"
-
-      const method = isEditing ? "PUT" : "POST"
-
-      const response = await fetch(endpoint, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Une erreur est survenue")
-      }
-
-      toast({
-        title: isEditing ? "Message mis à jour" : "Message créé",
-        description: isEditing
-          ? "Le message a été mis à jour avec succès."
-          : "Le nouveau message a été créé avec succès.",
-      })
-
-      // Rediriger vers la liste des messages
-      router.push("/dashboard/main-message")
-      router.refresh()
-    } catch (error) {
-      console.error("Erreur lors de la soumission du formulaire:", error)
-      toast({
-        variant: "destructive",
-        title: "Erreur",
-        description:
-          error instanceof Error
-            ? error.message
-            : "Une erreur inconnue est survenue",
-      })
-    } finally {
-      setIsSubmitting(false)
+  const handleFormSubmit = async (data: MainMessageFormValues) => {
+    const transformedData = {
+      ...data,
+      background_color:
+        data.background_color === "Par défaut" ? "" : data.background_color,
+      text_color: data.text_color === "Par défaut" ? "" : data.text_color,
     }
+    await onSubmit(transformedData)
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Première colonne */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PencilLine className="h-5 w-5" />
-                  Contenu du message
-                </CardTitle>
-                <CardDescription>
-                  Texte qui sera affiché sur la page d&apos;accueil
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Message*</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Entrez le message à afficher..."
-                          className="resize-none min-h-32"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        Ce message sera affiché sur la page d&apos;accueil si
-                        actif
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Soyez concis</AlertTitle>
-                  <AlertDescription>
-                    Les messages trop longs peuvent nuire à l&apos;expérience
-                    utilisateur. Limitez-vous à une phrase claire et impactante.
-                  </AlertDescription>
-                </Alert>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Paramètres</CardTitle>
-                <CardDescription>
-                  Configuration du statut et de l&apos;affichage
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="active"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">
-                          Activer le message
-                        </FormLabel>
-                        <FormDescription>
-                          Lorsqu&apos;il est activé, ce message s&apos;affiche
-                          sur la page d&apos;accueil (désactive automatiquement
-                          les autres messages)
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="has_background"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">
-                          Arrière-plan coloré
-                        </FormLabel>
-                        <FormDescription>
-                          Appliquer la couleur d&apos;arrière-plan sélectionnée
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Deuxième colonne */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Palette className="h-5 w-5" />
-                  Aperçu
-                </CardTitle>
-                <CardDescription>
-                  Visualisez le message tel qu&apos;il apparaîtra sur le site
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div
-                  className={`p-4 rounded-md ${previewStyle.backgroundColor}`}
-                >
-                  <p
-                    className={`text-center font-medium ${previewStyle.textColor}`}
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Colonne principale avec le formulaire */}
+        <div className="lg:col-span-2">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleFormSubmit)}>
+              <Tabs
+                defaultValue="content"
+                value={activeTab}
+                onValueChange={setActiveTab}
+                className="w-full"
+              >
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger
+                    value="content"
+                    className="flex items-center gap-2"
                   >
-                    {previewStyle.content || "Aperçu du message..."}
+                    <MessageSquareText className="h-4 w-4" />
+                    Contenu
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="appearance"
+                    className="flex items-center gap-2"
+                  >
+                    <Palette className="h-4 w-4" />
+                    Apparence
+                  </TabsTrigger>
+                </TabsList>
+
+                <div className="mt-6">
+                  {/* Onglet du contenu */}
+                  <TabsContent value="content" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <MessageSquareText className="h-5 w-5" />
+                          Contenu du message
+                        </CardTitle>
+                        <CardDescription>
+                          Texte qui sera affiché aux utilisateurs
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        <FormField
+                          name="content"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Texte du message</FormLabel>
+                              <FormControl>
+                                <Textarea
+                                  placeholder="Saisissez le contenu du message..."
+                                  className="min-h-32 resize-y"
+                                  {...field}
+                                  disabled={isSubmitting}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                Le message principal affiché sur la page
+                                d&apos;accueil (maximum 500 caractères)
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          name="active"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                              <div className="space-y-0.5">
+                                <FormLabel className="text-base">
+                                  Activation du message
+                                </FormLabel>
+                                <FormDescription>
+                                  {field.value
+                                    ? "Le message est visible sur le site"
+                                    : "Le message est masqué"}
+                                </FormDescription>
+                              </div>
+                              <FormControl>
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
+                                  disabled={isSubmitting}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </CardContent>
+                      <CardFooter className="flex justify-end gap-2 pt-4 border-t">
+                        <Button
+                          type="button"
+                          onClick={() => setActiveTab("appearance")}
+                          className="gap-2"
+                          variant={"cyna"}
+                        >
+                          Suite
+                          <Palette className="h-4 w-4" />
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </TabsContent>
+
+                  {/* Onglet d'apparence */}
+                  <TabsContent value="appearance" className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Palette className="h-5 w-5" />
+                          Apparence du message
+                        </CardTitle>
+                        <CardDescription>
+                          Personnalisation visuelle du message
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="space-y-6">
+                        {/* Menu déroulant pour la couleur d'arrière-plan */}
+                        <FormField
+                          name="background_color"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Couleur d&apos;arrière-plan</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value ?? undefined}
+                                value={field.value ?? ""}
+                                disabled={isSubmitting}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Sélectionnez une couleur" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {backgroundColorOptions.map(option => (
+                                    <SelectItem
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <div
+                                          className={cn(
+                                            "w-4 h-4 rounded border border-gray-300",
+                                            option.value !== "Par défaut"
+                                              ? option.value
+                                              : "bg-primary/5"
+                                          )}
+                                        ></div>
+                                        {option.label}
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                Sélectionnez une couleur d&apos;arrière-plan
+                                pour votre message
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        {/* Menu déroulant pour la couleur du texte */}
+                        <FormField
+                          name="text_color"
+                          control={form.control}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Couleur du texte</FormLabel>
+                              <Select
+                                onValueChange={field.onChange}
+                                defaultValue={field.value ?? undefined}
+                                value={field.value ?? ""}
+                                disabled={isSubmitting}
+                              >
+                                <FormControl>
+                                  <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Sélectionnez une couleur" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  {textColorOptions.map(option => (
+                                    <SelectItem
+                                      key={option.value}
+                                      value={option.value}
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <div
+                                          className={cn(
+                                            "w-4 h-4 rounded border border-gray-300",
+                                            option.value !== "Par défaut"
+                                              ? option.value.replace(
+                                                  "text-",
+                                                  "bg-"
+                                                )
+                                              : "bg-foreground",
+                                            option.value.includes("white")
+                                              ? "border-gray-300"
+                                              : "border-transparent"
+                                          )}
+                                        ></div>
+                                        {option.label}
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                Sélectionnez une couleur pour le texte de votre
+                                message
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </CardContent>
+                      <CardFooter className="flex justify-end gap-2 pt-4 border-t">
+                        <div className="flex gap-2">
+                          <Button type="button" variant="outline" asChild>
+                            <Link href="/dashboard/main-message">Annuler</Link>
+                          </Button>
+                          <Button
+                            type="submit"
+                            className="gap-2"
+                            disabled={isSubmitting}
+                            variant={"cyna"}
+                          >
+                            {isSubmitting ? (
+                              <>Enregistrement...</>
+                            ) : (
+                              <>
+                                <Save className="h-4 w-4" />
+                                {isEditing
+                                  ? "Mettre à jour"
+                                  : "Créer le message"}
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      </CardFooter>
+                    </Card>
+                  </TabsContent>
+                </div>
+              </Tabs>
+            </form>
+          </Form>
+        </div>
+
+        {/* Colonne d'aperçu */}
+        <div className="lg:col-span-1">
+          <Card className="sticky top-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <SlidersHorizontal className="h-4 w-4" />
+                Aperçu du message
+              </CardTitle>
+              <CardDescription>Prévisualisation en temps réel</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div
+                className={cn(
+                  "p-6 rounded-md border transition-colors",
+                  watchedValues.background_color &&
+                    watchedValues.background_color !== "Par défaut"
+                    ? watchedValues.background_color
+                    : "bg-primary/5"
+                )}
+              >
+                <p
+                  className={cn(
+                    "text-lg text-center font-bold",
+                    watchedValues.text_color &&
+                      watchedValues.text_color !== "Par défaut"
+                      ? watchedValues.text_color
+                      : "text-foreground"
+                  )}
+                >
+                  {watchedValues.content || "Aperçu du message..."}
+                </p>
+              </div>
+
+              <div className="pt-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Statut:
                   </p>
+                  <Badge
+                    variant={watchedValues.active ? "default" : "outline"}
+                    className={
+                      watchedValues.active
+                        ? "bg-green-500 text-white"
+                        : "bg-gray-100 text-gray-600"
+                    }
+                  >
+                    {watchedValues.active ? "Actif" : "Inactif"}
+                  </Badge>
                 </div>
 
-                <Separator />
-
-                <FormField
-                  control={form.control}
-                  name="background_color"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Couleur d&apos;arrière-plan</FormLabel>
-                      <Select
-                        onValueChange={value => {
-                          field.onChange(value)
-                          updatePreview(
-                            "backgroundColor",
-                            value || "bg-primary/10"
-                          )
-                        }}
-                        value={field.value || ""}
-                        disabled={!form.getValues("has_background")}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionnez une couleur" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {backgroundColors.map(color => (
-                            <SelectItem key={color.value} value={color.value}>
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className={`w-4 h-4 rounded ${color.value || "bg-primary/10"}`}
-                                />
-                                {color.label}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Sera appliqué uniquement si l&apos;arrière-plan est
-                        activé
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="text_color"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Couleur du texte</FormLabel>
-                      <Select
-                        onValueChange={value => {
-                          field.onChange(value)
-                          updatePreview(
-                            "textColor",
-                            value === "none" ? "text-foreground" : value
-                          )
-                        }}
-                        value={field.value || "none"}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Sélectionnez une couleur" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {textColors.map(color => (
-                            <SelectItem key={color.value} value={color.value}>
-                              <div className="flex items-center gap-2">
-                                <div
-                                  className="w-4 h-4 rounded"
-                                  style={{
-                                    backgroundColor:
-                                      color.value === "none"
-                                        ? "#E5E7EB"
-                                        : color.value === "text-black"
-                                          ? "#000000"
-                                          : color.value === "text-white"
-                                            ? "#FFFFFF"
-                                            : color.value === "text-blue-700"
-                                              ? "#1D4ED8"
-                                              : color.value === "text-green-700"
-                                                ? "#047857"
-                                                : color.value === "text-red-700"
-                                                  ? "#B91C1C"
-                                                  : color.value ===
-                                                      "text-yellow-700"
-                                                    ? "#A16207"
-                                                    : color.value ===
-                                                        "text-orange-700"
-                                                      ? "#C2410C"
-                                                      : color.value ===
-                                                          "text-purple-700"
-                                                        ? "#7E22CE"
-                                                        : color.value ===
-                                                            "text-gray-700"
-                                                          ? "#374151"
-                                                          : color.value ===
-                                                              "text-primary"
-                                                            ? "var(--primary)"
-                                                            : "#E5E7EB",
-                                    border:
-                                      color.value === "text-white"
-                                        ? "1px solid #E5E7EB"
-                                        : "none",
-                                  }}
-                                />
-                                {color.label}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        Couleur du texte du message
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      {isEditing ? "Mise à jour..." : "Création..."}
-                    </>
-                  ) : (
-                    <>
-                      <Save className="mr-2 h-4 w-4" />
-                      {isEditing
-                        ? "Mettre à jour le message"
-                        : "Créer le message"}
-                    </>
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => router.push("/dashboard/main-message")}
-                  disabled={isSubmitting}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Annuler
-                </Button>
-              </CardContent>
-            </Card>
-          </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Arrière-plan:
+                  </p>
+                  <Badge
+                    variant={
+                      watchedValues.background_color !== "Par défaut"
+                        ? "default"
+                        : "outline"
+                    }
+                    className={
+                      watchedValues.background_color !== "Par défaut"
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-100 text-gray-600"
+                    }
+                  >
+                    {watchedValues.background_color !== "Par défaut"
+                      ? "Personnalisé"
+                      : "Par défaut"}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </form>
-    </Form>
+      </div>
+    </div>
   )
 }

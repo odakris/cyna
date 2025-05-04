@@ -4,7 +4,7 @@ import { CategoryDetailsSkeleton } from "@/components/Skeletons/CategorySkeleton
 import ErrorDisplay from "@/components/Admin/Categories/Details/ErrorDisplay"
 import CategoryHeader from "@/components/Admin/Categories/Details/CategoryHeader"
 import DeleteDialog from "@/components/Admin/Categories/Details/DeleteDialog"
-import { useCategoryDetails } from "@/hooks/use-category-details"
+import { useCategoryDetails } from "@/hooks/category/use-category-details"
 import Image from "next/image"
 import {
   Card,
@@ -50,7 +50,7 @@ export function CategoryDetailsPage({ id }: CategoryDetailsPageProps) {
   }
 
   return (
-    <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
+    <div className="mx-auto p-3 sm:p-6 space-y-4 sm:space-y-8 animate-in fade-in duration-300">
       {/* En-tête avec titre et actions */}
       <CategoryHeader
         category={category}
@@ -58,20 +58,20 @@ export function CategoryDetailsPage({ id }: CategoryDetailsPageProps) {
         handleEdit={handleEdit}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Colonne principale avec les détails */}
         <div className="lg:col-span-2">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ImageIcon className="h-5 w-5" />
+            <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <ImageIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                 Aperçu de la catégorie
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm">
                 Image et description détaillée de la catégorie
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-4 sm:space-y-6 px-3 sm:px-6">
               <div className="aspect-video rounded-lg overflow-hidden bg-muted border">
                 <Image
                   width={500}
@@ -83,8 +83,10 @@ export function CategoryDetailsPage({ id }: CategoryDetailsPageProps) {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-2">Description</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <h3 className="text-base sm:text-lg font-semibold mb-2">
+                  Description
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {category.description ||
                     "Aucune description disponible pour cette catégorie."}
                 </p>
@@ -96,25 +98,29 @@ export function CategoryDetailsPage({ id }: CategoryDetailsPageProps) {
         {/* Colonne d'informations */}
         <div className="lg:col-span-1">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Tag className="h-5 w-5" />
+            <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <Tag className="h-4 w-4 sm:h-5 sm:w-5" />
                 Informations
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm">
                 Détails techniques de la catégorie
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Nom</p>
-                <p className="font-semibold">{category.name}</p>
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
+                  Nom
+                </p>
+                <p className="text-sm sm:text-base font-semibold">
+                  {category.name}
+                </p>
               </div>
 
               <Separator />
 
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Priorité d&apos;affichage
                 </p>
                 <div className="flex items-center gap-2">
@@ -132,12 +138,12 @@ export function CategoryDetailsPage({ id }: CategoryDetailsPageProps) {
               <Separator />
 
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Produits associés
                 </p>
                 <div className="flex items-center gap-2">
                   <Badge>{productCount}</Badge>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-xs sm:text-sm text-muted-foreground">
                     produit{productCount !== 1 ? "s" : ""}
                   </span>
                 </div>
@@ -147,17 +153,17 @@ export function CategoryDetailsPage({ id }: CategoryDetailsPageProps) {
 
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium mb-1">
+                  <p className="text-xs sm:text-sm font-medium mb-1">
                     Statut de la catégorie
                   </p>
                   {category.active ? (
-                    <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white border-0">
+                    <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white border-0 text-xs">
                       <CheckCircle2 className="mr-1 h-3 w-3" /> Actif
                     </Badge>
                   ) : (
                     <Badge
                       variant="outline"
-                      className="bg-slate-100 text-slate-800 border-slate-200"
+                      className="bg-slate-100 text-slate-800 border-slate-200 text-xs"
                     >
                       <XCircle className="mr-1 h-3 w-3" /> Inactif
                     </Badge>
@@ -173,11 +179,11 @@ export function CategoryDetailsPage({ id }: CategoryDetailsPageProps) {
               <Separator />
 
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
+                <p className="text-xs sm:text-sm font-medium text-muted-foreground">
                   Dernière mise à jour
                 </p>
-                <p className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CalendarDays className="h-4 w-4" />
+                <p className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                  <CalendarDays className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   {new Date(category.updated_at).toLocaleDateString("fr-FR", {
                     day: "numeric",
                     month: "long",

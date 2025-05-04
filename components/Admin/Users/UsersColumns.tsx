@@ -83,7 +83,7 @@ export const usersColumns: ColumnDef<User>[] = [
         `${firstName?.charAt(0) || ""}${lastName?.charAt(0) || ""}`.toUpperCase()
 
       return (
-        <div className="flex items-center space-x-3 pl-2">
+        <div className="flex items-center space-x-10 pl-5">
           <Avatar className="h-8 w-8">
             <AvatarFallback className="bg-primary/10 text-primary text-xs">
               {initials}

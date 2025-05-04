@@ -1,10 +1,8 @@
-// app/api/contact-message/[id]/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import contactMessageController from "@/lib/controllers/contact-message-controller"
 import { validateId } from "@/lib/utils/utils"
 import { checkPermission } from "@/lib/api-permissions"
 
-// app/api/contact-message/[id]/route.ts
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }

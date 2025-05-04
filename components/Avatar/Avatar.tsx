@@ -71,18 +71,11 @@ export function AvatarDemo() {
           aria-label="Menu utilisateur"
         >
           <Avatar className="h-8 w-8 border-2 border-white/20">
-            {isAuthenticated ? (
+            {isAuthenticated &&
               // Si connecté, afficher la photo de profil si disponible
-              session?.user?.image ? (
+              (session?.user?.image ? (
                 <AvatarImage src={session.user.image} alt={userName} />
-              ) : null
-            ) : (
-              // Si non connecté, afficher le logo Cyna
-              <AvatarImage
-                src="/assets/FULL-LOGO/cyna-logo-white.png"
-                alt="Logo Cyna"
-              />
-            )}
+              ) : null)}
 
             {/* Fallback avec initiales ou CY */}
             <AvatarFallback

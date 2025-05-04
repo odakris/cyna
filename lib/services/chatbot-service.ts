@@ -26,6 +26,10 @@ type ConversationContext =
   | "info_products"
   | "info_pricing"
   | "info_specific_product"
+  | "info_category" // Nouveau contexte pour les catégories
+  | "info_offers" // Nouveau contexte pour les offres spéciales
+  | "compare_products" // Nouveau contexte pour comparer les produits
+  | "service_support" // Nouveau contexte pour le support technique
 
 /**
  * Traite un message utilisateur et génère une réponse appropriée.
@@ -89,9 +93,36 @@ export async function processChatbotMessage(
       lastBotContent.includes("intrusion") ||
       lastBotContent.includes("soc") ||
       lastBotContent.includes("investigation") ||
-      lastBotContent.includes("crise")
+      lastBotContent.includes("crise") ||
+      lastBotContent.includes("edr") ||
+      lastBotContent.includes("xdr") ||
+      lastBotContent.includes("phishing") ||
+      lastBotContent.includes("threat") ||
+      lastBotContent.includes("rgpd") ||
+      lastBotContent.includes("red team") ||
+      lastBotContent.includes("formation")
     ) {
       currentContext = "info_specific_product"
+    } else if (
+      lastBotContent.includes("prévention") ||
+      lastBotContent.includes("protection") ||
+      lastBotContent.includes("réponse")
+    ) {
+      currentContext = "info_category"
+    } else if (
+      lastBotContent.includes("offre") ||
+      lastBotContent.includes("promotion") ||
+      lastBotContent.includes("réduction")
+    ) {
+      currentContext = "info_offers"
+    } else if (lastBotContent.includes("comparaison")) {
+      currentContext = "compare_products"
+    } else if (
+      lastBotContent.includes("support") ||
+      lastBotContent.includes("assistance") ||
+      lastBotContent.includes("technique")
+    ) {
+      currentContext = "service_support"
     }
 
     // Log pour débogage
@@ -271,7 +302,11 @@ export async function processChatbotMessage(
 
       case "info_products":
       case "info_specific_product":
-        // Si l'utilisateur veut plus d'informations sur un produit
+      case "info_category":
+      case "info_offers":
+      case "compare_products":
+      case "service_support":
+        // Si l'utilisateur veut plus d'informations
         if (
           [
             "oui",
@@ -309,6 +344,64 @@ export async function processChatbotMessage(
       }
     }
 
+    // CATÉGORIES
+    if (
+      lowerMessage.includes("catégorie") ||
+      lowerMessage.includes("types de") ||
+      lowerMessage.includes("quels services") ||
+      lowerMessage.includes("quels produits")
+    ) {
+      return {
+        response:
+          "Nous proposons trois grandes catégories de solutions de cybersécurité : Prévention (diagnostic, tests d'intrusion, formation, audit RGPD), Protection (SOC, EDR, XDR, anti-phishing) et Réponse (investigation, gestion de crise, Threat Intelligence, Red Team). Quelle catégorie vous intéresse le plus ?",
+        needsHumanSupport: false,
+        context: "info_category",
+      }
+    }
+
+    // PRÉVENTION
+    if (
+      lowerMessage.includes("prévention") ||
+      lowerMessage.includes("anticiper") ||
+      lowerMessage.includes("éviter")
+    ) {
+      return {
+        response:
+          "Notre catégorie Prévention comprend plusieurs services : le Diagnostic Cyber (4500€), le Test d'intrusion (4000€), la Formation Cybersécurité (2500€) et l'Audit de conformité RGPD (3500€). Ces services vous aident à identifier et corriger les vulnérabilités avant qu'elles ne soient exploitées. Souhaitez-vous des informations sur l'un de ces services en particulier ?",
+        needsHumanSupport: false,
+        context: "info_category",
+      }
+    }
+
+    // PROTECTION
+    if (
+      lowerMessage.includes("protection") ||
+      lowerMessage.includes("défendre") ||
+      lowerMessage.includes("sécuriser")
+    ) {
+      return {
+        response:
+          "Notre catégorie Protection comprend : Micro SOC (5000€), SOC Managé (7000€), EDR - Endpoint Detection and Response (4800€), XDR - Extended Detection and Response (8500€) et Protection Email & Anti-Phishing (3500€). Ces solutions constituent votre ligne de défense active contre les cybermenaces. Souhaitez-vous des détails sur l'un de ces services ?",
+        needsHumanSupport: false,
+        context: "info_category",
+      }
+    }
+
+    // RÉPONSE
+    if (
+      lowerMessage.includes("réponse") ||
+      lowerMessage.includes("réaction") ||
+      lowerMessage.includes("après attaque") ||
+      lowerMessage.includes("incident")
+    ) {
+      return {
+        response:
+          "Notre catégorie Réponse comprend : Investigation, éradication, remédiation (8500€), Gestion de crise cybersécurité (9500€), Cyber Threat Intelligence (6000€) et Red Team - Simulation d'attaques avancées (10000€). Ces services vous accompagnent suite à un incident de sécurité ou pour tester votre résistance. Lequel vous intéresse particulièrement ?",
+        needsHumanSupport: false,
+        context: "info_category",
+      }
+    }
+
     // PRODUITS/SERVICES
     if (
       lowerMessage.includes("produit") ||
@@ -318,7 +411,7 @@ export async function processChatbotMessage(
     ) {
       return {
         response:
-          "Nous proposons plusieurs solutions de cybersécurité : Diagnostic Cyber, Test d'intrusion, Micro SOC, SOC Managé, Investigation et Gestion de crise. Souhaitez-vous des détails sur l'un de ces services ?",
+          "Nous proposons plusieurs solutions de cybersécurité réparties en 3 catégories : Prévention (Diagnostic Cyber, Test d'intrusion, Formation, Audit RGPD), Protection (Micro SOC, SOC Managé, EDR, XDR, Anti-Phishing) et Réponse (Investigation, Gestion de crise, Threat Intelligence, Red Team). Souhaitez-vous des détails sur l'une de ces catégories ou services ?",
         needsHumanSupport: false,
         context: "info_products",
       }
@@ -334,9 +427,68 @@ export async function processChatbotMessage(
     ) {
       return {
         response:
-          "Nos tarifs varient selon les services. Le Diagnostic Cyber commence à 4500€, le Test d'intrusion à 4000€, le Micro SOC à 5000€, le SOC Managé à 7000€. Souhaitez-vous être mis en relation avec un conseiller pour obtenir un devis personnalisé ?",
+          "Nos tarifs varient selon les services. En Prévention : Diagnostic Cyber (4500€), Test d'intrusion (4000€), Formation (2500€), Audit RGPD (3500€). En Protection : Micro SOC (5000€), SOC Managé (7000€), EDR (4800€), XDR (8500€), Anti-Phishing (3500€). En Réponse : Investigation (8500€), Gestion de crise (9500€), Threat Intelligence (6000€), Red Team (10000€). Souhaitez-vous un devis personnalisé ?",
         needsHumanSupport: true,
         context: "info_pricing",
+      }
+    }
+
+    // PROMOTIONS ET OFFRES SPÉCIALES
+    if (
+      lowerMessage.includes("promotion") ||
+      lowerMessage.includes("offre spéciale") ||
+      lowerMessage.includes("réduction") ||
+      lowerMessage.includes("remise") ||
+      lowerMessage.includes("promo")
+    ) {
+      return {
+        response:
+          "Nous avons actuellement une offre spéciale printemps 2025 avec 15% de réduction sur tous nos services de protection jusqu'au 30 avril ! Cette offre est applicable sur nos solutions Micro SOC, SOC Managé, EDR, XDR et Protection Email & Anti-Phishing. Souhaitez-vous en savoir plus ou être mis en relation avec un conseiller pour en bénéficier ?",
+        needsHumanSupport: true,
+        context: "info_offers",
+      }
+    }
+
+    // COMPARAISON DE PRODUITS
+    if (
+      lowerMessage.includes("comparer") ||
+      lowerMessage.includes("différence") ||
+      lowerMessage.includes("versus") ||
+      lowerMessage.includes("vs") ||
+      (lowerMessage.includes("ou") &&
+        (lowerMessage.includes("soc") ||
+          lowerMessage.includes("edr") ||
+          lowerMessage.includes("xdr")))
+    ) {
+      // Détection de comparaison entre SOC
+      if (
+        (lowerMessage.includes("micro soc") &&
+          lowerMessage.includes("soc managé")) ||
+        (lowerMessage.includes("micro") && lowerMessage.includes("managé"))
+      ) {
+        return {
+          response:
+            "Le Micro SOC (5000€) est conçu pour les PME avec une infrastructure simple et offre une surveillance en heures ouvrées, tandis que le SOC Managé (7000€) est une solution 24/7 pour les grandes entreprises avec une infrastructure complexe et des besoins de sécurité avancés. Souhaitez-vous plus de détails sur ces différences ?",
+          needsHumanSupport: true,
+          context: "compare_products",
+        }
+      }
+
+      // Détection de comparaison entre EDR et XDR
+      if (lowerMessage.includes("edr") && lowerMessage.includes("xdr")) {
+        return {
+          response:
+            "L'EDR (4800€) surveille uniquement les endpoints (postes de travail, serveurs) tandis que le XDR (8500€) offre une protection étendue en intégrant les données des endpoints, du réseau, du cloud et des emails pour une visibilité complète sur tout votre écosystème numérique. Le XDR permet de détecter des attaques complexes multi-vecteurs invisibles aux solutions EDR. Souhaitez-vous être mis en relation avec un expert pour une analyse de vos besoins ?",
+          needsHumanSupport: true,
+          context: "compare_products",
+        }
+      }
+
+      return {
+        response:
+          "Je peux vous aider à comparer nos différentes solutions. Pourriez-vous me préciser quels services ou produits spécifiques vous souhaitez comparer ?",
+        needsHumanSupport: false,
+        context: "compare_products",
       }
     }
 
@@ -344,7 +496,7 @@ export async function processChatbotMessage(
     if (lowerMessage.includes("diagnostic")) {
       return {
         response:
-          "Le Diagnostic Cyber est un audit complet de votre infrastructure informatique qui permet d'identifier les vulnérabilités de sécurité. Prix à partir de 4500€. Souhaitez-vous être mis en relation avec un conseiller pour en savoir plus ?",
+          "Le Diagnostic Cyber est un audit complet de votre infrastructure informatique qui permet d'identifier les vulnérabilités de sécurité. Il inclut l'analyse des vulnérabilités techniques et organisationnelles, l'évaluation des politiques existantes, et fournit un plan d'action priorisé. Prix à partir de 4500€. Souhaitez-vous être mis en relation avec un conseiller pour en savoir plus ?",
         needsHumanSupport: true,
         context: "info_specific_product",
       }
@@ -358,7 +510,38 @@ export async function processChatbotMessage(
     ) {
       return {
         response:
-          "Le Test d'intrusion simule des attaques réelles pour évaluer la robustesse de vos systèmes. Il permet d'identifier les vulnérabilités exploitables dans votre infrastructure. Prix à partir de 4000€. Souhaitez-vous être mis en relation avec un conseiller ?",
+          "Le Test d'intrusion simule des attaques réelles pour évaluer la robustesse de vos systèmes. Nos experts en sécurité offensive identifient les failles exploitables dans votre environnement numérique avec des tests ciblés sur applications web, API, réseaux et infrastructures. Prix à partir de 4000€. Souhaitez-vous être mis en relation avec un conseiller ?",
+        needsHumanSupport: true,
+        context: "info_specific_product",
+      }
+    }
+
+    // FORMATION CYBERSÉCURITÉ
+    if (
+      lowerMessage.includes("formation") ||
+      lowerMessage.includes("sensibilisation") ||
+      lowerMessage.includes("apprendre") ||
+      lowerMessage.includes("former")
+    ) {
+      return {
+        response:
+          "Notre programme de Formation Cybersécurité transforme vos collaborateurs en acteurs proactifs de la sécurité. Nous proposons des modules adaptés à tous les niveaux avec du contenu personnalisé selon votre secteur d'activité. La formation inclut des simulations de phishing et des ateliers pratiques. Prix à partir de 2500€. Souhaitez-vous en savoir plus ?",
+        needsHumanSupport: true,
+        context: "info_specific_product",
+      }
+    }
+
+    // AUDIT RGPD
+    if (
+      lowerMessage.includes("rgpd") ||
+      lowerMessage.includes("gdpr") ||
+      lowerMessage.includes("règlement") ||
+      lowerMessage.includes("données personnelles") ||
+      lowerMessage.includes("conformité")
+    ) {
+      return {
+        response:
+          "Notre Audit de conformité RGPD analyse vos pratiques de traitement des données personnelles pour garantir leur alignement avec la réglementation européenne. Nous évaluons vos bases légales, documents, procédures et transferts de données. Vous recevrez un rapport de non-conformités avec un plan d'action correctif. Prix à partir de 3500€. Souhaitez-vous plus d'informations ?",
         needsHumanSupport: true,
         context: "info_specific_product",
       }
@@ -371,7 +554,70 @@ export async function processChatbotMessage(
     ) {
       return {
         response:
-          "Nous proposons deux solutions SOC (Security Operations Center) : le Micro SOC adapté aux PME (à partir de 5000€) et le SOC Managé pour les grandes entreprises avec une équipe dédiée 24/7 (à partir de 7000€). Souhaitez-vous discuter avec un conseiller pour déterminer la solution adaptée à vos besoins ?",
+          "Nous proposons deux solutions SOC (Security Operations Center) : le Micro SOC adapté aux PME (à partir de 5000€) avec surveillance en heures ouvrées, et le SOC Managé pour les grandes entreprises avec une équipe dédiée 24/7/365 (à partir de 7000€) incluant une chasse proactive aux menaces et une gestion des incidents. Souhaitez-vous discuter avec un conseiller pour déterminer la solution adaptée à vos besoins ?",
+        needsHumanSupport: true,
+        context: "info_specific_product",
+      }
+    }
+
+    // MICRO SOC
+    if (lowerMessage.includes("micro soc")) {
+      return {
+        response:
+          "Notre Micro SOC est une solution de surveillance continue spécialement conçue pour les PME. Elle détecte les menaces en temps réel en analysant les comportements suspects et inclut la collecte des logs système, réseau et applicatifs avec une interface intuitive et des alertes contextualisées. Prix à partir de 5000€. Souhaitez-vous plus de détails ?",
+        needsHumanSupport: true,
+        context: "info_specific_product",
+      }
+    }
+
+    // SOC MANAGÉ
+    if (
+      lowerMessage.includes("soc managé") ||
+      lowerMessage.includes("soc géré") ||
+      lowerMessage.includes("security operations center managé")
+    ) {
+      return {
+        response:
+          "Notre SOC Managé offre une protection continue avec des analystes experts opérant 24/7. Il combine technologies avancées et intelligence humaine pour une détection et réponse rapides. Notre solution inclut une architecture SIEM/SOAR, une veille sur les menaces, et une chasse proactive. Prix à partir de 7000€. Souhaitez-vous être contacté par un spécialiste ?",
+        needsHumanSupport: true,
+        context: "info_specific_product",
+      }
+    }
+
+    // EDR (Endpoint Detection and Response)
+    if (
+      lowerMessage.includes("edr") ||
+      lowerMessage.includes("endpoint") ||
+      lowerMessage.includes("poste de travail")
+    ) {
+      return {
+        response:
+          "Notre solution EDR (Endpoint Detection and Response) surveille en continu vos postes de travail et serveurs pour détecter les menaces sophistiquées. Contrairement aux antivirus traditionnels, notre EDR analyse les comportements en temps réel avec des agents légers et une isolation instantanée des terminaux compromis. Prix à partir de 4800€. Souhaitez-vous une démonstration ?",
+        needsHumanSupport: true,
+        context: "info_specific_product",
+      }
+    }
+
+    // XDR (Extended Detection and Response)
+    if (lowerMessage.includes("xdr") || lowerMessage.includes("extended")) {
+      return {
+        response:
+          "Notre plateforme XDR (Extended Detection and Response) unifie la détection et la réponse à travers tous vos vecteurs d'attaque (endpoints, réseau, cloud, emails). Cette approche holistique permet de détecter les attaques complexes traversant plusieurs systèmes avec une corrélation automatique des alertes et une visualisation complète de la chaîne d'attaque. Prix à partir de 8500€. Souhaitez-vous en savoir plus ?",
+        needsHumanSupport: true,
+        context: "info_specific_product",
+      }
+    }
+
+    // ANTI-PHISHING
+    if (
+      lowerMessage.includes("phishing") ||
+      lowerMessage.includes("email") ||
+      lowerMessage.includes("hameçonnage") ||
+      lowerMessage.includes("courriel")
+    ) {
+      return {
+        response:
+          "Notre Protection Email & Anti-Phishing utilise l'intelligence artificielle pour analyser chaque message et détecter les tentatives de phishing, les malwares et les usurpations d'identité. Nous proposons un filtrage multi-couches, une analyse des pièces jointes, une vérification DMARC/SPF/DKIM et des simulations personnalisées. Prix à partir de 3500€. Souhaitez-vous être contacté par un expert ?",
         needsHumanSupport: true,
         context: "info_specific_product",
       }
@@ -380,11 +626,14 @@ export async function processChatbotMessage(
     // INVESTIGATION
     if (
       lowerMessage.includes("investigation") ||
-      lowerMessage.includes("incident")
+      lowerMessage.includes("incident") ||
+      lowerMessage.includes("compromission") ||
+      lowerMessage.includes("remédiation") ||
+      lowerMessage.includes("forensique")
     ) {
       return {
         response:
-          "Notre service d'Investigation permet d'analyser les incidents de sécurité et d'y remédier efficacement. Prix à partir de 8500€. Souhaitez-vous être mis en relation avec un expert ?",
+          "Notre service d'Investigation, éradication et remédiation fournit une réponse méthodique aux incidents de sécurité. Nos experts en forensique numérique analysent l'étendue de la compromission, collectent les preuves selon les normes judiciaires, et identifient les vecteurs d'attaque avec une équipe disponible 24/7. Prix à partir de 8500€. Avez-vous besoin d'assistance immédiate ?",
         needsHumanSupport: true,
         context: "info_specific_product",
       }
@@ -394,9 +643,56 @@ export async function processChatbotMessage(
     if (lowerMessage.includes("crise") || lowerMessage.includes("urgence")) {
       return {
         response:
-          "Notre service de Gestion de crise vous accompagne lors d'incidents majeurs de cybersécurité, avec une équipe dédiée pour minimiser l'impact. Prix à partir de 9500€. Souhaitez-vous être mis en contact avec un spécialiste ?",
+          "Notre service de Gestion de crise cybersécurité vous accompagne lors d'incidents majeurs avec une équipe pluridisciplinaire. Nous prenons en charge la coordination globale de la réponse, la communication interne/externe, les relations avec les autorités (ANSSI, CNIL) et les stratégies de continuité d'activité. Prix à partir de 9500€. Souhaitez-vous être contacté en urgence ?",
         needsHumanSupport: true,
         context: "info_specific_product",
+      }
+    }
+
+    // CYBER THREAT INTELLIGENCE
+    if (
+      lowerMessage.includes("threat") ||
+      lowerMessage.includes("intelligence") ||
+      lowerMessage.includes("menace") ||
+      lowerMessage.includes("renseignement") ||
+      lowerMessage.includes("cti")
+    ) {
+      return {
+        response:
+          "Notre service de Cyber Threat Intelligence (CTI) transforme le renseignement sur les menaces en avantage stratégique. Nous surveillons activement le paysage des menaces ciblant votre secteur avec une veille sur le dark web, une analyse des campagnes d'attaques émergentes et des alertes précoces sur les vulnérabilités. Prix à partir de 6000€. Souhaitez-vous plus d'informations ?",
+        needsHumanSupport: true,
+        context: "info_specific_product",
+      }
+    }
+
+    // RED TEAM
+    if (
+      lowerMessage.includes("red team") ||
+      lowerMessage.includes("équipe rouge") ||
+      lowerMessage.includes("simulation d'attaque") ||
+      lowerMessage.includes("attaque simulée")
+    ) {
+      return {
+        response:
+          "Notre service Red Team reproduit les méthodes d'attaque des adversaires sophistiqués. Contrairement aux tests d'intrusion traditionnels, nos opérations sont des simulations complètes avec ingénierie sociale, exploitation technique et mouvement latéral. Nous testons vos défenses techniques et vos capacités de détection et réponse. Prix à partir de 10000€. Souhaitez-vous échanger avec un expert ?",
+        needsHumanSupport: true,
+        context: "info_specific_product",
+      }
+    }
+
+    // SUPPORT TECHNIQUE / SERVICE APRÈS-VENTE
+    if (
+      lowerMessage.includes("support") ||
+      lowerMessage.includes("après-vente") ||
+      lowerMessage.includes("assistance technique") ||
+      lowerMessage.includes("problème technique") ||
+      lowerMessage.includes("difficulté")
+    ) {
+      return {
+        response:
+          "Notre équipe de support technique est disponible pour vous aider avec tout problème lié à nos services. Pour une assistance rapide, pourriez-vous me préciser le service concerné et la nature de votre demande ? Souhaitez-vous être mis en relation avec un de nos techniciens ?",
+        needsHumanSupport: true,
+        context: "service_support",
       }
     }
 
@@ -450,7 +746,7 @@ export async function processChatbotMessage(
       // Sinon réponse générique
       return {
         response:
-          "Souhaitez-vous des informations spécifiques sur l'un de nos services ou être mis en relation avec un conseiller ?",
+          "Souhaitez-vous des informations spécifiques sur l'une de nos catégories de services (Prévention, Protection, Réponse) ou être mis en relation avec un conseiller ?",
         needsHumanSupport: false,
         context: "initial",
       }
@@ -459,7 +755,7 @@ export async function processChatbotMessage(
     // RÉPONSE PAR DÉFAUT
     return {
       response:
-        "Je peux vous renseigner sur nos produits et services de cybersécurité, nos tarifs ou vous mettre en relation avec un conseiller. Comment puis-je vous aider ?",
+        "Je peux vous renseigner sur nos solutions de cybersécurité réparties en 3 catégories : Prévention (Diagnostic, Tests, Formation, RGPD), Protection (SOC, EDR, XDR, Anti-Phishing) et Réponse (Investigation, Gestion de crise, Threat Intelligence, Red Team). Comment puis-je vous aider ?",
       needsHumanSupport: false,
       context: "initial",
     }

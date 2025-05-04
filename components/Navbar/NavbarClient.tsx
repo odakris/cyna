@@ -40,7 +40,7 @@ export default function NavbarClient({ categories }: NavbarProps) {
     },
     {
       name: "Recherche Avancée",
-      href: "/recherche",
+      href: "/produit",
       icon: <Search className="h-4 w-4 mr-2" />,
     },
     {
@@ -253,7 +253,7 @@ export default function NavbarClient({ categories }: NavbarProps) {
         </div>
       </div>
 
-      {/* DESKTOP NAVIGATION - Complètement repensée */}
+      {/* DESKTOP NAVIGATION */}
       <nav className="hidden lg:block">
         <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
           <div className="flex items-center gap-8">
@@ -315,7 +315,7 @@ export default function NavbarClient({ categories }: NavbarProps) {
 
                 <NavigationMenuItem>
                   <Link
-                    href="/recherche"
+                    href="/produit"
                     className="flex items-center px-3 py-2 text-sm text-white rounded-md hover:bg-white/10 transition-colors duration-200"
                   >
                     <Search className="mr-1.5 h-4 w-4" />

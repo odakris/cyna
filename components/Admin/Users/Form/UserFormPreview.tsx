@@ -28,35 +28,39 @@ export default function UserFormPreview({
 }: UserFormPreviewProps) {
   return (
     <div className="flex flex-col items-center justify-center pt-4">
-      <Avatar className="h-24 w-24 mb-4 border-4 border-background shadow-lg">
+      <Avatar className="h-20 sm:h-24 w-20 sm:w-24 mb-3 sm:mb-4 border-4 border-background shadow-lg">
         <AvatarImage
           src={`https://api.dicebear.com/7.x/initials/svg?seed=${firstName}%20${lastName}&backgroundColor=4f46e5`}
           alt={`${firstName} ${lastName}`}
         />
-        <AvatarFallback className="text-xl font-bold">
+        <AvatarFallback className="text-lg sm:text-xl font-bold">
           {getUserInitials(firstName, lastName)}
         </AvatarFallback>
       </Avatar>
 
-      <h3 className="text-lg font-semibold">
+      <h3 className="text-base sm:text-lg font-semibold">
         {firstName || "Prénom"} {lastName || "Nom"}
       </h3>
 
-      <p className="text-sm text-muted-foreground mb-2">
+      <p className="text-xs sm:text-sm text-muted-foreground mb-2 break-all text-center">
         {email || "email@exemple.com"}
       </p>
 
-      <Badge className={`px-3 py-1 ${getRoleBadgeColor(role)}`}>{role}</Badge>
+      <Badge
+        className={`px-2 sm:px-3 py-0.5 sm:py-1 text-xs sm:text-sm ${getRoleBadgeColor(role)}`}
+      >
+        {role}
+      </Badge>
 
-      <Separator className="my-4" />
+      <Separator className="my-3 sm:my-4" />
 
-      <div className="w-full space-y-4">
+      <div className="w-full space-y-3 sm:space-y-4">
         <div className="flex justify-between items-center">
-          <span className="text-sm flex items-center gap-1">
-            <Mail className="h-4 w-4" /> Email vérifié
+          <span className="text-xs sm:text-sm flex items-center gap-1">
+            <Mail className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Email vérifié
           </span>
           <Badge
-            className={`px-2 py-0.5 text-xs ${
+            className={`px-1.5 sm:px-2 py-0.5 text-xs ${
               emailVerified
                 ? "bg-green-600 text-white"
                 : "bg-gray-600 text-white"
@@ -67,11 +71,11 @@ export default function UserFormPreview({
         </div>
 
         <div className="flex justify-between items-center">
-          <span className="text-sm flex items-center gap-1">
-            <Lock className="h-4 w-4" /> Authentification 2FA
+          <span className="text-xs sm:text-sm flex items-center gap-1">
+            <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Authentification 2FA
           </span>
           <Badge
-            className={`px-2 py-0.5 text-xs ${
+            className={`px-1.5 sm:px-2 py-0.5 text-xs ${
               twoFactorEnabled
                 ? "bg-green-600 text-white"
                 : "bg-gray-600 text-white"
@@ -82,11 +86,11 @@ export default function UserFormPreview({
         </div>
 
         <div className="flex justify-between items-center">
-          <span className="text-sm flex items-center gap-1">
-            <Power className="h-4 w-4" /> Statut
+          <span className="text-xs sm:text-sm flex items-center gap-1">
+            <Power className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Statut
           </span>
           <Badge
-            className={`px-2 py-0.5 text-xs ${
+            className={`px-1.5 sm:px-2 py-0.5 text-xs ${
               active ? "bg-green-600 text-white" : "bg-gray-600 text-white"
             }`}
           >

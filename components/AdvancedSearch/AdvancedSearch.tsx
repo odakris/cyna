@@ -5,10 +5,10 @@ import { ProductCard } from "@/components/Products/ProductCard"
 import { BaseProductGrid } from "@/components/Products/BaseProductGrid"
 import { AdvancedSearchProps } from "@/types/Types"
 import { useAdvancedSearch } from "@/hooks/use-advanced-search"
-import { FilterPanel } from "@/components/AdvancedSearch/FilterPanel"
-import { MobileFilterPanel } from "@/components/AdvancedSearch/MobileFilterPanel"
-import { ActiveFilters } from "@/components/AdvancedSearch/ActiveFilters"
-import { SortOptions } from "@/components/AdvancedSearch/SortOptions"
+import { FilterPanel } from "./FilterPanel"
+import { MobileFilterPanel } from "./MobileFilterPanel"
+import { ActiveFilters } from "./ActiveFilters"
+import { SortOptions } from "./SortOptions"
 
 export default function AdvancedSearch({ categories }: AdvancedSearchProps) {
   const {
@@ -64,18 +64,20 @@ export default function AdvancedSearch({ categories }: AdvancedSearchProps) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {/* En-tête de la page amélioré */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#302082] mb-2">
+        <h1 className="text-3xl font-bold text-[#302082] mb-2 relative pb-2 inline-block">
           Recherche avancée
+          <span className="absolute bottom-0 left-0 w-3/4 h-1 bg-[#302082] rounded-full"></span>
         </h1>
-        <p className="text-gray-600">
-          Trouvez le service SaaS idéal pour répondre à vos besoins en
-          cybersécurité
+        <p className="text-gray-600 max-w-3xl">
+          Trouvez la solution de cybersécurité idéale pour répondre aux besoins
+          spécifiques de votre entreprise
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Panneau de filtres pour grands écrans */}
+        {/* Panneau de filtres pour grands écrans - Conserve toutes les fonctionnalités existantes */}
         <FilterPanel
           title={title}
           description={description}

@@ -12,7 +12,7 @@ declare module "next-auth" {
       first_name: string
       last_name: string
       email: string
-      role: string
+      role?: string
     } & DefaultSession["user"]
   }
 
@@ -21,7 +21,7 @@ declare module "next-auth" {
     first_name: string
     last_name: string
     email: string
-    role: string
+    role?: string
   }
 }
 
@@ -31,7 +31,7 @@ declare module "next-auth/jwt" {
     first_name: string
     last_name: string
     email: string
-    role: string
+    role?: string
   }
 }
 
@@ -66,6 +66,12 @@ export const authOptions: NextAuthOptions = {
             "Authorize - Erreur: Utilisateur non trouvé ou sans mot de passe"
           )
           throw new Error("Utilisateur non trouvé")
+        }
+
+        // Vérification que l'utilisateur est actif
+        if (!user.active) {
+          console.log("Authorize - Erreur: Compte utilisateur inactif")
+          throw new Error("Compte inactif")
         }
 
         const isPasswordValid = await bcrypt.compare(

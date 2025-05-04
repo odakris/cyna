@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useEffect, useState } from "react"
 import {
   Form,
   FormControl,
@@ -20,7 +21,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation"
-import emailjs from "@emailjs/browser"
 import {
   RegisterFormValues,
   registerFormSchema,
@@ -32,14 +32,18 @@ import {
   ShieldCheck,
   AlertCircle,
   Loader2,
+  CheckCircle,
+  Shield,
 } from "lucide-react"
-import { useState } from "react"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Progress } from "@/components/ui/progress"
 
-// Composant RegisterForm
 const RegisterForm = () => {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [passwordStrength, setPasswordStrength] = useState(0)
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
@@ -52,9 +56,48 @@ const RegisterForm = () => {
     },
   })
 
+  // Calculer la force du mot de passe à chaque changement
+  useEffect(() => {
+    const password = form.watch("password")
+    if (!password) {
+      setPasswordStrength(0)
+      return
+    }
+
+    let strength = 0
+
+    // Longueur - jusqu'à 25%
+    strength += Math.min(password.length * 2.5, 25)
+
+    // Complexité - jusqu'à 75% supplémentaires
+    if (/[A-Z]/.test(password)) strength += 15 // Majuscules
+    if (/[a-z]/.test(password)) strength += 15 // Minuscules
+    if (/[0-9]/.test(password)) strength += 15 // Chiffres
+    if (/[^A-Za-z0-9]/.test(password)) strength += 15 // Caractères spéciaux
+    if (password.length > 10) strength += 15 // Longueur supplémentaire
+
+    setPasswordStrength(Math.min(strength, 100))
+  }, [form.watch("password")])
+
+  // Fonction pour obtenir la couleur de la barre de progression
+  const getStrengthColor = () => {
+    if (passwordStrength < 30) return "red-500"
+    if (passwordStrength < 60) return "yellow-500"
+    return "green-500"
+  }
+
+  // Fonction pour obtenir le texte de force du mot de passe
+  const getStrengthText = () => {
+    if (passwordStrength < 30) return "Faible"
+    if (passwordStrength < 60) return "Moyen"
+    if (passwordStrength < 80) return "Bon"
+    return "Excellent"
+  }
+
   const handleSubmit = async (data: RegisterFormValues) => {
     setIsSubmitting(true)
     setSubmitError(null)
+    setSuccessMessage(null)
 
     try {
       // Étape 1 : Inscription via l'API
@@ -73,39 +116,33 @@ const RegisterForm = () => {
 
       const result = await response.json()
 
-      if (response.ok) {
-        // Étape 2 : Envoyer un e-mail de bienvenue avec EmailJS
-        const templateParams = {
-          firstName: data.firstName,
-          email: data.email,
-          subject: "Bienvenue sur Cyna !",
-          message:
-            "Merci de vous être inscrit sur Cyna ! Votre compte a été créé avec succès.",
-          actionLink: "", // Pas de lien pour l'inscription
-        }
-
-        await emailjs.send(
-          process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-          process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_GENERIC!, // Template générique
-          templateParams,
-          process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY!
-        )
-
-        console.log("E-mail de bienvenue envoyé avec succès !")
-        router.push("/") // Redirige vers la page d'accueil après succès
-      } else {
+      if (!response.ok) {
         console.error("Erreur lors de l'inscription:", result.error)
         setSubmitError(
-          result.error || "Une erreur est survenue lors de l'inscription"
+          typeof result.error === "string"
+            ? result.error
+            : "Une erreur est survenue lors de l'inscription"
         )
+        return
       }
-    } catch (error) {
-      console.error(
-        "Erreur lors de la requête ou de l'envoi de l'e-mail:",
-        error
+
+      // Afficher le message de succès
+      setSuccessMessage(
+        "Votre compte a été créé avec succès ! Un email de vérification vous a été envoyé. " +
+          "Veuillez vérifier votre boîte de réception pour activer votre compte."
       )
+
+      // Réinitialiser le formulaire
+      form.reset()
+
+      // Option: rediriger vers la page de connexion après un délai
+      setTimeout(() => {
+        router.push("/auth")
+      }, 5000)
+    } catch (error) {
+      console.error("Erreur lors de la requête:", error)
       setSubmitError(
-        "Une erreur est survenue lors de l'inscription ou de l'envoi de l'e-mail"
+        "Une erreur est survenue lors de l'inscription. Veuillez réessayer."
       )
     } finally {
       setIsSubmitting(false)
@@ -123,6 +160,18 @@ const RegisterForm = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {successMessage && (
+          <Alert className="mb-4 bg-green-50 border-green-200 text-green-800">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <AlertTitle className="text-green-600 font-semibold">
+              Inscription réussie !
+            </AlertTitle>
+            <AlertDescription className="text-green-700">
+              {successMessage}
+            </AlertDescription>
+          </Alert>
+        )}
+
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleSubmit)}
@@ -148,9 +197,9 @@ const RegisterForm = () => {
                     </FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-gray-50 focus:bg-white border border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors"
+                        className="bg-gray-50 focus:bg-white border-2 border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors"
                         placeholder="Prénom"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !!successMessage}
                         {...field}
                       />
                     </FormControl>
@@ -171,9 +220,9 @@ const RegisterForm = () => {
                     </FormLabel>
                     <FormControl>
                       <Input
-                        className="bg-gray-50 focus:bg-white border border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors"
+                        className="bg-gray-50 focus:bg-white border-2 border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors"
                         placeholder="Nom"
-                        disabled={isSubmitting}
+                        disabled={isSubmitting || !!successMessage}
                         {...field}
                       />
                     </FormControl>
@@ -196,9 +245,9 @@ const RegisterForm = () => {
                   <FormControl>
                     <Input
                       type="email"
-                      className="bg-gray-50 focus:bg-white border border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors"
+                      className="bg-gray-50 focus:bg-white border-2 border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors"
                       placeholder="votre@email.com"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !!successMessage}
                       {...field}
                     />
                   </FormControl>
@@ -218,14 +267,74 @@ const RegisterForm = () => {
                     Mot de passe
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      className="bg-gray-50 focus:bg-white border border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors"
-                      placeholder="••••••••••"
-                      disabled={isSubmitting}
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        type="password"
+                        className="bg-gray-50 focus:bg-white border-2 border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors pr-10"
+                        placeholder="••••••••••"
+                        disabled={isSubmitting || !!successMessage}
+                        {...field}
+                      />
+                      <Shield className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                    </div>
                   </FormControl>
+
+                  <div className="mt-2 space-y-1">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-gray-500">
+                        Force du mot de passe:
+                      </span>
+                      <span
+                        className={`font-medium ${
+                          passwordStrength < 30
+                            ? "text-red-500"
+                            : passwordStrength < 60
+                              ? "text-yellow-500"
+                              : "text-green-500"
+                        }`}
+                      >
+                        {getStrengthText()}
+                      </span>
+                    </div>
+                    <Progress
+                      value={passwordStrength}
+                      className="h-1.5 w-full bg-gray-200 rounded-full"
+                      indicatorClassName={`bg-${getStrengthColor()}`}
+                    />
+                    <ul className="text-xs text-gray-500 mt-2 space-y-1 pl-5 list-disc">
+                      <li
+                        className={
+                          field.value && field.value.length >= 8
+                            ? "text-green-600"
+                            : ""
+                        }
+                      >
+                        Au moins 8 caractères
+                      </li>
+                      <li
+                        className={
+                          /[A-Z]/.test(field.value) ? "text-green-600" : ""
+                        }
+                      >
+                        Au moins une majuscule
+                      </li>
+                      <li
+                        className={
+                          /[a-z]/.test(field.value) ? "text-green-600" : ""
+                        }
+                      >
+                        Au moins une minuscule
+                      </li>
+                      <li
+                        className={
+                          /[0-9]/.test(field.value) ? "text-green-600" : ""
+                        }
+                      >
+                        Au moins un chiffre
+                      </li>
+                    </ul>
+                  </div>
+
                   <FormMessage className="text-xs" />
                 </FormItem>
               )}
@@ -242,33 +351,38 @@ const RegisterForm = () => {
                     Confirmer le mot de passe
                   </FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      className="bg-gray-50 focus:bg-white border border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors"
-                      placeholder="••••••••••"
-                      disabled={isSubmitting}
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        type="password"
+                        className="bg-gray-50 focus:bg-white border-2 border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors pr-10"
+                        placeholder="••••••••••"
+                        disabled={isSubmitting || !!successMessage}
+                        {...field}
+                      />
+                      <Shield className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                    </div>
                   </FormControl>
                   <FormMessage className="text-xs" />
                 </FormItem>
               )}
             />
 
-            <Button
-              className="w-full bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-2 border-transparent hover:border-[#FF6B00] hover:bg-white hover:text-[#FF6B00] transition-all duration-300 text-sm font-semibold py-5 mt-2"
-              disabled={isSubmitting}
-              type="submit"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Inscription en cours...
-                </>
-              ) : (
-                "Créer mon compte"
-              )}
-            </Button>
+            {!successMessage && (
+              <Button
+                className="w-full bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-2 border-transparent hover:border-[#FF6B00] hover:bg-white hover:text-[#FF6B00] transition-all duration-300 text-sm font-semibold py-5 mt-2"
+                disabled={isSubmitting}
+                type="submit"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Inscription en cours...
+                  </>
+                ) : (
+                  "Créer mon compte"
+                )}
+              </Button>
+            )}
           </form>
         </Form>
       </CardContent>

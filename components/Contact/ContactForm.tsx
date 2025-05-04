@@ -26,6 +26,7 @@ import {
   CheckCircle,
   MessageSquare,
   Send,
+  User,
 } from "lucide-react"
 
 export default function ContactForm() {
@@ -37,6 +38,8 @@ export default function ContactForm() {
   } = useForm<ContactMessageFormValues>({
     resolver: zodResolver(contactMessageSchema),
     defaultValues: {
+      first_name: "",
+      last_name: "",
       email: "",
       subject: "",
       message: "",
@@ -65,11 +68,11 @@ export default function ContactForm() {
       reset()
       toast({
         title: "Succès",
+        variant: "success",
         description: "Votre message a été envoyé avec succès.",
       })
 
-      // Reset submission state after a delay for better UX
-      setTimeout(() => setIsSubmitted(false), 3000)
+      // setTimeout(() => setIsSubmitted(false), 3000)
     } catch (error) {
       console.error("Erreur lors de l'envoi:", error)
       toast({
@@ -124,9 +127,66 @@ export default function ContactForm() {
                 Nous avons bien reçu votre message et nous vous répondrons dans
                 les plus brefs délais.
               </p>
+              <Button
+                variant="cyna"
+                className="mt-4 text-[#302082] border-[#302082] hover:bg-[#302082]/10"
+                onClick={() => {
+                  setIsSubmitted(false)
+                  reset()
+                }}
+              >
+                Retour
+              </Button>
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="first_name"
+                    className="text-sm font-semibold text-[#302082] flex items-center gap-2"
+                  >
+                    <User className="h-4 w-4" />
+                    Prénom
+                  </label>
+                  <Input
+                    id="first_name"
+                    {...register("first_name")}
+                    placeholder="Votre prénom"
+                    className="bg-gray-50 focus:bg-white border border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors"
+                    disabled={isSubmitting}
+                  />
+                  {errors.first_name && (
+                    <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                      <AlertTriangle className="h-3.5 w-3.5" />
+                      {errors.first_name.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="last_name"
+                    className="text-sm font-semibold text-[#302082] flex items-center gap-2"
+                  >
+                    <User className="h-4 w-4" />
+                    Nom
+                  </label>
+                  <Input
+                    id="last_name"
+                    {...register("last_name")}
+                    placeholder="Votre nom"
+                    className="bg-gray-50 focus:bg-white border border-gray-200 focus:border-[#302082] focus-visible:ring-1 focus-visible:ring-[#302082] transition-colors"
+                    disabled={isSubmitting}
+                  />
+                  {errors.last_name && (
+                    <p className="text-xs text-red-500 flex items-center gap-1 mt-1">
+                      <AlertTriangle className="h-3.5 w-3.5" />
+                      {errors.last_name.message}
+                    </p>
+                  )}
+                </div>
+              </div>
               <div className="space-y-1.5">
                 <label
                   htmlFor="email"

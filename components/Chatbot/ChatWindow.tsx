@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Send, User, Loader2, Shield } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { useChatbot } from "@/hooks/use-chatbot"
+import { useChatbot } from "@/hooks/chatbot/use-chatbot"
 import { MessageType } from "@prisma/client"
 
 export default function ChatWindow() {

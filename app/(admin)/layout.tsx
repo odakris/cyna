@@ -1,4 +1,3 @@
-// app/(admin)/layout.tsx
 import { Toaster } from "@/components/ui/toaster"
 
 export default function AdminRootLayout({

@@ -1,69 +1,70 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { CartItem, useCart } from "@/context/CartContext";
-import Image from "next/image";
-import { useState, useMemo } from "react";
+} from "@/components/ui/select"
+import { CartItem, useCart } from "@/context/CartContext"
+import Image from "next/image"
+import { useState, useMemo } from "react"
 
 type CartProps = {
-  item: CartItem;
-};
+  item: CartItem
+}
 
 const CartItemComponent: React.FC<CartProps> = ({ item }) => {
-  const { cart, updateCartItem, decreaseQuantity, removeFromCart } = useCart();
-  const [isRemoving, setIsRemoving] = useState(false);
+  const { cart, updateCartItem, decreaseQuantity, removeFromCart } = useCart()
+  const [isRemoving, setIsRemoving] = useState(false)
 
   if (!item || !item.uniqueId) {
-    console.error("Item invalide reçu dans CartItemComponent:", item);
-    return null;
+    console.error("Item invalide reçu dans CartItemComponent:", item)
+    return null
   }
 
-  const currentItem = cart.find((cartItem) => cartItem.uniqueId === item.uniqueId) || item;
+  const currentItem =
+    cart.find(cartItem => cartItem.uniqueId === item.uniqueId) || item
 
   const handleSubscriptionChange = (value: string) => {
-    updateCartItem(currentItem.uniqueId, { subscription: value });
-  };
+    updateCartItem(currentItem.uniqueId, { subscription: value })
+  }
 
   const handleQuantityIncrement = () => {
-    updateCartItem(currentItem.uniqueId, { quantity: currentItem.quantity + 1 });
-  };
+    updateCartItem(currentItem.uniqueId, { quantity: currentItem.quantity + 1 })
+  }
 
   const handleQuantityDecrement = () => {
-    decreaseQuantity(currentItem.uniqueId);
-  };
+    decreaseQuantity(currentItem.uniqueId)
+  }
 
   const handleRemove = () => {
-    if (isRemoving) return;
-    setIsRemoving(true);
-    removeFromCart(currentItem.uniqueId);
-    setTimeout(() => setIsRemoving(false), 1000);
-  };
+    if (isRemoving) return
+    setIsRemoving(true)
+    removeFromCart(currentItem.uniqueId)
+    setTimeout(() => setIsRemoving(false), 1000)
+  }
 
   // Calculer le prix unitaire en fonction de l'abonnement
   const unitPrice = useMemo(() => {
     switch (currentItem.subscription || "MONTHLY") {
       case "MONTHLY":
-        return currentItem.price;
+        return currentItem.price
       case "YEARLY":
-        return currentItem.price * 12; // Prix annuel = mensuel * 12
+        return currentItem.price * 12 // Prix annuel = mensuel * 12
       case "PER_USER":
-        return currentItem.price;
+        return currentItem.price
       case "PER_MACHINE":
-        return currentItem.price;
+        return currentItem.price
       default:
-        return currentItem.price;
+        return currentItem.price
     }
-  }, [currentItem.price, currentItem.subscription]);
+  }, [currentItem.price, currentItem.subscription])
 
   // Calculer le prix total (prix unitaire * quantité)
   const adjustedPrice = useMemo(() => {
-    return unitPrice * currentItem.quantity;
-  }, [unitPrice, currentItem.quantity]);
+    return unitPrice * currentItem.quantity
+  }, [unitPrice, currentItem.quantity])
 
   return (
     <div className="flex justify-center mb-12">
@@ -114,10 +115,12 @@ const CartItemComponent: React.FC<CartProps> = ({ item }) => {
           </div>
           <div className="flex flex-col space-y-2">
             <p className="text-sm">
-              Prix unitaire : <span className="font-semibold">{unitPrice.toFixed(2)}€</span>
+              Prix unitaire :{" "}
+              <span className="font-semibold">{unitPrice.toFixed(2)}€</span>
             </p>
             <p className="text-sm">
-              Prix total : <span className="font-semibold">{adjustedPrice.toFixed(2)}€</span>
+              Prix total :{" "}
+              <span className="font-semibold">{adjustedPrice.toFixed(2)}€</span>
             </p>
           </div>
         </div>
@@ -148,7 +151,7 @@ const CartItemComponent: React.FC<CartProps> = ({ item }) => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default CartItemComponent;
+export default CartItemComponent

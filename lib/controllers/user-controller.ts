@@ -85,11 +85,20 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
     }
 
     if (error instanceof Error) {
+      // Traiter les erreurs spécifiques pour préserver leur contexte
+      if (error.message.startsWith("EMAIL_EXISTS:")) {
+        // Extraire le message réel après le code
+        const actualMessage = error.message.split(":")[1]
+        return NextResponse.json(
+          { error: actualMessage, code: "EMAIL_EXISTS" },
+          { status: 400 }
+        )
+      }
+
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    const message = error instanceof Error ? error.message : "Erreur inconnue"
-    return NextResponse.json({ error: message }, { status: 400 })
+    return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }
 

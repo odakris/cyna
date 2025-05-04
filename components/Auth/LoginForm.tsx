@@ -67,6 +67,11 @@ const LoginForm: React.FC = () => {
         case "Mot de passe incorrect":
           setErrorMessage("Mot de passe incorrect.")
           break
+        case "Compte inactif":
+          setErrorMessage(
+            "Ce compte a été désactivé. Veuillez contacter l'administrateur."
+          )
+          break
         default:
           setErrorMessage("Une erreur est survenue lors de la connexion.")
       }

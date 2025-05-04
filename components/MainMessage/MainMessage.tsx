@@ -60,7 +60,7 @@ export default function MainMessage() {
   return (
     <Card className={`w-full ${bgColor}`}>
       <CardContent className="py-4 px-6">
-        <p className={`text-center font-medium ${textColor}`}>
+        <p className={`text-center font-bold text-4xl ${textColor}`}>
           {message.content}
         </p>
       </CardContent>
