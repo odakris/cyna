@@ -19,8 +19,8 @@ export default function CategoriesHeader({
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
       <div>
         <div className="flex items-center gap-2">
-          <TagIcon className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">
+          <TagIcon className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Gestion des Catégories
           </h1>
         </div>
@@ -28,32 +28,35 @@ export default function CategoriesHeader({
           <Badge variant="outline" className="font-normal">
             {categoriesCount} catégorie{categoriesCount > 1 ? "s" : ""}
           </Badge>
+          {/* Badge de sélection - uniquement visible sur desktop */}
           <Badge
             variant="secondary"
-            className="font-normal"
+            className="font-normal hidden md:inline-flex"
             title="Sélectionnées"
           >
-            {selectedCount} sélectionnée
-            {selectedCount > 1 ? "s" : ""}
+            {selectedCount} sélectionnée{selectedCount > 1 ? "s" : ""}
           </Badge>
         </div>
       </div>
 
       <div className="flex flex-wrap gap-3">
         <PermissionGuard permission="categories:create">
-          <Button asChild>
+          <Button asChild className="flex-1 sm:flex-auto">
             <Link href="/dashboard/categories/new">
               <Plus className="mr-2 h-4 w-4" />
-              Ajouter une catégorie
+              <span className="sm:inline">Ajouter</span>
+              <span className="hidden sm:inline"> une catégorie</span>
             </Link>
           </Button>
         </PermissionGuard>
 
+        {/* Bouton supprimer - uniquement visible sur desktop */}
         <PermissionGuard permission="categories:delete">
           <Button
             variant="destructive"
             disabled={selectedCount === 0}
             onClick={() => setShowDeleteDialog(true)}
+            className="hidden md:flex"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Supprimer ({selectedCount})

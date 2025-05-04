@@ -107,11 +107,11 @@ const subscriptionStatusConfig = {
   },
 }
 
-interface ProductDetailsPageProps {
+interface OrderDetailPageProps {
   orderId: string
 }
 
-export function OrderDetailPage({ orderId }: ProductDetailsPageProps) {
+export function OrderDetailPage({ orderId }: OrderDetailPageProps) {
   const {
     order,
     loading,
@@ -138,7 +138,7 @@ export function OrderDetailPage({ orderId }: ProductDetailsPageProps) {
   const totalQuantity = getTotalQuantity()
 
   return (
-    <div className="mx-auto py-6 space-y-6">
+    <div className="mx-auto py-3 sm:py-6 space-y-4 sm:space-y-6 animate-in fade-in duration-300">
       {/* En-tête avec actions */}
       <OrderDetailHeader
         order={order}
@@ -150,9 +150,9 @@ export function OrderDetailPage({ orderId }: ProductDetailsPageProps) {
         orderStatusConfig={orderStatusConfig}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Colonne principale */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Informations produits */}
           <OrderDetailProducts
             order={order}
@@ -162,8 +162,8 @@ export function OrderDetailPage({ orderId }: ProductDetailsPageProps) {
           />
 
           {/* Informations de paiement et historique */}
-          <Tabs defaultValue="payment">
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs defaultValue="payment" className="w-full">
+            <TabsList className="w-full grid grid-cols-2">
               <TabsTrigger value="payment">Paiement</TabsTrigger>
               <TabsTrigger value="history">Historique</TabsTrigger>
             </TabsList>
@@ -183,7 +183,7 @@ export function OrderDetailPage({ orderId }: ProductDetailsPageProps) {
         </div>
 
         {/* Colonne d'informations (sidebar) */}
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6 order-first lg:order-last">
           {/* Informations client */}
           <OrderCustomerInfo order={order} />
 

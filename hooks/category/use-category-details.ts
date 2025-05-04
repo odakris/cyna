@@ -61,6 +61,7 @@ export function useCategoryDetails(id: string) {
       }
 
       toast({
+        variant: "success",
         title: "Catégorie supprimée",
         description: "La catégorie a été supprimée avec succès.",
       })

@@ -9,9 +9,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Key } from "lucide-react"
 
 // Composants factorisés
 import UserHeader from "@/components/Admin/Users/Details/UserHeader"
@@ -21,6 +19,7 @@ import UserDeleteDialog from "@/components/Admin/Users/Details/UserDeleteDialog"
 import ErrorDisplay from "@/components/Admin/Users/Details/ErrorDisplay"
 import { Separator } from "@/components/ui/separator"
 import UserActiveSwitch from "@/components/Admin/Users/UserActiveSwitch"
+import { ResendVerificationButton } from "@/components/Admin/Users/Details/ResendVerificationButton"
 
 export default function UserDetailsPage({
   params,
@@ -50,7 +49,7 @@ export default function UserDetailsPage({
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6 space-y-8 animate-in fade-in duration-300">
+    <div className="max-w-5xl mx-auto p-2 sm:p-6 space-y-4 sm:space-y-8 animate-in fade-in duration-300">
       {/* En-tête avec titre et actions */}
       <UserHeader
         user={user}
@@ -59,34 +58,36 @@ export default function UserDetailsPage({
         getRoleBadgeColor={getRoleBadgeColor}
       />
 
-      <Card className="overflow-hidden border-border/40 shadow-lg">
-        <CardHeader className="flex flex-row justify-between items-start p-6 pb-0 bg-muted/20">
+      <Card className="overflow-hidden border-border/40 shadow-sm">
+        <CardHeader className="flex flex-col sm:flex-row justify-between items-start p-3 sm:p-6 pb-0 bg-muted/20">
           <div>
             <div className="space-y-1">
-              <CardTitle className="text-2xl">
+              <CardTitle className="text-xl sm:text-2xl">
                 {user.first_name} {user.last_name}
               </CardTitle>
-              <CardDescription className="text-md">
+              <CardDescription className="text-sm sm:text-md break-all">
                 {user.email}
               </CardDescription>
             </div>
-            <Badge className={`px-3 py-1 my-3 ${getRoleBadgeColor(user.role)}`}>
+            <Badge
+              className={`px-2 sm:px-3 py-0.5 sm:py-1 my-2 sm:my-3 text-xs sm:text-sm ${getRoleBadgeColor(user.role)}`}
+            >
               {user.role}
             </Badge>
           </div>
 
-          <div className="text-right">
-            <p className="text-xl text-muted-foreground">Statut</p>
+          <div className="text-right mt-3 sm:mt-0">
+            <p className="text-lg sm:text-xl text-muted-foreground">Statut</p>
             <Badge
               variant={user.email_verified ? "default" : "destructive"}
-              className="py-1 px-3"
+              className="py-0.5 px-2 sm:py-1 sm:px-3 text-xs sm:text-sm"
             >
               {user.email_verified ? "Vérifié" : "Non vérifié"}
             </Badge>
           </div>
         </CardHeader>
 
-        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 pt-6">
+        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 p-3 sm:p-6 pt-4 sm:pt-6">
           {/* Profil utilisateur */}
           <UserProfile
             user={user}
@@ -97,10 +98,12 @@ export default function UserDetailsPage({
           {/* Informations utilisateur */}
           <UserInfo user={user} formatDate={formatDate} />
 
-          <Separator />
+          <div className="md:col-span-2">
+            <Separator className="my-2 sm:my-4" />
+          </div>
 
           {/* Statut utilisateur */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between md:col-span-2">
             <div>
               <p className="text-sm font-medium mb-1">
                 Statut de l&apos;utilisateur
@@ -124,13 +127,17 @@ export default function UserDetailsPage({
           </div>
 
           {/* Accès et Sécurité */}
-          <div className="md:col-span-2 space-y-6">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Accès et sécurité</h3>
-              <Button>
-                <Key className="mr-2 h-4 w-4" />
-                Réinitialiser le mot de passe
-              </Button>
+          <div className="md:col-span-2 space-y-4 sm:space-y-6 mt-2 sm:mt-4">
+            <div className="flex justify-between items-center flex-wrap gap-3">
+              <h3 className="text-base sm:text-lg font-semibold">
+                Accès et sécurité
+              </h3>
+              <div>
+                <ResendVerificationButton
+                  email={user.email}
+                  userId={user.id_user}
+                />
+              </div>
             </div>
           </div>
         </CardContent>

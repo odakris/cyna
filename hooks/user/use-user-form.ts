@@ -101,6 +101,7 @@ export function useUserForm(userId?: string) {
 
       toast({
         title: "Statut modifié",
+        variant: "success",
         description: `L'utilisateur est maintenant ${updatedUser.active ? "actif" : "inactif"}.`,
       })
 

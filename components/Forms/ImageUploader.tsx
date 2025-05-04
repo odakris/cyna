@@ -85,7 +85,9 @@ export function ImageUploader({
         field.onChange(uploadedImagePaths) // Mettre à jour le champ avec toutes les images
 
         toast({
-          title: "Image téléchargée avec succès",
+          variant: "success",
+          description: "Images téléchargées avec succès",
+          title: "Images téléchargées",
         })
       } else {
         const filePath = await uploadImage(files[0])
@@ -93,7 +95,9 @@ export function ImageUploader({
         field.onChange(filePath) // Mettre à jour la valeur du champ
 
         toast({
-          title: "Image téléchargée avec succès",
+          variant: "success",
+          description: "Image téléchargée avec succès",
+          title: "Image téléchargée",
         })
       }
     } catch (error) {

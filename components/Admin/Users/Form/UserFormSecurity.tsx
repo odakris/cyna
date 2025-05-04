@@ -55,38 +55,38 @@ export default function UserFormSecurity({
   const renderSelectedRole = (role: string) => (
     <div className="flex items-center gap-2">
       <Badge className={getRoleBadgeColor(role)}>{role}</Badge>
-      <span className="text-xs text-muted-foreground">
+      <span className="text-xs text-muted-foreground hidden sm:inline">
         {roleDescription[role as keyof typeof roleDescription]}
       </span>
     </div>
   )
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <FormField
         name="password"
         control={form.control}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Mot de Passe</FormLabel>
+            <FormLabel className="text-sm sm:text-base">Mot de Passe</FormLabel>
             <FormControl>
               <div className="relative">
                 <Key className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   {...field}
                   disabled={isSubmitting}
-                  className="pl-9"
+                  className="pl-9 text-sm sm:text-base h-9 sm:h-10"
                   type="password"
                   placeholder={isEditing ? "••••••••" : "Nouveau mot de passe"}
                 />
               </div>
             </FormControl>
-            <FormDescription>
+            <FormDescription className="text-xs sm:text-sm">
               {isEditing
                 ? "Laissez vide pour conserver le mot de passe actuel"
                 : "Minimum 8 caractères avec au moins 1 majuscule, 1 minuscule, 1 chiffre et 1 caractère spécial"}
             </FormDescription>
-            <FormMessage />
+            <FormMessage className="text-xs sm:text-sm" />
           </FormItem>
         )}
       />
@@ -98,7 +98,7 @@ export default function UserFormSecurity({
         control={form.control}
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Rôle</FormLabel>
+            <FormLabel className="text-sm sm:text-base">Rôle</FormLabel>
             <FormControl>
               <div className="relative">
                 <Shield className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground z-10" />
@@ -107,12 +107,16 @@ export default function UserFormSecurity({
                   onValueChange={field.onChange}
                   disabled={isSubmitting}
                 >
-                  <SelectTrigger className="pl-9">
+                  <SelectTrigger className="pl-9 text-sm sm:text-base h-9 sm:h-10">
                     <SelectValue>{renderSelectedRole(field.value)}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {Object.values(Role).map(role => (
-                      <SelectItem key={role} value={role}>
+                      <SelectItem
+                        key={role}
+                        value={role}
+                        className="text-sm sm:text-base"
+                      >
                         <div className="flex items-center gap-2">
                           <Badge className={getRoleBadgeColor(role)}>
                             {role}
@@ -131,11 +135,11 @@ export default function UserFormSecurity({
                 </Select>
               </div>
             </FormControl>
-            <FormDescription>
+            <FormDescription className="text-xs sm:text-sm">
               Définit les permissions et l&apos;accès de l&apos;utilisateur dans
               le système
             </FormDescription>
-            <FormMessage />
+            <FormMessage className="text-xs sm:text-sm" />
           </FormItem>
         )}
       />
@@ -144,12 +148,12 @@ export default function UserFormSecurity({
         name="active"
         control={form.control}
         render={({ field }) => (
-          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 mt-4">
+          <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 sm:p-4 mt-4">
             <div className="space-y-0.5">
-              <FormLabel className="text-base">
+              <FormLabel className="text-sm sm:text-base">
                 Activation de L&apos;utilisateur
               </FormLabel>
-              <FormDescription>
+              <FormDescription className="text-xs sm:text-sm">
                 {field.value
                   ? "L'utilisateur est actif et peut se connecter"
                   : "L'utilisateur est inactif et ne peut pas se connecter"}
@@ -171,8 +175,10 @@ export default function UserFormSecurity({
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <FormLabel>Email vérifié</FormLabel>
-            <FormDescription>
+            <FormLabel className="text-sm sm:text-base">
+              Email vérifié
+            </FormLabel>
+            <FormDescription className="text-xs sm:text-sm">
               L&apos;adresse email a-t-elle été vérifiée ?
             </FormDescription>
           </div>
@@ -187,8 +193,10 @@ export default function UserFormSecurity({
 
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <FormLabel>Authentification à deux facteurs</FormLabel>
-            <FormDescription>
+            <FormLabel className="text-sm sm:text-base">
+              Authentification à deux facteurs
+            </FormLabel>
+            <FormDescription className="text-xs sm:text-sm">
               Activer la protection supplémentaire du compte
             </FormDescription>
           </div>

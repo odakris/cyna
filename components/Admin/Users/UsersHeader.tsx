@@ -19,8 +19,8 @@ export default function UsersHeader({
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
       <div>
         <div className="flex items-center gap-2">
-          <Users className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">
+          <Users className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Gestion des Utilisateurs
           </h1>
         </div>
@@ -28,9 +28,10 @@ export default function UsersHeader({
           <Badge variant="outline" className="font-normal">
             {usersCount} utilisateur{usersCount > 1 ? "s" : ""}
           </Badge>
+          {/* Badge de sélection - sur desktop ET mobile */}
           <Badge
             variant="secondary"
-            className="font-normal"
+            className="font-normal hidden md:inline-flex"
             title="Sélectionnés"
           >
             {selectedCount} sélectionné
@@ -41,22 +42,25 @@ export default function UsersHeader({
 
       <div className="flex flex-wrap gap-3">
         <PermissionGuard permission="users:create">
-          <Button asChild variant="default">
+          <Button asChild className="flex-1 sm:flex-auto">
             <Link href="/dashboard/users/new">
               <UserPlus className="mr-2 h-4 w-4" />
-              Ajouter un utilisateur
+              <span className="sm:inline">Ajouter</span>
+              <span className="hidden sm:inline"> un utilisateur</span>
             </Link>
           </Button>
         </PermissionGuard>
 
         <PermissionGuard permission="users:delete">
+          {/* Bouton de suppression visible uniquement sur desktop */}
           <Button
             variant="destructive"
             disabled={selectedCount === 0}
             onClick={() => setShowDeleteDialog(true)}
+            className="hidden md:flex" // Masqué sur mobile, visible sur desktop
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            Supprimer ({selectedCount})
+            <span>Supprimer ({selectedCount})</span>
           </Button>
         </PermissionGuard>
       </div>

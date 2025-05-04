@@ -27,16 +27,20 @@ export default function OrderPaymentInfo({
 }: OrderPaymentInfoProps) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Informations de paiement</CardTitle>
+      <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+        <CardTitle className="text-base sm:text-lg">
+          Informations de paiement
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid gap-4">
+      <CardContent className="px-3 sm:px-6">
+        <div className="grid gap-3 sm:gap-4">
           <div className="flex items-center justify-between border-b pb-2">
-            <div className="font-medium">Méthode de paiement</div>
+            <div className="font-medium text-sm sm:text-base">
+              Méthode de paiement
+            </div>
             <div className="flex items-center">
-              <CreditCard className="mr-2 h-4 w-4 text-muted-foreground" />
-              <span>
+              <CreditCard className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+              <span className="text-sm">
                 {order.payment_method}
                 {order.last_card_digits &&
                   ` (**** **** **** ${order.last_card_digits})`}
@@ -44,13 +48,17 @@ export default function OrderPaymentInfo({
             </div>
           </div>
           <div className="flex items-center justify-between border-b pb-2">
-            <div className="font-medium">Date du paiement</div>
-            <div>{formattedDate}</div>
+            <div className="font-medium text-sm sm:text-base">
+              Date du paiement
+            </div>
+            <div className="text-sm">{formattedDate}</div>
           </div>
           <div className="flex items-center justify-between border-b pb-2">
-            <div className="font-medium">Statut du paiement</div>
+            <div className="font-medium text-sm sm:text-base">
+              Statut du paiement
+            </div>
             <Badge
-              className={`${orderStatusConfig[order.order_status]?.bgColor} ${orderStatusConfig[order.order_status]?.color}`}
+              className={`${orderStatusConfig[order.order_status]?.bgColor} ${orderStatusConfig[order.order_status]?.color} text-xs`}
             >
               {orderStatusConfig[order.order_status]?.icon}
               <span className="ml-1">
@@ -60,23 +68,25 @@ export default function OrderPaymentInfo({
             </Badge>
           </div>
           <div className="flex items-center justify-between">
-            <div className="font-medium">Numéro de facture</div>
+            <div className="font-medium text-sm sm:text-base">
+              Numéro de facture
+            </div>
             <div className="flex items-center">
-              <Receipt className="mr-2 h-4 w-4 text-muted-foreground" />
-              <span>{order.invoice_number}</span>
+              <Receipt className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
+              <span className="text-sm">{order.invoice_number}</span>
             </div>
           </div>
         </div>
       </CardContent>
       {order.invoice_pdf_url && (
-        <CardFooter>
-          <Button className="w-full" asChild>
+        <CardFooter className="px-3 sm:px-6 pt-2">
+          <Button className="w-full text-xs sm:text-sm h-9" asChild>
             <a
               href={order.invoice_pdf_url}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <ExternalLink className="mr-2 h-4 w-4" />
+              <ExternalLink className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Voir la facture
             </a>
           </Button>

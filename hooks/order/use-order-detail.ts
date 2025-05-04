@@ -69,6 +69,7 @@ export function useOrderDetail(orderId: string) {
       setOrder(data.order)
       toast({
         title: "Statut mis à jour",
+        variant: "success",
         description: `La commande est maintenant ${getStatusLabel(updateStatus)}`,
       })
     } catch (error) {

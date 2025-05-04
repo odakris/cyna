@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import {
   ColumnFiltersState,
   SortingState,
@@ -17,8 +17,8 @@ import {
 } from "@/components/Admin/Conversations/ConversationColumns"
 
 export function useConversationsTable(
-  conversations: Conversation[],
-  activeTab: string
+  conversations: Conversation[]
+  // activeTab?: string
 ) {
   // États pour la table
   const [sorting, setSorting] = useState<SortingState>([
@@ -62,13 +62,13 @@ export function useConversationsTable(
   })
 
   // Appliquer le filtre en fonction de l'onglet actif
-  useEffect(() => {
-    if (activeTab === "all") {
-      table.getColumn("status")?.setFilterValue(undefined)
-    } else {
-      table.getColumn("status")?.setFilterValue(activeTab)
-    }
-  }, [activeTab, table])
+  // useEffect(() => {
+  //   if (activeTab === "all") {
+  //     table.getColumn("status")?.setFilterValue(undefined)
+  //   } else {
+  //     table.getColumn("status")?.setFilterValue(activeTab)
+  //   }
+  // }, [activeTab, table])
 
   return {
     table,

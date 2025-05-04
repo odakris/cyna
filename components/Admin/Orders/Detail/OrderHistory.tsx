@@ -13,17 +13,19 @@ export default function OrderHistory({
 }: OrderHistoryProps) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Historique de la commande</CardTitle>
+      <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+        <CardTitle className="text-base sm:text-lg">
+          Historique de la commande
+        </CardTitle>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+      <CardContent className="px-3 sm:px-6">
+        <ScrollArea className="h-[180px] sm:h-[200px] w-full rounded-md border p-3 sm:p-4">
           <div className="space-y-4">
             <div className="flex gap-3">
               <div className={`h-2 w-2 mt-2 rounded-full bg-green-500`} />
               <div>
-                <div className="font-semibold">Commande créée</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="font-medium text-sm">Commande créée</div>
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   {formattedDate}
                 </div>
               </div>
@@ -34,12 +36,12 @@ export default function OrderHistory({
               />
               <div>
                 <div
-                  className={`font-semibold ${order.order_status === "PENDING" ? "text-muted-foreground" : ""}`}
+                  className={`font-medium text-sm ${order.order_status === "PENDING" ? "text-muted-foreground" : ""}`}
                 >
                   Paiement reçu
                 </div>
                 {order.order_status !== "PENDING" && (
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-xs sm:text-sm text-muted-foreground">
                     {formattedDate}
                   </div>
                 )}

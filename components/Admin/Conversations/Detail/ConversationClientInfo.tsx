@@ -1,11 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { User, CheckCircle, XCircle } from "lucide-react"
+import { User, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import { Separator } from "@/components/ui/separator"
 import { ConversationStatus } from "@prisma/client"
-import { renderStatusBadge } from "../ConversationColumns"
+// import { renderStatusBadge } from "../ConversationColumns"
 
 interface ConversationClientInfoProps {
   email: string | null
@@ -77,12 +77,12 @@ export default function ConversationClientInfo({
 
         <Separator />
 
-        <div>
+        {/* <div>
           <h3 className="text-sm font-medium text-muted-foreground mb-1">
             Statut
           </h3>
           <div>{renderStatusBadge(status)}</div>
-        </div>
+        </div> */}
 
         <Separator />
 
@@ -109,7 +109,7 @@ export default function ConversationClientInfo({
             Actions
           </h3>
           <div className="flex flex-col gap-2">
-            {status !== ConversationStatus.CLOSED && (
+            {/* {status !== ConversationStatus.CLOSED && (
               <Button
                 variant="outline"
                 size="sm"
@@ -120,7 +120,7 @@ export default function ConversationClientInfo({
                 <XCircle className="mr-2 h-4 w-4" />
                 Fermer la conversation
               </Button>
-            )}
+            )} */}
 
             {status === ConversationStatus.CLOSED && (
               <Button

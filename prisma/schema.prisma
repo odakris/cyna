@@ -250,6 +250,8 @@ model Session {
 
 model ContactMessage {
     id_message    Int       @id @default(autoincrement())
+    first_name    String    @db.VarChar(100)
+    last_name     String    @db.VarChar(100)
     email         String    @db.VarChar(255)
     subject       String    @db.VarChar(200)
     message       String    @db.Text

@@ -51,10 +51,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     }
 
     // Si c'est une nouvelle conversation d'un utilisateur connecté, mettre à jour l'ID utilisateur
-    if (conversation.id_user === null && session?.user?.id) {
+    if (conversation.id_user === null && session?.user?.id_user) {
       await prisma.chatConversation.update({
         where: { id_conversation: conversation.id_conversation },
-        data: { id_user: parseInt(session.user.id) },
+        data: { id_user: session.user.id_user },
       })
     }
 

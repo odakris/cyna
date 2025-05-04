@@ -114,7 +114,9 @@ export function ProductForm({
       const product_caroussel_images = Array.isArray(
         values.product_caroussel_images
       )
-        ? values.product_caroussel_images
+        ? values.product_caroussel_images.filter(
+            img => img && img.trim() !== ""
+          )
         : []
 
       // Formatage des valeurs avec gestion correcte des images du carrousel
@@ -155,6 +157,8 @@ export function ProductForm({
         }
 
         toast({
+          variant: "success",
+          description: "Le produit a été mis à jour avec succès.",
           title: "Produit mis à jour avec succès !",
         })
 
@@ -181,6 +185,8 @@ export function ProductForm({
         const newProduct = await response.json()
 
         toast({
+          variant: "success",
+          description: "Le produit a été créé avec succès.",
           title: "Produit créé avec succès !",
         })
 
@@ -213,8 +219,8 @@ export function ProductForm({
   )
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Colonne principale avec le formulaire */}
         <div className="lg:col-span-2">
           <Form {...form}>
@@ -228,48 +234,54 @@ export function ProductForm({
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger
                     value="basic"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm py-1.5 sm:py-2"
                   >
-                    <Info className="h-4 w-4" />
-                    Informations de base
+                    <Info className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">
+                      Informations de base
+                    </span>
+                    <span className="sm:hidden">Infos</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="details"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm py-1.5 sm:py-2"
                   >
-                    <ListChecks className="h-4 w-4" />
-                    Détails techniques
+                    <ListChecks className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Détails techniques</span>
+                    <span className="sm:hidden">Détails</span>
                   </TabsTrigger>
                   <TabsTrigger
                     value="images"
-                    className="flex items-center gap-2"
+                    className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm py-1.5 sm:py-2"
                   >
-                    <FileImage className="h-4 w-4" />
-                    Images
+                    <FileImage className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span>Images</span>
                   </TabsTrigger>
                 </TabsList>
 
-                <div className="mt-6">
+                <div className="mt-4 sm:mt-6">
                   {/* Onglet des informations de base */}
-                  <TabsContent value="basic" className="space-y-6">
+                  <TabsContent value="basic" className="space-y-4 sm:space-y-6">
                     <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <PencilLine className="h-5 w-5" />
+                      <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+                        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                          <PencilLine className="h-4 w-4 sm:h-5 sm:w-5" />
                           Détails du Produit
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="text-xs sm:text-sm">
                           Informations principales du produit qui seront
                           visibles par les utilisateurs
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-6">
+                      <CardContent className="space-y-4 sm:space-y-6 px-3 sm:px-6">
                         <FormField
                           name="name"
                           control={form.control}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Nom du produit</FormLabel>
+                              <FormLabel className="text-sm sm:text-base">
+                                Nom du produit
+                              </FormLabel>
                               <FormControl>
                                 <div className="relative">
                                   <Tag className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -277,14 +289,14 @@ export function ProductForm({
                                     placeholder="Entrez le nom du produit..."
                                     {...field}
                                     disabled={isSubmitting}
-                                    className="pl-9"
+                                    className="pl-9 text-sm sm:text-base h-9 sm:h-10"
                                   />
                                 </div>
                               </FormControl>
-                              <FormDescription>
+                              <FormDescription className="text-xs sm:text-sm">
                                 Le nom complet qui sera affiché aux clients
                               </FormDescription>
-                              <FormMessage />
+                              <FormMessage className="text-xs sm:text-sm" />
                             </FormItem>
                           )}
                         />
@@ -294,7 +306,9 @@ export function ProductForm({
                           control={form.control}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Description commerciale</FormLabel>
+                              <FormLabel className="text-sm sm:text-base">
+                                Description commerciale
+                              </FormLabel>
                               <FormControl>
                                 <div className="relative">
                                   <BookText className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -302,26 +316,28 @@ export function ProductForm({
                                     placeholder="Décrivez ce produit..."
                                     {...field}
                                     disabled={isSubmitting}
-                                    className="pl-9 pt-2 min-h-32"
+                                    className="pl-9 pt-2 min-h-24 sm:min-h-32 text-sm sm:text-base"
                                   />
                                 </div>
                               </FormControl>
-                              <FormDescription>
+                              <FormDescription className="text-xs sm:text-sm">
                                 Description attractive du produit pour les
                                 clients
                               </FormDescription>
-                              <FormMessage />
+                              <FormMessage className="text-xs sm:text-sm" />
                             </FormItem>
                           )}
                         />
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                           <FormField
                             name="unit_price"
                             control={form.control}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Prix unitaire (€)</FormLabel>
+                                <FormLabel className="text-sm sm:text-base">
+                                  Prix unitaire (€)
+                                </FormLabel>
                                 <FormControl>
                                   <div className="relative">
                                     <Banknote className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -331,14 +347,14 @@ export function ProductForm({
                                       placeholder="0.00"
                                       {...field}
                                       disabled={isSubmitting}
-                                      className="pl-9"
+                                      className="pl-9 text-sm sm:text-base h-9 sm:h-10"
                                     />
                                   </div>
                                 </FormControl>
-                                <FormDescription>
+                                <FormDescription className="text-xs sm:text-sm">
                                   Prix de vente en euros (TVA incluse)
                                 </FormDescription>
-                                <FormMessage />
+                                <FormMessage className="text-xs sm:text-sm" />
                               </FormItem>
                             )}
                           />
@@ -348,7 +364,9 @@ export function ProductForm({
                             control={form.control}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Catégorie</FormLabel>
+                                <FormLabel className="text-sm sm:text-base">
+                                  Catégorie
+                                </FormLabel>
                                 <FormControl>
                                   <div className="relative">
                                     <Layers className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground z-10" />
@@ -361,7 +379,7 @@ export function ProductForm({
                                       }
                                       disabled={isSubmitting}
                                     >
-                                      <SelectTrigger className="pl-9">
+                                      <SelectTrigger className="pl-9 text-sm sm:text-base h-9 sm:h-10">
                                         <SelectValue placeholder="Sélectionner une catégorie" />
                                       </SelectTrigger>
                                       <SelectContent>
@@ -369,6 +387,7 @@ export function ProductForm({
                                           <SelectItem
                                             key={category.id_category}
                                             value={String(category.id_category)}
+                                            className="text-sm sm:text-base"
                                           >
                                             {category.name}
                                           </SelectItem>
@@ -377,56 +396,62 @@ export function ProductForm({
                                     </Select>
                                   </div>
                                 </FormControl>
-                                <FormDescription>
+                                <FormDescription className="text-xs sm:text-sm">
                                   La catégorie sous laquelle le produit sera
                                   classé
                                 </FormDescription>
-                                <FormMessage />
+                                <FormMessage className="text-xs sm:text-sm" />
                               </FormItem>
                             )}
                           />
                         </div>
                       </CardContent>
-                      <CardFooter className="flex justify-end gap-2 pt-4 border-t">
+                      <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t px-3 sm:px-6">
                         <Button
                           type="button"
                           onClick={() => router.push("/dashboard/products")}
                           disabled={isSubmitting}
+                          className="w-full sm:w-auto text-sm sm:text-base"
                         >
                           Annuler
                         </Button>
                         <Button
                           type="button"
                           onClick={() => setActiveTab("details")}
-                          className="gap-2"
+                          className="gap-2 w-full sm:w-auto text-sm sm:text-base"
                           variant={"cyna"}
                         >
                           Suivant
-                          <ArrowRight className="h-4 w-4" />
+                          <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </Button>
                       </CardFooter>
                     </Card>
                   </TabsContent>
 
                   {/* Onglet des détails techniques */}
-                  <TabsContent value="details" className="space-y-6">
+                  <TabsContent
+                    value="details"
+                    className="space-y-4 sm:space-y-6"
+                  >
                     <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <ListChecks className="h-5 w-5" />
+                      <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+                        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                          <ListChecks className="h-4 w-4 sm:h-5 sm:w-5" />
                           Spécifications et disponibilité
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="text-xs sm:text-sm">
                           Détails techniques, stock et statut du produit
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-6">
+                      <CardContent className="space-y-4 sm:space-y-6 px-3 sm:px-6">
                         <FormField
                           name="technical_specs"
                           control={form.control}
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel>Spécifications techniques</FormLabel>
+                              <FormLabel className="text-sm sm:text-base">
+                                Spécifications techniques
+                              </FormLabel>
                               <FormControl>
                                 <div className="relative">
                                   <ListChecks className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -434,26 +459,28 @@ export function ProductForm({
                                     placeholder="Détaillez les spécifications techniques..."
                                     {...field}
                                     disabled={isSubmitting}
-                                    className="pl-9 pt-2 min-h-32"
+                                    className="pl-9 pt-2 min-h-24 sm:min-h-32 text-sm sm:text-base"
                                   />
                                 </div>
                               </FormControl>
-                              <FormDescription>
+                              <FormDescription className="text-xs sm:text-sm">
                                 Caractéristiques techniques détaillées du
                                 produit
                               </FormDescription>
-                              <FormMessage />
+                              <FormMessage className="text-xs sm:text-sm" />
                             </FormItem>
                           )}
                         />
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                           <FormField
                             name="stock"
                             control={form.control}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Stock disponible</FormLabel>
+                                <FormLabel className="text-sm sm:text-base">
+                                  Stock disponible
+                                </FormLabel>
                                 <FormControl>
                                   <div className="relative">
                                     <Box className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -464,14 +491,14 @@ export function ProductForm({
                                       placeholder="0"
                                       {...field}
                                       disabled={isSubmitting}
-                                      className="pl-9"
+                                      className="pl-9 text-sm sm:text-base h-9 sm:h-10"
                                     />
                                   </div>
                                 </FormControl>
-                                <FormDescription>
+                                <FormDescription className="text-xs sm:text-sm">
                                   Nombre d&apos;unités disponibles en stock
                                 </FormDescription>
-                                <FormMessage />
+                                <FormMessage className="text-xs sm:text-sm" />
                               </FormItem>
                             )}
                           />
@@ -481,7 +508,9 @@ export function ProductForm({
                             control={form.control}
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel>Priorité d&apos;affichage</FormLabel>
+                                <FormLabel className="text-sm sm:text-base">
+                                  Priorité d&apos;affichage
+                                </FormLabel>
                                 <FormControl>
                                   <div className="relative">
                                     <BarChart3 className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -492,14 +521,14 @@ export function ProductForm({
                                       placeholder="1"
                                       {...field}
                                       disabled={isSubmitting}
-                                      className="pl-9"
+                                      className="pl-9 text-sm sm:text-base h-9 sm:h-10"
                                     />
                                   </div>
                                 </FormControl>
-                                <FormDescription>
+                                <FormDescription className="text-xs sm:text-sm">
                                   Ordre d&apos;affichage (1 = haute priorité)
                                 </FormDescription>
-                                <FormMessage />
+                                <FormMessage className="text-xs sm:text-sm" />
                               </FormItem>
                             )}
                           />
@@ -509,12 +538,12 @@ export function ProductForm({
                           name="available"
                           control={form.control}
                           render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 sm:p-4">
                               <div className="space-y-0.5">
-                                <FormLabel className="text-base">
+                                <FormLabel className="text-sm sm:text-base">
                                   Disponibilité du produit
                                 </FormLabel>
-                                <FormDescription>
+                                <FormDescription className="text-xs sm:text-sm">
                                   {field.value
                                     ? "Le produit est disponible à la vente"
                                     : "Le produit n'est pas disponible à la vente"}
@@ -535,12 +564,12 @@ export function ProductForm({
                           name="active"
                           control={form.control}
                           render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4 mt-4">
+                            <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 sm:p-4 mt-4">
                               <div className="space-y-0.5">
-                                <FormLabel className="text-base">
+                                <FormLabel className="text-sm sm:text-base">
                                   Activation du produit
                                 </FormLabel>
-                                <FormDescription>
+                                <FormDescription className="text-xs sm:text-sm">
                                   {field.value
                                     ? "Le produit est visible et peut être acheté sur le site"
                                     : "Le produit est masqué et ne peut pas être acheté"}
@@ -557,41 +586,44 @@ export function ProductForm({
                           )}
                         />
                       </CardContent>
-                      <CardFooter className="flex justify-end gap-2 pt-4 border-t">
+                      <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t px-3 sm:px-6">
                         <Button
                           type="button"
                           onClick={() => setActiveTab("basic")}
-                          className="gap-2"
+                          className="gap-2 w-full sm:w-auto text-sm sm:text-base"
                         >
-                          <ArrowLeft className="h-4 w-4" />
+                          <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           Retour
                         </Button>
                         <Button
                           type="button"
                           onClick={() => setActiveTab("images")}
-                          className="gap-2"
+                          className="gap-2 w-full sm:w-auto text-sm sm:text-base"
                           variant={"cyna"}
                         >
                           Suivant
-                          <ArrowRight className="h-4 w-4" />
+                          <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </Button>
                       </CardFooter>
                     </Card>
                   </TabsContent>
 
                   {/* Onglet des images */}
-                  <TabsContent value="images" className="space-y-6">
+                  <TabsContent
+                    value="images"
+                    className="space-y-4 sm:space-y-6"
+                  >
                     <Card>
-                      <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                          <ImageIcon className="h-5 w-5" />
+                      <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+                        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                          <ImageIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                           Images du produit
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="text-xs sm:text-sm">
                           Images qui seront affichées sur la page du produit
                         </CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-6">
+                      <CardContent className="space-y-4 sm:space-y-6 px-3 sm:px-6">
                         <Controller
                           name="main_image"
                           control={form.control}
@@ -605,12 +637,12 @@ export function ProductForm({
                                 label="Image principale du produit"
                                 helpText="Cette image sera utilisée comme visuel principal du produit."
                               />
-                              <FormMessage />
+                              <FormMessage className="text-xs sm:text-sm" />
                             </FormItem>
                           )}
                         />
 
-                        <Separator className="my-6" />
+                        <Separator className="my-4 sm:my-6" />
 
                         <Controller
                           name="product_caroussel_images"
@@ -627,41 +659,43 @@ export function ProductForm({
                                 label="Images supplémentaires (carrousel)"
                                 helpText="Vous pouvez sélectionner plusieurs images pour le carrousel du produit."
                               />
-                              <FormMessage />
+                              <FormMessage className="text-xs sm:text-sm" />
                             </FormItem>
                           )}
                         />
 
                         <Alert className="mt-4 bg-muted">
-                          <FileQuestion className="h-4 w-4" />
-                          <AlertTitle>Conseils pour les images</AlertTitle>
-                          <AlertDescription>
+                          <FileQuestion className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          <AlertTitle className="text-sm sm:text-base">
+                            Conseils pour les images
+                          </AlertTitle>
+                          <AlertDescription className="text-xs sm:text-sm">
                             Utilisez des images au format carré de 800x800
                             pixels minimum pour un affichage optimal. Les
                             formats supportés sont JPG, JPEG, PNG et WebP.
                           </AlertDescription>
                         </Alert>
                       </CardContent>
-                      <CardFooter className="flex justify-end gap-2 pt-4 border-t">
+                      <CardFooter className="flex flex-col sm:flex-row justify-end gap-2 pt-4 border-t px-3 sm:px-6">
                         <Button
                           type="button"
                           onClick={() => setActiveTab("details")}
-                          className="gap-2"
+                          className="gap-2 w-full sm:w-auto text-sm sm:text-base"
                         >
-                          <ArrowLeft className="h-4 w-4" />
+                          <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                           Retour
                         </Button>
                         <Button
                           type="submit"
                           disabled={isSubmitting}
-                          className="gap-2"
+                          className="gap-2 w-full sm:w-auto text-sm sm:text-base"
                           variant={"cyna"}
                         >
                           {isSubmitting ? (
                             <>Enregistrement...</>
                           ) : (
                             <>
-                              <Save className="h-4 w-4" />
+                              <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                               {isEditing ? "Mettre à jour" : "Créer le produit"}
                             </>
                           )}
@@ -675,8 +709,8 @@ export function ProductForm({
           </Form>
         </div>
 
-        {/* Colonne d'aperçu */}
-        <div className="lg:col-span-1">
+        {/* Colonne d'aperçu - masquée sur mobile, visible sur desktop */}
+        <div className="hidden lg:block lg:col-span-1">
           <Card className="sticky top-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -801,23 +835,24 @@ export function ProductForm({
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-muted-foreground mb-1">
-                        État du produit
-                      </p>
-                      {watchedValues.active ? (
-                        <div className="flex items-center gap-1 text-blue-600">
-                          <Power className="h-4 w-4" />
-                          <span className="text-sm font-medium">Actif</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1 text-gray-500">
-                          <Power className="h-4 w-4" />
-                          <span className="text-sm font-medium">Inactif</span>
-                        </div>
-                      )}
-                    </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-1">
+                      État du produit
+                    </p>
+                    {watchedValues.active ? (
+                      <div className="flex items-center gap-1 text-blue-600">
+                        <Power className="h-4 w-4" />
+                        <span className="text-sm font-medium">Actif</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <Power className="h-4 w-4" />
+                        <span className="text-sm font-medium">Inactif</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

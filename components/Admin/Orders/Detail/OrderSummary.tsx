@@ -17,33 +17,41 @@ export default function OrderSummary({
 }: OrderSummaryProps) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Résumé de la commande</CardTitle>
+      <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+        <CardTitle className="text-base sm:text-lg">
+          Résumé de la commande
+        </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6">
         <div className="space-y-2">
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Date de commande:</span>
-            <span>
+            <span className="text-xs sm:text-sm text-muted-foreground">
+              Date de commande:
+            </span>
+            <span className="text-xs sm:text-sm">
               {format(new Date(order.order_date), "dd/MM/yyyy", {
                 locale: fr,
               })}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">
+            <span className="text-xs sm:text-sm text-muted-foreground">
               Nombre d&apos;articles:
             </span>
-            <span>{totalQuantity}</span>
+            <span className="text-xs sm:text-sm">{totalQuantity}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Méthode de paiement:</span>
-            <span>{order.payment_method}</span>
+            <span className="text-xs sm:text-sm text-muted-foreground">
+              Méthode de paiement:
+            </span>
+            <span className="text-xs sm:text-sm">{order.payment_method}</span>
           </div>
           <Separator className="my-2" />
           <div className="flex justify-between font-medium">
-            <span>Total:</span>
-            <span>{formatPrice(order.total_amount)}</span>
+            <span className="text-sm">Total:</span>
+            <span className="text-sm sm:text-base">
+              {formatPrice(order.total_amount)}
+            </span>
           </div>
         </div>
       </CardContent>

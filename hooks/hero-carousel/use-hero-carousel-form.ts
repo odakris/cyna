@@ -111,6 +111,7 @@ export function useHeroCarouselForm(slideId?: string) {
 
         toast({
           title: "Slide mis à jour",
+          variant: "success",
           description: "Le slide a été mis à jour avec succès.",
         })
       } else {
@@ -132,6 +133,7 @@ export function useHeroCarouselForm(slideId?: string) {
 
         toast({
           title: "Slide créé",
+          variant: "success",
           description: "Le nouveau slide a été créé avec succès.",
         })
       }

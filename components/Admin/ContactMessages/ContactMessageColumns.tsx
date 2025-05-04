@@ -98,6 +98,10 @@ export const ContactMessageColumns: ColumnDef<ContactMessage>[] = [
     cell: ({ row }) => {
       const isRead = row.getValue("is_read") as boolean
       const isResponded = row.original.is_responded
+      // Détermine si ce message est récent (moins de 24h)
+      const isRecent =
+        Date.now() - new Date(row.original.sent_date).getTime() <
+        24 * 60 * 60 * 1000
 
       return (
         <div className="flex justify-center">
@@ -123,9 +127,12 @@ export const ContactMessageColumns: ColumnDef<ContactMessage>[] = [
                   ) : (
                     <Badge
                       variant="outline"
-                      className="bg-blue-100 text-blue-800"
+                      className={`bg-blue-100 text-blue-800 ${!isRead && isRecent ? "animate-pulse" : ""}`}
                     >
                       <XCircle className="mr-1 h-3 w-3 text-blue-600" /> Non lu
+                      {isRecent && (
+                        <span className="ml-1 text-xs font-bold">•</span>
+                      )}
                     </Badge>
                   )}
                 </div>
@@ -135,7 +142,9 @@ export const ContactMessageColumns: ColumnDef<ContactMessage>[] = [
                   ? "Message répondu"
                   : isRead
                     ? "Message lu"
-                    : "Message non lu"}
+                    : isRecent
+                      ? "Nouveau message non lu"
+                      : "Message non lu"}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

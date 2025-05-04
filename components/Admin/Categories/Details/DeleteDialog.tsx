@@ -26,19 +26,21 @@ export default function DeleteDialog({
 }: DeleteDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md max-w-[95vw]">
         <DialogHeader>
-          <DialogTitle>Confirmer la suppression</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-base sm:text-lg">
+            Confirmer la suppression
+          </DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">
             Êtes-vous sûr de vouloir supprimer la catégorie &quot;
             {categoryName}&quot; ? Cette action est irréversible.
           </DialogDescription>
         </DialogHeader>
 
         {productCount > 0 && (
-          <div className="my-4 p-4 bg-amber-50 border border-amber-200 rounded-md">
-            <p className="text-amber-600 flex items-center">
-              <ShieldAlert className="mr-2 h-4 w-4" />
+          <div className="my-3 sm:my-4 p-3 sm:p-4 bg-amber-50 border border-amber-200 rounded-md">
+            <p className="text-amber-600 flex items-center text-xs sm:text-sm">
+              <ShieldAlert className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
               Attention: Cette catégorie contient {productCount} produit
               {productCount > 1 ? "s" : ""}. La suppression affectera tous ces
               produits.
@@ -46,12 +48,20 @@ export default function DeleteDialog({
           </div>
         )}
 
-        <DialogFooter className="mt-4 gap-2">
-          <Button variant="outline" onClick={() => setIsOpen(false)}>
+        <DialogFooter className="flex-col sm:flex-row gap-2 mt-3 sm:mt-4">
+          <Button
+            variant="outline"
+            onClick={() => setIsOpen(false)}
+            className="text-xs sm:text-sm"
+          >
             Annuler
           </Button>
-          <Button variant="destructive" onClick={onConfirm}>
-            <Trash2 className="mr-2 h-4 w-4" />
+          <Button
+            variant="destructive"
+            onClick={onConfirm}
+            className="text-xs sm:text-sm"
+          >
+            <Trash2 className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Confirmer la suppression
           </Button>
         </DialogFooter>

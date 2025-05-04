@@ -32,7 +32,7 @@ export default function ProductSpecs({
       <CardContent className="space-y-6">
         {product.technical_specs ? (
           <div className="prose prose-sm max-w-none dark:prose-invert">
-            <p className="text-muted-foreground whitespace-pre-line">
+            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
               {product.technical_specs}
             </p>
           </div>

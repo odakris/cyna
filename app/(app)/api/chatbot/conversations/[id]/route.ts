@@ -113,3 +113,47 @@ export async function PATCH(
     )
   }
 }
+
+// Supprimer une conversation
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
+  try {
+    const session = await getServerSession(authOptions)
+    const resolvedParams = await params
+    const conversationId = validateId(resolvedParams.id)
+
+    if (conversationId === null || isNaN(conversationId)) {
+      return NextResponse.json(
+        { error: "Invalid conversation ID" },
+        { status: 400 }
+      )
+    }
+
+    // Vérifier les permissions (seuls les admins/managers peuvent supprimer)
+    if (
+      !session ||
+      ![Role.ADMIN, Role.MANAGER, Role.SUPER_ADMIN]
+        .toString()
+        .includes(session.user.role as string)
+    ) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    }
+    // Supprimer la conversation
+    const deletedConversation = await prisma.chatConversation.delete({
+      where: { id_conversation: conversationId },
+    })
+    // Supprimer les messages associés
+    await prisma.chatMessage.deleteMany({
+      where: { id_conversation: conversationId },
+    })
+    return NextResponse.json(deletedConversation)
+  } catch (error) {
+    console.error(`Error deleting conversation ${params.id}:`, error)
+    return NextResponse.json(
+      { error: "Failed to delete conversation" },
+      { status: 500 }
+    )
+  }
+}

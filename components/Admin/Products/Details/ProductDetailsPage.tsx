@@ -38,7 +38,7 @@ export function ProductDetailsPage({ id }: ProductDetailsPageProps) {
   }
 
   return (
-    <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
+    <div className="mx-auto p-3 sm:p-6 space-y-4 sm:space-y-8 animate-in fade-in duration-300">
       {/* En-tête avec titre et actions */}
       <ProductHeader
         product={product}
@@ -47,9 +47,10 @@ export function ProductDetailsPage({ id }: ProductDetailsPageProps) {
         handleEdit={handleEdit}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Sur mobile: affichage des sections en colonnes plutôt qu'en grille */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Colonne principale avec les détails */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
           {/* Informations générales du produit */}
           <ProductInfo product={product} formatPrice={formatPrice} />
 
@@ -60,7 +61,7 @@ export function ProductDetailsPage({ id }: ProductDetailsPageProps) {
           <ProductGallery product={product} handleEdit={handleEdit} />
         </div>
 
-        {/* Colonne d'informations (sidebar) */}
+        {/* Colonne d'informations (sidebar) - sur mobile, cette colonne passe en bas */}
         <ProductSidebar
           product={product}
           category={category}

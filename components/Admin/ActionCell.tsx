@@ -29,7 +29,7 @@ export interface ActionConfig {
     | "external"
     | "external_main"
     | "reply"
-    | "receipt"
+    | "download_receipt"
     | "custom"
   href?: string
   externalPath?: string
@@ -69,7 +69,7 @@ const ActionsCell = ({
     reply: <Reply className="h-4 w-4" />,
     external: <ExternalLink className="h-4 w-4" />,
     external_main: <ExternalLink className="h-4 w-4" />,
-    receipt: <Receipt className="h-4 w-4" />,
+    download_receipt: <Receipt className="h-4 w-4" />,
   }
 
   // Mapping des types d'actions vers leurs permissions par défaut
@@ -78,7 +78,7 @@ const ActionsCell = ({
     edit: `${section}:edit` as Permission,
     delete: `${section}:delete` as Permission,
     reply: `${section}:respond` as Permission,
-    receipt: `${section}:view` as Permission,
+    download_receipt: `${section}:view` as Permission,
     external: undefined, // Pas de permission requise pour voir sur le site
     external_main: undefined, // Pas de permission requise pour voir sur le site
     custom: undefined,
@@ -100,7 +100,47 @@ const ActionsCell = ({
       return false
     }
 
+    // Vérifier si invoicePdfUrl existe pour les actions receipt et download_receipt
+    if (
+      action.type === "download_receipt" &&
+      (!invoicePdfUrl || invoicePdfUrl === "#")
+    ) {
+      return false
+    }
+
     return true
+  }
+
+  // Gestion du téléchargement de la facture
+  const handleDownloadReceipt = async () => {
+    if (!invoicePdfUrl) return
+
+    try {
+      const response = await fetch(invoicePdfUrl)
+      if (!response.ok) {
+        if (response.status === 403) {
+          throw new Error("Accès non autorisé à la facture")
+        }
+        throw new Error("Erreur lors de la récupération de la facture")
+      }
+
+      const blob = await response.blob()
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = `facture-${entityId}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error("Erreur lors du téléchargement de la facture :", error)
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Impossible de télécharger la facture. Veuillez réessayer plus tard."
+      alert(errorMessage)
+    }
   }
 
   // Générer l'URL en fonction du type d'action
@@ -120,8 +160,8 @@ const ActionsCell = ({
         return `/`
       case "reply":
         return `${basePath}/${entityId}/respond`
-      case "receipt":
-        return `${invoicePdfUrl}`
+      case "download_receipt":
+        return "#" // Pas d'URL directe, géré par handleDownloadReceipt
       default:
         return "#"
     }
@@ -146,8 +186,8 @@ const ActionsCell = ({
         return "Voir sur le site"
       case "reply":
         return "Répondre"
-      case "receipt":
-        return "Voir la facture"
+      case "download_receipt":
+        return "Télécharger la facture"
       default:
         return ""
     }
@@ -180,7 +220,17 @@ const ActionsCell = ({
                   onClick={() => onDelete && onDelete(action.id || entityId)}
                 >
                   {getActionIcon(action)}
-                  <span className="sr-only">{action.tooltip}</span>
+                  <span className="sr-only">{getTooltipContent(action)}</span>
+                </Button>
+              ) : action.type === "download_receipt" ? (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={handleDownloadReceipt}
+                >
+                  {getActionIcon(action)}
+                  <span className="sr-only">{getTooltipContent(action)}</span>
                 </Button>
               ) : (
                 <Link
@@ -189,7 +239,7 @@ const ActionsCell = ({
                 >
                   <Button variant="ghost" size="icon" className="h-8 w-8">
                     {getActionIcon(action)}
-                    <span className="sr-only">{action.tooltip}</span>
+                    <span className="sr-only">{getTooltipContent(action)}</span>
                   </Button>
                 </Link>
               )}

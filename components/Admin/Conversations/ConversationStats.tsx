@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card"
-import { MessageSquare, Clock, CheckCircle, XCircle } from "lucide-react"
+import { MessageSquare } from "lucide-react"
 
 interface ConversationStatsProps {
   stats: {
@@ -26,7 +26,7 @@ export default function ConversationStats({ stats }: ConversationStatsProps) {
         </CardContent>
       </Card>
 
-      <Card>
+      {/* <Card>
         <CardContent className="p-4 flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">Actives</p>
@@ -36,9 +36,9 @@ export default function ConversationStats({ stats }: ConversationStatsProps) {
             <CheckCircle className="h-5 w-5 text-green-600" />
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
-      <Card>
+      {/* <Card>
         <CardContent className="p-4 flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">
@@ -50,9 +50,9 @@ export default function ConversationStats({ stats }: ConversationStatsProps) {
             <Clock className="h-5 w-5 text-amber-600" />
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
-      <Card>
+      {/* <Card>
         <CardContent className="p-4 flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-muted-foreground">Fermées</p>
@@ -62,7 +62,7 @@ export default function ConversationStats({ stats }: ConversationStatsProps) {
             <XCircle className="h-5 w-5 text-slate-600" />
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
       <Card>
         <CardContent className="p-4 flex items-center justify-between">

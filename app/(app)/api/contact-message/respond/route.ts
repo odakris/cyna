@@ -1,4 +1,3 @@
-// app/api/contact-message/respond/route.ts
 import { NextRequest, NextResponse } from "next/server"
 import contactMessageController from "@/lib/controllers/contact-message-controller"
 import { checkPermission } from "@/lib/api-permissions"
@@ -9,6 +8,7 @@ export async function POST(request: NextRequest) {
     const permissionCheck = await checkPermission("contact:respond")
     if (permissionCheck) return permissionCheck
 
+    // Passer ces informations au service
     return await contactMessageController.respond(request)
   } catch (error) {
     console.error("API Route Error:", error)

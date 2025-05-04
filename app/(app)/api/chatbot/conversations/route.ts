@@ -15,8 +15,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       data: {
         status: ConversationStatus.ACTIVE,
         email: email || session?.user?.email || null,
-        id_user: session?.user?.id
-          ? parseInt(session.user.id)
+        id_user: session?.user?.id_user
+          ? session.user.id_user
           : userId
             ? parseInt(userId)
             : null,
