@@ -30,12 +30,16 @@ if (!stripeKey) {
 }
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
+// Définir les types d'abonnement valides
+const VALID_SUBSCRIPTION_TYPES = ['MONTHLY', 'YEARLY', 'PER_USER', 'PER_MACHINE'];
+
 interface CartItem {
   id: string;
   uniqueId: string;
   name: string;
   price: number;
   quantity: number;
+  subscription?: string;
   subscription_type?: string;
   imageUrl?: string;
 }
@@ -47,6 +51,7 @@ interface Address {
   address1: string;
   address2?: string;
   postal_code: string;
+  region?: string;
   city: string;
   country: string;
   mobile_phone: string;
@@ -69,6 +74,8 @@ function CheckoutContent() {
   const elements = useElements();
   const [isGuest, setIsGuest] = useState(false);
   const [guestEmail, setGuestEmail] = useState('');
+  const [guestUserId, setGuestUserId] = useState<number | null>(null);
+  const [guestStripeCustomerId, setGuestStripeCustomerId] = useState<string | null>(null);
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [paymentInfos, setPaymentInfos] = useState<PaymentInfo[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
@@ -79,6 +86,7 @@ function CheckoutContent() {
     address1: '',
     address2: '',
     postal_code: '',
+    region: '',
     city: '',
     country: '',
     mobile_phone: '',
@@ -88,6 +96,16 @@ function CheckoutContent() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const safeParseJson = async (response: Response) => {
+    try {
+      const text = await response.text();
+      return text ? JSON.parse(text) : {};
+    } catch (err) {
+      console.error('[CheckoutPage] Erreur parsing JSON:', err, { responseText: await response.text() });
+      return { message: 'Réponse serveur invalide' };
+    }
+  };
 
   const fetchUserData = async (userId: number) => {
     console.log('[CheckoutPage] Récupération des données utilisateur:', { userId });
@@ -103,7 +121,7 @@ function CheckoutContent() {
 
       let addressData: Address[] = [];
       if (addressResponse.ok) {
-        addressData = await addressResponse.json();
+        addressData = await safeParseJson(addressResponse);
         console.log('[CheckoutPage] Adresses récupérées:', {
           count: addressData.length,
           addresses: addressData.map(a => ({
@@ -123,17 +141,16 @@ function CheckoutContent() {
           setSelectedAddress(null);
         }
       } else {
-        const errorData = await addressResponse.json();
+        const errorData = await safeParseJson(addressResponse);
         console.error('[CheckoutPage] Erreur adresses:', errorData);
         setError(`Erreur lors du chargement des adresses: ${errorData.message || 'Erreur inconnue'}`);
       }
 
       let paymentData: PaymentInfo[] = [];
       if (paymentResponse.ok) {
-        paymentData = await paymentResponse.json();
+        paymentData = await safeParseJson(paymentResponse);
         console.log('[CheckoutPage] Moyens de paiement récupérés:', {
           count: paymentData.length,
-          rawData: paymentData,
           paymentIds: paymentData.map((p: PaymentInfo) => ({
             id: p.id_payment_info,
             stripe_payment_id: p.stripe_payment_id,
@@ -153,7 +170,7 @@ function CheckoutContent() {
           setSelectedPayment(null);
         }
       } else {
-        const errorData = await paymentResponse.json();
+        const errorData = await safeParseJson(paymentResponse);
         console.error('[CheckoutPage] Erreur moyens de paiement:', errorData);
         setError(`Erreur lors du chargement des moyens de paiement: ${errorData.message || 'Erreur inconnue'}`);
       }
@@ -168,7 +185,7 @@ function CheckoutContent() {
       }
     } catch (err) {
       console.error('[CheckoutPage] Erreur réseau:', err);
-      setError('Erreur réseau lors du chargement des données utilisateur');
+      setError('Erreur réseau lors du chargement des données utilisateur. Veuillez réessayer.');
     } finally {
       setLoading(false);
     }
@@ -177,6 +194,7 @@ function CheckoutContent() {
   useEffect(() => {
     console.log('[CheckoutPage] Session details:', {
       userId: session?.user?.id_user,
+      guestUserId,
       session,
       cart,
       stripeKey: stripeKey ? 'présente' : 'manquante',
@@ -211,7 +229,42 @@ function CheckoutContent() {
       setPaymentInfos([]);
       setLoading(false);
     }
-  }, [session, status]);
+  }, [session, status, guestUserId, cart]);
+
+  const createGuestUser = async () => {
+    if (!guestEmail) {
+      setError('Veuillez entrer un e-mail pour continuer en tant qu’invité');
+      return null;
+    }
+    try {
+      const guestUserResponse = await fetch('/api/users/guest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: guestEmail }),
+      });
+
+      if (!guestUserResponse.ok) {
+        const errorData = await safeParseJson(guestUserResponse);
+        console.error('[CheckoutPage] Erreur création utilisateur invité:', errorData);
+        setError(`Erreur lors de la création de l’utilisateur invité: ${errorData.message || 'Erreur inconnue'}`);
+        return null;
+      }
+
+      const guestUser = await safeParseJson(guestUserResponse);
+      console.log('[CheckoutPage] Utilisateur invité créé:', {
+        userId: guestUser.id_user,
+        email: guestEmail,
+        stripeCustomerId: guestUser.stripeCustomerId,
+      });
+      setGuestUserId(guestUser.id_user);
+      setGuestStripeCustomerId(guestUser.stripeCustomerId);
+      return guestUser.id_user;
+    } catch (err) {
+      console.error('[CheckoutPage] Erreur réseau lors de la création de l’utilisateur invité:', err);
+      setError('Erreur réseau lors de la création de l’utilisateur invité. Vérifiez votre connexion et réessayez.');
+      return null;
+    }
+  };
 
   const handleSaveNewAddress = async () => {
     console.log('[CheckoutPage] Sauvegarde nouvelle adresse:', newAddress);
@@ -231,28 +284,10 @@ function CheckoutContent() {
     }
 
     try {
-      let userId = session?.user?.id_user;
+      let userId = session?.user?.id_user || guestUserId;
       if (isGuest && !userId) {
-        if (!guestEmail) {
-          setError('Veuillez entrer un e-mail pour continuer en tant qu’invité');
-          return;
-        }
-        const guestUserResponse = await fetch('/api/users/guest', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: guestEmail }),
-        });
-
-        if (!guestUserResponse.ok) {
-          const errorData = await guestUserResponse.json();
-          console.error('[CheckoutPage] Erreur création utilisateur invité:', errorData);
-          setError(`Erreur lors de la création de l’utilisateur invité: ${errorData.message || 'Erreur inconnue'}`);
-          return;
-        }
-
-        const guestUser = await guestUserResponse.json();
-        userId = guestUser.id_user;
-        console.log('[CheckoutPage] Utilisateur invité créé:', { userId, email: guestEmail });
+        userId = await createGuestUser();
+        if (!userId) return;
       }
 
       if (!userId) {
@@ -270,18 +305,34 @@ function CheckoutContent() {
       });
 
       if (response.ok) {
-        const savedAddress = await response.json();
+        const savedAddress = await safeParseJson(response);
+        console.log('[CheckoutPage] Adresse créée avec succès:', {
+          id_address: savedAddress.id_address,
+          address1: savedAddress.address1,
+          city: savedAddress.city,
+          region: savedAddress.region,
+        });
         setAddresses([...addresses, savedAddress]);
         setSelectedAddress(savedAddress.id_address.toString());
-        console.log('[CheckoutPage] Nouvelle adresse sélectionnée:', { id_address: savedAddress.id_address });
+        console.log('[CheckoutPage] Nouvelle adresse sélectionnée automatiquement:', {
+          selectedAddress: savedAddress.id_address.toString(),
+        });
       } else {
-        const errorData = await response.json();
-        console.error('[CheckoutPage] Erreur sauvegarde adresse:', errorData);
-        setError(`Erreur lors de l'ajout de l'adresse: ${errorData.message || 'Erreur inconnue'}`);
+        const errorData = await safeParseJson(response);
+        console.error('[CheckoutPage] Erreur sauvegarde adresse:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+        });
+        setError(
+          response.status === 405
+            ? 'Méthode POST non autorisée pour /api/users/addresses. Vérifiez la configuration du serveur.'
+            : `Erreur lors de l'ajout de l'adresse: ${errorData.message || 'Erreur inconnue (code: ' + response.status + ')'}`,
+        );
       }
     } catch (err) {
       console.error('[CheckoutPage] Erreur réseau:', err);
-      setError('Erreur réseau lors de l’ajout de l’adresse');
+      setError('Erreur réseau lors de l’ajout de l’adresse. Vérifiez votre connexion et réessayez.');
     }
 
     setNewAddress({
@@ -290,6 +341,7 @@ function CheckoutContent() {
       address1: '',
       address2: '',
       postal_code: '',
+      region: '',
       city: '',
       country: '',
       mobile_phone: '',
@@ -299,7 +351,7 @@ function CheckoutContent() {
   const handleSaveNewPayment = async () => {
     console.log('[CheckoutPage] Sauvegarde nouveau moyen de paiement:', {
       card_name: newPayment.card_name,
-      userId: session?.user?.id_user || 'invité',
+      userId: session?.user?.id_user || guestUserId || 'invité',
     });
     setError(null);
 
@@ -316,32 +368,20 @@ function CheckoutContent() {
     }
 
     try {
-      let userId = session?.user?.id_user;
+      let userId = session?.user?.id_user || guestUserId;
       if (isGuest && !userId) {
-        if (!guestEmail) {
-          setError('Veuillez entrer un e-mail pour continuer en tant qu’invité');
-          return;
-        }
-        const guestUserResponse = await fetch('/api/users/guest', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email: guestEmail }),
-        });
-
-        if (!guestUserResponse.ok) {
-          const errorData = await guestUserResponse.json();
-          console.error('[CheckoutPage] Erreur création utilisateur invité:', errorData);
-          setError(`Erreur lors de la création de l’utilisateur invité: ${errorData.message || 'Erreur inconnue'}`);
-          return;
-        }
-
-        const guestUser = await guestUserResponse.json();
-        userId = guestUser.id_user;
-        console.log('[CheckoutPage] Utilisateur invité créé:', { userId, email: guestEmail });
+        userId = await createGuestUser();
+        if (!userId) return;
       }
 
       if (!userId) {
         setError('Utilisateur non identifié');
+        return;
+      }
+
+      if (!guestStripeCustomerId && isGuest) {
+        console.error('[CheckoutPage] stripeCustomerId manquant pour utilisateur invité');
+        setError('Erreur: client Stripe non configuré pour l’utilisateur invité');
         return;
       }
 
@@ -352,32 +392,13 @@ function CheckoutContent() {
         return;
       }
 
-      const customerResponse = await fetch('/api/stripe/create-customer', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': userId.toString(),
-        },
-        body: JSON.stringify({
-          email: isGuest ? guestEmail : session?.user?.email,
-          name: newPayment.card_name,
-        }),
-      });
-
-      if (!customerResponse.ok) {
-        const errorData = await customerResponse.json();
-        console.error('[CheckoutPage] Erreur création client Stripe:', errorData);
-        setError(`Erreur lors de la création du client Stripe: ${errorData.message || 'Erreur inconnue'}`);
-        return;
-      }
-
-      const { customerId } = await customerResponse.json();
-      console.log('[CheckoutPage] Client Stripe créé:', { customerId });
-
       const { paymentMethod, error } = await stripe.createPaymentMethod({
         type: 'card',
         card: cardElement,
-        billing_details: { name: newPayment.card_name, email: isGuest ? guestEmail : undefined },
+        billing_details: { 
+          name: newPayment.card_name, 
+          email: isGuest ? guestEmail : undefined 
+        },
       });
 
       if (error) {
@@ -400,7 +421,7 @@ function CheckoutContent() {
         },
         body: JSON.stringify({
           paymentMethodId: paymentMethod.id,
-          customerId,
+          customerId: isGuest ? guestStripeCustomerId : undefined,
         }),
       });
 
@@ -408,7 +429,7 @@ function CheckoutContent() {
         userId,
         card_name: newPayment.card_name,
         stripe_payment_id: paymentMethod.id,
-        stripe_customer_id: customerId,
+        stripe_customer_id: isGuest ? guestStripeCustomerId : undefined,
         last_card_digits: paymentMethod.card.last4,
         brand: paymentMethod.card.brand,
         exp_month: paymentMethod.card.exp_month,
@@ -425,7 +446,7 @@ function CheckoutContent() {
           userId,
           card_name: newPayment.card_name,
           stripe_payment_id: paymentMethod.id,
-          stripe_customer_id: customerId,
+          stripe_customer_id: isGuest ? guestStripeCustomerId : undefined,
           last_card_digits: paymentMethod.card.last4,
           brand: paymentMethod.card.brand,
           exp_month: paymentMethod.card.exp_month,
@@ -434,21 +455,29 @@ function CheckoutContent() {
       });
 
       if (response.ok) {
-        const savedPayment = await response.json();
+        const savedPayment = await safeParseJson(response);
         setPaymentInfos([...paymentInfos, savedPayment]);
         setSelectedPayment(String(savedPayment.id_payment_info));
         console.log('[CheckoutPage] Nouveau moyen de paiement sélectionné:', { id_payment_info: savedPayment.id_payment_info });
       } else {
-        const errorData = await response.json();
-        console.error('[CheckoutPage] Erreur API:', errorData);
-        setError(`Erreur lors de l'ajout du moyen de paiement: ${errorData.message || 'Erreur inconnue'}`);
+        const errorData = await safeParseJson(response);
+        console.error('[CheckoutPage] Erreur API:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData,
+        });
+        setError(
+          response.status === 405
+            ? 'Méthode POST non autorisée pour /api/users/payment-infos. Vérifiez la configuration du serveur.'
+            : `Erreur lors de l'ajout du moyen de paiement: ${errorData.message || 'Erreur inconnue (code: ' + response.status + ')'}`,
+        );
       }
 
       setNewPayment({ card_name: '' });
       cardElement.clear();
     } catch (err) {
       console.error('[CheckoutPage] Erreur réseau:', err);
-      setError('Erreur réseau lors de l’ajout du moyen de paiement');
+      setError('Erreur réseau lors de l’ajout du moyen de paiement. Vérifiez votre connexion et réessayez.');
     }
   };
 
@@ -456,6 +485,7 @@ function CheckoutContent() {
     console.log('[CheckoutPage] Tentative de traitement du paiement:', {
       isGuest,
       guestEmail,
+      guestUserId,
       selectedAddress,
       selectedPayment,
       cart,
@@ -469,19 +499,56 @@ function CheckoutContent() {
       return;
     }
 
-    for (const item of cart) {
-      if (
-        !item.id ||
-        !item.uniqueId ||
-        !item.name ||
-        typeof item.price !== 'number' ||
-        typeof item.quantity !== 'number'
-      ) {
-        console.error('[CheckoutPage] Élément de panier invalide:', item);
-        setError('Un ou plusieurs éléments du panier sont invalides');
-        return;
-      }
+    // Valider et normaliser le panier
+    const normalizedCart = cart
+      .map(item => {
+        const subscription_type = VALID_SUBSCRIPTION_TYPES.includes(item.subscription || '')
+          ? item.subscription
+          : 'MONTHLY';
+        if (item.subscription !== subscription_type) {
+          console.warn('[CheckoutPage] Correction subscription_type:', {
+            original: item.subscription,
+            corrected: subscription_type,
+          });
+        }
+        return {
+          id: item.id || '', // Assurer que id est une chaîne non vide
+          uniqueId: item.uniqueId || `${item.id}-${subscription_type}-${Date.now()}`, // Générer uniqueId si absent
+          name: item.name || 'Produit inconnu', // Valeur par défaut pour name
+          price: typeof item.price === 'number' && item.price > 0 ? item.price : 0, // Valider price
+          quantity: typeof item.quantity === 'number' && item.quantity > 0 ? Math.floor(item.quantity) : 1, // Valider quantity
+          subscription_type,
+          subscription: subscription_type,
+          imageUrl: item.imageUrl || undefined, // Optionnel
+        };
+      })
+      .filter(item => {
+        // Filtrer les éléments invalides
+        const isValid = item.id && item.price > 0 && item.quantity > 0 && VALID_SUBSCRIPTION_TYPES.includes(item.subscription_type);
+        if (!isValid) {
+          console.error('[CheckoutPage] Élément de panier ignoré (invalide):', item);
+        }
+        return isValid;
+      });
+
+    // Vérifier si le panier normalisé est vide
+    if (normalizedCart.length === 0) {
+      console.error('[CheckoutPage] Panier normalisé vide après validation:', { originalCart: cart });
+      setError('Aucun élément valide dans le panier. Veuillez vérifier votre sélection.');
+      return;
     }
+
+    console.log('[CheckoutPage] Panier normalisé:', {
+      count: normalizedCart.length,
+      items: normalizedCart.map(item => ({
+        id: item.id,
+        uniqueId: item.uniqueId,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        subscription_type: item.subscription_type,
+      })),
+    });
 
     if (!selectedAddress || !addresses.some(a => a.id_address.toString() === selectedAddress)) {
       console.error('[CheckoutPage] Adresse invalide:', {
@@ -501,28 +568,10 @@ function CheckoutContent() {
       return;
     }
 
-    let userId = session?.user?.id_user;
-    if (isGuest) {
-      if (!guestEmail) {
-        setError('Veuillez entrer un e-mail pour continuer en tant qu’invité');
-        return;
-      }
-      const guestUserResponse = await fetch('/api/users/guest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: guestEmail }),
-      });
-
-      if (!guestUserResponse.ok) {
-        const errorData = await guestUserResponse.json();
-        console.error('[CheckoutPage] Erreur création utilisateur invité:', errorData);
-        setError(`Erreur lors de la création de l’utilisateur invité: ${errorData.message || 'Erreur inconnue'}`);
-        return;
-      }
-
-      const guestUser = await guestUserResponse.json();
-      userId = guestUser.id_user;
-      console.log('[CheckoutPage] Utilisateur invité utilisé:', { userId, email: guestEmail });
+    let userId = session?.user?.id_user || guestUserId;
+    if (isGuest && !userId) {
+      userId = await createGuestUser();
+      if (!userId) return;
     }
 
     if (!userId) {
@@ -550,7 +599,7 @@ function CheckoutContent() {
     try {
       const sessionToken = isGuest ? 'guest' : userId.toString();
       const stripe_payment_id = selectedPaymentInfo.stripe_payment_id;
-      const stripe_customer_id = selectedPaymentInfo.stripe_customer_id; // Peut être undefined
+      const stripe_customer_id = selectedPaymentInfo.stripe_customer_id;
 
       console.log('[CheckoutPage] Données de paiement:', {
         selectedPayment,
@@ -564,7 +613,7 @@ function CheckoutContent() {
       const paymentIdToSend = parseInt(selectedPayment).toString();
 
       console.log('[CheckoutPage] Envoi à /api/checkout:', {
-        cartItems: cart,
+        cartItems: normalizedCart,
         addressId: addressIdToSend,
         paymentId: paymentIdToSend,
         guestId: isGuest ? userId : undefined,
@@ -580,7 +629,7 @@ function CheckoutContent() {
           'x-user-id': userId.toString(),
         },
         body: JSON.stringify({
-          cartItems: cart,
+          cartItems: normalizedCart,
           addressId: addressIdToSend,
           paymentId: paymentIdToSend,
           guestId: isGuest ? userId : undefined,
@@ -590,36 +639,100 @@ function CheckoutContent() {
         }),
       });
 
-      const responseData = await response.json();
+      const responseData = await safeParseJson(response);
 
-      if (response.ok) {
-        console.log('[CheckoutPage] Paiement réussi:', {
-          orderId: responseData.orderId,
-          paymentIntentId: responseData.paymentIntentId,
-        });
-        setCart([]);
-        router.push(`/checkout/success?orderId=${responseData.orderId}`);
-      } else {
+      if (!response.ok) {
         console.error('[CheckoutPage] Échec du paiement:', responseData);
         setError(
-          responseData.error.includes('Moyen de paiement')
+          responseData.message?.includes('Moyen de paiement')
             ? 'Le moyen de paiement sélectionné est invalide ou non configuré. Veuillez en ajouter un nouveau.'
-            : `Paiement échoué : ${responseData.error || 'Erreur inconnue'}`
+            : `Paiement échoué : ${responseData.message || 'Erreur inconnue'}`
         );
+        return;
       }
+
+      console.log('[CheckoutPage] Paiement réussi:', {
+        orderId: responseData.orderId,
+        paymentIntentId: responseData.paymentIntentId,
+      });
+
+      // Conserver une copie profonde du panier pour la confirmation
+      const cartForConfirmation = JSON.parse(JSON.stringify(normalizedCart));
+      console.log('[CheckoutPage] Panier pour confirmation:', {
+        count: cartForConfirmation.length,
+        items: cartForConfirmation,
+      });
+
+      console.log('[CheckoutPage] Envoi à /api/checkout/confirmation:', {
+        paymentIntentId: responseData.paymentIntentId,
+        addressId: addressIdToSend,
+        paymentId: paymentIdToSend,
+        guestId: isGuest ? userId : undefined,
+        cartItems: cartForConfirmation,
+      });
+
+      const confirmationResponse = await fetch(
+        `/api/checkout/confirmation?payment_intent_id=${responseData.paymentIntentId}&addressId=${addressIdToSend}&paymentId=${paymentIdToSend}${isGuest ? `&guestId=${userId}` : ''}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': userId.toString(),
+          },
+          body: JSON.stringify({
+            cartItems: cartForConfirmation,
+          }),
+        }
+      );
+
+      if (!confirmationResponse.ok) {
+        const errorData = await safeParseJson(confirmationResponse);
+        console.error('[CheckoutPage] Erreur /api/checkout/confirmation:', errorData);
+        setError(`Erreur lors de la confirmation de la commande: ${errorData.message || 'Erreur inconnue'}`);
+        return;
+      }
+
+      const confirmationData = await safeParseJson(confirmationResponse);
+      console.log('[CheckoutPage] Réponse de confirmation:', {
+        orderId: confirmationData.id_order,
+        invoice_number: confirmationData.invoice_number,
+        invoice_pdf_url: confirmationData.invoice_pdf_url,
+      });
+
+      const invoiceResponse = await fetch(`/api/invoices/${confirmationData.id_order}/download`, {
+        method: 'GET',
+      });
+      
+
+      if (invoiceResponse.ok) {
+        const pdfBlob = await invoiceResponse.blob();
+        const url = window.URL.createObjectURL(pdfBlob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `facture-${confirmationData.invoice_number}.pdf`;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        console.log('[CheckoutPage] Facture téléchargée avec succès:', {
+          invoice_number: confirmationData.invoice_number,
+        });
+      } else {
+        const errorData = await safeParseJson(invoiceResponse);
+        console.error('[CheckoutPage] Erreur génération facture:', errorData);
+        setError(`Erreur lors de la génération de la facture: ${errorData.message || 'Erreur inconnue'}`);
+      }
+
+      // Vider le panier uniquement après toutes les requêtes
+      setCart([]);
+      router.push(`/checkout/success?orderId=${responseData.orderId}`);
     } catch (err) {
       console.error('[CheckoutPage] Erreur réseau:', err);
-      setError('Erreur réseau lors du traitement du paiement');
+      setError('Erreur réseau lors du traitement du paiement. Vérifiez votre connexion et réessayez.');
     }
   };
 
-  if (status === 'loading') {
-    return <p>Chargement...</p>;
-  }
-
   const totalCartPrice = cart.reduce((sum, item) => {
     let unitPrice = item.price;
-    switch (item.subscription_type || 'MONTHLY') {
+    switch (item.subscription) {
       case 'MONTHLY':
         unitPrice = item.price;
         break;
@@ -680,10 +793,10 @@ function CheckoutContent() {
                 <div key={item.uniqueId} className="mb-2">
                   <p>{item.name}</p>
                   <p>Quantité : {item.quantity}</p>
-                  <p>Abonnement : {item.subscription_type}</p>
+                  <p>Abonnement : {item.subscription}</p>
                   <p>
                     Total :{' '}
-                    {(item.price * (item.subscription_type === 'YEARLY' ? 12 : 1) * item.quantity).toFixed(2)} €
+                    {(item.price * ((item.subscription) === 'YEARLY' ? 12 : 1) * item.quantity).toFixed(2)} €
                   </p>
                 </div>
               ))
@@ -757,9 +870,15 @@ function CheckoutContent() {
                   className="mt-2"
                 />
                 <Input
+                  placeholder="Région"
+                  value={newAddress.region}
+                  onChange={(e) => setNewAddress({ ...newAddress, region: e.target.value })}
+                  className="mt-2"
+                />
+                <Input
                   placeholder="Ville"
                   value={newAddress.city}
-                  onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                  onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value})}
                   className="mt-2"
                 />
                 <Input

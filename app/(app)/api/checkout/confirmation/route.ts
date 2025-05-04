@@ -6,6 +6,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-10-28.acacia',
 });
 
+// Définir les types d'abonnement valides
+const VALID_SUBSCRIPTION_TYPES = ['MONTHLY', 'YEARLY', 'PER_USER', 'PER_MACHINE'];
+
 export async function POST(request: NextRequest) {
   try {
     console.log('[API Checkout Confirmation] Début de la requête POST');
@@ -24,6 +27,7 @@ export async function POST(request: NextRequest) {
       userId,
     });
 
+    // Valider les paramètres
     if (!paymentIntentId) {
       console.error('[API Checkout Confirmation] payment_intent_id manquant');
       return NextResponse.json(
@@ -38,6 +42,35 @@ export async function POST(request: NextRequest) {
         { error: 'Adresse et moyen de paiement requis' },
         { status: 400 }
       );
+    }
+
+    // Récupérer cartItems du corps de la requête
+    const { cartItems } = await request.json();
+    console.log('[API Checkout Confirmation] Éléments du panier reçus:', {
+      count: cartItems?.length || 0,
+      cartItems,
+    });
+
+    // Valider cartItems
+    if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+      console.error('[API Checkout Confirmation] Panier vide ou invalide:', { cartItems });
+      return NextResponse.json({ error: 'Panier vide' }, { status: 400 });
+    }
+
+    // Valider chaque élément du panier
+    for (const item of cartItems) {
+      if (
+        !item.id ||
+        typeof item.price !== 'number' ||
+        typeof item.quantity !== 'number' ||
+        !VALID_SUBSCRIPTION_TYPES.includes(item.subscription_type)
+      ) {
+        console.error('[API Checkout Confirmation] Élément de panier invalide:', item);
+        return NextResponse.json(
+          { error: 'Un ou plusieurs éléments du panier sont invalides' },
+          { status: 400 }
+        );
+      }
     }
 
     // Valider le PaymentIntent
@@ -77,27 +110,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Récupérer les éléments du panier
-    console.log('[API Checkout Confirmation] Recherche panier pour utilisateur:', { userId: userIdToUse });
-    const cartItems = await prisma.cartItem.findMany({
-      where: { userId_user: userIdToUse },
-    });
-
-    console.log('[API Checkout Confirmation] Éléments du panier:', {
-      count: cartItems.length,
-    });
-
-    if (!cartItems || cartItems.length === 0) {
-      console.error('[API Checkout Confirmation] Panier vide');
-      return NextResponse.json({ error: 'Panier vide' }, { status: 400 });
-    }
-
     // Valider paymentInfo
     const paymentInfo = await prisma.paymentInfo.findUnique({
       where: { id_payment_info: parseInt(paymentId) },
     });
     if (!paymentInfo || paymentInfo.id_user !== userIdToUse) {
-      console.error('[API Checkout Confirmation] Moyen de paiement non trouvé ou non associé:', { paymentId, userId: userIdToUse });
+      console.error('[API Checkout Confirmation] Moyen de paiement non trouvé ou non associé:', {
+        paymentId,
+        userId: userIdToUse,
+      });
       return NextResponse.json(
         { error: 'Moyen de paiement non trouvé ou non associé à l’utilisateur' },
         { status: 404 }
@@ -109,7 +130,10 @@ export async function POST(request: NextRequest) {
       where: { id_address: parseInt(addressId) },
     });
     if (!address || address.id_user !== userIdToUse) {
-      console.error('[API Checkout Confirmation] Adresse non trouvée ou non associée:', { addressId, userId: userIdToUse });
+      console.error('[API Checkout Confirmation] Adresse non trouvée ou non associée:', {
+        addressId,
+        userId: userIdToUse,
+      });
       return NextResponse.json(
         { error: 'Adresse non trouvée ou non associée à l’utilisateur' },
         { status: 404 }
@@ -126,42 +150,63 @@ export async function POST(request: NextRequest) {
     }, 0);
 
     // Générer invoice_number
-    const invoiceNumber = `INV-${Date.now()}-s${Math.random().toString(36).slice(2, 8)}`;
-    const invoicePdfUrl = `/api/invoice/download?invoice_number=${invoiceNumber}`;
+    const invoiceNumber = `INV-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     console.log('[API Checkout Confirmation] Génération de la commande:', {
       invoiceNumber,
-      invoicePdfUrl,
     });
 
-    // Créer la commande avec invoice_pdf_url
-    const order = await prisma.order.create({
-      data: {
+    // Vérifier si la commande existe déjà (pour éviter les doublons)
+    const existingOrder = await prisma.order.findFirst({
+      where: {
         id_user: userIdToUse,
         id_address: parseInt(addressId),
-        total_amount: totalAmount,
-        subtotal: totalAmount,
-        payment_method: 'card',
-        last_card_digits: paymentInfo.last_card_digits || null,
-        invoice_number: invoiceNumber,
-        invoice_pdf_url: invoicePdfUrl,
-        order_status: 'COMPLETED',
-        order_items: {
-          create: cartItems.map((item) => ({
-            id_product: parseInt(item.id),
-            quantity: item.quantity,
-            unit_price: item.price,
-            subscription_type: item.subscription_type,
-            subscription_status: 'ACTIVE',
-            subscription_duration: item.subscription_type === 'MONTHLY' ? 12 : 1,
-          })),
-        },
-      },
-      include: {
-        address: true,
-        order_items: true,
+        invoice_number: { startsWith: `INV-${Date.now()}` }, // Approximation basée sur le timestamp
       },
     });
+
+    let order;
+    if (existingOrder) {
+      console.log('[API Checkout Confirmation] Commande existante trouvée:', {
+        orderId: existingOrder.id_order,
+      });
+      order = existingOrder;
+    } else {
+      // Créer la commande avec invoice_pdf_url
+      order = await prisma.order.create({
+        data: {
+          id_user: userIdToUse,
+          id_address: parseInt(addressId),
+          total_amount: totalAmount,
+          subtotal: totalAmount,
+          payment_method: 'card',
+          last_card_digits: paymentInfo.last_card_digits || null,
+          invoice_number: invoiceNumber,
+          invoice_pdf_url: `/api/invoices/${order?.id_order || 'TEMP'}/download`, // Placeholder temporaire
+          order_status: 'COMPLETED',
+          order_items: {
+            create: cartItems.map((item) => ({
+              id_product: parseInt(item.id),
+              quantity: item.quantity,
+              unit_price: item.price,
+              subscription_type: item.subscription_type,
+              subscription_status: 'ACTIVE',
+              subscription_duration: item.subscription_type === 'MONTHLY' ? 12 : 1,
+            })),
+          },
+        },
+        include: {
+          address: true,
+          order_items: true,
+        },
+      });
+
+      // Mettre à jour invoice_pdf_url avec le véritable id_order
+      await prisma.order.update({
+        where: { id_order: order.id_order },
+        data: { invoice_pdf_url: `/api/invoices/${order.id_order}/download` },
+      });
+    }
 
     // Vérifier que invoice_pdf_url est enregistré
     const savedOrder = await prisma.order.findUnique({
@@ -169,13 +214,13 @@ export async function POST(request: NextRequest) {
       select: { invoice_pdf_url: true },
     });
 
-    console.log('[API Checkout Confirmation] Commande créée:', {
+    console.log('[API Checkout Confirmation] Commande confirmée:', {
       orderId: order.id_order,
       invoiceNumber,
       invoice_pdf_url: savedOrder.invoice_pdf_url,
     });
 
-    // Nettoyer le panier
+    // Nettoyer le panier (optionnel, si utilisé côté serveur)
     await prisma.cartItem.deleteMany({
       where: { userId_user: userIdToUse },
     });
@@ -185,7 +230,7 @@ export async function POST(request: NextRequest) {
       total_amount: order.total_amount,
       order_date: order.order_date,
       invoice_number: order.invoice_number,
-      invoice_pdf_url: order.invoice_pdf_url,
+      invoice_pdf_url: savedOrder.invoice_pdf_url,
       payment_method: order.payment_method,
       last_card_digits: order.last_card_digits,
       address: {
@@ -215,5 +260,7 @@ export async function POST(request: NextRequest) {
       { error: 'Erreur lors de la confirmation de la commande', details: error.message },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
