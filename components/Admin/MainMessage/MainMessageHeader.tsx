@@ -19,8 +19,8 @@ export default function MainMessageHeader({
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
       <div>
         <div className="flex items-center gap-2">
-          <MessageSquareText className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">
+          <MessageSquareText className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Gestion des Messages Principaux
           </h1>
         </div>
@@ -30,21 +30,21 @@ export default function MainMessageHeader({
           </Badge>
           <Badge
             variant="secondary"
-            className="font-normal"
+            className="font-normal hidden md:inline-flex"
             title="Sélectionnés"
           >
-            {selectedCount} sélectionné
-            {selectedCount > 1 ? "s" : ""}
+            {selectedCount} sélectionné{selectedCount > 1 ? "s" : ""}
           </Badge>
         </div>
       </div>
 
       <div className="flex flex-wrap gap-3">
         <PermissionGuard permission="main-message:create">
-          <Button asChild>
+          <Button asChild className="flex-1 sm:flex-auto">
             <Link href="/dashboard/main-message/new">
               <Plus className="mr-2 h-4 w-4" />
-              Ajouter un message
+              <span className="sm:inline">Ajouter</span>
+              <span className="hidden sm:inline"> un message</span>
             </Link>
           </Button>
         </PermissionGuard>
@@ -54,9 +54,11 @@ export default function MainMessageHeader({
             variant="destructive"
             disabled={selectedCount === 0}
             onClick={() => setShowDeleteDialog(true)}
+            className="hidden md:flex"
           >
             <Trash2 className="mr-2 h-4 w-4" />
-            Supprimer ({selectedCount})
+            <span className="sm:inline">Supprimer</span>
+            <span className="hidden sm:inline"> ({selectedCount})</span>
           </Button>
         </PermissionGuard>
       </div>

@@ -24,20 +24,23 @@ export default function DeleteDialog({
 }: DeleteDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md max-w-[95vw]">
         <DialogHeader>
-          <DialogTitle>Confirmer la suppression</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-base sm:text-lg">
+            Confirmer la suppression
+          </DialogTitle>
+          <DialogDescription className="text-xs sm:text-sm">
             Êtes-vous sûr de vouloir supprimer ce message ? Cette action ne peut
             pas être annulée.
           </DialogDescription>
         </DialogHeader>
 
-        <DialogFooter className="mt-4 gap-2">
+        <DialogFooter className="mt-4 gap-2 flex-col sm:flex-row">
           <Button
             variant="outline"
             onClick={() => setIsOpen(false)}
             disabled={isDeleting}
+            className="text-xs sm:text-sm w-full sm:w-auto"
           >
             Annuler
           </Button>
@@ -45,15 +48,16 @@ export default function DeleteDialog({
             variant="destructive"
             onClick={onConfirm}
             disabled={isDeleting}
+            className="text-xs sm:text-sm w-full sm:w-auto"
           >
             {isDeleting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
                 Suppression...
               </>
             ) : (
               <>
-                <Trash2 className="mr-2 h-4 w-4" />
+                <Trash2 className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Confirmer la suppression
               </>
             )}

@@ -18,8 +18,8 @@ export default function ConversationHeader({
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
       <div>
         <div className="flex items-center gap-2">
-          <BotMessageSquare className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">
+          <BotMessageSquare className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Chatbot Conversations
           </h1>
         </div>
@@ -29,7 +29,7 @@ export default function ConversationHeader({
           </Badge>
           <Badge
             variant="secondary"
-            className="font-normal"
+            className="font-normal hidden md:inline-flex"
             title="Sélectionnées"
           >
             {selectedCount} sélectionnée
@@ -38,14 +38,15 @@ export default function ConversationHeader({
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="hidden md:flex flex-wrap gap-3">
         <PermissionGuard permission="conversations:delete">
           <Button
             variant="destructive"
             disabled={selectedCount === 0}
             onClick={() => setShowDeleteDialog(true)}
+            className="text-xs sm:text-sm"
           >
-            <Trash2 className="mr-2 h-4 w-4" />
+            <Trash2 className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
             Supprimer ({selectedCount})
           </Button>
         </PermissionGuard>

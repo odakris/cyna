@@ -27,19 +27,26 @@ export default function ConversationDetailHeader({
   setShowDeleteDialog,
 }: ConversationDetailHeaderProps) {
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4">
       <div className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="icon" className="rounded-full">
-          <Link href="/dashboard/contact">
-            <ArrowLeft className="h-5 w-5" />
+        <Button
+          asChild
+          variant="ghost"
+          size="icon"
+          className="rounded-full h-8 w-8 sm:h-10 sm:w-10"
+        >
+          <Link href="/dashboard/conversations">
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold">Détails de la conversation</h1>
+        <h1 className="text-xl sm:text-3xl font-bold truncate">
+          Détails de la conversation
+        </h1>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         {statusUpdating ? (
-          <Clock className="h-4 w-4 animate-spin" />
+          <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
         ) : (
           <>
             {/* <Select
@@ -62,9 +69,10 @@ export default function ConversationDetailHeader({
                 <Button
                   variant="destructive"
                   onClick={() => setShowDeleteDialog(true)}
+                  className="text-xs sm:text-sm h-8 sm:h-10"
                 >
-                  <Trash className="mr-2 h-4 w-4" />
-                  Supprimer
+                  <Trash className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  <span className="inline">Supprimer</span>
                 </Button>
               </PermissionGuard>
             )}

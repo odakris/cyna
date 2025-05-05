@@ -16,8 +16,10 @@ export default function AppearanceInfo({
 }: AppearanceInfoProps) {
   return (
     <div>
-      <h3 className="text-lg font-semibold mb-4">Apparence</h3>
-      <dl className="grid grid-cols-[150px_1fr] gap-2 items-center">
+      <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">
+        Apparence
+      </h3>
+      <dl className="grid grid-cols-[100px_1fr] sm:grid-cols-[150px_1fr] gap-2 items-center text-sm">
         <dt className="font-medium text-muted-foreground">Arrière-plan:</dt>
         <dd className="flex items-center gap-4">
           {message?.has_background ? (

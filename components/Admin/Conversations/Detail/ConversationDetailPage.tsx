@@ -58,35 +58,44 @@ export default function ConversationDetailPage({
 
   if (loading) {
     return (
-      <div className="container mx-auto p-6 flex flex-col items-center justify-center h-[70vh]">
-        <Loader2 className="h-10 w-10 animate-spin text-primary mb-4" />
-        <p>Chargement de la conversation...</p>
+      <div className="container mx-auto p-3 sm:p-6 flex flex-col items-center justify-center h-[70vh]">
+        <Loader2 className="h-8 w-8 sm:h-10 sm:w-10 animate-spin text-primary mb-3 sm:mb-4" />
+        <p className="text-sm sm:text-base">Chargement de la conversation...</p>
       </div>
     )
   }
 
   if (error || !conversation) {
     return (
-      <div className="container mx-auto p-6 space-y-4">
-        <Button asChild variant="ghost" className="mb-4" onClick={handleBack}>
+      <div className="container mx-auto p-3 sm:p-6 space-y-4">
+        <Button
+          asChild
+          variant="ghost"
+          className="mb-3 sm:mb-4 h-8 sm:h-10 text-xs sm:text-sm"
+          onClick={handleBack}
+        >
           <div>Retour</div>
         </Button>
 
         <Card className="border-red-200 bg-red-50 dark:bg-red-950/20">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-500" />
-              <CardTitle className="text-red-500">
+              <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+              <CardTitle className="text-red-500 text-base sm:text-lg">
                 Conversation non trouvée
               </CardTitle>
             </div>
-            <CardDescription className="text-red-600">
+            <CardDescription className="text-red-600 text-xs sm:text-sm">
               {error ||
                 "La conversation demandée n'existe pas ou a été supprimée."}
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex justify-center pt-2 pb-6">
-            <Button variant="outline" onClick={handleBack}>
+          <CardContent className="flex justify-center pt-2 pb-4 sm:pb-6">
+            <Button
+              variant="outline"
+              onClick={handleBack}
+              className="text-xs sm:text-sm h-8 sm:h-10"
+            >
               Retour à la liste
             </Button>
           </CardContent>
@@ -96,7 +105,7 @@ export default function ConversationDetailPage({
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6 animate-in fade-in duration-300">
+    <div className="container mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6 animate-in fade-in duration-300">
       <ConversationDetailHeader
         conversationId={conversation.id_conversation}
         status={conversation.status}
@@ -106,7 +115,7 @@ export default function ConversationDetailPage({
         setShowDeleteDialog={setShowDeleteDialog}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <ConversationMessages
           messages={messages}
           formatMessageTime={formatMessageTime}
@@ -133,19 +142,30 @@ export default function ConversationDetailPage({
 
       {/* Boîte de dialogue de confirmation de suppression */}
       <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md max-w-[95vw]">
           <DialogHeader>
-            <DialogTitle>Confirmer la suppression</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-base sm:text-lg">
+              Confirmer la suppression
+            </DialogTitle>
+            <DialogDescription className="text-xs sm:text-sm">
               Voulez-vous vraiment supprimer cette conversation ? Cette action
               est irréversible.
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2 mt-3 sm:mt-4">
             <DialogClose asChild>
-              <Button variant="outline">Annuler</Button>
+              <Button
+                variant="outline"
+                className="w-full sm:w-auto text-xs sm:text-sm"
+              >
+                Annuler
+              </Button>
             </DialogClose>
-            <Button variant="destructive" onClick={handleDelete}>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              className="w-full sm:w-auto text-xs sm:text-sm"
+            >
               Supprimer définitivement
             </Button>
           </DialogFooter>

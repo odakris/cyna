@@ -18,8 +18,8 @@ export default function ContactMessageHeader({
     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
       <div>
         <div className="flex items-center gap-2">
-          <Mail className="h-6 w-6 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">
+          <Mail className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Messages de Contact
           </h1>
         </div>
@@ -27,13 +27,13 @@ export default function ContactMessageHeader({
           <Badge variant="outline" className="font-normal">
             {messagesCount} message{messagesCount > 1 ? "s" : ""}
           </Badge>
+          {/* Badge de sélection - affichage conditionnel selon la taille d'écran */}
           <Badge
             variant="secondary"
-            className="font-normal"
+            className="font-normal hidden md:inline-flex"
             title="Sélectionnés"
           >
-            {selectedCount} sélectionné
-            {selectedCount > 1 ? "s" : ""}
+            {selectedCount} sélectionné{selectedCount > 1 ? "s" : ""}
           </Badge>
         </div>
       </div>
@@ -44,6 +44,7 @@ export default function ContactMessageHeader({
             variant="destructive"
             disabled={selectedCount === 0}
             onClick={() => setShowDeleteDialog(true)}
+            className="hidden md:flex" // Masqué sur mobile, visible sur desktop
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Supprimer ({selectedCount})

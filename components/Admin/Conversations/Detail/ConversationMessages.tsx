@@ -72,33 +72,33 @@ export default function ConversationMessages({
     switch (type) {
       case MessageType.USER:
         return (
-          <Avatar>
-            <AvatarFallback className="bg-primary/10">
-              <User className="h-4 w-4" />
+          <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
+            <AvatarFallback className="bg-primary/10 text-xs sm:text-sm">
+              <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </AvatarFallback>
           </Avatar>
         )
       case MessageType.BOT:
         return (
-          <Avatar>
-            <AvatarFallback>
-              <Bot className="h-4 w-4" />
+          <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
+            <AvatarFallback className="text-xs sm:text-sm">
+              <Bot className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </AvatarFallback>
           </Avatar>
         )
       case MessageType.ADMIN:
         return (
-          <Avatar>
-            <AvatarFallback className="bg-green-100 text-green-800">
-              <Shield className="h-4 w-4" />
+          <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
+            <AvatarFallback className="bg-green-100 text-green-800 text-xs sm:text-sm">
+              <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </AvatarFallback>
           </Avatar>
         )
       default:
         return (
-          <Avatar>
-            <AvatarFallback>
-              <User className="h-4 w-4" />
+          <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
+            <AvatarFallback className="text-xs sm:text-sm">
+              <User className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </AvatarFallback>
           </Avatar>
         )
@@ -107,9 +107,9 @@ export default function ConversationMessages({
 
   return (
     <Card className="lg:col-span-2">
-      <CardHeader className="pb-4">
+      <CardHeader className="py-3 sm:py-4 px-3 sm:px-6">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-xl">Conversation</CardTitle>
+          <CardTitle className="text-lg sm:text-xl">Conversation</CardTitle>
           {/* <Badge
             variant={
               status === "ACTIVE"
@@ -127,17 +127,17 @@ export default function ConversationMessages({
             {status}
           </Badge> */}
         </div>
-        <CardDescription>
+        <CardDescription className="text-xs sm:text-sm">
           {messages.length} message{messages.length > 1 ? "s" : ""}
         </CardDescription>
       </CardHeader>
 
-      <ScrollArea className="h-[500px] px-4">
-        <div className="flex flex-col gap-4 py-4">
+      <ScrollArea className="h-[400px] sm:h-[500px] px-3 sm:px-4">
+        <div className="flex flex-col gap-3 sm:gap-4 py-3 sm:py-4">
           {messages.map(message => (
             <div
               key={message.id_message}
-              className={`flex gap-3 ${
+              className={`flex gap-2 sm:gap-3 ${
                 message.message_type === MessageType.USER
                   ? "justify-start"
                   : "justify-start"
@@ -147,7 +147,7 @@ export default function ConversationMessages({
 
               <div className="flex flex-col max-w-[80%]">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-medium text-sm">
+                  <span className="font-medium text-xs sm:text-sm">
                     {message.message_type === MessageType.USER
                       ? "Client"
                       : message.message_type === MessageType.BOT
@@ -160,7 +160,7 @@ export default function ConversationMessages({
                 </div>
 
                 <div
-                  className={`px-4 py-3 rounded-lg ${
+                  className={`px-3 sm:px-4 py-2 sm:py-3 rounded-lg ${
                     message.message_type === MessageType.USER
                       ? "bg-muted"
                       : message.message_type === MessageType.BOT
@@ -168,7 +168,9 @@ export default function ConversationMessages({
                         : "bg-green-100 dark:bg-green-900/20"
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{message.content}</p>
+                  <p className="whitespace-pre-wrap text-xs sm:text-sm">
+                    {message.content}
+                  </p>
                 </div>
               </div>
             </div>
@@ -177,13 +179,13 @@ export default function ConversationMessages({
         </div>
       </ScrollArea>
 
-      {/* <CardFooter className="pt-6 pb-8 border-t">
+      {/* <CardFooter className="pt-4 sm:pt-6 pb-6 sm:pb-8 border-t">
         {status === "CLOSED" ? (
-          <div className="w-full text-center py-4 text-muted-foreground">
-            <XCircle className="mx-auto h-6 w-6 mb-2 opacity-70" />
-            <p>Cette conversation est fermée</p>
+          <div className="w-full text-center py-3 sm:py-4 text-muted-foreground">
+            <XCircle className="mx-auto h-5 w-5 sm:h-6 sm:w-6 mb-2 opacity-70" />
+            <p className="text-sm sm:text-base">Cette conversation est fermée</p>
             <Button
-              className="mt-2"
+              className="mt-2 text-xs sm:text-sm h-8 sm:h-10"
               variant="outline"
               onClick={() => updateStatus("ACTIVE")}
               disabled={statusUpdating}
@@ -199,16 +201,18 @@ export default function ConversationMessages({
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={sending || status === "CLOSED"}
+              className="text-sm"
             />
             <Button
               onClick={handleSendMessage}
               variant="cyna"
               disabled={sending || !input.trim() || status === "CLOSED"}
+              className="text-xs sm:text-sm h-9 sm:h-10"
             >
               {sending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
               ) : (
-                <Send className="mr-2 h-4 w-4" />
+                <Send className="mr-1 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
               )}
               Envoyer
             </Button>

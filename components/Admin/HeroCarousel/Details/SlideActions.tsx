@@ -32,31 +32,33 @@ export default function SlideActions({
   onStatusChange,
 }: SlideActionsProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Layers className="h-5 w-5" />
+        <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Layers className="h-4 w-4 sm:h-5 sm:w-5" />
             Informations
           </CardTitle>
-          <CardDescription>Détails du slide</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
+            Détails du slide
+          </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3 sm:space-y-4 px-3 sm:px-6">
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">
               Statut
             </p>
             <div className="flex items-center justify-between mt-1">
               <div>
                 {slide.active ? (
-                  <Badge className="bg-green-500 hover:bg-green-600 text-white">
+                  <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs">
                     <CheckCircle2 className="mr-1 h-3 w-3" />
                     Actif
                   </Badge>
                 ) : (
                   <Badge
                     variant="outline"
-                    className="border-red-200 text-red-600 bg-red-50"
+                    className="border-red-200 text-red-600 bg-red-50 text-xs"
                   >
                     <XCircle className="mr-1 h-3 w-3" />
                     Inactif
@@ -70,7 +72,7 @@ export default function SlideActions({
           <Separator />
 
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">
               Priorité d&apos;affichage
             </p>
             <div className="flex items-center gap-2 mt-1">
@@ -78,10 +80,10 @@ export default function SlideActions({
                 variant="outline"
                 className={
                   slide.priority_order <= 3
-                    ? "bg-red-100 text-red-700 border-red-200"
+                    ? "bg-red-100 text-red-700 border-red-200 text-xs"
                     : slide.priority_order <= 7
-                      ? "bg-amber-100 text-amber-700 border-amber-200"
-                      : "bg-blue-100 text-blue-700 border-blue-200"
+                      ? "bg-amber-100 text-amber-700 border-amber-200 text-xs"
+                      : "bg-blue-100 text-blue-700 border-blue-200 text-xs"
                 }
               >
                 <BarChart3 className="mr-1 h-3 w-3" />
@@ -100,11 +102,11 @@ export default function SlideActions({
           <Separator />
 
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">
               Dernière mise à jour
             </p>
-            <p className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              <CalendarDays className="h-4 w-4" />
+            <p className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mt-1">
+              <CalendarDays className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               {formatDate(slide.updated_at.toString())}
             </p>
           </div>
@@ -112,11 +114,11 @@ export default function SlideActions({
           <Separator />
 
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-1">
+            <p className="text-xs sm:text-sm font-medium text-muted-foreground mb-1">
               Date de création
             </p>
-            <p className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              <Calendar className="h-4 w-4" />
+            <p className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mt-1">
+              <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               {formatDate(slide.created_at.toString())}
             </p>
           </div>

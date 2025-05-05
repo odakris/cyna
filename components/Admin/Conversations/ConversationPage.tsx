@@ -24,7 +24,7 @@ export default function ConversationPage() {
     error,
     fetchConversations,
     deleteConversations,
-    activeTab,
+    // activeTab,
     // setActiveTab,
     stats,
     showDeleteDialog,
@@ -33,8 +33,8 @@ export default function ConversationPage() {
 
   // État et logique de la table de données
   const { table, globalFilter, setGlobalFilter } = useConversationsTable(
-    conversations,
-    activeTab
+    conversations
+    // activeTab
   )
 
   // Gestionnaire de suppression
@@ -60,23 +60,29 @@ export default function ConversationPage() {
 
   if (error) {
     return (
-      <Card className="container mx-auto p-6 space-y-6 animate-in fade-in duration-300">
+      <Card className="container mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6 animate-in fade-in duration-300">
         <CardHeader>
           <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-red-500" />
-            <CardTitle className="text-red-500">Erreur</CardTitle>
+            <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
+            <CardTitle className="text-red-500 text-base sm:text-lg">
+              Erreur
+            </CardTitle>
           </div>
-          <CardDescription>{error}</CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
+            {error}
+          </CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
-          <Button onClick={fetchConversations}>Réessayer</Button>
+          <Button onClick={fetchConversations} className="text-xs sm:text-sm">
+            Réessayer
+          </Button>
         </CardContent>
       </Card>
     )
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6 animate-in fade-in duration-300">
+    <div className="container mx-auto p-3 sm:p-6 space-y-4 sm:space-y-6 animate-in fade-in duration-300">
       {/* En-tête avec titre et actions */}
       <ConversationHeader
         conversationsCount={conversations.length}
@@ -136,7 +142,7 @@ export default function ConversationPage() {
           </Tabs>
         </CardHeader> */}
 
-        <CardContent className="p-6">
+        <CardContent className="p-3 sm:p-6">
           {/* Filtres et options de recherche */}
           <ConversationFilters
             table={table}
@@ -149,15 +155,20 @@ export default function ConversationPage() {
           <ConversationTable table={table} />
         </CardContent>
 
-        <CardFooter className="bg-muted/50 py-3 border-t flex justify-between items-center">
-          <p className="text-sm text-muted-foreground">
+        <CardFooter className="bg-muted/50 py-3 border-t flex flex-col sm:flex-row justify-between items-center">
+          <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left mb-2 sm:mb-0">
             Total des conversations: <strong>{stats.total}</strong> | Actives:{" "}
             <strong className="text-green-600">{stats.active}</strong> | En
             attente: <strong className="text-amber-600">{stats.pending}</strong>{" "}
             | Fermées:{" "}
             <strong className="text-slate-600">{stats.closed}</strong>
           </p>
-          <Button variant="outline" size="sm" onClick={fetchConversations}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchConversations}
+            className="w-full sm:w-auto"
+          >
             <RefreshCw className="mr-2 h-3 w-3" />
             Actualiser
           </Button>

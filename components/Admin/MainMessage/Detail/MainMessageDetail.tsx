@@ -66,7 +66,7 @@ export default function MainMessageDetail({ id }: MainMessageDetailProps) {
         <AccessDenied message="Vous n'avez pas la permission de voir les détails des messages." />
       }
     >
-      <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
+      <div className="mx-auto p-3 sm:p-6 space-y-4 sm:space-y-8 animate-in fade-in duration-300">
         <MessageHeader
           message={message}
           setShowDeleteDialog={setShowDeleteDialog}
@@ -75,20 +75,20 @@ export default function MainMessageDetail({ id }: MainMessageDetailProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquareText className="h-5 w-5 text-primary" />
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+              <MessageSquareText className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               Message Principal
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Détails complets du message principal
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-8">
+          <CardContent className="space-y-4 sm:space-y-8">
             <MessagePreview message={message} />
 
             <Separator />
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <GeneralInfo
                 message={message}
                 toggleActiveStatus={toggleActiveStatus}

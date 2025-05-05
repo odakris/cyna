@@ -36,7 +36,7 @@ export default function HeroCarouselDetailPage({
   }
 
   return (
-    <div className="mx-auto p-6 space-y-8 animate-in fade-in duration-300">
+    <div className="mx-auto p-3 sm:p-6 space-y-4 sm:space-y-8 animate-in fade-in duration-300">
       {/* Header with title and actions */}
       <HeroCarouselHeader
         slide={slide}
@@ -44,7 +44,7 @@ export default function HeroCarouselDetailPage({
         handleEdit={handleEdit}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Main column with details */}
         <div className="lg:col-span-2">
           <SlidePreview slide={slide} handleEdit={handleEdit} />
