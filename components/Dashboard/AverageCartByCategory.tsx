@@ -13,6 +13,7 @@ import {
 import { ChartData, TimeFrame } from "@/types/dashboard"
 import { formatEuro } from "@/lib/utils/format"
 import { TooltipProps, ChartEntry } from "@/types/recharts"
+import { useEffect, useState, useRef } from "react"
 
 interface AverageCartByCategoryProps {
   data: ChartData[]
@@ -52,8 +53,8 @@ const CustomTooltip: React.FC<TooltipProps> = ({ active, payload, label }) => {
     const sortedPayload = [...payload].sort((a, b) => b.value - a.value)
 
     return (
-      <div className="bg-white p-4 border border-gray-200 rounded-md shadow-lg">
-        <p className="font-medium text-gray-900 mb-2">
+      <div className="bg-white p-2 sm:p-4 border border-gray-200 rounded-md shadow-lg text-xs sm:text-sm">
+        <p className="font-medium text-gray-900 mb-1 sm:mb-2">
           {label
             ? new Date(label.toString()).toLocaleDateString("fr-FR", {
                 dateStyle: "long",
@@ -61,13 +62,20 @@ const CustomTooltip: React.FC<TooltipProps> = ({ active, payload, label }) => {
             : ""}
         </p>
         {sortedPayload.map((entry, index) => (
-          <div key={`item-${index}`} className="flex items-center mb-1">
+          <div
+            key={`item-${index}`}
+            className="flex items-center mb-0.5 sm:mb-1"
+          >
             <div
-              className="w-3 h-3 rounded-full mr-2"
+              className="w-2 h-2 sm:w-3 sm:h-3 rounded-full mr-1 sm:mr-2"
               style={{ backgroundColor: entry.color }}
             />
-            <span className="text-gray-700 mr-2">{entry.name}:</span>
-            <span className="font-semibold">{formatEuro(entry.value)}</span>
+            <span className="text-gray-700 mr-1 sm:mr-2 text-xs sm:text-sm">
+              {entry.name}:
+            </span>
+            <span className="font-semibold text-xs sm:text-sm">
+              {formatEuro(entry.value)}
+            </span>
           </div>
         ))}
       </div>
@@ -81,11 +89,30 @@ export default function AverageCartByCategory({
   data,
   timeFrame,
 }: AverageCartByCategoryProps) {
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Surveiller et mettre à jour la taille du conteneur
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        setContainerSize({
+          width: containerRef.current.offsetWidth,
+          height: containerRef.current.offsetHeight,
+        })
+      }
+    }
+
+    updateSize()
+    window.addEventListener("resize", updateSize)
+    return () => window.removeEventListener("resize", updateSize)
+  }, [])
+
   // Si les données sont vides, afficher un message
   if (!data.length) {
     return (
       <div className="flex h-full justify-center items-center">
-        <p className="text-gray-500">
+        <p className="text-gray-500 text-sm sm:text-base">
           Aucune donnée de panier moyen disponible pour cette période
         </p>
       </div>
@@ -125,31 +152,49 @@ export default function AverageCartByCategory({
   // Formatter les dates pour l'axe Y selon la période
   const formatXAxis = (value: string): string => {
     const date = new Date(value)
+    const isMobile = containerSize.width < 500
+
     if (timeFrame === "5weeks") {
-      // Format semaine (ex: "Semaine 12")
-      return `Semaine ${date.getWeek()}`
+      // Format semaine (ex: "Semaine 12" ou "Sem 12" sur mobile)
+      return isMobile ? `S${date.getWeek()}` : `Sem ${date.getWeek()}`
     } else {
-      // Format jour (ex: "12 avril")
-      return date.toLocaleDateString("fr-FR", {
-        day: "numeric",
-        month: "short",
-      })
+      // Format jour adapté à la taille
+      return isMobile
+        ? `${date.getDate()}/${date.getMonth() + 1}`
+        : date.toLocaleDateString("fr-FR", { day: "numeric", month: "short" })
     }
   }
 
+  // Formatter les valeurs de l'axe X selon la taille d'écran
+  const formatYAxis = (value: number) => {
+    if (containerSize.width < 500) {
+      // Version compacte pour mobile
+      if (value >= 1000) return `${(value / 1000).toFixed(0)}k€`
+      return `${value}€`
+    }
+    return formatEuro(value)
+  }
+
+  // Adapter l'affichage des légendes selon la taille
+  const shouldShowLegend = containerSize.width >= 350
+  const isMobile = containerSize.width < 500
+
   return (
-    <div className="flex flex-col h-full">
-      <ResponsiveContainer width="100%" height="100%">
+    <div ref={containerRef} className="flex flex-col h-full">
+      <ResponsiveContainer
+        width="100%"
+        height={shouldShowLegend ? "93%" : "100%"}
+      >
         <BarChart
           data={transformedData}
           margin={{
-            top: 20,
-            right: 30,
-            left: 20,
-            bottom: 30,
+            top: 10,
+            right: isMobile ? 5 : 30,
+            left: isMobile ? 5 : 20,
+            bottom: 20,
           }}
           barGap={0}
-          barCategoryGap={20}
+          barCategoryGap={isMobile ? 10 : 20}
           layout="vertical"
         >
           <CartesianGrid
@@ -159,24 +204,27 @@ export default function AverageCartByCategory({
           />
           <XAxis
             type="number"
-            tickFormatter={value => formatEuro(value as number)}
-            tick={{ fontSize: 12, fill: "#6b7280" }}
+            tickFormatter={formatYAxis}
+            tick={{ fontSize: isMobile ? 9 : 12, fill: "#6b7280" }}
             stroke="#d1d5db"
           />
           <YAxis
             type="category"
             dataKey="date"
             tickFormatter={formatXAxis}
-            tick={{ fontSize: 12, fill: "#6b7280" }}
-            width={120}
+            tick={{ fontSize: isMobile ? 9 : 12, fill: "#6b7280" }}
+            width={isMobile ? 60 : 120}
             stroke="#d1d5db"
           />
           <Tooltip content={<CustomTooltip />} />
           <Legend
             verticalAlign="top"
             iconType="circle"
-            iconSize={10}
-            wrapperStyle={{ paddingBottom: 10 }}
+            iconSize={isMobile ? 8 : 10}
+            wrapperStyle={{
+              paddingBottom: isMobile ? 5 : 10,
+              fontSize: isMobile ? "0.7rem" : "0.75rem",
+            }}
           />
           {categories.map(category => (
             <Bar
@@ -186,7 +234,7 @@ export default function AverageCartByCategory({
               fill={categoryColors[category] || "#9ca3af"}
               stackId="a"
               radius={[0, 4, 4, 0]}
-              maxBarSize={30}
+              maxBarSize={isMobile ? 20 : 30}
               isAnimationActive={true}
               animationDuration={500}
             />
@@ -194,18 +242,22 @@ export default function AverageCartByCategory({
         </BarChart>
       </ResponsiveContainer>
 
-      {/* Légende des catégories avec couleurs */}
-      <div className="flex justify-center mt-2 gap-6">
-        {categories.map(category => (
-          <div key={category} className="flex items-center">
-            <div
-              className="w-4 h-4 rounded-full mr-2"
-              style={{ backgroundColor: categoryColors[category] || "#9ca3af" }}
-            />
-            <span className="text-sm font-medium">{category}</span>
-          </div>
-        ))}
-      </div>
+      {/* Légende des catégories avec couleurs - uniquement sur petits écrans si nécessaire */}
+      {shouldShowLegend && containerSize.width < 640 && (
+        <div className="flex flex-wrap justify-center mt-1 gap-2 sm:gap-4">
+          {categories.map(category => (
+            <div key={category} className="flex items-center">
+              <div
+                className="w-2 sm:w-3 h-2 sm:h-3 rounded-full mr-1"
+                style={{
+                  backgroundColor: categoryColors[category] || "#9ca3af",
+                }}
+              />
+              <span className="text-xs sm:text-sm">{category}</span>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -10,9 +10,8 @@ import {
 } from "recharts"
 import { CategorySalesData } from "@/types/dashboard"
 import { formatEuro, formatPercentage } from "@/lib/utils/format"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import {
-  ActiveShapeProps,
   PieChartTooltipProps,
   PieChartEntry,
   PieChartMouseEvent,
@@ -50,7 +49,8 @@ const generateCategoryColors = (count: number): string[] => {
 }
 
 // Composant pour une portion active/survolée du graphique
-const renderActiveShape = (props: ActiveShapeProps) => {
+// Utilisation de "any" pour éviter les problèmes de typage avec Recharts
+const renderActiveShape = (props: any) => {
   const {
     cx,
     cy,
@@ -72,7 +72,8 @@ const renderActiveShape = (props: ActiveShapeProps) => {
         dy={-20}
         textAnchor="middle"
         fill="#374151"
-        className="text-lg font-semibold"
+        className="text-base sm:text-lg font-semibold"
+        style={{ fontSize: innerRadius < 50 ? "0.875rem" : "1rem" }}
       >
         {payload.name}
       </text>
@@ -81,7 +82,8 @@ const renderActiveShape = (props: ActiveShapeProps) => {
         y={cy}
         textAnchor="middle"
         fill="#4b5563"
-        className="text-base"
+        className="text-sm sm:text-base"
+        style={{ fontSize: innerRadius < 50 ? "0.75rem" : "0.875rem" }}
       >
         {formatEuro(value)}
       </text>
@@ -91,7 +93,8 @@ const renderActiveShape = (props: ActiveShapeProps) => {
         dy={20}
         textAnchor="middle"
         fill="#6b7280"
-        className="text-sm"
+        className="text-xs sm:text-sm"
+        style={{ fontSize: innerRadius < 50 ? "0.7rem" : "0.75rem" }}
       >
         {formatPercentage(percent)}
       </text>
@@ -99,7 +102,7 @@ const renderActiveShape = (props: ActiveShapeProps) => {
         cx={cx}
         cy={cy}
         innerRadius={innerRadius}
-        outerRadius={outerRadius + 8}
+        outerRadius={outerRadius + (innerRadius < 50 ? 4 : 8)}
         startAngle={startAngle}
         endAngle={endAngle}
         fill={fill}
@@ -109,8 +112,8 @@ const renderActiveShape = (props: ActiveShapeProps) => {
         cy={cy}
         startAngle={startAngle}
         endAngle={endAngle}
-        innerRadius={outerRadius + 8}
-        outerRadius={outerRadius + 12}
+        innerRadius={outerRadius + (innerRadius < 50 ? 4 : 8)}
+        outerRadius={outerRadius + (innerRadius < 50 ? 6 : 12)}
         fill={fill}
       />
     </g>
@@ -122,7 +125,7 @@ const CustomTooltip: React.FC<PieChartTooltipProps> = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload
     return (
-      <div className="bg-white p-4 border border-gray-200 rounded-md shadow-lg">
+      <div className="bg-white p-2 sm:p-4 border border-gray-200 rounded-md shadow-lg text-xs sm:text-sm">
         <p className="font-medium text-gray-900 mb-1">{data.name}</p>
         <p className="text-gray-600 mb-1">
           Ventes:{" "}
@@ -144,12 +147,45 @@ const CustomTooltip: React.FC<PieChartTooltipProps> = ({ active, payload }) => {
 export default function SalesByCategory({ data }: SalesByCategoryProps) {
   // État pour suivre l'index de la section active
   const [activeIndex, setActiveIndex] = useState<number | undefined>(undefined)
+  // État pour suivre la taille du conteneur
+  const [containerSize, setContainerSize] = useState({ width: 0, height: 0 })
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Déterminer la taille du conteneur
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        setContainerSize({
+          width: containerRef.current.offsetWidth,
+          height: containerRef.current.offsetHeight,
+        })
+      }
+    }
+
+    updateSize()
+    window.addEventListener("resize", updateSize)
+    return () => window.removeEventListener("resize", updateSize)
+  }, [])
+
+  // Calculer les dimensions du graphique en fonction de la taille d'écran
+  const getChartDimensions = () => {
+    const isMobile = containerSize.width < 500
+    const isSmall = containerSize.width < 350
+
+    return {
+      innerRadius: isSmall ? 40 : isMobile ? 50 : 60,
+      outerRadius: isSmall ? 60 : isMobile ? 70 : 80,
+      pieHeight: containerSize.height > 400 ? "70%" : "55%",
+    }
+  }
+
+  const { innerRadius, outerRadius, pieHeight } = getChartDimensions()
 
   // Si les données sont vides, afficher un message
   if (!data.length) {
     return (
       <div className="flex h-full justify-center items-center">
-        <p className="text-gray-500">
+        <p className="text-gray-500 text-sm sm:text-base">
           Aucune donnée de vente par catégorie disponible
         </p>
       </div>
@@ -178,9 +214,12 @@ export default function SalesByCategory({ data }: SalesByCategoryProps) {
     setActiveIndex(undefined)
   }
 
+  // Déterminer si l'affichage doit être simplifié pour les petits écrans
+  const isCompactView = containerSize.width < 400
+
   return (
-    <div className="flex flex-col h-full">
-      <ResponsiveContainer width="100%" height="70%">
+    <div ref={containerRef} className="flex flex-col h-full">
+      <ResponsiveContainer width="100%" height={pieHeight}>
         <PieChart>
           <Pie
             activeIndex={activeIndex}
@@ -189,8 +228,8 @@ export default function SalesByCategory({ data }: SalesByCategoryProps) {
             cx="50%"
             cy="50%"
             labelLine={false}
-            innerRadius={60}
-            outerRadius={80}
+            innerRadius={innerRadius}
+            outerRadius={outerRadius}
             fill="#8884d8"
             dataKey="value"
             nameKey="name"
@@ -210,20 +249,22 @@ export default function SalesByCategory({ data }: SalesByCategoryProps) {
         </PieChart>
       </ResponsiveContainer>
 
-      {/* Table récapitulative améliorée */}
-      <div className="mt-3 overflow-x-auto border rounded-lg shadow-sm">
+      {/* Table récapitulative adaptative */}
+      <div className="mt-2 sm:mt-3 overflow-x-auto border rounded-lg shadow-sm text-xs sm:text-sm">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 sm:px-4 py-2 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Catégorie
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Ventes
               </th>
-              <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Part
-              </th>
+              {!isCompactView && (
+                <th className="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Part
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -234,40 +275,44 @@ export default function SalesByCategory({ data }: SalesByCategoryProps) {
                 onMouseEnter={() => setActiveIndex(index)}
                 onMouseLeave={() => setActiveIndex(undefined)}
               >
-                <td className="px-4 py-3 whitespace-nowrap">
+                <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap">
                   <div className="flex items-center">
                     <div
-                      className="w-4 h-4 rounded-full mr-2 flex-shrink-0"
+                      className="w-3 sm:w-4 h-3 sm:h-4 rounded-full mr-1 sm:mr-2 flex-shrink-0"
                       style={{
                         backgroundColor:
                           categoryColors[index % categoryColors.length],
                       }}
                     ></div>
-                    <span className="text-sm font-medium text-gray-900">
+                    <span className="text-xs sm:text-sm font-medium text-gray-900 truncate max-w-[100px] sm:max-w-full">
                       {item.name}
                     </span>
                   </div>
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium text-gray-900">
+                <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-right text-xs sm:text-sm font-medium text-gray-900">
                   {formatEuro(item.value)}
                 </td>
-                <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium text-gray-900">
-                  {formatPercentage(item.percentage / 100)}
-                </td>
+                {!isCompactView && (
+                  <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-right text-xs sm:text-sm font-medium text-gray-900">
+                    {formatPercentage(item.percentage / 100)}
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
           <tfoot className="bg-gray-50">
             <tr>
-              <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+              <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
                 Total
               </td>
-              <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium text-gray-900">
+              <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-right text-xs sm:text-sm font-medium text-gray-900">
                 {formatEuro(totalSales)}
               </td>
-              <td className="px-4 py-3 whitespace-nowrap text-right text-sm font-medium text-gray-900">
-                100%
-              </td>
+              {!isCompactView && (
+                <td className="px-2 sm:px-4 py-2 sm:py-3 whitespace-nowrap text-right text-xs sm:text-sm font-medium text-gray-900">
+                  100%
+                </td>
+              )}
             </tr>
           </tfoot>
         </table>
