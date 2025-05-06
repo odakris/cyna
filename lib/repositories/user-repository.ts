@@ -83,7 +83,7 @@ export const create = async (data: UserFormValues): Promise<User> => {
           first_name: data.first_name.trim(),
           last_name: data.last_name.trim(),
           email: data.email.trim(),
-          password: data.password,
+          password: data.password || "",
           role: data.role,
           email_verified: data.email_verified,
           two_factor_enabled: data.two_factor_enabled,
@@ -143,7 +143,7 @@ export const update = async (
           first_name: data.first_name.trim(),
           last_name: data.last_name.trim(),
           email: data.email.trim(),
-          password: data.password,
+          password: data.password || userExists.password, // Utiliser l'ancien mot de passe si non fourni
           role: data.role,
           email_verified: data.email_verified,
           two_factor_enabled: data.two_factor_enabled,

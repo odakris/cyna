@@ -1,4 +1,4 @@
-import { Key, Shield } from "lucide-react"
+import { Shield } from "lucide-react"
 import {
   FormField,
   FormItem,
@@ -7,7 +7,6 @@ import {
   FormMessage,
   FormDescription,
 } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -25,7 +24,6 @@ import { Role } from "@prisma/client"
 interface UserFormSecurityProps {
   form: UseFormReturn<UserFormValues>
   isSubmitting: boolean
-  isEditing: boolean
   emailVerified: boolean
   setEmailVerified: (value: boolean) => void
   twoFactorEnabled: boolean
@@ -44,7 +42,6 @@ const roleDescription = {
 export default function UserFormSecurity({
   form,
   isSubmitting,
-  isEditing,
   emailVerified,
   setEmailVerified,
   twoFactorEnabled,
@@ -63,36 +60,6 @@ export default function UserFormSecurity({
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <FormField
-        name="password"
-        control={form.control}
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel className="text-sm sm:text-base">Mot de Passe</FormLabel>
-            <FormControl>
-              <div className="relative">
-                <Key className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  {...field}
-                  disabled={isSubmitting}
-                  className="pl-9 text-sm sm:text-base h-9 sm:h-10"
-                  type="password"
-                  placeholder={isEditing ? "••••••••" : "Nouveau mot de passe"}
-                />
-              </div>
-            </FormControl>
-            <FormDescription className="text-xs sm:text-sm">
-              {isEditing
-                ? "Laissez vide pour conserver le mot de passe actuel"
-                : "Minimum 8 caractères avec au moins 1 majuscule, 1 minuscule, 1 chiffre et 1 caractère spécial"}
-            </FormDescription>
-            <FormMessage className="text-xs sm:text-sm" />
-          </FormItem>
-        )}
-      />
-
-      <Separator />
-
       <FormField
         name="role"
         control={form.control}

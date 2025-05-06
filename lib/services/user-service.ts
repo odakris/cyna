@@ -1,10 +1,11 @@
 import { User } from "@prisma/client"
 import userRepository from "../repositories/user-repository"
 import { UserFormValues } from "../validations/user-schema"
+import bcrypt from "bcrypt"
 
 /**
  * Récupère la liste complète des utilisateurs depuis le dépôt de données.
- * @returns {Promise<User[]>} Liste des produits.
+ * @returns {Promise<User[]>} Liste des utilisateurs.
  */
 export const getAllUsers = async (): Promise<User[]> => {
   try {
@@ -17,9 +18,9 @@ export const getAllUsers = async (): Promise<User[]> => {
 
 /**
  * Récupère un utilisateur spécifique en fonction de son identifiant.
- * @param {number} id - Identifiant unique du produit.
- * @returns {Promise<User>} Le produit correspondant avec son URL d'image.
- * @throws {Error} Si le produit n'existe pas.
+ * @param {number} id - Identifiant unique de l'utilisateur.
+ * @returns {Promise<User>} L'utilisateur correspondant.
+ * @throws {Error} Si l'utilisateur n'existe pas.
  */
 export const getUserById = async (id: number): Promise<User> => {
   try {
@@ -71,8 +72,8 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
 
 /**
  * Crée un nouvel utilisateur en base de données.
- * @param {UserFormValues} data - Données du produit à enregistrer.
- * @returns {Promise<User>} Le produit nouvellement créé.
+ * @param {UserFormValues} data - Données du l'utilisateur à enregistrer.
+ * @returns {Promise<User>} L'utilisateur nouvellement créé.
  */
 export const createUser = async (data: UserFormValues): Promise<User> => {
   try {
@@ -85,7 +86,21 @@ export const createUser = async (data: UserFormValues): Promise<User> => {
       )
     }
 
-    return await userRepository.create(data)
+    // Pour la création, on doit avoir un mot de passe
+    if (!data.password) {
+      throw new Error("Le mot de passe est requis pour créer un utilisateur")
+    }
+
+    // Hasher le mot de passe
+    const hashedPassword = await bcrypt.hash(data.password, 10)
+
+    // Créer l'utilisateur avec les données formatées
+    const createData = {
+      ...data,
+      password: hashedPassword,
+    }
+
+    return await userRepository.create(createData)
   } catch (error) {
     if (error instanceof Error) {
       // Si c'est une erreur spécifique avec un format connu
@@ -104,10 +119,10 @@ export const createUser = async (data: UserFormValues): Promise<User> => {
 
 /**
  * Met à jour un utilisateur existant avec de nouvelles informations.
- * @param {number} id - Identifiant du produit à mettre à jour.
- * @param {UserFormValues} data - Nouvelles données du produit.
- * @returns {Promise<User>} Le produit mis à jour.
- * @throws {Error} Si le produit n'existe pas.
+ * @param {number} id - Identifiant de l'utilisateur à mettre à jour.
+ * @param {UserFormValues} data - Nouvelles données de l'utilisateur.
+ * @returns {Promise<User>} L'utilisateur mis à jour.
+ * @throws {Error} Si l'utilisateur n'existe pas.
  */
 export const updateUser = async (
   id: number,
@@ -115,14 +130,14 @@ export const updateUser = async (
 ): Promise<User> => {
   try {
     // Vérifier si l'utilisateur existe
-    const exists = await userRepository.exists(id)
+    const currentUser = await userRepository.findById(id)
 
-    if (!exists) {
+    if (!currentUser) {
       throw new Error("Utilisateur non trouvé")
     }
 
     // Vérifier si l'email est déjà utilisé par un autre utilisateur
-    if (data.email) {
+    if (data.email && data.email !== currentUser.email) {
       const existingUser = await userRepository.findByEmail(data.email.trim())
       if (existingUser && existingUser.id_user !== id) {
         throw new Error(
@@ -131,7 +146,21 @@ export const updateUser = async (
       }
     }
 
-    return await userRepository.update(id, data)
+    // Pour la mise à jour, traiter correctement le mot de passe
+    // Si un mot de passe est fourni et non vide, le hasher
+    // Sinon, utiliser le mot de passe actuel
+    let passwordToUse: string = currentUser.password
+    if (data.password && data.password.trim() !== "") {
+      passwordToUse = await bcrypt.hash(data.password, 10)
+    }
+
+    // Créer un nouvel objet pour la mise à jour avec le bon type pour password
+    const updateData = {
+      ...data,
+      password: passwordToUse,
+    }
+
+    return await userRepository.update(id, updateData)
   } catch (error) {
     if (error instanceof Error) {
       // Si c'est une erreur spécifique concernant un email déjà utilisé
@@ -187,11 +216,10 @@ export const deleteUser = async (id: number): Promise<object> => {
 }
 
 /**
- * Active ou désactive un produit.
- * Empêche l'activation si la catégorie du produit est inactive.
- * @param {number} id - Identifiant du produit à modifier.
- * @returns {Promise<{user: User, blocked?: boolean, reason?: string}>} Le produit avec son statut mis à jour ou un message d'erreur.
- * @throws {Error} Si le produit n'existe pas.
+ * Active ou désactive un utilisateur.
+ * @param {number} id - Identifiant de l'utilisateur à modifier.
+ * @returns {Promise<{user: User, blocked?: boolean, reason?: string}>} L'utilisateur avec son statut mis à jour ou un message d'erreur.
+ * @throws {Error} Si l'utilisateur n'existe pas.
  */
 export const toggleUserStatus = async (
   id: number
@@ -200,7 +228,7 @@ export const toggleUserStatus = async (
     // Vérifier si l'utilisateur existe
     const user = await userRepository.findById(id)
     if (!user) {
-      throw new Error("Produit non trouvé")
+      throw new Error("Utilisateur non trouvé")
     }
 
     // Inverser le statut actif
@@ -210,7 +238,10 @@ export const toggleUserStatus = async (
     const updatedUser = await userRepository.updateActiveStatus(id, newStatus)
     return { user: updatedUser }
   } catch (error) {
-    console.error("Erreur lors du changement de statut du produit:", error)
+    console.error(
+      "Erreur lors du changement de statut de l'utilisateur:",
+      error
+    )
     throw error
   }
 }

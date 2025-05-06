@@ -7,17 +7,34 @@ class PasswordResetService {
   /**
    * Demande de réinitialisation de mot de passe
    * @param email Email de l'utilisateur
+   * @param userId ID de l'utilisateur (optionnel, pour les demandes administratives)
    * @returns Objet contenant les informations de réinitialisation
    */
   async requestPasswordReset(
-    email: string
+    email: string,
+    userId?: number
   ): Promise<{ success: boolean; message: string }> {
     try {
-      // Vérifier si l'utilisateur existe
-      const user = await prisma.user.findUnique({
-        where: { email },
-        select: { id_user: true, first_name: true, email: true, active: true },
-      })
+      // Chercher l'utilisateur par ID si fourni, sinon par email
+      const user = userId
+        ? await prisma.user.findUnique({
+            where: { id_user: userId },
+            select: {
+              id_user: true,
+              first_name: true,
+              email: true,
+              active: true,
+            },
+          })
+        : await prisma.user.findUnique({
+            where: { email },
+            select: {
+              id_user: true,
+              first_name: true,
+              email: true,
+              active: true,
+            },
+          })
 
       // Ne pas révéler si l'utilisateur existe pour des raisons de sécurité
       if (!user || !user.active) {

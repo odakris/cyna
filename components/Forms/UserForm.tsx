@@ -16,14 +16,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Save } from "lucide-react"
-import { userFormSchema, UserFormValues } from "@/lib/validations/user-schema"
+import { Save, InfoIcon } from "lucide-react"
+import {
+  userFormSchema,
+  UserFormValues,
+  userCreateSchema,
+} from "@/lib/validations/user-schema"
 import { UserFormSkeleton } from "@/components/Skeletons/UserSkeletons"
 import UserFormHeader from "@/components/Admin/Users/Form/UserFormHeader"
 import UserFormBasicInfo from "@/components/Admin/Users/Form/UserFormBasicInfo"
 import UserFormSecurity from "@/components/Admin/Users/Form/UserFormSecurity"
 import UserFormPreview from "@/components/Admin/Users/Form/UserFormPreview"
 import UserFormError from "@/components/Admin/Users/Form/UserFormError"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface UserFormPageProps {
   userId?: string
@@ -48,13 +53,16 @@ export default function UserForm({ userId }: UserFormPageProps) {
     isEditing,
   } = useUserForm(userId)
 
+  // Utiliser le schéma de validation approprié (avec ou sans mot de passe requis)
+  const validationSchema = isEditing ? userFormSchema : userCreateSchema
+
   const form = useForm<UserFormValues>({
-    resolver: zodResolver(userFormSchema),
+    resolver: zodResolver(validationSchema),
     defaultValues: initialData || {
       first_name: "",
       last_name: "",
       email: "",
-      password: "",
+      password: "", // Ce champ reste pour la création, mais est optionnel en édition
       role: "CUSTOMER",
       active: true,
       email_verified: false,
@@ -79,7 +87,7 @@ export default function UserForm({ userId }: UserFormPageProps) {
         first_name: values.first_name.trim(),
         last_name: values.last_name.trim(),
         email: values.email.trim(),
-        password: values.password.trim(),
+        password: values.password?.trim() || "",
         role: values.role,
         email_verified: emailVerified,
         two_factor_enabled: twoFactorEnabled,
@@ -214,6 +222,21 @@ export default function UserForm({ userId }: UserFormPageProps) {
                 }
               />
 
+              {isEditing && (
+                <Alert
+                  variant="default"
+                  className="bg-blue-50 border-blue-200 text-blue-700"
+                >
+                  <InfoIcon className="h-4 w-4" />
+                  <AlertDescription>
+                    Pour des raisons de sécurité, les administrateurs ne peuvent
+                    pas modifier les mots de passe des utilisateurs. Un lien de
+                    réinitialisation peut être envoyé depuis la page de détails
+                    de l&apos;utilisateur.
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <Card>
                 <CardHeader className="py-3 sm:py-6 px-3 sm:px-6">
                   <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
@@ -241,7 +264,6 @@ export default function UserForm({ userId }: UserFormPageProps) {
                   <UserFormSecurity
                     form={form}
                     isSubmitting={isSubmitting}
-                    isEditing={isEditing}
                     emailVerified={emailVerified}
                     setEmailVerified={setEmailVerified}
                     twoFactorEnabled={twoFactorEnabled}

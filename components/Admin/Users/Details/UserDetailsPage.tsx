@@ -20,6 +20,7 @@ import ErrorDisplay from "@/components/Admin/Users/Details/ErrorDisplay"
 import { Separator } from "@/components/ui/separator"
 import UserActiveSwitch from "@/components/Admin/Users/UserActiveSwitch"
 import { ResendVerificationButton } from "@/components/Admin/Users/Details/ResendVerificationButton"
+import { SendPasswordResetButton } from "@/components/Admin/Users/Details/SendPasswordResetButton"
 
 export default function UserDetailsPage({
   params,
@@ -128,12 +129,16 @@ export default function UserDetailsPage({
 
           {/* Accès et Sécurité */}
           <div className="md:col-span-2 space-y-4 sm:space-y-6 mt-2 sm:mt-4">
-            <div className="flex justify-between items-center flex-wrap gap-3">
+            <div className="flex justify-between items-start flex-wrap gap-3">
               <h3 className="text-base sm:text-lg font-semibold">
                 Accès et sécurité
               </h3>
-              <div>
+              <div className="flex flex-col sm:flex-row gap-2">
                 <ResendVerificationButton
+                  email={user.email}
+                  userId={user.id_user}
+                />
+                <SendPasswordResetButton
                   email={user.email}
                   userId={user.id_user}
                 />
