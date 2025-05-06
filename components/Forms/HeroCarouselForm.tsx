@@ -12,6 +12,7 @@ import {
   Layout,
   Tag,
   FileImage,
+  AlertCircle,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -79,6 +80,25 @@ export function HeroCarouselForm({
     },
   })
 
+  const formErrors = form.formState.errors
+
+  // Liste des erreurs à afficher
+  const errorMessages = Object.entries(formErrors).map(([field, error]) => {
+    const fieldLabels: { [key: string]: string } = {
+      title: "Titre",
+      description: "Description",
+      image_url: "Image",
+      button_text: "Texte du bouton",
+      button_link: "Lien du bouton",
+      priority_order: "Ordre de priorité",
+    }
+
+    return {
+      field: fieldLabels[field] || field,
+      message: error?.message || "Valeur invalide",
+    }
+  })
+
   const handleSubmit = async (data: HeroCarouselFormValues) => {
     setIsSubmitting(true)
     try {
@@ -96,6 +116,24 @@ export function HeroCarouselForm({
         onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-4 sm:space-y-6"
       >
+        {/* Alerte pour les erreurs de validation */}
+        {errorMessages.length > 0 && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Erreurs dans le formulaire</AlertTitle>
+            <AlertDescription>
+              Veuillez corriger les erreurs suivantes :
+              <ul className="list-disc pl-5 mt-2">
+                {errorMessages.map((error, index) => (
+                  <li key={index}>
+                    <strong>{error.field}</strong>: {error.message}
+                  </li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Colonne principale */}
           <div className="lg:col-span-2 space-y-4 sm:space-y-6">

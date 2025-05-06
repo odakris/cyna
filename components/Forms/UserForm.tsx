@@ -16,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Save, InfoIcon } from "lucide-react"
+import { Save, InfoIcon, AlertCircle } from "lucide-react"
 import {
   userFormSchema,
   UserFormValues,
@@ -28,7 +28,7 @@ import UserFormBasicInfo from "@/components/Admin/Users/Form/UserFormBasicInfo"
 import UserFormSecurity from "@/components/Admin/Users/Form/UserFormSecurity"
 import UserFormPreview from "@/components/Admin/Users/Form/UserFormPreview"
 import UserFormError from "@/components/Admin/Users/Form/UserFormError"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 interface UserFormPageProps {
   userId?: string
@@ -196,6 +196,23 @@ export default function UserForm({ userId }: UserFormPageProps) {
   const watchedLastName = form.watch("last_name")
   const watchedEmail = form.watch("email")
   const watchedActive = form.watch("active")
+  const formErrors = form.formState.errors
+
+  // Liste des erreurs à afficher
+  const errorMessages = Object.entries(formErrors).map(([field, error]) => {
+    const fieldLabels: { [key: string]: string } = {
+      first_name: "Prénom",
+      last_name: "Nom",
+      email: "Email",
+      password: "Mot de passe",
+      role: "Rôle",
+    }
+
+    return {
+      field: fieldLabels[field] || field,
+      message: error?.message || "Valeur invalide",
+    }
+  })
 
   if (loading) {
     return <UserFormSkeleton />
@@ -221,6 +238,24 @@ export default function UserForm({ userId }: UserFormPageProps) {
                   user ? `${user.first_name} ${user.last_name}` : undefined
                 }
               />
+
+              {/* Alerte pour les erreurs de validation */}
+              {errorMessages.length > 0 && (
+                <Alert variant="destructive">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Erreurs dans le formulaire</AlertTitle>
+                  <AlertDescription>
+                    Veuillez corriger les erreurs suivantes :
+                    <ul className="list-disc pl-5 mt-2">
+                      {errorMessages.map((error, index) => (
+                        <li key={index}>
+                          <strong>{error.field}</strong>: {error.message}
+                        </li>
+                      ))}
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+              )}
 
               {isEditing && (
                 <Alert

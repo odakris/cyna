@@ -36,6 +36,7 @@ import {
   Save,
   Palette,
   SlidersHorizontal,
+  AlertCircle,
 } from "lucide-react"
 import Link from "next/link"
 import {
@@ -44,6 +45,7 @@ import {
 } from "@/lib/validations/main-message-schema"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 // Définition des options de couleur d'arrière-plan
 const backgroundColorOptions = [
@@ -140,6 +142,7 @@ export default function MainMessageForm({
   })
 
   const watchedValues = form.watch()
+  const formErrors = form.formState.errors
 
   const handleFormSubmit = async (data: MainMessageFormValues) => {
     const transformedData = {
@@ -151,6 +154,20 @@ export default function MainMessageForm({
     await onSubmit(transformedData)
   }
 
+  // Liste des erreurs à afficher
+  const errorMessages = Object.entries(formErrors).map(([field, error]) => {
+    const fieldLabels: { [key: string]: string } = {
+      content: "Contenu du message",
+      background_color: "Couleur d'arrière-plan",
+      text_color: "Couleur du texte",
+    }
+
+    return {
+      field: fieldLabels[field] || field,
+      message: error?.message || "Valeur invalide",
+    }
+  })
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -158,6 +175,24 @@ export default function MainMessageForm({
         <div className="lg:col-span-2">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleFormSubmit)}>
+              {/* Alerte pour les erreurs de validation */}
+              {errorMessages.length > 0 && (
+                <Alert variant="destructive" className="mb-6">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertTitle>Erreurs dans le formulaire</AlertTitle>
+                  <AlertDescription>
+                    Veuillez corriger les erreurs suivantes :
+                    <ul className="list-disc pl-5 mt-2">
+                      {errorMessages.map((error, index) => (
+                        <li key={index}>
+                          <strong>{error.field}</strong>: {error.message}
+                        </li>
+                      ))}
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <Tabs
                 defaultValue="content"
                 value={activeTab}

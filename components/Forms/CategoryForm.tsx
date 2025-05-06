@@ -30,6 +30,13 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { ImageUploader } from "@/components/Forms/ImageUploader"
 import {
   categoryFormSchema,
@@ -50,6 +57,7 @@ import {
   ArrowRight,
   PencilLine,
   Power,
+  AlertCircle,
 } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 
@@ -81,6 +89,7 @@ export function CategoryForm({
   })
 
   const watchedValues = form.watch()
+  const formErrors = form.formState.errors
 
   const onSubmit = async (values: CategoryFormValues) => {
     try {
@@ -155,8 +164,41 @@ export function CategoryForm({
     }
   }
 
+  // Liste des erreurs à afficher
+  const errorMessages = Object.entries(formErrors).map(([field, error]) => {
+    const fieldLabels: { [key: string]: string } = {
+      name: "Nom de la catégorie",
+      description: "Description",
+      image: "Image de la catégorie",
+      priority_order: "Priorité d'affichage",
+    }
+
+    return {
+      field: fieldLabels[field] || field,
+      message: error?.message || "Valeur invalide",
+    }
+  })
+
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Alerte pour les erreurs de validation */}
+      {errorMessages.length > 0 && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erreurs dans le formulaire</AlertTitle>
+          <AlertDescription>
+            Veuillez corriger les erreurs suivantes :
+            <ul className="list-disc pl-5 mt-2">
+              {errorMessages.map((error, index) => (
+                <li key={index}>
+                  <strong>{error.field}</strong>: {error.message}
+                </li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <div className="lg:col-span-2">
           <Form {...form}>
@@ -258,30 +300,73 @@ export function CategoryForm({
                         />
 
                         <FormField
-                          name="priority_order"
                           control={form.control}
+                          name="priority_order"
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="text-sm sm:text-base">
-                                Priorité d&apos;affichage
+                                Ordre de priorité
                               </FormLabel>
                               <FormControl>
                                 <div className="relative">
                                   <SortAsc className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                                  <Input
-                                    type="number"
-                                    min="1"
-                                    step="1"
-                                    placeholder="1"
-                                    {...field}
+                                  <Select
+                                    onValueChange={value =>
+                                      field.onChange(parseInt(value))
+                                    }
+                                    defaultValue={field.value.toString()}
                                     disabled={isSubmitting}
-                                    className="pl-9 text-sm sm:text-base h-9 sm:h-10 w-full sm:w-1/3"
-                                  />
+                                  >
+                                    <FormControl>
+                                      <SelectTrigger className="pl-9 text-sm sm:text-base h-9 sm:h-10">
+                                        <SelectValue placeholder="Sélectionnez la priorité" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem
+                                        value="1"
+                                        className="text-sm sm:text-base"
+                                      >
+                                        1 - Très haute priorité
+                                      </SelectItem>
+                                      <SelectItem
+                                        value="2"
+                                        className="text-sm sm:text-base"
+                                      >
+                                        2 - Haute priorité
+                                      </SelectItem>
+                                      <SelectItem
+                                        value="3"
+                                        className="text-sm sm:text-base"
+                                      >
+                                        3 - Priorité élevée
+                                      </SelectItem>
+                                      <SelectItem
+                                        value="5"
+                                        className="text-sm sm:text-base"
+                                      >
+                                        5 - Priorité moyenne
+                                      </SelectItem>
+                                      <SelectItem
+                                        value="7"
+                                        className="text-sm sm:text-base"
+                                      >
+                                        7 - Priorité normale
+                                      </SelectItem>
+                                      <SelectItem
+                                        value="10"
+                                        className="text-sm sm:text-base"
+                                      >
+                                        10 - Priorité basse
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
                                 </div>
                               </FormControl>
                               <FormDescription className="text-xs sm:text-sm">
-                                Un nombre plus petit donne une priorité plus
-                                élevée dans les listes
+                                Les catégories sont affichées par ordre
+                                croissant de priorité (1 sera affiché en
+                                premier)
                               </FormDescription>
                               <FormMessage className="text-xs sm:text-sm" />
                             </FormItem>
