@@ -1,123 +1,158 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth/next';
-import { authOptions } from '../../auth/[...nextauth]/route';
+"use client"
 
-export async function GET(request: Request) {
-  try {
-    console.log('[API Addresses] Début de la requête GET');
-    console.log('[API Addresses] Headers reçus:', Object.fromEntries(request.headers));
+import { useEffect, useState } from "react"
+import { useRouter, useParams } from "next/navigation"
+import { useSession } from "next-auth/react"
+import { AddressForm } from "../../../../../components/Account/AdresseForm"
 
-    const session = await getServerSession(authOptions);
-    console.log('[API Addresses] Session:', {
-      userId: session?.user?.id_user,
-      sessionExists: !!session,
-    });
+export default function EditAddressPage() {
+  const { id_address } = useParams()
+  const { data: session } = useSession()
+  const router = useRouter()
+
+  const [address, setAddress] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [password, setPassword] = useState<string>("")
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchAddress = async () => {
+      if (id_address && session?.user?.id_user) {
+        try {
+          console.log("[EditAddressPage] Récupération de l'adresse:", { id_address, userId: session.user.id_user })
+          const response = await fetch(
+            `/api/users/${session.user.id_user}/addresses/${id_address}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          )
+          const data = await response.json()
+          console.log("[EditAddressPage] Réponse API:", { status: response.status, data })
+          if (response.ok) {
+            setAddress(data)
+          } else {
+            setErrorMessage(data.message || "Erreur lors de la récupération de l’adresse.")
+          }
+        } catch (err) {
+          console.error("[EditAddressPage] Erreur lors de la récupération:", err)
+          setErrorMessage("Une erreur est survenue lors de la récupération de l’adresse.")
+        }
+      }
+    }
+
+    if (session) {
+      fetchAddress()
+    }
+  }, [id_address, session])
+
+  const checkPassword = async (password: string) => {
+    try {
+      const response = await fetch("/api/check-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      })
+
+      const data = await response.json()
+      return data.isValid
+    } catch (err) {
+      console.error("[EditAddressPage] Erreur vérification mot de passe:", err)
+      return false
+    }
+  }
+
+  const handleUpdate = async (newAddress: any) => {
+    if (!password) {
+      setPasswordError("Le mot de passe est requis.")
+      return
+    }
+
+    setLoading(true)
+    setErrorMessage(null)
+
+    const isPasswordValid = await checkPassword(password)
+    if (!isPasswordValid) {
+      setPasswordError("Mot de passe incorrect.")
+      setLoading(false)
+      return
+    }
 
     if (!session?.user?.id_user) {
-      console.error('[API Addresses] Utilisateur non connecté');
-      return NextResponse.json(
-        { message: 'Utilisateur non connecté. Veuillez vous connecter pour accéder à vos adresses.' },
-        { status: 401 }
-      );
+      setErrorMessage("Vous devez être connecté.")
+      setLoading(false)
+      return
     }
 
-    const userId = parseInt(session.user.id_user);
-    if (isNaN(userId)) {
-      console.error('[API Addresses] userId invalide:', { userId: session.user.id_user });
-      return NextResponse.json(
-        { message: 'ID utilisateur invalide' },
-        { status: 400 }
-      );
+    try {
+      console.log("[EditAddressPage] Mise à jour de l'adresse:", { id_address, userId: session.user.id_user })
+      const response = await fetch(
+        `/api/users/${session.user.id_user}/addresses/${id_address}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(newAddress),
+        }
+      )
+
+      console.log("[EditAddressPage] Réponse API PUT:", { status: response.status })
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || "Échec de la mise à jour.")
+      }
+
+      console.log("[EditAddressPage] Adresse mise à jour, redirection vers /account/settings")
+      router.push("/account/settings")
+    } catch (err: any) {
+      console.error("[EditAddressPage] Erreur mise à jour:", err)
+      setErrorMessage(err.message || "Erreur mise à jour adresse.")
     }
 
-    const addresses = await prisma.address.findMany({
-      where: { id_user: userId },
-    });
-
-    console.log('[API Addresses] Adresses récupérées:', {
-      count: addresses.length,
-      addresses,
-    });
-
-    if (addresses.length === 0) {
-      console.warn('[API Addresses] Aucune adresse trouvée pour l’utilisateur:', { userId });
-    }
-
-    return NextResponse.json(addresses, { status: 200 });
-  } catch (error: any) {
-    console.error('[API Addresses] Erreur:', {
-      message: error.message,
-      stack: error.stack,
-    });
-    return NextResponse.json(
-      { message: 'Erreur lors de la récupération des adresses', error: error.message },
-      { status: 500 }
-    );
+    setLoading(false)
   }
-}
 
-export async function POST(request: Request) {
-  try {
-    console.log('[API Addresses] Début de la requête POST');
-    const session = await getServerSession(authOptions);
-    console.log('[API Addresses] Session:', {
-      userId: session?.user?.id_user,
-      sessionExists: !!session,
-    });
-
-    if (!session?.user?.id_user) {
-      console.error('[API Addresses] Utilisateur non connecté');
-      return NextResponse.json(
-        { message: 'Utilisateur non connecté. Veuillez vous connecter pour ajouter une adresse.' },
-        { status: 401 }
-      );
-    }
-
-    const userId = parseInt(session.user.id_user);
-    if (isNaN(userId)) {
-      console.error('[API Addresses] userId invalide:', { userId: session.user.id_user });
-      return NextResponse.json(
-        { message: 'ID utilisateur invalide' },
-        { status: 400 }
-      );
-    }
-
-    const body = await request.json();
-    const { first_name, last_name, address1, address2, postal_code, city, country, mobile_phone } = body;
-
-    if (!first_name || !last_name || !address1 || !postal_code || !city || !country || !mobile_phone) {
-      console.error('[API Addresses] Champs obligatoires manquants:', body);
-      return NextResponse.json(
-        { message: 'Tous les champs obligatoires doivent être remplis' },
-        { status: 400 }
-      );
-    }
-
-    const newAddress = await prisma.address.create({
-      data: {
-        id_user: userId,
-        first_name,
-        last_name,
-        address1,
-        address2,
-        postal_code,
-        city,
-        country,
-        mobile_phone,
-      },
-    });
-
-    console.log('[API Addresses] Adresse créée:', newAddress);
-    return NextResponse.json(newAddress, { status: 201 });
-  } catch (error: any) {
-    console.error('[API Addresses] Erreur:', {
-      message: error.message,
-      stack: error.stack,
-    });
-    return NextResponse.json(
-      { message: 'Erreur lors de la création de l’adresse', error: error.message },
-      { status: 500 }
-    );
+  if (!session) {
+    return <div>Chargement...</div>
   }
+
+  if (!address) {
+    return <div>{errorMessage || "Chargement..."}</div>
+  }
+
+  return (
+    <div className="p-6 space-y-6">
+      <h1 className="text-2xl font-bold">Modifier l’adresse</h1>
+      {errorMessage && <div className="text-red-600 text-sm mb-4">{errorMessage}</div>}
+      <p className="text-sm text-gray-600">
+        Pour modifier votre adresse, veuillez remplir le formulaire ci-dessous.
+      </p>
+
+      <div>
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          Mot de passe actuel
+        </label>
+        <input
+          id="password"
+          type="password"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          required
+          className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+        />
+        {passwordError && (
+          <div className="text-red-600 text-sm mt-2">{passwordError}</div>
+        )}
+      </div>
+
+      <AddressForm
+        initialData={address}
+        onSubmit={handleUpdate}
+        loading={loading}
+      />
+    </div>
+  )
 }

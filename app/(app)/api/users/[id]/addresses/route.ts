@@ -1,55 +1,120 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AddressController } from "@/lib/controllers/AddressController";
 
-export async function GET(req: NextRequest, context: { params: { id: string } }) {
-    try {
-        const { id } = await context.params;
-        if (!id) {
-            return NextResponse.json({ error: "User ID is required" }, { status: 400 });
-        }
-        return await AddressController.getUserAddresses(id);
-    } catch (error) {
-        console.error("Error fetching addresses in API route:", error);
-        return NextResponse.json({ error: "API Error fetching addresses" }, { status: 500 });
+export async function GET(req: NextRequest, { params }: { params: { id: string, id_address?: string } }) {
+  try {
+    const { id, id_address } = params;
+    console.log("[Route GET /api/users/[id]/addresses] Appel avec userId:", id, "id_address:", id_address);
+
+    if (!id) {
+      console.error("[Route GET /api/users/[id]/addresses] ID utilisateur manquant");
+      return NextResponse.json(
+        { message: "ID utilisateur requis" },
+        { status: 400 }
+      );
     }
-}
 
-export async function POST(req: NextRequest, context: { params: { id: string } }) {
-    try {
-        const { id } = await context.params
-        if (!id) {
-            return NextResponse.json({ error: "User ID is required" }, { status: 400 })
-        }
-
-        // Récupère les données envoyées
-        const body = await req.json();
-        console.log("Données reçues côté serveur:", body);
-
-        if (!body || Object.keys(body).length === 0) {
-            return NextResponse.json({ error: "Données de l'adresse manquantes" }, { status: 400 });
-        }
-
-        return await AddressController.createAddress(id, body);
-    } catch (error) {
-        console.error("Error creating address in API route:", error)
-        return NextResponse.json({ error: "API Error creating address" }, { status: 500 })
+    if (id_address) {
+      return await AddressController.getUserAddressById(req, id, id_address);
     }
-}
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
-    const { searchParams } = new URL(req.url)
-    const id_address = searchParams.get("addressId")
-  
-    if (!params.id || !id_address) {
-      return NextResponse.json({ error: "User ID et Address ID requis" }, { status: 400 })
-    }
-  
-    try {
-      const deleted = await AddressController.deleteAddress(params.id, id_address)
-      return NextResponse.json(deleted, { status: 200 })
-    } catch (error) {
-      console.error("Erreur suppression adresse :", error)
-      return NextResponse.json({ error: "Erreur lors de la suppression" }, { status: 500 })
-    }
+    return await AddressController.getUserAddresses(req, id);
+  } catch (error) {
+    console.error("[Route GET /api/users/[id]/addresses] Erreur:", error);
+    return NextResponse.json(
+      { message: "Erreur serveur lors de la récupération des adresses" },
+      { status: 500 }
+    );
   }
-  
+}
+
+export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const { id } = params;
+    console.log("[Route POST /api/users/[id]/addresses] Appel avec userId:", id);
+
+    if (!id) {
+      console.error("[Route POST /api/users/[id]/addresses] ID utilisateur manquant");
+      return NextResponse.json(
+        { message: "ID utilisateur requis" },
+        { status: 400 }
+      );
+    }
+
+    const body = await req.json();
+    console.log("[Route POST /api/users/[id]/addresses] Données reçues:", body);
+
+    if (!body || Object.keys(body).length === 0) {
+      console.error("[Route POST /api/users/[id]/addresses] Données de l'adresse manquantes");
+      return NextResponse.json(
+        { message: "Données de l'adresse requises" },
+        { status: 400 }
+      );
+    }
+
+    return await AddressController.createAddress(req, id, body);
+  } catch (error) {
+    console.error("[Route POST /api/users/[id]/addresses] Erreur:", error);
+    return NextResponse.json(
+      { message: "Erreur serveur lors de la création de l'adresse" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: NextRequest, { params }: { params: { id: string, id_address: string } }) {
+  try {
+    const { id, id_address } = params;
+    console.log("[Route PUT /api/users/[id]/addresses] Appel avec userId:", id, "id_address:", id_address);
+
+    if (!id || !id_address) {
+      console.error("[Route PUT /api/users/[id]/addresses] ID utilisateur ou adresse manquant", { id, id_address });
+      return NextResponse.json(
+        { message: "ID utilisateur ou ID d'adresse requis" },
+        { status: 400 }
+      );
+    }
+
+    const body = await req.json();
+    console.log("[Route PUT /api/users/[id]/addresses] Données reçues:", body);
+
+    if (!body || Object.keys(body).length === 0) {
+      console.error("[Route PUT /api/users/[id]/addresses] Données de l'adresse manquantes");
+      return NextResponse.json(
+        { message: "Données de l'adresse requises" },
+        { status: 400 }
+      );
+    }
+
+    return await AddressController.updateAddress(req, id, id_address, body);
+  } catch (error) {
+    console.error("[Route PUT /api/users/[id]/addresses] Erreur:", error);
+    return NextResponse.json(
+      { message: "Erreur serveur lors de la mise à jour de l'adresse" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: NextRequest, { params }: { params: { id: string, id_address?: string } }) {
+  try {
+    const { id, id_address } = params;
+    console.log("[Route DELETE /api/users/[id]/addresses] Appel avec userId:", id, "id_address:", id_address);
+
+    if (!id || !id_address) {
+      console.error("[Route DELETE /api/users/[id]/addresses] ID utilisateur ou adresse manquant", { id, id_address });
+      return NextResponse.json(
+        { message: "ID utilisateur et ID d'adresse requis" },
+        { status: 400 }
+      );
+    }
+
+    return await AddressController.deleteAddress(req, id, id_address);
+  } catch (error) {
+    console.error("[Route DELETE /api/users/[id]/addresses] Erreur:", error);
+    return NextResponse.json(
+      { message: "Erreur serveur lors de la suppression de l'adresse" },
+      { status: 500 }
+    );
+  }
+}
