@@ -20,24 +20,33 @@ export default function EditAddressPage() {
     const fetchAddress = async () => {
       if (id_address && session?.user?.id_user) {
         try {
+          console.log("[EditAddressPage] Récupération de l'adresse:", { id_address, userId: session.user.id_user })
           const response = await fetch(
-            `/api/users/${session.user.id_user}/addresses/${id_address}`
+            `/api/users/${session.user.id_user}/addresses/${id_address}`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
           )
           const data = await response.json()
+          console.log("[EditAddressPage] Réponse API:", { status: response.status, data })
           if (response.ok) {
             setAddress(data)
           } else {
             setErrorMessage(data.message || "Erreur lors de la récupération de l’adresse.")
           }
         } catch (err) {
-          console.error("Erreur lors de la récupération:", err)
+          console.error("[EditAddressPage] Erreur lors de la récupération:", err)
           setErrorMessage("Une erreur est survenue lors de la récupération de l’adresse.")
         }
       }
     }
 
-    fetchAddress()
-  }, [id_address, session?.user?.id_user])
+    if (session) {
+      fetchAddress()
+    }
+  }, [id_address, session])
 
   const checkPassword = async (password: string) => {
     try {
@@ -50,7 +59,7 @@ export default function EditAddressPage() {
       const data = await response.json()
       return data.isValid
     } catch (err) {
-      console.error("Erreur vérification mot de passe:", err)
+      console.error("[EditAddressPage] Erreur vérification mot de passe:", err)
       return false
     }
   }
@@ -78,26 +87,36 @@ export default function EditAddressPage() {
     }
 
     try {
+      console.log("[EditAddressPage] Mise à jour de l'adresse:", { id_address, userId: session.user.id_user })
       const response = await fetch(
         `/api/users/${session.user.id_user}/addresses/${id_address}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(newAddress),
         }
       )
 
+      console.log("[EditAddressPage] Réponse API PUT:", { status: response.status })
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.message || "Échec de la mise à jour.")
       }
 
+      console.log("[EditAddressPage] Adresse mise à jour, redirection vers /account/settings")
       router.push("/account/settings")
     } catch (err: any) {
+      console.error("[EditAddressPage] Erreur mise à jour:", err)
       setErrorMessage(err.message || "Erreur mise à jour adresse.")
     }
 
     setLoading(false)
+  }
+
+  if (!session) {
+    return <div>Chargement...</div>
   }
 
   if (!address) {

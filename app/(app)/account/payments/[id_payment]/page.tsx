@@ -7,24 +7,26 @@ import { PaymentMethodsForm } from "@/components/Account/PaymentMethodsForm"
 import StripeWrapper from "@/components/StripeWrapper"
 
 export default function EditPaymentMethodPage() {
-  const { id_payment } = useParams() // Récupérer l'ID de la méthode de paiement depuis l'URL
+  const { id_payment } = useParams()
   const { data: session } = useSession()
   const router = useRouter()
 
   const [paymentMethod, setPaymentMethod] = useState(null)
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [password, setPassword] = useState<string>("") // Nouvel état pour le mot de passe
+  const [password, setPassword] = useState<string>("")
   const [passwordError, setPasswordError] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchPaymentMethod = async () => {
       if (id_payment && session?.user?.id_user) {
         try {
+          console.log("[EditPaymentMethodPage] Récupération du moyen de paiement:", { id_payment, userId: session.user.id_user });
           const response = await fetch(
             `/api/users/${session.user.id_user}/payments/${id_payment}`
           )
           const data = await response.json()
+          console.log("[EditPaymentMethodPage] Réponse API:", { status: response.status, data });
           if (response.ok) {
             setPaymentMethod(data)
           } else {
@@ -34,7 +36,7 @@ export default function EditPaymentMethodPage() {
             )
           }
         } catch (err) {
-          console.error("Erreur lors de la récupération:", err)
+          console.error("[EditPaymentMethodPage] Erreur lors de la récupération:", err)
           setErrorMessage(
             "Une erreur est survenue lors de la récupération de la méthode de paiement."
           )
@@ -42,8 +44,28 @@ export default function EditPaymentMethodPage() {
       }
     }
 
-    fetchPaymentMethod()
-  }, [id_payment, session?.user?.id_user])
+    if (session) {
+      fetchPaymentMethod()
+    }
+  }, [id_payment, session])
+
+  const checkPassword = async (password: string) => {
+    try {
+      const response = await fetch("/api/check-password", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ password }),
+      })
+
+      const data = await response.json()
+      return data.isValid
+    } catch (err) {
+      console.error("[EditPaymentMethodPage] Erreur lors de la vérification du mot de passe:", err)
+      return false
+    }
+  }
 
   const handleUpdate = async (newPaymentMethod: any) => {
     if (!password) {
@@ -54,15 +76,14 @@ export default function EditPaymentMethodPage() {
     setLoading(true)
     setErrorMessage(null)
 
-    // Vérification du mot de passe
-    const isPasswordValid = await checkPassword(password) // Fonction à implémenter pour valider le mot de passe
+    const isPasswordValid = await checkPassword(password)
     if (!isPasswordValid) {
-      setPasswordError("Le mot de passe actuel est incorrect.")
+      setPasswordError("Mot de passe incorrect.")
       setLoading(false)
       return
     }
 
-    setPasswordError(null) // Réinitialiser l'erreur de mot de passe
+    setPasswordError(null)
 
     if (!session?.user?.id_user) {
       setErrorMessage(
@@ -81,7 +102,7 @@ export default function EditPaymentMethodPage() {
     }
 
     try {
-      // Appeler l'API pour remplacer la méthode de paiement
+      console.log("[EditPaymentMethodPage] Mise à jour du moyen de paiement:", { id_payment, userId: session.user.id_user });
       const response = await fetch(
         `/api/users/${session.user.id_user}/payments/${id_payment}`,
         {
@@ -93,6 +114,7 @@ export default function EditPaymentMethodPage() {
         }
       )
 
+      console.log("[EditPaymentMethodPage] Réponse API PUT:", { status: response.status });
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(
@@ -101,9 +123,10 @@ export default function EditPaymentMethodPage() {
         )
       }
 
+      console.log("[EditPaymentMethodPage] Moyen de paiement mis à jour, redirection vers /account/settings");
       router.push("/account/settings")
     } catch (err: any) {
-      console.error("Erreur dans handleUpdate:", err)
+      console.error("[EditPaymentMethodPage] Erreur dans handleUpdate:", err)
       setErrorMessage(
         err.message ||
           "Une erreur est survenue lors de la mise à jour de la méthode de paiement."
@@ -113,22 +136,8 @@ export default function EditPaymentMethodPage() {
     setLoading(false)
   }
 
-  const checkPassword = async (password: string) => {
-    try {
-      const response = await fetch("/api/check-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ password }),
-      })
-
-      const data = await response.json()
-      return data.isValid // Assurez-vous que la réponse contienne un champ "isValid"
-    } catch (err) {
-      console.error("Erreur lors de la vérification du mot de passe:", err)
-      return false
-    }
+  if (!session) {
+    return <div>Chargement...</div>
   }
 
   if (!paymentMethod) {
@@ -147,7 +156,6 @@ export default function EditPaymentMethodPage() {
           informations de carte ci-dessous.
         </p>
 
-        {/* Champ pour entrer le mot de passe actuel */}
         <div>
           <label
             htmlFor="password"

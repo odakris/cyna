@@ -13,20 +13,28 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
 async function withAuth(
   req: NextRequest,
   userId: number,
-  handler: (userId: number, ...args: any) => Promise<NextResponse>
+  handler: (userId: number, ...args: any) => Promise<NextResponse>,
+  ...args: any
 ) {
   try {
+    console.log("[PaymentController withAuth] Vérification de la session pour userId:", userId);
     const session = await getServerSession(authOptions);
+    console.log("[PaymentController withAuth] Session récupérée:", {
+      sessionExists: !!session,
+      userIdInSession: session?.user?.id_user,
+    });
+
     if (!session?.user?.id_user) {
-      console.error("[PaymentController] Session manquante ou utilisateur non connecté", { userId });
+      console.error("[PaymentController withAuth] Session manquante ou utilisateur non connecté", { userId });
       return NextResponse.json(
         { message: "Non authentifié. Veuillez vous connecter." },
         { status: 401 }
       );
     }
 
-    if (session.user.id_user !== userId) {
-      console.error("[PaymentController] Utilisateur non autorisé", {
+    const sessionUserId = session.user.id_user;
+    if (isNaN(sessionUserId) || sessionUserId !== userId) {
+      console.error("[PaymentController withAuth] Utilisateur non autorisé", {
         sessionUserId: session.user.id_user,
         requestedUserId: userId,
       });
@@ -41,16 +49,17 @@ async function withAuth(
       select: { id_user: true },
     });
     if (!user) {
-      console.error("[PaymentController] Utilisateur non trouvé", { userId });
+      console.error("[PaymentController withAuth] Utilisateur non trouvé", { userId });
       return NextResponse.json(
         { message: "Utilisateur non trouvé" },
         { status: 404 }
       );
     }
 
-    return await handler(userId);
+    console.log("[PaymentController withAuth] Authentification réussie pour userId:", userId);
+    return await handler(userId, ...args);
   } catch (error: any) {
-    console.error("[PaymentController] Erreur dans withAuth", {
+    console.error("[PaymentController withAuth] Erreur", {
       message: error.message,
       stack: error.stack,
     });
@@ -228,24 +237,68 @@ export const paymentController = {
     return withAuth(req, userId, async (userId: number) => {
       try {
         const body = await req.json();
-        console.log("Received update body in controller:", body);
+        console.log("[PaymentController updatePaymentMethod] Données reçues:", body);
 
         const requiredFields = ["stripe_payment_id", "card_name", "brand", "last_card_digits"];
         const missing = requiredFields.filter((field) => !body[field]);
 
         if (missing.length > 0) {
+          console.error("[PaymentController updatePaymentMethod] Champs manquants:", { missing });
           return NextResponse.json(
             { message: `Champs manquants : ${missing.join(", ")}` },
             { status: 400 }
           );
         }
 
-        const updatedPayment = await paymentService.replacePayment(userId, paymentId, body);
-        console.log("PaymentMethod remplacé:", updatedPayment);
+        // Récupérer stripeCustomerId de l'utilisateur
+        const user = await prisma.user.findUnique({
+          where: { id_user: userId },
+          select: { stripeCustomerId: true },
+        });
+
+        if (!user || !user.stripeCustomerId) {
+          console.error("[PaymentController updatePaymentMethod] Utilisateur ou stripeCustomerId non trouvé:", { userId });
+          return NextResponse.json(
+            { message: "Utilisateur ou identifiant Stripe non trouvé" },
+            { status: 404 }
+          );
+        }
+
+        // Attacher le nouveau payment_method au client Stripe
+        try {
+          await stripe.paymentMethods.attach(body.stripe_payment_id, {
+            customer: user.stripeCustomerId,
+          });
+          console.log("[PaymentController updatePaymentMethod] Payment method attaché:", {
+            stripe_payment_id: body.stripe_payment_id,
+            stripeCustomerId: user.stripeCustomerId,
+          });
+        } catch (error: any) {
+          console.error("[PaymentController updatePaymentMethod] Erreur lors de l'attachement du payment method:", error);
+          return NextResponse.json(
+            {
+              message: "Erreur lors de l'association du moyen de paiement au client Stripe",
+              details: error.message,
+            },
+            { status: 400 }
+          );
+        }
+
+        // Ajouter stripe_customer_id aux données
+        const paymentData = {
+          ...body,
+          stripe_customer_id: user.stripeCustomerId,
+        };
+
+        const updatedPayment = await paymentService.replacePayment(userId, paymentId, paymentData);
+        console.log("[PaymentController updatePaymentMethod] PaymentMethod remplacé:", updatedPayment);
         return NextResponse.json(updatedPayment);
       } catch (err: any) {
-        console.error("Erreur lors de la mise à jour:", err);
-        return NextResponse.json({ message: err.message || "Erreur interne du serveur" }, { status: 500 });
+        console.error("[PaymentController updatePaymentMethod] Erreur:", err);
+        return NextResponse.json(
+          { message: err.message || "Erreur interne du serveur" },
+          { status: 500 }
+        );
       }
     });
   },
@@ -263,8 +316,11 @@ export const paymentController = {
         await paymentService.deletePayment(userId, paymentId);
         return NextResponse.json({ message: "Méthode de paiement supprimée avec succès" });
       } catch (err: any) {
-        console.error("Erreur dans deletePaymentMethod:", err);
-        return NextResponse.json({ message: err.message || "Erreur interne du serveur" }, { status: 500 });
+        console.error("[PaymentController deletePaymentMethod] Erreur:", err);
+        return NextResponse.json(
+          { message: err.message || "Erreur interne du serveur" },
+          { status: 500 }
+        );
       }
     });
   },
