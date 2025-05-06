@@ -9,15 +9,36 @@ import { Product } from "@prisma/client"
  * @param products - Liste des produits à trier
  * @returns Liste des produits triés
  */
-export const sortProducts = <T extends Product>(products: T[]): T[] => {
+export const sortActiveProducts = <
+  T extends { active: boolean; available: boolean; priority_order: number },
+>(
+  products: T[]
+): T[] => {
+  return [...products]
+    .filter(product => product.active) // Filtrer les produits inactifs
+    .sort((a, b) => {
+      // Trier d'abord par disponibilité (disponibles avant indisponibles)
+      if (a.available !== b.available) {
+        return a.available ? -1 : 1
+      }
+
+      // Ensuite par priority_order (croissant)
+      return a.priority_order - b.priority_order
+    })
+}
+
+export const sortAllProducts = <
+  T extends { active: boolean; available: boolean; priority_order: number },
+>(
+  products: T[]
+): T[] => {
   return [...products].sort((a, b) => {
-    // Gérer d'abord le cas des produits non disponibles (toujours en dernier)
+    // Trier d'abord par disponibilité (disponibles avant indisponibles)
     if (a.available !== b.available) {
       return a.available ? -1 : 1
     }
 
-    // Si les deux produits ont le même statut de disponibilité,
-    // trier par priority_order (plus petit = plus prioritaire)
+    // Ensuite par priority_order (croissant)
     return a.priority_order - b.priority_order
   })
 }
@@ -33,13 +54,8 @@ export const getTopProducts = <T extends Product>(
   products: T[],
   limit: number = 6
 ): T[] => {
-  // Filtrer uniquement les produits disponibles pour les produits vedettes
-  const availableProducts = products.filter(product => product.available)
-
-  // Trier par priority_order
-  const sortedProducts = availableProducts.sort(
-    (a, b) => a.priority_order - b.priority_order
-  )
+  // Utiliser sortProducts pour trier les produits
+  const sortedProducts = sortActiveProducts(products)
 
   // Limiter au nombre demandé
   return sortedProducts.slice(0, limit)

@@ -65,6 +65,7 @@ import {
   Box,
   PencilLine,
   Power,
+  AlertCircle,
 } from "lucide-react"
 import { Category } from "@prisma/client"
 
@@ -105,6 +106,7 @@ export function ProductForm({
 
   // Obtenir les valeurs actuelles pour la prévisualisation
   const watchedValues = form.watch()
+  const formErrors = form.formState.errors
 
   const onSubmit = async (values: ProductFormValues) => {
     try {
@@ -218,8 +220,46 @@ export function ProductForm({
     cat => cat.id_category === Number(watchedValues.id_category)
   )
 
+  // Liste des erreurs à afficher
+  const errorMessages = Object.entries(formErrors).map(([field, error]) => {
+    const fieldLabels: { [key: string]: string } = {
+      name: "Nom du produit",
+      description: "Description commerciale",
+      technical_specs: "Spécifications techniques",
+      unit_price: "Prix unitaire",
+      stock: "Stock disponible",
+      id_category: "Catégorie",
+      main_image: "Image principale",
+      priority_order: "Priorité d'affichage",
+      product_caroussel_images: "Images du carrousel",
+    }
+
+    return {
+      field: fieldLabels[field] || field,
+      message: error?.message || "Valeur invalide",
+    }
+  })
+
   return (
     <div className="space-y-4 sm:space-y-6">
+      {/* Alerte pour les erreurs de validation */}
+      {errorMessages.length > 0 && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Erreurs dans le formulaire</AlertTitle>
+          <AlertDescription>
+            Veuillez corriger les erreurs suivantes :
+            <ul className="list-disc pl-5 mt-2">
+              {errorMessages.map((error, index) => (
+                <li key={index}>
+                  <strong>{error.field}</strong>: {error.message}
+                </li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         {/* Colonne principale avec le formulaire */}
         <div className="lg:col-span-2">
@@ -504,29 +544,72 @@ export function ProductForm({
                           />
 
                           <FormField
-                            name="priority_order"
                             control={form.control}
+                            name="priority_order"
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel className="text-sm sm:text-base">
-                                  Priorité d&apos;affichage
+                                  Ordre de priorité
                                 </FormLabel>
                                 <FormControl>
                                   <div className="relative">
                                     <BarChart3 className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                                    <Input
-                                      type="number"
-                                      min="1"
-                                      step="1"
-                                      placeholder="1"
-                                      {...field}
+                                    <Select
+                                      onValueChange={value =>
+                                        field.onChange(parseInt(value))
+                                      }
+                                      defaultValue={field.value.toString()}
                                       disabled={isSubmitting}
-                                      className="pl-9 text-sm sm:text-base h-9 sm:h-10"
-                                    />
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger className="pl-9 text-sm sm:text-base h-9 sm:h-10">
+                                          <SelectValue placeholder="Sélectionnez la priorité" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        <SelectItem
+                                          value="1"
+                                          className="text-sm sm:text-base"
+                                        >
+                                          1 - Très haute priorité
+                                        </SelectItem>
+                                        <SelectItem
+                                          value="2"
+                                          className="text-sm sm:text-base"
+                                        >
+                                          2 - Haute priorité
+                                        </SelectItem>
+                                        <SelectItem
+                                          value="3"
+                                          className="text-sm sm:text-base"
+                                        >
+                                          3 - Priorité élevée
+                                        </SelectItem>
+                                        <SelectItem
+                                          value="5"
+                                          className="text-sm sm:text-base"
+                                        >
+                                          5 - Priorité moyenne
+                                        </SelectItem>
+                                        <SelectItem
+                                          value="7"
+                                          className="text-sm sm:text-base"
+                                        >
+                                          7 - Priorité normale
+                                        </SelectItem>
+                                        <SelectItem
+                                          value="10"
+                                          className="text-sm sm:text-base"
+                                        >
+                                          10 - Priorité basse
+                                        </SelectItem>
+                                      </SelectContent>
+                                    </Select>
                                   </div>
                                 </FormControl>
                                 <FormDescription className="text-xs sm:text-sm">
-                                  Ordre d&apos;affichage (1 = haute priorité)
+                                  Les produits sont affichés par ordre croissant
+                                  de priorité (1 sera affiché en premier)
                                 </FormDescription>
                                 <FormMessage className="text-xs sm:text-sm" />
                               </FormItem>

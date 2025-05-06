@@ -2,7 +2,7 @@ import productRepository from "@/lib/repositories/product-repository"
 import { ProductFormValues } from "@/lib/validations/product-schema"
 import { Product } from "@prisma/client"
 import categoryRepository from "@/lib/repositories/category-repository"
-import { sortProducts } from "@/lib/utils/product-utils"
+import { sortAllProducts } from "@/lib/utils/product-utils"
 
 /**
  * Récupère la liste complète des produits depuis le dépôt de données.
@@ -11,7 +11,7 @@ import { sortProducts } from "@/lib/utils/product-utils"
 export const getAllProducts = async (): Promise<Product[]> => {
   try {
     const products = await productRepository.findAll()
-    return sortProducts(products) // Appliquer le tri
+    return sortAllProducts(products)
   } catch (error) {
     console.error("Erreur lors de la récupération des produits:", error)
     throw new Error("Erreur lors de la récupération des produits")
@@ -54,6 +54,11 @@ export const createProduct = async (
       throw new Error(`La catégorie avec l'ID ${data.id_category} n'existe pas`)
     }
 
+    // Forcer available à false si stock est à 0
+    if (data.stock === 0) {
+      data.available = false
+    }
+
     return await productRepository.create(data)
   } catch (error) {
     if (error instanceof Error) {
@@ -93,6 +98,11 @@ export const updateProduct = async (
     const categoryExists = await categoryRepository.exists(data.id_category)
     if (!categoryExists) {
       throw new Error(`La catégorie avec l'ID ${data.id_category} n'existe pas`)
+    }
+
+    // Forcer available à false si stock est à 0
+    if (data.stock === 0) {
+      data.available = false
     }
 
     return await productRepository.update(id, data)

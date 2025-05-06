@@ -1,8 +1,8 @@
-// components/ProductGrid/ProductGrid.tsx
 import React from "react"
 import { Product } from "@prisma/client"
 import { ProductCard } from "@/components/Products/ProductCard"
 import { BaseProductGrid } from "./BaseProductGrid"
+import { sortActiveProducts } from "@/lib/utils/product-utils"
 
 interface ProductGridProps {
   products: Product[]
@@ -15,7 +15,8 @@ export function ProductGrid({
   loading = false,
   emptyMessage = "Aucun produit trouvé dans cette catégorie.",
 }: ProductGridProps) {
-  const filteredProducts = products.filter(product => product.active)
+  // const filteredProducts = products.filter(product => product.active)
+  const filteredProducts = sortActiveProducts(products)
   return (
     <BaseProductGrid
       loading={loading}

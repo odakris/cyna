@@ -1,4 +1,3 @@
-// 1. components/ProductCard/BaseProductCard.tsx (amélioré)
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"

@@ -1,4 +1,3 @@
-// components/ProductCard/ProductCard.tsx
 import * as React from "react"
 import { Product } from "@prisma/client"
 import { BaseProductCard } from "./BaseProductCard"

@@ -1,9 +1,9 @@
 import React from "react"
-import { FeaturedProduct } from "@/types/frontend-types"
 import { BaseProductCard } from "@/components/Products/BaseProductCard"
+import { Product } from "@prisma/client"
 
 interface TopProductCardProps {
-  product: FeaturedProduct
+  product: Product
 }
 
 export function TopProductCard({ product }: TopProductCardProps) {
