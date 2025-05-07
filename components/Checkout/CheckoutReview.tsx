@@ -53,15 +53,12 @@ export function CheckoutReview({
   paymentInfos,
   selectedPayment,
   cart,
-  //   totalCartPrice,
-  //   taxes,
   finalTotal,
   onBack,
   handleProceedToPayment,
   processingPayment,
   error = null,
 }: CheckoutReviewProps) {
-  // Find selected address and payment objects
   const selectedAddressObj = addresses.find(
     a => a.id_address.toString() === selectedAddress
   )
@@ -221,14 +218,19 @@ export function CheckoutReview({
         </div>
       </CardContent>
 
-      <CardFooter className="bg-gray-50 border-t p-4 flex flex-col-reverse sm:flex-row sm:justify-between gap-4">
-        <Button variant="outline" onClick={onBack} disabled={processingPayment}>
+      <CardFooter className="bg-gray-50 border-t p-4 flex flex-col gap-3">
+        <Button
+          className="w-full sm:w-auto px-3 text-sm"
+          variant="outline"
+          onClick={onBack}
+          disabled={processingPayment}
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Précédent
         </Button>
 
         <Button
-          className="w-full sm:w-auto bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white"
+          className="w-full sm:w-auto px-3 text-sm bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white"
           onClick={handleProceedToPayment}
           disabled={processingPayment}
         >

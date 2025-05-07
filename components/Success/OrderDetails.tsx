@@ -29,10 +29,11 @@ interface Address {
   first_name: string
   last_name: string
   address1: string
-  address2: string | null
+  address2?: string | null
   city: string
   postal_code: string
   country: string
+  mobile_phone?: string
 }
 
 interface Order {
@@ -54,16 +55,21 @@ interface OrderDetailsProps {
   order: Order
   downloadingInvoice: boolean
   handleDownloadInvoice: () => Promise<void>
+  guestEmail?: string // Ajout d'un email guest optionnel
 }
 
 export function OrderDetails({
   order,
   downloadingInvoice,
   handleDownloadInvoice,
+  guestEmail,
 }: OrderDetailsProps) {
   // Calculate totals
   const subtotal = order.total_amount / 1.2 // Remove 20% VAT
   const tax = order.total_amount - subtotal
+
+  // Utilisez l'email du guest si l'utilisateur est un invité
+  const email = guestEmail || order.user?.email || ""
 
   return (
     <Card className="border-2 border-gray-100 shadow-md mb-6">
@@ -90,32 +96,34 @@ export function OrderDetails({
         <div>
           <h3 className="text-base font-semibold mb-3 text-[#302082] flex items-center gap-2">
             <Package className="h-4 w-4" />
-            Articles ({order.order_items.length})
+            Articles ({order.order_items?.length || 0})
           </h3>
 
           <div className="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
             <div className="divide-y divide-gray-200">
-              {order.order_items.map((item, index) => (
-                <div key={index} className="p-3">
-                  <div className="flex justify-between items-start mb-1">
-                    <p className="font-medium">
-                      {item.name || `Produit ID: ${item.id_product}`}
-                    </p>
-                    <p className="font-medium">
-                      {(item.unit_price * item.quantity).toFixed(2)}€
-                    </p>
+              {order.order_items &&
+                order.order_items.map((item, index) => (
+                  <div key={index} className="p-3">
+                    <div className="flex justify-between items-start mb-1">
+                      <p className="font-medium">
+                        {item.name || `Produit ID: ${item.id_product}`}
+                      </p>
+                      <p className="font-medium">
+                        {(item.unit_price * item.quantity).toFixed(2)}€
+                      </p>
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      <p>
+                        Quantité: {item.quantity} × {item.unit_price.toFixed(2)}
+                        €
+                      </p>
+                      <p>
+                        Abonnement:{" "}
+                        {item.subscription_type.toLowerCase().replace("_", " ")}
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-sm text-gray-600">
-                    <p>
-                      Quantité: {item.quantity} × {item.unit_price.toFixed(2)}€
-                    </p>
-                    <p>
-                      Abonnement:{" "}
-                      {item.subscription_type.toLowerCase().replace("_", " ")}
-                    </p>
-                  </div>
-                </div>
-              ))}
+                ))}
             </div>
           </div>
         </div>
@@ -123,24 +131,29 @@ export function OrderDetails({
         {/* Customer information */}
         <div className="space-y-6">
           {/* Billing address */}
-          <div>
-            <h3 className="text-base font-semibold mb-3 text-[#302082] flex items-center gap-2">
-              <Home className="h-4 w-4" />
-              Adresse de facturation
-            </h3>
+          {order.address && (
+            <div>
+              <h3 className="text-base font-semibold mb-3 text-[#302082] flex items-center gap-2">
+                <Home className="h-4 w-4" />
+                Adresse de facturation
+              </h3>
 
-            <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 text-sm">
-              <p className="font-medium">
-                {order.address.first_name} {order.address.last_name}
-              </p>
-              <p>{order.address.address1}</p>
-              {order.address.address2 && <p>{order.address.address2}</p>}
-              <p>
-                {order.address.postal_code} {order.address.city},{" "}
-                {order.address.country}
-              </p>
+              <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 text-sm">
+                <p className="font-medium">
+                  {order.address.first_name} {order.address.last_name}
+                </p>
+                <p>{order.address.address1}</p>
+                {order.address.address2 && <p>{order.address.address2}</p>}
+                <p>
+                  {order.address.postal_code} {order.address.city},{" "}
+                  {order.address.country}
+                </p>
+                {order.address.mobile_phone && (
+                  <p>{order.address.mobile_phone}</p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Contact information */}
           <div>
@@ -152,7 +165,7 @@ export function OrderDetails({
             <div className="bg-gray-50 p-3 rounded-lg border border-gray-200 text-sm">
               <p className="flex items-center gap-2">
                 <Mail className="h-3.5 w-3.5 text-gray-500" />
-                {order.user.email}
+                {email}
               </p>
             </div>
           </div>

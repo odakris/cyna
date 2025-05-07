@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card"
 
 interface NextStepsCardProps {
-  email: string
+  email?: string // Rendons l'email optionnel
 }
 
 export function NextStepsCard({ email }: NextStepsCardProps) {
@@ -31,8 +31,17 @@ export function NextStepsCard({ email }: NextStepsCardProps) {
             <div>
               <p className="font-medium">Consultez votre email</p>
               <p className="text-sm text-gray-600">
-                Nous avons envoyé un email de confirmation à {email} avec tous
-                les détails de votre commande.
+                {email ? (
+                  <>
+                    Nous avons envoyé un email de confirmation à {email} avec
+                    tous les détails de votre commande.
+                  </>
+                ) : (
+                  <>
+                    Nous avons envoyé un email de confirmation avec tous les
+                    détails de votre commande.
+                  </>
+                )}
               </p>
             </div>
           </div>

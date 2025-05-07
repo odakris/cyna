@@ -1,4 +1,3 @@
-// app/checkout/page.tsx
 "use client"
 
 import { useState, useEffect } from "react"
@@ -20,8 +19,7 @@ import { CartSummary } from "@/components/Checkout/CartSummary"
 import { EmptyCart } from "@/components/Checkout/EmptyCart"
 import { LoadingState } from "@/components/Checkout/LoadingState"
 
-// Stripe configuration - Version corrigée
-// La clé doit commencer par pk_test_ ou pk_live_ selon l'environnement
+// Stripe configuration
 const stripeKey =
   process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY ||
   process.env.NEXT_PUBLIC_STRIPE_KEY ||
@@ -115,15 +113,15 @@ function CheckoutContent() {
   // Main checkout component
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 animate-in fade-in duration-300">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#302082] relative pb-2 inline-block">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <h1 className="text-xl sm:text-2xl font-bold text-[#302082] relative pb-2">
           Finaliser votre commande
           <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
         </h1>
         <Button
           asChild
           variant="outline"
-          className="border-[#302082] text-[#302082] hover:bg-[#302082]/5"
+          className="w-full sm:w-auto border-[#302082] text-[#302082] hover:bg-[#302082]/5"
         >
           <Link href="/panier">
             <ArrowLeft className="mr-2 h-4 w-4" />

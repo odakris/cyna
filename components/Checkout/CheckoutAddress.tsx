@@ -154,7 +154,7 @@ export function CheckoutAddress({
                     first_name: e.target.value,
                   })
                 }
-                className="bg-white focus:ring-[#302082] focus:border-[#302082]"
+                className="bg-white focus:ring-[#302082] focus:border-[#302082] text-sm"
               />
             </div>
             <div className="space-y-2">
@@ -168,7 +168,7 @@ export function CheckoutAddress({
                     last_name: e.target.value,
                   })
                 }
-                className="bg-white focus:ring-[#302082] focus:border-[#302082]"
+                className="bg-white focus:ring-[#302082] focus:border-[#302082] text-sm"
               />
             </div>
             <div className="space-y-2 sm:col-span-2">
@@ -184,7 +184,7 @@ export function CheckoutAddress({
                     address1: e.target.value,
                   })
                 }
-                className="bg-white focus:ring-[#302082] focus:border-[#302082]"
+                className="bg-white focus:ring-[#302082] focus:border-[#302082] text-sm"
               />
             </div>
             <div className="space-y-2 sm:col-span-2">
@@ -200,7 +200,7 @@ export function CheckoutAddress({
                     address2: e.target.value,
                   })
                 }
-                className="bg-white focus:ring-[#302082] focus:border-[#302082]"
+                className="bg-white focus:ring-[#302082] focus:border-[#302082] text-sm"
               />
             </div>
             <div className="space-y-2">
@@ -216,7 +216,7 @@ export function CheckoutAddress({
                     postal_code: e.target.value,
                   })
                 }
-                className="bg-white focus:ring-[#302082] focus:border-[#302082]"
+                className="bg-white focus:ring-[#302082] focus:border-[#302082] text-sm"
               />
             </div>
             <div className="space-y-2">
@@ -232,7 +232,7 @@ export function CheckoutAddress({
                     city: e.target.value,
                   })
                 }
-                className="bg-white focus:ring-[#302082] focus:border-[#302082]"
+                className="bg-white focus:ring-[#302082] focus:border-[#302082] text-sm"
               />
             </div>
             <div className="space-y-2">
@@ -248,7 +248,7 @@ export function CheckoutAddress({
                     region: e.target.value,
                   })
                 }
-                className="bg-white focus:ring-[#302082] focus:border-[#302082]"
+                className="bg-white focus:ring-[#302082] focus:border-[#302082] text-sm"
               />
             </div>
             <div className="space-y-2">
@@ -264,7 +264,7 @@ export function CheckoutAddress({
                     country: e.target.value,
                   })
                 }
-                className="bg-white focus:ring-[#302082] focus:border-[#302082]"
+                className="bg-white focus:ring-[#302082] focus:border-[#302082] text-sm"
               />
             </div>
             <div className="space-y-2 sm:col-span-2">
@@ -280,20 +280,20 @@ export function CheckoutAddress({
                     mobile_phone: e.target.value,
                   })
                 }
-                className="bg-white focus:ring-[#302082] focus:border-[#302082]"
+                className="bg-white focus:ring-[#302082] focus:border-[#302082] text-sm"
               />
             </div>
           </div>
         </div>
       </CardContent>
 
-      <CardFooter className="bg-gray-50 border-t p-4 flex flex-col sm:flex-row gap-3 sm:justify-between">
+      <CardFooter className="bg-gray-50 border-t p-4 flex flex-col md:flex-row flex-wrap gap-3 justify-between">
         <p className="text-xs text-gray-500 flex items-center">
           <span className="text-red-500">*</span> Champs obligatoires
         </p>
-        <div className="flex gap-3 w-full sm:w-auto">
+        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
           <Button
-            className="flex-1 sm:flex-initial"
+            className="w-full md:w-auto px-3 text-sm"
             variant="outline"
             onClick={onBack}
             disabled={loading}
@@ -303,7 +303,7 @@ export function CheckoutAddress({
           </Button>
 
           <Button
-            className="flex-1 sm:flex-initial bg-[#302082] hover:bg-[#302082]/90"
+            className="w-full md:w-auto px-3 text-sm bg-[#302082] hover:bg-[#302082]/90"
             onClick={handleSaveNewAddress}
             disabled={loading}
           >
@@ -312,7 +312,7 @@ export function CheckoutAddress({
 
           {selectedAddress && (
             <Button
-              className="flex-1 sm:flex-initial bg-[#FF6B00] hover:bg-[#FF6B00]/90"
+              className="w-full md:w-auto px-3 text-sm bg-[#FF6B00] hover:bg-[#FF6B00]/90"
               onClick={onNext}
               disabled={loading}
             >

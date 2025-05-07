@@ -40,6 +40,7 @@ export function useOrder(orderId: string | null) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [downloadingInvoice, setDownloadingInvoice] = useState(false)
+  const [guestEmail, setGuestEmail] = useState<string | null>(null)
 
   // Safely parse JSON response
   const safeParseJson = async (response: Response) => {
@@ -62,6 +63,15 @@ export function useOrder(orderId: string | null) {
       }
 
       try {
+        // Tenter de récupérer l'email de l'invité depuis localStorage
+        const storedGuestEmail =
+          typeof window !== "undefined"
+            ? localStorage.getItem("guestEmail")
+            : null
+        if (storedGuestEmail) {
+          setGuestEmail(storedGuestEmail)
+        }
+
         const response = await fetch(`/api/orders/${orderId}`)
 
         if (!response.ok) {
@@ -73,10 +83,11 @@ export function useOrder(orderId: string | null) {
           return
         }
 
-        const orderData = await safeParseJson(response)
-        setOrder(orderData)
+        const data = await safeParseJson(response)
+        setOrder(data.order || data)
         setLoading(false)
-      } catch {
+      } catch (error) {
+        console.error("Erreur réseau lors du chargement de la commande:", error)
         setError("Erreur réseau lors du chargement de la commande")
         setLoading(false)
       }
@@ -121,7 +132,8 @@ export function useOrder(orderId: string | null) {
         description: "Votre facture a été téléchargée",
         variant: "success",
       })
-    } catch {
+    } catch (error) {
+      console.error("Erreur téléchargement facture:", error)
       toast({
         title: "Erreur",
         description: "Erreur lors du téléchargement de la facture",
@@ -138,5 +150,6 @@ export function useOrder(orderId: string | null) {
     error,
     downloadingInvoice,
     handleDownloadInvoice,
+    guestEmail,
   }
 }

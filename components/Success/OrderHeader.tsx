@@ -2,7 +2,7 @@ import { CheckCircle2 } from "lucide-react"
 
 interface OrderHeaderProps {
   orderId: number
-  email: string
+  email?: string
 }
 
 export function OrderHeader({ orderId, email }: OrderHeaderProps) {
@@ -16,7 +16,7 @@ export function OrderHeader({ orderId, email }: OrderHeaderProps) {
       </h1>
       <p className="text-gray-600 max-w-lg mx-auto">
         Votre commande #{orderId} a été traitée avec succès.
-        {/* Un email de confirmation a été envoyé à {email}. */}
+        {email && <> Un email de confirmation a été envoyé à {email}.</>}
       </p>
     </div>
   )

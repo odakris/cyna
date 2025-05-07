@@ -147,7 +147,7 @@ export function CheckoutPayment({
                     card_name: e.target.value,
                   })
                 }
-                className="bg-white focus:ring-[#302082] focus:border-[#302082]"
+                className="bg-white focus:ring-[#302082] focus:border-[#302082] text-sm"
               />
             </div>
 
@@ -155,12 +155,12 @@ export function CheckoutPayment({
               <label className="text-sm font-medium text-gray-700">
                 Détails de la carte *
               </label>
-              <div className="p-3 border rounded-md bg-white focus-within:ring-2 focus-within:ring-[#302082] focus-within:border-[#302082] transition-colors">
+              <div className="p-2 border rounded-md bg-white focus-within:ring-2 focus-within:ring-[#302082] focus-within:border-[#302082] transition-colors min-h-[40px]">
                 <CardElement
                   options={{
                     style: {
                       base: {
-                        fontSize: "16px",
+                        fontSize: "12px",
                         color: "#424770",
                         "::placeholder": {
                           color: "#aab7c4",
@@ -189,15 +189,20 @@ export function CheckoutPayment({
         </div>
       </CardContent>
 
-      <CardFooter className="bg-gray-50 border-t p-4 flex justify-between">
-        <Button variant="outline" onClick={onBack} disabled={loading}>
+      <CardFooter className="bg-gray-50 border-t p-4 flex flex-col md:flex-row flex-wrap gap-3 justify-between">
+        <Button
+          className="w-full md:w-auto px-3 text-sm"
+          variant="outline"
+          onClick={onBack}
+          disabled={loading}
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Précédent
         </Button>
 
-        <div className="flex gap-3">
+        <div className="flex flex-col md:flex-row gap-3 w-full md:w-auto">
           <Button
-            className="bg-[#302082] hover:bg-[#302082]/90"
+            className="w-full md:w-auto px-3 text-sm bg-[#302082] hover:bg-[#302082]/90"
             onClick={handleSaveNewPayment}
             disabled={loading}
           >
@@ -206,7 +211,7 @@ export function CheckoutPayment({
 
           {selectedPayment && (
             <Button
-              className="bg-[#FF6B00] hover:bg-[#FF6B00]/90"
+              className="w-full md:w-auto px-3 text-sm bg-[#FF6B00] hover:bg-[#FF6B00]/90"
               onClick={onNext}
               disabled={loading}
             >
