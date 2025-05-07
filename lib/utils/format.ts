@@ -36,3 +36,19 @@ export function formatDate(dateString?: string) {
     minute: "2-digit",
   }).format(date)
 }
+
+/**
+ * Tronque un texte à une longueur donnée et ajoute des points de suspension
+ * @param text Texte à tronquer
+ * @param maxLength Longueur maximale
+ * @returns Texte tronqué avec points de suspension si nécessaire
+ */
+export const truncateText = (text: string, maxLength: number): string => {
+  if (!text) return ""
+
+  if (text.length <= maxLength) {
+    return text
+  }
+
+  return text.substring(0, maxLength) + "..."
+}

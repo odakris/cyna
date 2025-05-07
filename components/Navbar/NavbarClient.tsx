@@ -3,12 +3,12 @@
 import * as React from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Menu, Search, X, Home, ShoppingCart, Shield, Tag } from "lucide-react"
+import { Menu, Home, ShoppingCart, Shield, Tag, X, Search } from "lucide-react"
 import { AvatarDemo } from "@/components/Avatar/Avatar"
-import { Input } from "@/components/ui/input"
 import { SideBasket } from "@/components/SideBasket/SideBasket"
 import { Button } from "@/components/ui/button"
 import { Category } from "@prisma/client"
+import { SearchInput } from "@/components/SearchBar/SearchInput"
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -35,7 +35,7 @@ export default function NavbarClient({ categories }: NavbarProps) {
     { name: "Accueil", href: "/", icon: <Home className="h-4 w-4 mr-2" /> },
     {
       name: "Categories",
-      href: "/categories",
+      href: "/categorie",
       icon: <Tag className="h-4 w-4 mr-2" />,
     },
     {
@@ -154,13 +154,7 @@ export default function NavbarClient({ categories }: NavbarProps) {
 
       {/* Barre de recherche sur mobile - pleine largeur */}
       <div className="md:hidden px-4 pb-3">
-        <div className="relative w-full">
-          <Input
-            placeholder="Rechercher..."
-            className="w-full h-9 pr-10 pl-3 text-sm bg-white/10 text-white border-white/20 focus:bg-white/20 focus:border-white/40 rounded-md placeholder:text-white/60"
-          />
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
-        </div>
+        <SearchInput variant="mobile" placeholder="Rechercher..." />
       </div>
 
       {/* TABLET NAVIGATION */}
@@ -176,13 +170,11 @@ export default function NavbarClient({ categories }: NavbarProps) {
         </Link>
 
         <div className="flex items-center gap-3">
-          <div className="relative w-48">
-            <Input
-              placeholder="Rechercher..."
-              className="h-9 pr-8 text-white bg-white/10 border-white/20 focus:bg-white/20 focus:border-white/40 placeholder:text-white/70"
-            />
-            <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
-          </div>
+          <SearchInput
+            variant="tablet"
+            placeholder="Rechercher..."
+            width="w-48"
+          />
 
           <Sheet>
             <SheetTrigger className="p-1.5 rounded-md hover:bg-white/20 active:bg-white/30 transition-colors">
@@ -338,13 +330,11 @@ export default function NavbarClient({ categories }: NavbarProps) {
 
           {/* Partie droite: recherche, panier, profil */}
           <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Input
-                placeholder="Rechercher un produit..."
-                className="w-56 h-9 pr-8 pl-3 text-white bg-white/10 border-white/20 focus:border-white/30 focus:bg-white/15 transition-colors placeholder:text-white/60 rounded-md"
-              />
-              <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
-            </div>
+            <SearchInput
+              variant="desktop"
+              placeholder="Rechercher un produit..."
+              width="w-56"
+            />
 
             <Button
               asChild

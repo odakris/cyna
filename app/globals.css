@@ -184,6 +184,104 @@ body {
   font-style: normal;
 } */
 
+
+/* Styles pour la barre de recherche et ses résultats */
+.search-results-container {
+  position: relative;
+}
+
+/* Indicateur de défilement - apparaît lorsque le contenu est défilable */
+.search-results-container .scroll-shadow {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.search-results-container .has-scroll+.scroll-shadow,
+.search-results-container .has-scroll~.scroll-shadow {
+  opacity: 0.7;
+}
+
+/* Amélioration du style de défilement pour les résultats de recherche */
+.search-results-container .scrollbar {
+  width: 6px !important;
+  background-color: transparent !important;
+}
+
+.search-results-container .thumb {
+  background-color: rgba(48, 32, 130, 0.2) !important;
+  border-radius: 6px !important;
+}
+
+.search-results-container .thumb:hover,
+.search-results-container .thumb:active {
+  background-color: rgba(48, 32, 130, 0.4) !important;
+}
+
+/* Animation pour l'indicateur d'aide */
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    display: none;
+  }
+}
+
+.help-indicator {
+  animation: fadeOut 3s forwards;
+}
+
+/* Effet d'apparition des résultats de recherche */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.search-results-container [role="dialog"] {
+  animation: slideIn 0.2s ease-out forwards;
+}
+
+/* Styles pour les items de résultats de recherche */
+.search-result-item {
+  transition: all 0.2s ease;
+}
+
+.search-result-item:hover {
+  transform: translateX(2px);
+}
+
+/* Animation de chargement améliorée */
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.6;
+  }
+}
+
+.loading-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
