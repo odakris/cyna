@@ -1,4 +1,3 @@
-// lib/services/chatbot-service.ts
 import { prisma } from "@/lib/prisma"
 import { ChatMessage, MessageType } from "@prisma/client"
 
@@ -10,6 +9,8 @@ export interface BotResponse {
     email?: string
     subject?: string
     message?: string
+    first_name?: string
+    last_name?: string
   }
 }
 
@@ -18,6 +19,10 @@ type ConversationContext =
   | "initial"
   | "asking_for_email"
   | "email_provided"
+  | "asking_for_first_name"
+  | "first_name_provided"
+  | "asking_for_last_name"
+  | "last_name_provided"
   | "asking_for_subject"
   | "subject_provided"
   | "asking_for_message"
@@ -26,10 +31,10 @@ type ConversationContext =
   | "info_products"
   | "info_pricing"
   | "info_specific_product"
-  | "info_category" // Nouveau contexte pour les catégories
-  | "info_offers" // Nouveau contexte pour les offres spéciales
-  | "compare_products" // Nouveau contexte pour comparer les produits
-  | "service_support" // Nouveau contexte pour le support technique
+  | "info_category"
+  | "info_offers"
+  | "compare_products"
+  | "service_support"
 
 /**
  * Traite un message utilisateur et génère une réponse appropriée.
@@ -65,8 +70,13 @@ export async function processChatbotMessage(
 
     // Déterminer le contexte actuel basé sur le dernier message du bot
     let currentContext: ConversationContext = "initial"
-    let collectedData: { email?: string; subject?: string; message?: string } =
-      {}
+    let collectedData: {
+      email?: string
+      subject?: string
+      message?: string
+      first_name?: string
+      last_name?: string
+    } = {}
 
     // Détecter le contexte en fonction du contenu du dernier message du bot
     if (
@@ -74,6 +84,16 @@ export async function processChatbotMessage(
       lastBotContent.includes("me préciser votre adresse")
     ) {
       currentContext = "asking_for_email"
+    } else if (
+      lastBotContent.includes("prénom") ||
+      lastBotContent.includes("me préciser votre prénom")
+    ) {
+      currentContext = "asking_for_first_name"
+    } else if (
+      lastBotContent.includes("nom de famille") ||
+      lastBotContent.includes("votre nom")
+    ) {
+      currentContext = "asking_for_last_name"
     } else if (
       lastBotContent.includes("objet de votre demande") ||
       lastBotContent.includes("préciser brièvement l'objet")
@@ -138,9 +158,9 @@ export async function processChatbotMessage(
           collectedData.email = lowerMessage
           return {
             response:
-              "Merci pour votre email. Pourriez-vous préciser brièvement l'objet de votre demande ?",
+              "Merci pour votre email. Pourriez-vous me préciser votre prénom ?",
             needsHumanSupport: true,
-            context: "asking_for_subject",
+            context: "asking_for_first_name",
             collectedData,
           }
         } else if (["oui", "ok", "d'accord", "yes"].includes(lowerMessage)) {
@@ -161,17 +181,17 @@ export async function processChatbotMessage(
           }
         }
 
-      case "asking_for_subject":
+      case "asking_for_first_name":
         if (lowerMessage.length < 2) {
           return {
             response:
-              "Pourriez-vous fournir un peu plus de détails sur l'objet de votre demande ?",
+              "Pourriez-vous fournir un prénom valide s'il vous plaît ?",
             needsHumanSupport: true,
-            context: "asking_for_subject",
+            context: "asking_for_first_name",
           }
         }
 
-        // Récupérer l'email
+        // Récupérer l'email depuis l'historique des messages
         let userEmail = ""
 
         // Rechercher dans l'historique des messages pour trouver l'email
@@ -216,9 +236,135 @@ export async function processChatbotMessage(
           }
         }
 
-        // Stocker le sujet et demander le corps du message
+        // Stocker le prénom et demander le nom
         collectedData = {
           email: userEmail || "",
+          first_name: message.trim(),
+        }
+
+        return {
+          response: "Merci. Et quel est votre nom de famille ?",
+          needsHumanSupport: true,
+          context: "asking_for_last_name",
+          collectedData,
+        }
+
+      case "asking_for_last_name":
+        if (lowerMessage.length < 2) {
+          return {
+            response:
+              "Pourriez-vous fournir un nom de famille valide s'il vous plaît ?",
+            needsHumanSupport: true,
+            context: "asking_for_last_name",
+          }
+        }
+
+        // Récupérer l'email et le prénom
+        let storedEmail = ""
+        let storedFirstName = ""
+
+        // Vérifier si nous avons déjà l'email dans les messages précédents
+        const allUserMessages: string[] = messageHistory
+          .filter((msg: ChatMessage) => msg.message_type === MessageType.USER)
+          .map((msg: ChatMessage) => msg.content)
+
+        // Rechercher un email dans les messages utilisateur
+        const emailCandidates = allUserMessages.filter(content =>
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(content)
+        )
+
+        if (emailCandidates.length > 0) {
+          storedEmail = emailCandidates[0]
+        }
+
+        // Chercher le prénom en analysant les messages
+        const firstNameRequest = messageHistory.filter(
+          (msg: ChatMessage) =>
+            msg.message_type === MessageType.BOT &&
+            msg.content.toLowerCase().includes("prénom")
+        )
+
+        if (firstNameRequest.length > 0) {
+          const firstNameIndex = messageHistory.indexOf(firstNameRequest[0])
+
+          // Le prénom devrait être dans le message utilisateur suivant
+          for (let i = 0; i < messageHistory.length; i++) {
+            if (
+              messageHistory[i].message_type === MessageType.USER &&
+              i < firstNameIndex &&
+              !emailCandidates.includes(messageHistory[i].content) &&
+              messageHistory[i].content.length >= 2
+            ) {
+              storedFirstName = messageHistory[i].content
+              break
+            }
+          }
+        }
+
+        // Stocker le nom et demander l'objet du message
+        collectedData = {
+          email: storedEmail || "",
+          first_name: storedFirstName || "",
+          last_name: message.trim(),
+        }
+
+        return {
+          response:
+            "Merci pour ces informations. Pourriez-vous préciser brièvement l'objet de votre demande ?",
+          needsHumanSupport: true,
+          context: "asking_for_subject",
+          collectedData,
+        }
+
+      case "asking_for_subject":
+        if (lowerMessage.length < 2) {
+          return {
+            response:
+              "Pourriez-vous fournir un peu plus de détails sur l'objet de votre demande ?",
+            needsHumanSupport: true,
+            context: "asking_for_subject",
+          }
+        }
+
+        // Récupérer les informations déjà collectées
+        let storedEmail2 = ""
+        let storedFirstName2 = ""
+        let storedLastName = ""
+
+        // Rechercher dans l'historique pour ces informations
+        // (Code similaire à celui pour récupérer l'email et le prénom)
+        const emailCandidates2 = messageHistory
+          .filter((msg: ChatMessage) => msg.message_type === MessageType.USER)
+          .map((msg: ChatMessage) => msg.content)
+          .filter((content: string) =>
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(content)
+          )
+
+        if (emailCandidates2.length > 0) {
+          storedEmail2 = emailCandidates2[0]
+        }
+
+        // Logique pour trouver le prénom et le nom
+        // Cette partie est simplifiée, mais devrait être plus robuste en production
+        const userMessages = messageHistory
+          .filter((msg: ChatMessage) => msg.message_type === MessageType.USER)
+          .map((msg: ChatMessage) => msg.content)
+          .filter(
+            (content: string) =>
+              !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(content) && content.length >= 2
+          )
+
+        if (userMessages.length >= 2) {
+          // Supposons que les deux derniers messages non-email sont le prénom et le nom
+          storedFirstName2 = userMessages[1] // L'avant-dernier est probablement le prénom
+          storedLastName = userMessages[0] // Le dernier est probablement le nom
+        }
+
+        // Stocker le sujet et demander le corps du message
+        collectedData = {
+          email: storedEmail2 || "",
+          first_name: storedFirstName2 || "",
+          last_name: storedLastName || "",
           subject: message.trim(),
         }
 
@@ -240,22 +386,36 @@ export async function processChatbotMessage(
           }
         }
 
-        // Récupérer l'email et le sujet
-        let storedEmail = ""
+        // Récupérer toutes les informations précédemment collectées
+        let storedEmail3 = ""
+        let storedFirstName3 = ""
+        let storedLastName3 = ""
         let storedSubject = ""
 
-        // Vérifier si nous avons déjà l'email dans les messages précédents
-        const allUserMessages: string[] = messageHistory
+        // Récupération de l'email (comme précédemment)
+        const allUserMessages3 = messageHistory
           .filter((msg: ChatMessage) => msg.message_type === MessageType.USER)
           .map((msg: ChatMessage) => msg.content)
 
-        // Rechercher un email dans les messages utilisateur
-        const emailCandidates = allUserMessages.filter(content =>
+        const emailCandidates3 = allUserMessages3.filter(content =>
           /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(content)
         )
 
-        if (emailCandidates.length > 0) {
-          storedEmail = emailCandidates[0]
+        if (emailCandidates3.length > 0) {
+          storedEmail3 = emailCandidates3[0]
+        }
+
+        // Cette logique pourrait être améliorée pour une récupération plus précise
+        // Dans une vraie application, on pourrait stocker ces informations dans un état de session
+        const nonEmailMessages = allUserMessages3.filter(
+          msg => !emailCandidates3.includes(msg) && msg.length >= 2
+        )
+
+        if (nonEmailMessages.length >= 3) {
+          // On prend les 3 derniers messages non-email comme prénom, nom et sujet
+          storedSubject = nonEmailMessages[nonEmailMessages.length - 3]
+          storedLastName3 = nonEmailMessages[nonEmailMessages.length - 2]
+          storedFirstName3 = nonEmailMessages[nonEmailMessages.length - 1]
         }
 
         // Chercher le sujet en analysant le dernier message du bot demandant plus de détails
@@ -265,7 +425,7 @@ export async function processChatbotMessage(
             msg.content.toLowerCase().includes("détailler")
         )
 
-        if (detailsRequestMessages.length > 0) {
+        if (detailsRequestMessages.length > 0 && !storedSubject) {
           const subjectMessagesIndex = messageHistory.indexOf(
             detailsRequestMessages[0]
           )
@@ -278,7 +438,7 @@ export async function processChatbotMessage(
           ) {
             if (
               messageHistory[i].message_type === MessageType.USER &&
-              !emailCandidates.includes(messageHistory[i].content)
+              !emailCandidates3.includes(messageHistory[i].content)
             ) {
               storedSubject = messageHistory[i].content
               break
@@ -288,13 +448,25 @@ export async function processChatbotMessage(
 
         // Mettre à jour les données collectées avec le message complet
         collectedData = {
-          email: storedEmail,
+          email: storedEmail3 || "",
+          first_name: storedFirstName3 || "",
+          last_name: storedLastName3 || "",
           subject: storedSubject || "Demande via chatbot",
           message: message.trim(),
         }
 
+        // Construire une réponse qui mentionne toutes les informations collectées
+        const responseDetails = []
+        if (storedEmail3) responseDetails.push(`à l'adresse ${storedEmail3}`)
+        if (storedFirstName3 && storedLastName3)
+          responseDetails.push(`pour ${storedFirstName3} ${storedLastName3}`)
+        if (storedSubject) responseDetails.push(`concernant "${storedSubject}"`)
+
+        const detailsText =
+          responseDetails.length > 0 ? " " + responseDetails.join(" ") : ""
+
         return {
-          response: `Parfait ! Nous avons bien enregistré votre demande${storedSubject ? ` concernant "${storedSubject}"` : ""}. Un conseiller va vous contacter prochainement${storedEmail ? ` à l'adresse ${storedEmail}` : ""}. Merci pour votre confiance !`,
+          response: `Parfait ! Nous avons bien enregistré votre demande${detailsText}. Un conseiller va vous contacter prochainement. Merci pour votre confiance !`,
           needsHumanSupport: true,
           context: "ready_to_submit",
           collectedData,

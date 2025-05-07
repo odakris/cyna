@@ -18,6 +18,8 @@ interface MessageData {
     email?: string
     subject?: string
     message?: string
+    first_name?: string
+    last_name?: string
   }
   context?: string
 }
@@ -34,6 +36,8 @@ export function useChatbot() {
     email: "",
     subject: "",
     message: "",
+    first_name: "",
+    last_name: "",
   })
 
   const { toast } = useToast()
@@ -224,18 +228,47 @@ export function useChatbot() {
       if (messageData.collectedData.message) {
         collectedDataRef.current.message = messageData.collectedData.message
       }
+      if (messageData.collectedData.first_name) {
+        collectedDataRef.current.first_name =
+          messageData.collectedData.first_name
+      }
+      if (messageData.collectedData.last_name) {
+        collectedDataRef.current.last_name = messageData.collectedData.last_name
+      }
 
-      // Si toutes les données sont collectées et prêtes à être soumises
+      console.log("Données reçues du chatbot:", messageData.collectedData)
+
+      console.log("Données collectées avant envoi:", {
+        email: collectedDataRef.current.email,
+        subject: collectedDataRef.current.subject,
+        message: collectedDataRef.current.message,
+        first_name: collectedDataRef.current.first_name,
+        last_name: collectedDataRef.current.last_name,
+      })
+
+      // Vérifier si toutes les données nécessaires sont collectées
       if (
         messageData.context === "ready_to_submit" &&
         collectedDataRef.current.email &&
         collectedDataRef.current.subject &&
-        collectedDataRef.current.message
+        collectedDataRef.current.message &&
+        collectedDataRef.current.first_name &&
+        collectedDataRef.current.last_name
       ) {
+        console.log("Données avant envoi:", {
+          email: collectedDataRef.current.email,
+          subject: collectedDataRef.current.subject,
+          message: collectedDataRef.current.message,
+          first_name: collectedDataRef.current.first_name,
+          last_name: collectedDataRef.current.last_name,
+        })
+        // Modification de l'ordre pour que le prénom n'apparaisse pas à la place du sujet
         submitContactForm(
           collectedDataRef.current.email,
           collectedDataRef.current.subject,
-          collectedDataRef.current.message
+          collectedDataRef.current.message,
+          collectedDataRef.current.first_name,
+          collectedDataRef.current.last_name
         )
       }
     }
@@ -245,23 +278,37 @@ export function useChatbot() {
   const submitContactForm = async (
     email: string,
     subject: string,
-    message: string
+    message: string,
+    firstName: string,
+    lastName: string
   ) => {
     try {
       // Vérifier que nous avons les informations nécessaires
-      if (!email || !subject || !message) {
+      if (!email || !subject || !message || !firstName || !lastName) {
         console.error("Données manquantes pour le formulaire de contact:", {
           email,
           subject,
           message,
+          firstName,
+          lastName,
         })
         return
       }
+
+      console.log("Données envoyées à l'API:", {
+        email: email,
+        subject: subject,
+        message: message,
+        first_name: firstName,
+        last_name: lastName,
+      })
 
       console.log("Envoi du formulaire avec les données:", {
         email,
         subject,
         message,
+        firstName,
+        lastName,
       })
 
       // S'assurer que l'email est une chaîne de caractères valide
@@ -299,6 +346,8 @@ export function useChatbot() {
           email: finalEmail,
           subject: `[Via Chatbot IA] ${subject}`,
           message: message,
+          first_name: firstName,
+          last_name: lastName,
           id_user: session?.user?.id_user
             ? parseInt(session.user.id_user.toString())
             : null,
@@ -316,6 +365,8 @@ export function useChatbot() {
         email: "",
         subject: "",
         message: "",
+        first_name: "",
+        last_name: "",
       }
 
       // Informer l'utilisateur que sa demande a été enregistrée
