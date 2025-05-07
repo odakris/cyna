@@ -24,3 +24,15 @@ export const formatPercentage = (value: number): string => {
     maximumFractionDigits: 1,
   }).format(value)
 }
+
+export function formatDate(dateString?: string) {
+  if (!dateString) return "Date inconnue"
+  const date = new Date(dateString)
+  return new Intl.DateTimeFormat("fr-FR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date)
+}
