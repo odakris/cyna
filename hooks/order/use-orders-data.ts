@@ -101,7 +101,19 @@ export function useOrdersData() {
         })
 
         if (!response.ok) {
-          throw new Error(`Error deleting order ${id}`)
+          // Analyser la réponse d'erreur
+          const errorData = await response.json().catch(() => ({}))
+          console.error(`Erreur suppression commande ${id}:`, {
+            status: response.status,
+            statusText: response.statusText,
+            errorData,
+          })
+
+          throw new Error(
+            errorData.message ||
+              errorData.error ||
+              `Erreur lors de la suppression de la commande ${id} (${response.status})`
+          )
         }
       }
 

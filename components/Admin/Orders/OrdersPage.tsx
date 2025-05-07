@@ -18,6 +18,7 @@ import OrdersStats from "@/components/Admin/Orders/OrdersStats"
 import OrdersFilters from "@/components/Admin/Orders/OrdersFilters"
 import OrdersTable from "@/components/Admin/Orders/OrdersTable"
 import DeleteDialog from "@/components/Admin/Orders/DeleteDialog"
+import { toast } from "@/hooks/use-toast"
 
 export default function OrdersHomePage() {
   // État et logique des données
@@ -49,12 +50,25 @@ export default function OrdersHomePage() {
 
     if (selectedIds.length === 0) return
 
+    console.log("Tentative de suppression des commandes:", selectedIds)
+
     try {
+      console.log("Appel de deleteOrders...")
       await deleteOrders(selectedIds)
+      console.log("Suppression réussie!")
       setShowDeleteDialog(false)
       table.resetRowSelection()
     } catch (error) {
-      console.error("Erreur handleDelete:", error)
+      console.error("Erreur détaillée:", error)
+      // Afficher un message d'erreur à l'utilisateur
+      toast({
+        title: "Erreur",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Erreur lors de la suppression",
+        variant: "destructive",
+      })
     }
   }
 

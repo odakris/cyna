@@ -1,15 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
-import orderService from "@/lib/services/order-service";
-import { orderInputSchema, statusSchema } from "@/lib/validations/order-schema";
-import { ZodError } from "zod";
+import { NextRequest, NextResponse } from "next/server"
+import orderService from "@/lib/services/order-service"
+import { orderInputSchema, statusSchema } from "@/lib/validations/order-schema"
+import { ZodError } from "zod"
+import { checkPermission } from "../api-permissions"
+import { Role } from "@prisma/client"
 
 // Nouvelle fonction pour supporter ta route API
-async function createWithParams(data: any, userId?: string, guestId?: string): Promise<NextResponse> {
-  console.log("[OrderController] Données reçues pour création de commande (createWithParams):", JSON.stringify(data, null, 2));
+async function createWithParams(
+  data: any,
+  userId?: string,
+  guestId?: string
+): Promise<NextResponse> {
+  console.log(
+    "[OrderController] Données reçues pour création de commande (createWithParams):",
+    JSON.stringify(data, null, 2)
+  )
 
   try {
     if (!data || typeof data !== "object") {
-      console.error("[OrderController] Données data invalides:", { data });
+      console.error("[OrderController] Données data invalides:", { data })
       return NextResponse.json(
         {
           success: false,
@@ -17,25 +26,35 @@ async function createWithParams(data: any, userId?: string, guestId?: string): P
           details: "Les données de la commande doivent être un objet non vide",
         },
         { status: 400 }
-      );
+      )
     }
 
     // Construire le payload avec id_user et guestId
     const payload = {
       ...data,
-      id_user: userId && !isNaN(parseInt(userId)) ? parseInt(userId) : undefined,
+      id_user:
+        userId && !isNaN(parseInt(userId)) ? parseInt(userId) : undefined,
       guestId: guestId || undefined,
-    };
+    }
 
-    console.log("[OrderController] Payload avant validation:", JSON.stringify(payload, null, 2));
+    console.log(
+      "[OrderController] Payload avant validation:",
+      JSON.stringify(payload, null, 2)
+    )
 
     // Valider les données avec le même schéma que la fonction create
-    const validatedData = orderInputSchema.parse(payload);
-    console.log("[OrderController] Données validées:", JSON.stringify(validatedData, null, 2));
+    const validatedData = orderInputSchema.parse(payload)
+    console.log(
+      "[OrderController] Données validées:",
+      JSON.stringify(validatedData, null, 2)
+    )
 
     // Appeler la même méthode du service que la fonction create
-    const newOrder = await orderService.createOrder(validatedData);
-    console.log("[OrderController] Commande créée:", JSON.stringify(newOrder, null, 2));
+    const newOrder = await orderService.createOrder(validatedData)
+    console.log(
+      "[OrderController] Commande créée:",
+      JSON.stringify(newOrder, null, 2)
+    )
 
     return NextResponse.json(
       {
@@ -44,14 +63,17 @@ async function createWithParams(data: any, userId?: string, guestId?: string): P
         order: newOrder,
       },
       { status: 201 }
-    );
+    )
   } catch (error) {
-    console.error("[OrderController] Erreur lors de la création de la commande:", error);
+    console.error(
+      "[OrderController] Erreur lors de la création de la commande:",
+      error
+    )
 
     if (error instanceof ZodError) {
       const validationErrors = error.errors
-        .map((e) => `${e.path.join(".")}: ${e.message}`)
-        .join(", ");
+        .map(e => `${e.path.join(".")}: ${e.message}`)
+        .join(", ")
       return NextResponse.json(
         {
           success: false,
@@ -60,7 +82,7 @@ async function createWithParams(data: any, userId?: string, guestId?: string): P
           details: validationErrors,
         },
         { status: 400 }
-      );
+      )
     }
 
     if (error instanceof Error && error.message.includes("n'existe pas")) {
@@ -71,8 +93,11 @@ async function createWithParams(data: any, userId?: string, guestId?: string): P
           details: error.message,
         },
         { status: 400 }
-      );
-    } else if (error instanceof Error && error.message.includes("Stock insuffisant")) {
+      )
+    } else if (
+      error instanceof Error &&
+      error.message.includes("Stock insuffisant")
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -80,7 +105,7 @@ async function createWithParams(data: any, userId?: string, guestId?: string): P
           details: error.message,
         },
         { status: 400 }
-      );
+      )
     }
 
     return NextResponse.json(
@@ -90,7 +115,7 @@ async function createWithParams(data: any, userId?: string, guestId?: string): P
         details: error instanceof Error ? error.message : "Erreur inconnue",
       },
       { status: 500 }
-    );
+    )
   }
 }
 
@@ -100,10 +125,10 @@ async function createWithParams(data: any, userId?: string, guestId?: string): P
  */
 export const getAll = async (): Promise<NextResponse> => {
   try {
-    const orders = await orderService.getAllOrders();
-    return NextResponse.json({ orders, success: true }, { status: 200 });
+    const orders = await orderService.getAllOrders()
+    return NextResponse.json({ orders, success: true }, { status: 200 })
   } catch (error) {
-    console.error("Erreur lors de la récupération des commandes:", error);
+    console.error("Erreur lors de la récupération des commandes:", error)
     return NextResponse.json(
       {
         success: false,
@@ -111,9 +136,9 @@ export const getAll = async (): Promise<NextResponse> => {
         details: error instanceof Error ? error.message : "Erreur inconnue",
       },
       { status: 500 }
-    );
+    )
   }
-};
+}
 
 /**
  * Récupère une commande spécifique en fonction de son identifiant.
@@ -122,17 +147,26 @@ export const getAll = async (): Promise<NextResponse> => {
  */
 export const getById = async (id: number): Promise<NextResponse> => {
   try {
-    const order = await orderService.getOrderById(id);
-    return NextResponse.json({ order, success: true }, { status: 200 });
+    const order = await orderService.getOrderById(id)
+    return NextResponse.json({ order, success: true }, { status: 200 })
   } catch (error) {
-    console.error("Erreur lors de la récupération de la commande par ID:", error);
+    console.error(
+      "Erreur lors de la récupération de la commande par ID:",
+      error
+    )
 
     if (error instanceof Error) {
       if (error.message.includes("non trouvée")) {
-        return NextResponse.json({ success: false, message: error.message }, { status: 404 });
+        return NextResponse.json(
+          { success: false, message: error.message },
+          { status: 404 }
+        )
       }
       if (error.message.includes("invalide")) {
-        return NextResponse.json({ success: false, message: error.message }, { status: 400 });
+        return NextResponse.json(
+          { success: false, message: error.message },
+          { status: 400 }
+        )
       }
     }
 
@@ -143,9 +177,9 @@ export const getById = async (id: number): Promise<NextResponse> => {
         details: error instanceof Error ? error.message : "Erreur inconnue",
       },
       { status: 500 }
-    );
+    )
   }
-};
+}
 
 /**
  * Crée une nouvelle commande en validant les données reçues.
@@ -154,11 +188,11 @@ export const getById = async (id: number): Promise<NextResponse> => {
  */
 export const create = async (request: NextRequest): Promise<NextResponse> => {
   try {
-    const body = await request.json();
-    console.log("Données reçues pour création de commande:", body);
+    const body = await request.json()
+    console.log("Données reçues pour création de commande:", body)
 
-    const validatedData = orderInputSchema.parse(body);
-    const newOrder = await orderService.createOrder(validatedData);
+    const validatedData = orderInputSchema.parse(body)
+    const newOrder = await orderService.createOrder(validatedData)
 
     return NextResponse.json(
       {
@@ -167,14 +201,14 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
         order: newOrder,
       },
       { status: 201 }
-    );
+    )
   } catch (error) {
-    console.error("Erreur lors de la création de la commande:", error);
+    console.error("Erreur lors de la création de la commande:", error)
 
     if (error instanceof ZodError) {
       const validationErrors = error.errors
-        .map((e) => `${e.path.join(".")}: ${e.message}`)
-        .join(", ");
+        .map(e => `${e.path.join(".")}: ${e.message}`)
+        .join(", ")
       return NextResponse.json(
         {
           success: false,
@@ -183,7 +217,7 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
           details: validationErrors,
         },
         { status: 400 }
-      );
+      )
     }
 
     if (error instanceof Error && error.message.includes("n'existe pas")) {
@@ -194,8 +228,11 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
           details: error.message,
         },
         { status: 400 }
-      );
-    } else if (error instanceof Error && error.message.includes("Stock insuffisant")) {
+      )
+    } else if (
+      error instanceof Error &&
+      error.message.includes("Stock insuffisant")
+    ) {
       return NextResponse.json(
         {
           success: false,
@@ -203,7 +240,7 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
           details: error.message,
         },
         { status: 400 }
-      );
+      )
     }
 
     return NextResponse.json(
@@ -213,9 +250,9 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
         details: error instanceof Error ? error.message : "Erreur inconnue",
       },
       { status: 500 }
-    );
+    )
   }
-};
+}
 
 /**
  * Met à jour une commande existante avec de nouvelles données.
@@ -223,13 +260,19 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
  * @param {number} id - Identifiant de la commande à mettre à jour.
  * @returns {Promise<NextResponse>} Réponse JSON avec la commande mise à jour ou une erreur de validation.
  */
-export const update = async (request: NextRequest, id: number): Promise<NextResponse> => {
+export const update = async (
+  request: NextRequest,
+  id: number
+): Promise<NextResponse> => {
   try {
-    const body = await request.json();
-    console.log(`Données reçues pour mise à jour de la commande ID ${id}:`, body);
+    const body = await request.json()
+    console.log(
+      `Données reçues pour mise à jour de la commande ID ${id}:`,
+      body
+    )
 
-    const validatedData = orderInputSchema.parse(body);
-    const updatedOrder = await orderService.updateOrder(id, validatedData);
+    const validatedData = orderInputSchema.parse(body)
+    const updatedOrder = await orderService.updateOrder(id, validatedData)
 
     return NextResponse.json(
       {
@@ -238,14 +281,17 @@ export const update = async (request: NextRequest, id: number): Promise<NextResp
         order: updatedOrder,
       },
       { status: 200 }
-    );
+    )
   } catch (error) {
-    console.error(`Erreur lors de la mise à jour de la commande ID ${id}:`, error);
+    console.error(
+      `Erreur lors de la mise à jour de la commande ID ${id}:`,
+      error
+    )
 
     if (error instanceof ZodError) {
       const validationErrors = error.errors
-        .map((e) => `${e.path.join(".")}: ${e.message}`)
-        .join(", ");
+        .map(e => `${e.path.join(".")}: ${e.message}`)
+        .join(", ")
       return NextResponse.json(
         {
           success: false,
@@ -254,15 +300,21 @@ export const update = async (request: NextRequest, id: number): Promise<NextResp
           details: validationErrors,
         },
         { status: 400 }
-      );
+      )
     }
 
     if (error instanceof Error && error.message.includes("non trouvée")) {
-      return NextResponse.json({ success: false, message: error.message }, { status: 404 });
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 404 }
+      )
     }
 
     if (error instanceof Error && error.message.includes("invalide")) {
-      return NextResponse.json({ success: false, message: error.message }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 400 }
+      )
     }
 
     return NextResponse.json(
@@ -272,9 +324,9 @@ export const update = async (request: NextRequest, id: number): Promise<NextResp
         details: error instanceof Error ? error.message : "Erreur inconnue",
       },
       { status: 500 }
-    );
+    )
   }
-};
+}
 
 /**
  * Met à jour le statut d'une commande existante.
@@ -282,12 +334,15 @@ export const update = async (request: NextRequest, id: number): Promise<NextResp
  * @param {number} id - Identifiant de la commande à mettre à jour.
  * @returns {Promise<NextResponse>} Réponse JSON avec la commande mise à jour ou une erreur de validation.
  */
-export const updateStatus = async (request: NextRequest, id: number): Promise<NextResponse> => {
+export const updateStatus = async (
+  request: NextRequest,
+  id: number
+): Promise<NextResponse> => {
   try {
-    const body = await request.json();
+    const body = await request.json()
 
-    const { order_status } = statusSchema.parse(body);
-    const updatedOrder = await orderService.updateOrderStatus(id, order_status);
+    const { order_status } = statusSchema.parse(body)
+    const updatedOrder = await orderService.updateOrderStatus(id, order_status)
 
     return NextResponse.json(
       {
@@ -296,14 +351,17 @@ export const updateStatus = async (request: NextRequest, id: number): Promise<Ne
         order: updatedOrder,
       },
       { status: 200 }
-    );
+    )
   } catch (error) {
-    console.error(`Erreur lors de la mise à jour du statut de la commande ID ${id}:`, error);
+    console.error(
+      `Erreur lors de la mise à jour du statut de la commande ID ${id}:`,
+      error
+    )
 
     if (error instanceof ZodError) {
       const validationErrors = error.errors
-        .map((e) => `${e.path.join(".")}: ${e.message}`)
-        .join(", ");
+        .map(e => `${e.path.join(".")}: ${e.message}`)
+        .join(", ")
       return NextResponse.json(
         {
           success: false,
@@ -312,15 +370,21 @@ export const updateStatus = async (request: NextRequest, id: number): Promise<Ne
           details: validationErrors,
         },
         { status: 400 }
-      );
+      )
     }
 
     if (error instanceof Error && error.message.includes("non trouvée")) {
-      return NextResponse.json({ success: false, message: error.message }, { status: 404 });
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 404 }
+      )
     }
 
     if (error instanceof Error && error.message.includes("invalide")) {
-      return NextResponse.json({ success: false, message: error.message }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 400 }
+      )
     }
 
     return NextResponse.json(
@@ -330,34 +394,57 @@ export const updateStatus = async (request: NextRequest, id: number): Promise<Ne
         details: error instanceof Error ? error.message : "Erreur inconnue",
       },
       { status: 500 }
-    );
+    )
   }
-};
+}
 
 /**
  * Supprime une commande existante en fonction de son identifiant.
  * @param {number} id - Identifiant de la commande à supprimer.
  * @returns {Promise<NextResponse>} Réponse JSON avec un message de confirmation ou une erreur de validation.
  */
-export const remove = async (id: number): Promise<NextResponse> => {
+export const remove = async (
+  id: number,
+  userRole?: Role
+): Promise<NextResponse> => {
   try {
-    await orderService.deleteOrder(id);
+    // Vérification des permissions sauf pour SUPER_ADMIN
+    if (userRole !== Role.SUPER_ADMIN) {
+      const permissionCheck = await checkPermission("orders:delete")
+      if (permissionCheck) return permissionCheck
+    }
+
+    // Ajouter des logs
+    console.log(
+      `[OrderController] Tentative de suppression ID ${id}, role: ${userRole}`
+    )
+
+    await orderService.deleteOrder(id)
     return NextResponse.json(
       {
         success: true,
         message: `Commande ${id} supprimée avec succès`,
       },
       { status: 200 }
-    );
+    )
   } catch (error) {
-    console.error(`Erreur lors de la suppression de la commande ID ${id}:`, error);
+    console.error(
+      `Erreur lors de la suppression de la commande ID ${id}:`,
+      error
+    )
 
     if (error instanceof Error && error.message.includes("non trouvée")) {
-      return NextResponse.json({ success: false, message: error.message }, { status: 404 });
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 404 }
+      )
     }
 
     if (error instanceof Error && error.message.includes("invalide")) {
-      return NextResponse.json({ success: false, message: error.message }, { status: 400 });
+      return NextResponse.json(
+        { success: false, message: error.message },
+        { status: 400 }
+      )
     }
 
     if (
@@ -373,7 +460,7 @@ export const remove = async (id: number): Promise<NextResponse> => {
           details: error.message,
         },
         { status: 409 }
-      );
+      )
     }
 
     return NextResponse.json(
@@ -383,9 +470,9 @@ export const remove = async (id: number): Promise<NextResponse> => {
         details: error instanceof Error ? error.message : "Erreur inconnue",
       },
       { status: 500 }
-    );
+    )
   }
-};
+}
 
 /**
  * Récupère les commandes d'un utilisateur spécifique.
@@ -394,28 +481,31 @@ export const remove = async (id: number): Promise<NextResponse> => {
  */
 export const getUserOrders = async (id: string): Promise<NextResponse> => {
   if (!id) {
-    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    return NextResponse.json({ error: "User ID is required" }, { status: 400 })
   }
 
   try {
-    const orders = await orderService.getUserOrders(id);
+    const orders = await orderService.getUserOrders(id)
 
     if (orders.length === 0) {
-      return NextResponse.json({ error: "Aucune commande trouvée" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Aucune commande trouvée" },
+        { status: 404 }
+      )
     }
 
-    return NextResponse.json(orders, { status: 200 });
+    return NextResponse.json(orders, { status: 200 })
   } catch (error) {
-    console.error("OrderController Error fetching orders:", error);
+    console.error("OrderController Error fetching orders:", error)
     return NextResponse.json(
       {
         error: "Erreur lors de la récupération des commandes",
         details: error instanceof Error ? error.message : "Erreur inconnue",
       },
       { status: 500 }
-    );
+    )
   }
-};
+}
 
 /**
  * Récupère l'historique des commandes d'un utilisateur pour affichage.
@@ -428,48 +518,51 @@ export const getUserOrderHistoryForDisplay = async (
   req?: NextRequest
 ): Promise<NextResponse> => {
   if (!id) {
-    return NextResponse.json({ error: "User ID is required" }, { status: 400 });
+    return NextResponse.json({ error: "User ID is required" }, { status: 400 })
   }
 
   try {
-    const userId = parseInt(id);
+    const userId = parseInt(id)
     if (isNaN(userId) || userId <= 0) {
       return NextResponse.json(
         { error: "User ID must be a valid positive number" },
         { status: 400 }
-      );
+      )
     }
 
-    let filters;
+    let filters
     if (req) {
-      const url = new URL(req.url);
+      const url = new URL(req.url)
       filters = {
         year: url.searchParams.get("year") || undefined,
         categoryIds: url.searchParams.get("category_ids") || undefined,
         orderStatus: url.searchParams.get("order_status") || undefined,
         search: url.searchParams.get("search") || undefined,
         orderDate: url.searchParams.get("order_date") || undefined,
-      };
+      }
     }
 
-    const orders = await orderService.getUserOrderHistory(id, filters);
+    const orders = await orderService.getUserOrderHistory(id, filters)
 
     if (!orders || orders.length === 0) {
-      return NextResponse.json({ error: "Aucune commande trouvée" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Aucune commande trouvée" },
+        { status: 404 }
+      )
     }
 
-    return NextResponse.json(orders, { status: 200 });
+    return NextResponse.json(orders, { status: 200 })
   } catch (error) {
-    console.error("OrderController Error fetching order history:", error);
+    console.error("OrderController Error fetching order history:", error)
     return NextResponse.json(
       {
         error: "Erreur lors de la récupération de l'historique des commandes",
         details: error instanceof Error ? error.message : "Erreur inconnue",
       },
       { status: 500 }
-    );
+    )
   }
-};
+}
 
 const orderController = {
   createWithParams, // Nouvelle fonction pour ta route API
@@ -481,6 +574,6 @@ const orderController = {
   remove,
   getUserOrders,
   getUserOrderHistoryForDisplay,
-};
+}
 
-export default orderController;
+export default orderController
