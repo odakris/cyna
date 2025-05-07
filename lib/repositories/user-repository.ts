@@ -143,7 +143,7 @@ export const update = async (
           first_name: data.first_name.trim(),
           last_name: data.last_name.trim(),
           email: data.email.trim(),
-          password: data.password || userExists.password, // Utiliser l'ancien mot de passe si non fourni
+          password: data.password ?? userExists.password ?? "",
           role: data.role,
           email_verified: data.email_verified,
           two_factor_enabled: data.two_factor_enabled,

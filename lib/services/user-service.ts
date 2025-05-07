@@ -86,13 +86,27 @@ export const createUser = async (data: UserFormValues): Promise<User> => {
       )
     }
 
-    // Pour la création, on doit avoir un mot de passe
-    if (!data.password) {
+    // Déterminer s'il s'agit d'une création par un administrateur ou une inscription utilisateur
+    const isAdminCreation = true // Dans le contexte du backoffice, c'est toujours vrai
+
+    // Pour les créations par admin, le mot de passe est optionnel
+    // Mais pour l'inscription directe (route /api/register), il sera toujours requis
+    let hashedPassword: string
+
+    if (data.password) {
+      // Si un mot de passe est fourni, le hacher
+      hashedPassword = await bcrypt.hash(data.password, 10)
+    } else if (isAdminCreation) {
+      // Si c'est un admin qui crée l'utilisateur sans mot de passe,
+      // générer un mot de passe temporaire aléatoire
+      const temporaryPassword =
+        Math.random().toString(36).slice(-10) +
+        Math.random().toString(36).slice(-10)
+      hashedPassword = await bcrypt.hash(temporaryPassword, 10)
+    } else {
+      // Pour une inscription normale, le mot de passe est obligatoire
       throw new Error("Le mot de passe est requis pour créer un utilisateur")
     }
-
-    // Hasher le mot de passe
-    const hashedPassword = await bcrypt.hash(data.password, 10)
 
     // Créer l'utilisateur avec les données formatées
     const createData = {
@@ -149,7 +163,7 @@ export const updateUser = async (
     // Pour la mise à jour, traiter correctement le mot de passe
     // Si un mot de passe est fourni et non vide, le hasher
     // Sinon, utiliser le mot de passe actuel
-    let passwordToUse: string = currentUser.password
+    let passwordToUse: string = currentUser.password ?? ""
     if (data.password && data.password.trim() !== "") {
       passwordToUse = await bcrypt.hash(data.password, 10)
     }
