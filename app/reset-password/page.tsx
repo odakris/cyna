@@ -415,6 +415,15 @@ const ResetPasswordPage = () => {
                             >
                               Au moins un chiffre
                             </li>
+                            <li
+                              className={
+                                /[@$!%*?&]/.test(field.value)
+                                  ? "text-green-600"
+                                  : ""
+                              }
+                            >
+                              Au moins un caractère spécial
+                            </li>
                           </ul>
                         </div>
                         <FormMessage className="text-xs" />

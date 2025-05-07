@@ -17,11 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { Save, InfoIcon, AlertCircle } from "lucide-react"
-import {
-  userFormSchema,
-  UserFormValues,
-  userCreateSchema,
-} from "@/lib/validations/user-schema"
+import { userFormSchema, UserFormValues } from "@/lib/validations/user-schema"
 import { UserFormSkeleton } from "@/components/Skeletons/UserSkeletons"
 import UserFormHeader from "@/components/Admin/Users/Form/UserFormHeader"
 import UserFormBasicInfo from "@/components/Admin/Users/Form/UserFormBasicInfo"
@@ -53,8 +49,8 @@ export default function UserForm({ userId }: UserFormPageProps) {
     isEditing,
   } = useUserForm(userId)
 
-  // Utiliser le schéma de validation approprié (avec ou sans mot de passe requis)
-  const validationSchema = isEditing ? userFormSchema : userCreateSchema
+  // Utiliser le schéma de validation approprié (sans mot de passe requis)
+  const validationSchema = userFormSchema
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(validationSchema),
