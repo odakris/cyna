@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
+import { orderConfirmationEmailService } from "../../../../lib/services/email-order-confirmation-service";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2024-10-28.acacia",
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
     console.log("[API Checkout] Récupération de PaymentInfo pour paymentId:", paymentId);
     const paymentInfo = await prisma.paymentInfo.findUnique({
       where: { id_payment_info: parseInt(paymentId) },
-      select: { id_user: true, stripe_payment_id: true, stripe_customer_id: true },
+      select: { id_user: true, stripe_payment_id: true, stripe_customer_id: true, last_card_digits: true },
     });
 
     if (!paymentInfo || !paymentInfo.stripe_payment_id || !paymentInfo.stripe_customer_id) {
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
     console.log("[API Checkout] Récupération de l'utilisateur pour userId:", userId || guestId);
     const user = await prisma.user.findUnique({
       where: { id_user: userId || guestId },
-      select: { stripeCustomerId: true },
+      select: { stripeCustomerId: true, email: true, first_name: true },
     });
 
     if (!user) {
@@ -107,11 +108,20 @@ export async function POST(req: NextRequest) {
     }
     console.log("[API Checkout] id_payment_info validé:", paymentId);
 
-    // Vérifier que l'adresse existe
+    // Vérifier que l'adresse existe et récupérer ses détails
     console.log("[API Checkout] Récupération de l'adresse pour addressId:", addressId);
     const address = await prisma.address.findUnique({
       where: { id_address: parseInt(addressId) },
-      select: { id_user: true },
+      select: {
+        id_user: true,
+        address1: true,
+        address2: true,
+        city: true,
+        postal_code: true,
+        country: true,
+        first_name: true,
+        last_name: true,
+      },
     });
 
     if (!address || ((userId || guestId) && address.id_user !== (userId || guestId))) {
@@ -207,7 +217,7 @@ export async function POST(req: NextRequest) {
         enabled: true,
         allow_redirects: "never",
       },
-      metadata: { userId: (userId || guestId).toString() },
+      metadata: { userId: (userId || guestId).toString(), guestEmail: guestEmail || undefined },
     });
 
     console.log("[API Checkout] PaymentIntent créé:", {
@@ -239,8 +249,46 @@ export async function POST(req: NextRequest) {
     console.log("[API Checkout] Exécution de prisma.order.create...");
     const order = await prisma.order.create({
       data: orderData,
+      include: { order_items: true, address: true },
     });
     console.log("[API Checkout] Commande créée:", { id_order: order.id_order });
+
+    // Envoyer l'email de confirmation
+    const emailToSend = user.email || guestEmail;
+    if (!emailToSend) {
+      console.warn("[API Checkout] Aucun email disponible pour envoyer la confirmation:", { userId: userId || guestId });
+    } else {
+      const emailSent = await orderConfirmationEmailService.sendOrderConfirmationEmail({
+        orderId: order.id_order,
+        userId: userId || guestId,
+        email: emailToSend,
+        firstName: user.first_name || undefined,
+        orderItems: order.order_items.map(item => ({
+          id_product: item.id_product,
+          quantity: item.quantity,
+          unit_price: item.unit_price,
+          subscription_type: item.subscription_type,
+        })),
+        totalAmount: order.total_amount,
+        address: {
+          address1: order.address.address1,
+          address2: order.address.address2 || undefined,
+          city: order.address.city,
+          postal_code: order.address.postal_code,
+          country: order.address.country,
+          first_name: order.address.first_name,
+          last_name: order.address.last_name,
+        },
+        invoiceNumber: order.invoice_number,
+        orderDate: order.order_date,
+      });
+
+      if (emailSent) {
+        console.log("[API Checkout] Email de confirmation envoyé avec succès:", { orderId: order.id_order, email: emailToSend });
+      } else {
+        console.warn("[API Checkout] Échec de l'envoi de l'email de confirmation:", { orderId: order.id_order, email: emailToSend });
+      }
+    }
 
     console.log("[API Checkout] Paiement réussi:", {
       orderId: order.id_order,

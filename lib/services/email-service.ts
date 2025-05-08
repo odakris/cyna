@@ -7,6 +7,7 @@ export type EmailType =
   | "resetPassword"
   | "emailChange"
   | "generic"
+  | "orderConfirmation"
 
 // Structure commune pour les emails
 interface BaseEmailProps {
@@ -15,8 +16,6 @@ interface BaseEmailProps {
 }
 
 // Props spécifiques pour chaque type d'email
-// Removed WelcomeEmailProps as it is equivalent to BaseEmailProps
-
 interface VerificationEmailProps extends BaseEmailProps {
   verificationLink: string
 }
@@ -37,6 +36,32 @@ interface GenericEmailProps extends BaseEmailProps {
   actionText?: string
 }
 
+interface OrderConfirmationEmailProps extends BaseEmailProps {
+  orderDetails: {
+    orderId: number
+    orderDate: string
+    invoiceNumber: string
+    items: Array<{
+      name: string
+      quantity: number
+      unitPrice: number
+      subscriptionType: string
+      total: number
+    }>
+    totalAmount: number
+    shippingAddress: {
+      firstName: string
+      lastName: string
+      address1: string
+      address2?: string
+      city: string
+      postalCode: string
+      country: string
+    }
+    testModeNote?: string // Ajout pour le mode test
+  }
+}
+
 // Type union pour tous les types d'emails
 export type EmailProps =
   | (BaseEmailProps & { type: "welcome" })
@@ -44,6 +69,7 @@ export type EmailProps =
   | (ResetPasswordEmailProps & { type: "resetPassword" })
   | (EmailChangeProps & { type: "emailChange" })
   | (GenericEmailProps & { type: "generic" })
+  | (OrderConfirmationEmailProps & { type: "orderConfirmation" })
 
 // Paramètres avancés d'email (optionnels)
 export interface EmailOptions {
@@ -176,6 +202,19 @@ class EmailService {
             firstName,
             props.message,
             props.actionLink
+          ),
+        }
+
+      case "orderConfirmation":
+        return {
+          subject: `Confirmation de votre commande #${props.orderDetails.orderId} | ${CONFIG.appName}`,
+          html: this.getOrderConfirmationEmailHtml(
+            firstName,
+            props.orderDetails
+          ),
+          text: this.getOrderConfirmationEmailText(
+            firstName,
+            props.orderDetails
           ),
         }
 
@@ -407,6 +446,99 @@ class EmailService {
     `
   }
 
+  private getOrderConfirmationEmailHtml(
+    firstName: string,
+    orderDetails: OrderConfirmationEmailProps['orderDetails']
+  ): string {
+    const itemsHtml = orderDetails.items
+      .map(
+        item => `
+      <tr>
+        <td style="padding: 10px; border-bottom: 1px solid #eee;">${item.name}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.unitPrice.toFixed(2)} €</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">${item.subscriptionType}</td>
+        <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">${item.total.toFixed(2)} €</td>
+      </tr>
+    `
+      )
+      .join('')
+
+    const address2Html = orderDetails.shippingAddress.address2
+      ? `<p>${orderDetails.shippingAddress.address2}</p>`
+      : ''
+
+    const testModeNoteHtml = orderDetails.testModeNote
+      ? orderDetails.testModeNote
+      : ''
+
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Confirmation de commande #${orderDetails.orderId}</title>
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background-color: #302082; color: white; padding: 20px; text-align: center; }
+          .content { padding: 20px; }
+          .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #999; }
+          .button { display: inline-block; background-color: #FF6B00; color: white; text-decoration: none; padding: 10px 20px; border-radius: 4px; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+          th, td { padding: 10px; text-align: left; }
+          th { background-color: #f5f5f5; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>Confirmation de commande #${orderDetails.orderId}</h1>
+          </div>
+          <div class="content">
+            ${testModeNoteHtml}
+            <p>Bonjour ${firstName},</p>
+            <p>Merci pour votre commande sur ${CONFIG.appName}. Voici les détails de votre commande :</p>
+            <h3>Détails de la commande</h3>
+            <p><strong>Numéro de commande :</strong> ${orderDetails.invoiceNumber}</p>
+            <p><strong>Date de commande :</strong> ${new Date(orderDetails.orderDate).toLocaleDateString()}</p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Produit</th>
+                  <th style="text-align: center;">Quantité</th>
+                  <th style="text-align: right;">Prix unitaire</th>
+                  <th style="text-align: center;">Type</th>
+                  <th style="text-align: right;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${itemsHtml}
+              </tbody>
+            </table>
+            <p><strong>Total :</strong> ${orderDetails.totalAmount.toFixed(2)} €</p>
+            <h3>Adresse de livraison</h3>
+            <p>${orderDetails.shippingAddress.firstName} ${orderDetails.shippingAddress.lastName}</p>
+            <p>${orderDetails.shippingAddress.address1}</p>
+            ${address2Html}
+            <p>${orderDetails.shippingAddress.city}, ${orderDetails.shippingAddress.postalCode}</p>
+            <p>${orderDetails.shippingAddress.country}</p>
+            <p style="text-align: center; margin: 30px 0;">
+              <a href="${CONFIG.appUrl}/orders" class="button">Voir mes commandes</a>
+            </p>
+            <p>Si vous avez des questions, n'hésitez pas à nous contacter.</p>
+            <p>Cordialement,</p>
+            <p>L'équipe ${CONFIG.appName}</p>
+          </div>
+          <div class="footer">
+            <p>Cet email a été envoyé automatiquement, merci de ne pas y répondre.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `
+  }
+
   // Versions texte simple des emails pour les clients qui ne supportent pas le HTML
   private getWelcomeEmailText(firstName: string): string {
     return `
@@ -511,6 +643,61 @@ Bonjour ${firstName},
 
 ${message}
 ${actionSection}
+Cordialement,
+L'équipe ${CONFIG.appName}
+
+Cet email a été envoyé automatiquement, merci de ne pas y répondre.
+    `
+  }
+
+  private getOrderConfirmationEmailText(
+    firstName: string,
+    orderDetails: OrderConfirmationEmailProps['orderDetails']
+  ): string {
+    const itemsText = orderDetails.items
+      .map(
+        item =>
+          `- ${item.name}: ${item.quantity} x ${item.unitPrice.toFixed(2)} € (${item.subscriptionType}) = ${item.total.toFixed(2)} €`
+      )
+      .join('\n')
+
+    const address2Text = orderDetails.shippingAddress.address2
+      ? `${orderDetails.shippingAddress.address2}\n`
+      : ''
+
+    const testModeNoteText = orderDetails.testModeNote
+      ? `${orderDetails.testModeNote.replace(/<[^>]+>/g, '')}\n\n`
+      : ''
+
+    return `
+Confirmation de commande #${orderDetails.orderId} - ${CONFIG.appName}
+
+${testModeNoteText}Bonjour ${firstName},
+
+Merci pour votre commande sur ${CONFIG.appName}. Voici les détails de votre commande :
+
+Détails de la commande
+---------------------
+Numéro de commande : ${orderDetails.invoiceNumber}
+Date de commande : ${new Date(orderDetails.orderDate).toLocaleDateString()}
+
+Articles :
+${itemsText}
+
+Total : ${orderDetails.totalAmount.toFixed(2)} €
+
+Adresse de livraison
+--------------------
+${orderDetails.shippingAddress.firstName} ${orderDetails.shippingAddress.lastName}
+${orderDetails.shippingAddress.address1}
+${address2Text}${orderDetails.shippingAddress.city}, ${orderDetails.shippingAddress.postalCode}
+${orderDetails.shippingAddress.country}
+
+Vous pouvez consulter vos commandes ici :
+${CONFIG.appUrl}/orders
+
+Si vous avez des questions, n'hésitez pas à nous contacter.
+
 Cordialement,
 L'équipe ${CONFIG.appName}
 
