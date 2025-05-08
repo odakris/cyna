@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { emailService } from "@/lib/services/email-service"
 import crypto from "crypto"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 
 class PasswordResetService {
   /**

@@ -1,7 +1,7 @@
 import { User } from "@prisma/client"
 import userRepository from "../repositories/user-repository"
 import { UserFormValues } from "../validations/user-schema"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 
 /**
  * Récupère la liste complète des utilisateurs depuis le dépôt de données.
@@ -160,15 +160,18 @@ export const updateUser = async (
       }
     }
 
-    // Pour la mise à jour, traiter correctement le mot de passe
-    // Si un mot de passe est fourni et non vide, le hasher
-    // Sinon, utiliser le mot de passe actuel
+    // Traiter le mot de passe
     let passwordToUse: string = currentUser.password ?? ""
     if (data.password && data.password.trim() !== "") {
-      passwordToUse = await bcrypt.hash(data.password, 10)
+      // Vérifier si le mot de passe soumis est différent de l'ancien
+      const isSamePassword = await bcrypt.compare(data.password, currentUser.password ?? "")
+      if (!isSamePassword) {
+        // Hacher le mot de passe seulement s'il est différent
+        passwordToUse = await bcrypt.hash(data.password, 10)
+      }
     }
 
-    // Créer un nouvel objet pour la mise à jour avec le bon type pour password
+    // Créer un nouvel objet pour la mise à jour
     const updateData = {
       ...data,
       password: passwordToUse,
@@ -177,7 +180,6 @@ export const updateUser = async (
     return await userRepository.update(id, updateData)
   } catch (error) {
     if (error instanceof Error) {
-      // Si c'est une erreur spécifique concernant un email déjà utilisé
       if (
         error.message.includes("utilise déjà") ||
         error.message.includes("n'existe pas")

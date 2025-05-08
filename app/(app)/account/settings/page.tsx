@@ -457,9 +457,10 @@ export default function AccountSettingsPage() {
                         <DialogHeader>
                           <DialogTitle>Confirmer la suppression</DialogTitle>
                           <DialogDescription>
-                            Êtes-vous sûr de vouloir supprimer l&apos;adresse &quot;
-                            {address.address1}, {address.city}&quot; ? Cette action
-                            est irréversible.
+                            Êtes-vous sûr de vouloir supprimer l&apos;adresse
+                            &quot;
+                            {address.address1}, {address.city}&quot; ? Cette
+                            action est irréversible.
                           </DialogDescription>
                         </DialogHeader>
                         {modalError && (

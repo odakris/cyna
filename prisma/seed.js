@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid"
 
 const prisma = new PrismaClient()
 
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 
 // Fonction utilitaire pour générer des dates récentes
 const getRecentDate = daysAgo => {

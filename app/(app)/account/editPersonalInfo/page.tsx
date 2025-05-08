@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react"
 import PersonalInfoForm from "@/components/Account/PersonalInfoForm"
+import { useEffect, useState } from "react"
 
 type User = {
   id_user: number
@@ -12,9 +13,42 @@ type User = {
 
 export default function EditPersonalInfoPage() {
   const { data: session, status } = useSession()
+  const [user, setUser] = useState<User | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-  if (status === "loading") {
-    return <div className="py-10 text-center">Chargement de la session...</div>
+  useEffect(() => {
+    if (!session?.user?.id_user) return
+
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch(`/api/users/${session.user.id_user}`, {
+          credentials: "include",
+        })
+
+        if (!response.ok) {
+          throw new Error(
+            "Erreur lors de la récupération des données utilisateur"
+          )
+        }
+
+        const userData = await response.json()
+        setUser({
+          id_user: userData.id_user,
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          email: userData.email,
+        })
+      } catch (err) {
+        setError("Une erreur est survenue lors du chargement des données.")
+        console.error(err)
+      }
+    }
+
+    fetchUserData()
+  }, [session])
+
+  if (status === "loading" || !user) {
+    return <div className="py-10 text-center">Chargement...</div>
   }
 
   if (!session?.user) {
@@ -25,11 +59,8 @@ export default function EditPersonalInfoPage() {
     )
   }
 
-  const user: User = {
-    id_user: session.user.id_user,
-    first_name: session.user.first_name,
-    last_name: session.user.last_name,
-    email: session.user.email,
+  if (error) {
+    return <div className="py-10 text-center text-red-500">{error}</div>
   }
 
   return (

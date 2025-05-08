@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { PrismaClient, Role } from "@prisma/client"
-import bcrypt from "bcrypt"
+import bcrypt from "bcryptjs"
 import { registerApiSchema } from "@/lib/validations/register-schema"
 import Stripe from "stripe"
 import { emailVerificationService } from "@/lib/services/email-verification-service"
