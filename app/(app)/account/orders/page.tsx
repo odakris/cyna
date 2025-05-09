@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
-import { format, parse } from "date-fns"
+import { format, parse, isValid } from "date-fns"
 import { fr } from "date-fns/locale"
 
 type OrderItem = {
@@ -71,16 +71,6 @@ export default function OrdersPage() {
         const res = await fetch("/api/categories")
         const data = await res.json()
         if (res.ok) {
-          const ids = data.map(
-            (cat: { id_category: number }) => cat.id_category
-          )
-          const uniqueIds = new Set(ids)
-          if (ids.length !== uniqueIds.size) {
-            console.error(
-              "Erreur : Les ID des catégories ne sont pas uniques",
-              data
-            )
-          }
           const validCategories = data
             .filter(
               (cat: { id_category: number; name: string }) =>
@@ -142,34 +132,56 @@ export default function OrdersPage() {
         if (selectedCategoryIds.length > 0) {
           params.append("category_ids", selectedCategoryIds.join(","))
         }
-        if (selectedStatus.length > 0)
+        if (selectedStatus.length > 0) {
           params.append("order_status", selectedStatus.join(","))
+        }
 
         // Gestion de la recherche
         if (search) {
-          const dateFormats = [
-            "dd/MM/yyyy",
-            "dd MMMM yyyy",
-            "MMMM yyyy",
-            "yyyy",
+          // Nettoyer la saisie
+          const cleanedSearch = search.trim().toLowerCase()
+
+          // Essayer de parser comme une date ou des composants de date
+          const datePatterns = [
+            { pattern: "d MMMM yyyy", example: "9 mai 2025" },
+            { pattern: "d/M/yyyy", example: "9/5/2025" },
+            { pattern: "d MMMM", example: "9 mai" },
+            { pattern: "MMMM yyyy", example: "mai 2025" },
+            { pattern: "yyyy", example: "2025" },
+            { pattern: "MMMM", example: "mai" },
+            { pattern: "d", example: "9" },
           ]
 
           let parsedDate: Date | null = null
-          for (const dateFormat of dateFormats) {
+          let matchedPattern: string | null = null
+
+          for (const { pattern } of datePatterns) {
             try {
-              parsedDate = parse(search, dateFormat, new Date(), { locale: fr })
-              if (!isNaN(parsedDate.getTime())) break
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              parsedDate = parse(cleanedSearch, pattern, new Date(), {
+                locale: fr,
+              })
+              if (isValid(parsedDate)) {
+                matchedPattern = pattern
+                break
+              }
             } catch (e) {
               continue
             }
           }
 
-          if (parsedDate && !isNaN(parsedDate.getTime())) {
-            const formattedDate = format(parsedDate, "yyyy-MM-dd")
-            params.append("order_date", formattedDate)
+          if (parsedDate && isValid(parsedDate) && matchedPattern) {
+            if (matchedPattern.includes("yyyy")) {
+              params.append("year", parsedDate.getFullYear().toString())
+            }
+            if (matchedPattern.includes("MMMM")) {
+              params.append("month", (parsedDate.getMonth() + 1).toString())
+            }
+            if (matchedPattern.includes("d")) {
+              params.append("day", parsedDate.getDate().toString())
+            }
           } else {
-            params.append("search", search)
+            // Si ce n'est pas une date, considérer comme un nom de service
+            params.append("service_name", cleanedSearch)
           }
         }
 
@@ -318,11 +330,11 @@ export default function OrdersPage() {
 
         <div>
           <label className="font-semibold block mb-1 text-sm">
-            Rechercher par nom de service ou date (ex: 12/05/2024) :
+            Rechercher par date (ex: 9 mai, avril, mai 2025) :
           </label>
           <input
             type="text"
-            placeholder="Nom de service ou date (ex: 12/05/2024)"
+            placeholder="Date (ex: 9 mai, mai 2025)"
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="border border-gray-300 rounded px-2 py-1 w-full text-sm"

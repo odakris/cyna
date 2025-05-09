@@ -3,7 +3,7 @@ import { AddressController } from "@/lib/controllers/AddressController";
 
 export async function GET(req: NextRequest, { params }: { params: { id: string, id_address?: string } }) {
   try {
-    const { id, id_address } = params;
+    const { id, id_address } = await params;
     console.log("[Route GET /api/users/[id]/addresses] Appel avec userId:", id, "id_address:", id_address);
 
     if (!id) {

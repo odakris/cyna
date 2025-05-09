@@ -535,10 +535,11 @@ export const getUserOrderHistoryForDisplay = async (
       const url = new URL(req.url)
       filters = {
         year: url.searchParams.get("year") || undefined,
+        day: url.searchParams.get("day") || undefined,
+        month: url.searchParams.get("month") || undefined,
         categoryIds: url.searchParams.get("category_ids") || undefined,
         orderStatus: url.searchParams.get("order_status") || undefined,
-        search: url.searchParams.get("search") || undefined,
-        orderDate: url.searchParams.get("order_date") || undefined,
+        service_name: url.searchParams.get("service_name") || undefined,
       }
     }
 
@@ -563,6 +564,7 @@ export const getUserOrderHistoryForDisplay = async (
     )
   }
 }
+
 
 const orderController = {
   createWithParams, // Nouvelle fonction pour ta route API
