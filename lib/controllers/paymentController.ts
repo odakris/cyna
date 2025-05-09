@@ -127,6 +127,7 @@ export const paymentController = {
           brand,
           exp_month,
           exp_year,
+          is_default = false,
         } = body;
 
         // Valider les données
@@ -196,6 +197,20 @@ export const paymentController = {
           );
         }
 
+        // Si is_default est true, désactiver is_default pour les autres méthodes de paiement
+        if (is_default) {
+          await prisma.paymentInfo.updateMany({
+            where: {
+              id_user: userId,
+              is_default: true,
+            },
+            data: {
+              is_default: false,
+            },
+          })
+          console.log("[PaymentController createPaymentMethod] Autres méthodes par défaut désactivées pour userId:", userId)
+        }
+
         // Préparer les données pour paymentService.addPayment
         const paymentData = {
           card_name,
@@ -205,6 +220,7 @@ export const paymentController = {
           brand,
           exp_month: exp_month || null,
           exp_year: exp_year || null,
+          is_default,
         };
 
         // Créer le PaymentInfo via paymentService
@@ -213,6 +229,7 @@ export const paymentController = {
           id_payment_info: newPayment.id_payment_info,
           stripe_payment_id,
           stripe_customer_id: stripeCustomerId,
+          is_default,
         });
 
         return NextResponse.json(newPayment, { status: 201 });
