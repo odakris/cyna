@@ -96,9 +96,10 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string, 
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string, id_address?: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id, id_address } = params;
+    const { id } = await params;
+    const id_address = req.nextUrl.searchParams.get('addressId');
     console.log("[Route DELETE /api/users/[id]/addresses] Appel avec userId:", id, "id_address:", id_address);
 
     if (!id || !id_address) {
