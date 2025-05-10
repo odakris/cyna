@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Elements, useStripe } from '@stripe/react-stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Card,
@@ -52,13 +52,12 @@ function ConfirmationContent() {
   const { cart, setCart } = useCart();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const stripe = useStripe();
   const [address, setAddress] = useState<Address | null>(null);
   const [paymentInfo, setPaymentInfo] = useState<PaymentInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [invoiceUrl, setInvoiceUrl] = useState<string | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const addressId = searchParams.get('addressId');
   const paymentId = searchParams.get('paymentId');
@@ -95,24 +94,48 @@ function ConfirmationContent() {
         throw new Error('addressId ou paymentId manquant dans les paramètres URL');
       }
 
-      // Vérifier localStorage pour le mode invité
+      // Mode invité
       if (!session) {
         console.log('[Confirmation] Mode invité, vérification de localStorage');
         const guestAddresses = JSON.parse(localStorage.getItem('guestAddresses') || '[]');
         const guestPayments = JSON.parse(localStorage.getItem('guestPaymentInfos') || '[]');
 
-        console.log('[Confirmation] Contenu de guestPaymentInfos:', guestPayments);
+        console.log('[Confirmation] guestAddresses:', guestAddresses);
+        console.log('[Confirmation] guestPaymentInfos:', guestPayments);
 
-        const addressData = guestAddresses.find((addr: Address) => addr.id_address === addressId);
-        const paymentData = guestPayments.find((pay: PaymentInfo) => pay.id_payment_info === paymentId);
+        // Décryptage des données invité
+        const decryptResponse = await fetch('/api/guest/decrypt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ addresses: guestAddresses, payments: guestPayments }),
+        });
 
-        console.log('[Confirmation] Données invité', { addressData, paymentData });
+        if (!decryptResponse.ok) {
+          const errorText = await decryptResponse.text();
+          throw new Error(`Échec du déchiffrement des données invité: ${errorText}`);
+        }
+
+        const { addresses: decryptedAddresses, payments: decryptedPayments } = await decryptResponse.json();
+        console.log('[Confirmation] Données déchiffrées:', { decryptedAddresses, decryptedPayments });
+
+        const addressData = decryptedAddresses.find((addr: Address) => addr.id_address === addressId);
+        const paymentData = decryptedPayments.find((pay: PaymentInfo) => pay.id_payment_info === paymentId);
+
+        console.log('[Confirmation] Données invité trouvées:', { addressData, paymentData });
 
         if (!addressData) {
-          throw new Error('Adresse introuvable dans localStorage');
+          throw new Error('Adresse introuvable dans les données déchiffrées');
         }
         if (!paymentData) {
           throw new Error(`Moyen de paiement introuvable pour paymentId: ${paymentId}`);
+        }
+
+        // Vérifier les champs critiques
+        if (addressData.first_name.includes(':')) {
+          console.warn('[Confirmation] first_name non déchiffré:', addressData.first_name);
+        }
+        if (paymentData.card_name.includes(':')) {
+          console.warn('[Confirmation] card_name non déchiffré:', paymentData.card_name);
         }
 
         setAddress(addressData);
@@ -125,16 +148,16 @@ function ConfirmationContent() {
         throw new Error('ID utilisateur manquant dans la session');
       }
 
-      const headers = { 'x-user-id': session.user.id_user.toString() };
+      const headers = { 'x-user-id': session.user.id_user.toString(), 'Content-Type': 'application/json' };
       console.log('[Confirmation] Envoi des requêtes API', {
-        addressUrl: `/api/users/addresses?addressId=${addressId}`,
-        paymentUrl: `/api/users/payment-infos?paymentId=${paymentId}`,
+        addressUrl: `/api/users/${session.user.id_user}/addresses/${addressId}`,
+        paymentUrl: `/api/users/${session.user.id_user}/payments/${paymentId}`,
         headers,
       });
 
       const [addressResponse, paymentResponse] = await Promise.all([
-        fetch(`/api/users/addresses?addressId=${addressId}`, { headers, credentials: 'include' }),
-        fetch(`/api/users/payment-infos?paymentId=${paymentId}`, { headers, credentials: 'include' }),
+        fetch(`/api/users/${session.user.id_user}/addresses/${addressId}`, { headers, credentials: 'include' }),
+        fetch(`/api/users/${session.user.id_user}/payments/${paymentId}`, { headers, credentials: 'include' }),
       ]);
 
       console.log('[Confirmation] Réponses API', {
@@ -155,37 +178,47 @@ function ConfirmationContent() {
       const paymentData = await paymentResponse.json();
       console.log('[Confirmation] Données récupérées', { addressData, paymentData });
 
+      if (addressData.first_name.includes(':')) {
+        console.warn('[Confirmation] first_name non déchiffré:', addressData.first_name);
+      }
+      if (paymentData.card_name.includes(':')) {
+        console.warn('[Confirmation] card_name non déchiffré:', paymentData.card_name);
+      }
+
       setAddress(addressData);
       setPaymentInfo(paymentData);
     } catch (err) {
-      console.error('[Confirmation] Erreur dans fetchData', err);
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+      console.error('[Confirmation] Erreur dans fetchData', {
+        message: err.message,
+        stack: err.stack,
+      });
+      setError(err instanceof Error ? err.message : 'Échec du chargement des données. Veuillez réessayer.');
     } finally {
       setLoading(false);
       console.log('[Confirmation] Fin de fetchData', { loading: false, address: !!address, paymentInfo: !!paymentInfo, cartLength: cart.length });
     }
   };
 
-  const initiatePayment = async () => {
-    console.log('[Confirmation] Début de initiatePayment', { finalTotal, addressId, paymentId });
-
-    // Validation de paymentId
-    if (!paymentId || typeof paymentId !== 'string' || paymentId.trim() === '') {
-      console.error('[Confirmation] paymentId invalide:', paymentId);
-      setError('L’identifiant de paiement est requis et doit être une chaîne non vide');
-      router.push(`/checkout?error=${encodeURIComponent('Identifiant de paiement invalide')}`);
+  const handleConfirmPurchase = async () => {
+    if (isProcessing) {
+      console.log('[Confirmation] handleConfirmPurchase déjà en cours, ignoré');
       return;
     }
 
-    // Pour les utilisateurs connectés, paymentId doit être numérique
-    if (session && isNaN(parseInt(paymentId))) {
-      console.error('[Confirmation] paymentId non numérique pour utilisateur connecté:', paymentId);
-      setError('L’identifiant de paiement doit être numérique pour les utilisateurs connectés');
-      router.push(`/checkout?error=${encodeURIComponent('Identifiant de paiement non numérique')}`);
-      return;
-    }
+    console.log('[Confirmation] Début de handleConfirmPurchase', { totalCartPrice, taxes, addressId, paymentId });
+    setIsProcessing(true);
 
     try {
+      if (!paymentId || typeof paymentId !== 'string' || paymentId.trim() === '') {
+        console.error('[Confirmation] paymentId invalide:', paymentId);
+        throw new Error('L’identifiant de paiement est requis et doit être une chaîne non vide');
+      }
+
+      if (session && isNaN(parseInt(paymentId))) {
+        console.error('[Confirmation] paymentId non numérique pour utilisateur connecté:', paymentId);
+        throw new Error('L’identifiant de paiement doit être numérique pour les utilisateurs connectés');
+      }
+
       const guestUserId = localStorage.getItem('guestUserId');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
@@ -200,77 +233,142 @@ function ConfirmationContent() {
         throw new Error('Aucun ID utilisateur ou invité disponible');
       }
 
+      // Standardiser les cartItems pour inclure subscription_type
+      const validSubscriptions = ['MONTHLY', 'YEARLY', 'PER_USER', 'PER_MACHINE'];
+      const formattedCartItems = cart.map(item => ({
+        ...item,
+        subscription_type: validSubscriptions.includes(item.subscription || 'MONTHLY')
+          ? item.subscription || 'MONTHLY'
+          : 'MONTHLY',
+      }));
+
+      console.log('[Confirmation] Envoi à /api/checkout', {
+        cartItems: formattedCartItems,
+        addressId,
+        paymentId,
+        totalAmount: totalCartPrice,
+        taxes,
+      });
+
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers,
         body: JSON.stringify({
-          cartItems: cart,
+          cartItems: formattedCartItems,
           addressId,
           paymentId,
-          totalAmount: finalTotal,
+          totalAmount: totalCartPrice,
+          taxes,
         }),
       });
 
-      console.log('[Confirmation] Statut de la réponse /api/checkout:', response.status);
+      console.log('[Confirmation] /api/checkout response:', {
+        status: response.status,
+        statusText: response.statusText,
+      });
 
       if (!response.ok) {
         let errorMessage = `Erreur serveur: ${response.statusText}`;
         try {
           const errorData = await response.json();
           console.error('[Confirmation] Détails de l’erreur serveur:', errorData);
-          errorMessage = errorData.error || response.statusText;
+          errorMessage = errorData.message || errorData.error || response.statusText;
         } catch (jsonError) {
           console.error('[Confirmation] Impossible de parser la réponse:', jsonError);
           if (response.status === 405) {
             errorMessage = 'Méthode non autorisée. Veuillez réessayer ou contacter le support.';
           }
         }
-        throw new Error(`Erreur lors de l’initialisation du paiement: ${errorMessage}`);
+        throw new Error(`Échec de l’initialisation du paiement: ${errorMessage}`);
       }
 
       const data = await response.json();
-      console.log('[Confirmation] Données reçues du serveur', data);
+      console.log('[Confirmation] Données reçues de /api/checkout:', data);
 
-      if (!data.clientSecret) {
-        throw new Error('Le clientSecret est manquant dans la réponse du serveur');
+      if (!data.orderId || !data.status) {
+        console.error('[Confirmation] orderId ou status manquant dans la réponse:', data);
+        throw new Error('Réponse du serveur invalide');
       }
 
-      setClientSecret(data.clientSecret);
-      console.log('[Confirmation] ClientSecret défini', { clientSecret: data.clientSecret });
+      console.log('[Confirmation] orderId défini:', data.orderId);
+
+      if (data.status === 'succeeded') {
+        console.log('[Confirmation] Paiement réussi, finalisation:', { orderId: data.orderId });
+        await finalizeOrder(data.orderId);
+      } else {
+        console.error('[Confirmation] Statut de paiement inattendu:', data.status);
+        throw new Error(`Statut de paiement inattendu: ${data.status}`);
+      }
     } catch (err) {
-      console.error('[Confirmation] Erreur dans initiatePayment', err);
+      console.error('[Confirmation] Erreur dans handleConfirmPurchase:', {
+        message: err.message,
+        stack: err.stack,
+      });
       setError(err instanceof Error ? err.message : 'Erreur réseau');
+      router.push(`/checkout?error=${encodeURIComponent(err.message || 'Une erreur est survenue lors du paiement')}`);
+    } finally {
+      setIsProcessing(false);
+      console.log('[Confirmation] handleConfirmPurchase terminé:', { isProcessing: false, error });
     }
   };
 
-  useEffect(() => {
-    console.log('[Confirmation] useEffect principal', { status, addressId, paymentId, cartLength: cart.length, session });
-    if (status === 'loading') {
-      console.log('[Confirmation] Session en cours de chargement');
-      return;
-    }
+  const finalizeOrder = async (orderId: string) => {
+    console.log('[Confirmation] Début de finalizeOrder:', { orderId });
+    try {
+      console.log('[Confirmation] Envoi de l’email de confirmation:', {
+        to: session?.user?.email || localStorage.getItem('guestEmail'),
+        orderId,
+      });
 
-    if (!session && !localStorage.getItem('guestUserId')) {
-      console.log('[Confirmation] Redirection vers auth');
-      router.push('/auth?redirect=/checkout/confirmation');
-      return;
-    }
+      const emailResponse = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: session?.user?.email || localStorage.getItem('guestEmail'),
+          subject: `Confirmation de votre commande #${orderId}`,
+          html: `
+            <h1>Merci pour votre commande !</h1>
+            <p>Votre commande #${orderId} a été confirmée.</p>
+            <p>Montant total: ${finalTotal.toFixed(2)} €</p>
+            <p>Consultez votre facture dans votre espace client.</p>
+          `,
+        }),
+      });
 
-    if (!addressId || !paymentId) {
-      console.log('[Confirmation] Redirection vers checkout avec erreur');
-      router.push('/checkout?error=Missing%20addressId%20or%20paymentId');
-      return;
-    }
+      console.log('[Confirmation] Réponse email:', {
+        status: emailResponse.status,
+        ok: emailResponse.ok,
+      });
 
-    fetchData();
-  }, [session, status, addressId, paymentId, router]);
+      if (!emailResponse.ok) {
+        const errorText = await emailResponse.text();
+        console.error('[Confirmation] Échec de l’envoi de l’email:', errorText);
+      }
 
-  useEffect(() => {
-    if (cart.length > 0 && address && paymentInfo) {
-      console.log('[Confirmation] Lancement de initiatePayment');
-      initiatePayment();
+      console.log('[Confirmation] Génération du PDF de la facture pour la commande:', orderId);
+      await generateInvoicePDF({ id_order: orderId, total_amount: finalTotal });
+
+      setCart([]);
+      if (!session) {
+        console.log('[Confirmation] Suppression des données invité de localStorage');
+        localStorage.removeItem('guestCheckout');
+        localStorage.removeItem('guestUserId');
+        localStorage.removeItem('guestEmail');
+        localStorage.removeItem('guestAddresses');
+        localStorage.removeItem('guestPaymentInfos');
+      }
+
+      console.log('[Confirmation] Redirection vers success:', { orderId });
+      router.push(`/success?orderId=${orderId}`);
+    } catch (err) {
+      console.error('[Confirmation] Erreur dans finalizeOrder:', {
+        message: err.message,
+        stack: err.stack,
+      });
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la finalisation');
+      router.push(`/checkout?error=${encodeURIComponent(err.message || 'Une erreur est survenue lors de la finalisation')}`);
     }
-  }, [cart, address, paymentInfo]);
+  };
 
   const generateInvoicePDF = async (order: any) => {
     console.log('[Confirmation] Début de generateInvoicePDF', { orderId: order.id_order });
@@ -393,141 +491,42 @@ function ConfirmationContent() {
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     setInvoiceUrl(url);
-    console.log('[Confirmation] PDF généré', { invoiceUrl: url });
+    console.log('[Confirmation] PDF généré:', { invoiceUrl: url });
     return url;
   };
 
-  const handleConfirmPurchase = async () => {
-    if (!stripe || !clientSecret || !paymentInfo?.stripe_payment_id) {
-      setError('Stripe ou données de paiement non chargées');
-      console.error('[Confirmation] Échec de handleConfirmPurchase', {
-        stripe: !!stripe,
-        clientSecret,
-        stripePaymentId: paymentInfo?.stripe_payment_id,
-      });
+  useEffect(() => {
+    console.log('[Confirmation] useEffect principal', { status, addressId, paymentId, cartelLength: cart.length, session });
+    if (status === 'loading') {
+      console.log('[Confirmation] Session en cours de chargement');
       return;
     }
 
-    console.log('[Confirmation] stripe_payment_id:', paymentInfo.stripe_payment_id);
-    if (!paymentInfo.stripe_payment_id.startsWith('pm_')) {
-      setError('Identifiant de paiement Stripe invalide');
-      console.error('[Confirmation] stripe_payment_id invalide:', {
-        stripe_payment_id: paymentInfo.stripe_payment_id,
-        paymentId,
-      });
-      router.push(`/checkout?error=${encodeURIComponent('Identifiant de paiement Stripe invalide')}`);
+    if (!session && !localStorage.getItem('guestUserId')) {
+      console.log('[Confirmation] Redirection vers auth');
+      router.push('/auth?redirect=/checkout/confirmation');
       return;
     }
 
-    setLoading(true);
-    try {
-      console.log('[Confirmation] Confirmation du paiement avec Stripe', {
-        clientSecret,
-        paymentMethod: paymentInfo.stripe_payment_id,
-      });
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: paymentInfo.stripe_payment_id,
-      });
-
-      if (result.error) {
-        setError(result.error.message || 'Échec du paiement');
-        console.error('[Confirmation] Erreur de paiement', result.error);
-        setTimeout(() => {
-          router.push(`/checkout?error=${encodeURIComponent(result.error.message || 'Échec du paiement')}`);
-        }, 2000);
-        return;
-      }
-
-      if (result.paymentIntent?.status !== 'succeeded') {
-        setError('Paiement non réussi');
-        console.error('[Confirmation] Paiement non réussi', { paymentIntent: result.paymentIntent });
-        setTimeout(() => {
-          router.push(`/checkout?error=${encodeURIComponent('Paiement non réussi')}`);
-        }, 2000);
-        return;
-      }
-
-      console.log('[Confirmation] Paiement réussi, création de la commande');
-      const guestUserId = localStorage.getItem('guestUserId');
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-      if (session?.user?.id_user) {
-        headers['x-user-id'] = session.user.id_user.toString();
-        console.log('[Confirmation] Envoi de x-user-id:', session.user.id_user);
-      } else if (guestUserId) {
-        headers['x-guest-id'] = guestUserId;
-        console.log('[Confirmation] Envoi de x-guest-id:', guestUserId);
-      } else {
-        throw new Error('Aucun ID utilisateur ou invité disponible');
-      }
-
-      console.log('[Confirmation] Envoi à /api/orders', {
-        headers,
-        body: { cartItems: cart, addressId, paymentId, paymentIntentId: result.paymentIntent.id },
-      });
-
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({
-          cartItems: cart,
-          addressId,
-          paymentId,
-          paymentIntentId: result.paymentIntent.id,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Erreur lors de la création de la commande: ${errorText}`);
-      }
-
-      const order = await response.json();
-      console.log('[Confirmation] Commande créée', { order });
-
-      await fetch('/api/send-email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: session?.user?.email || localStorage.getItem('guestEmail'),
-          subject: `Confirmation de votre commande #${order.id_order}`,
-          html: `
-            <h1>Merci pour votre commande !</h1>
-            <p>Votre commande #${order.id_order} a été confirmée.</p>
-            <p>Montant total: ${order.total_amount.toFixed(2)} €</p>
-            <p>Consultez votre facture dans votre espace client.</p>
-          `,
-        }),
-      });
-
-      await generateInvoicePDF(order);
-
-      setCart([]);
-      if (!session) {
-        localStorage.removeItem('guestCheckout');
-        localStorage.removeItem('guestUserId');
-        localStorage.removeItem('guestEmail');
-        localStorage.removeItem('guestAddresses');
-        localStorage.removeItem('guestPaymentInfos');
-      }
-
-      console.log('[Confirmation] Redirection vers order-confirmation');
-      router.push(`/order-confirmation?orderId=${order.id_order}`);
-    } catch (err) {
-      console.error('[Confirmation] Erreur dans handleConfirmPurchase', err);
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la création de la commande');
-    } finally {
-      setLoading(false);
+    if (!addressId || !paymentId) {
+      console.log('[Confirmation] Redirection vers checkout avec erreur');
+      router.push('/checkout?error=Missing%20addressId%20or%20paymentId');
+      return;
     }
-  };
+
+    fetchData();
+  }, [session, status, addressId, paymentId, router]);
 
   if (loading) {
     return <p>Chargement...</p>;
   }
 
   if (!address || !paymentInfo || cart.length === 0) {
-    console.log('[Confirmation] Données manquantes', { address: !!address, paymentInfo: !!paymentInfo, cartLength: cart.length });
+    console.log('[Confirmation] Données manquantes:', {
+      address: !!address,
+      paymentInfo: !!paymentInfo,
+      cartLength: cart.length,
+    });
     return <p>Données manquantes ou panier vide. Veuillez retourner au checkout.</p>;
   }
 
@@ -542,17 +541,17 @@ function ConfirmationContent() {
           {cart.map((item) => (
             <div key={item.uniqueId} className="mb-2">
               <p>{item.name}</p>
-              <p>Quantité : {item.quantity}</p>
-              <p>Abonnement : {item.subscription || 'MONTHLY'}</p>
+              <p>Quantité: {item.quantity}</p>
+              <p>Abonnement: {item.subscription || 'MONTHLY'}</p>
               <p>
-                Total :{' '}
+                Total:{' '}
                 {(item.price * (item.subscription === 'YEARLY' ? 12 : 1) * item.quantity).toFixed(2)} €
               </p>
             </div>
           ))}
-          <p className="mt-4">Sous-total : {totalCartPrice.toFixed(2)} €</p>
-          <p>Taxes (20%) : {taxes.toFixed(2)} €</p>
-          <p className="text-xl font-bold">Total final : {finalTotal.toFixed(2)} €</p>
+          <p className="mt-4">Sous-total: {totalCartPrice.toFixed(2)} €</p>
+          <p>Taxes (20%): {taxes.toFixed(2)} €</p>
+          <p className="text-xl font-bold">Total final: {finalTotal.toFixed(2)} €</p>
         </CardContent>
       </Card>
       <Card className="mt-4">
@@ -586,9 +585,9 @@ function ConfirmationContent() {
       <Button
         className="mt-4 w-full"
         onClick={handleConfirmPurchase}
-        disabled={loading || !clientSecret}
+        disabled={isProcessing}
       >
-        {loading ? 'Traitement...' : 'Confirmer l’achat'}
+        {isProcessing ? 'Traitement...' : 'Confirmer l’achat'}
       </Button>
     </div>
   );

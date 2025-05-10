@@ -1,3 +1,6 @@
+"use client"
+
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -29,8 +32,8 @@ export interface PaymentInfo {
 
 interface CheckoutPaymentProps {
   paymentInfos: PaymentInfo[]
-  selectedPayment: string | null
-  setSelectedPayment: (id: string) => void
+  selectedPayment: PaymentInfo | null
+  setSelectedPayment: (payment: PaymentInfo | null) => void
   newPayment: {
     card_name: string
   }
@@ -54,6 +57,25 @@ export function CheckoutPayment({
   loading = false,
   error = null,
 }: CheckoutPaymentProps) {
+  useEffect(() => {
+    console.log("[CheckoutPayment] Props reçues:", {
+      paymentInfosCount: paymentInfos.length,
+      selectedPayment,
+    })
+    paymentInfos.forEach((payment) => {
+      console.log("[CheckoutPayment] Comparaison radio:", {
+        selectedId: selectedPayment?.id_payment_info,
+        paymentId: payment.id_payment_info,
+        isChecked: selectedPayment?.id_payment_info == payment.id_payment_info,
+      })
+    })
+  }, [paymentInfos, selectedPayment])
+
+  const handlePaymentSelect = (payment: PaymentInfo) => {
+    console.log("[CheckoutPayment] Sélection paiement:", payment)
+    setSelectedPayment(payment)
+  }
+
   return (
     <Card className="border-2 border-gray-100 shadow-md overflow-hidden">
       <CardHeader className="bg-gray-50 border-b pb-4">
@@ -90,26 +112,23 @@ export function CheckoutPayment({
                 <div
                   key={payment.id_payment_info}
                   className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
-                    selectedPayment === String(payment.id_payment_info)
+                    selectedPayment?.id_payment_info == payment.id_payment_info
                       ? "border-[#302082] bg-[#302082]/5 shadow-md"
                       : "border-gray-200 hover:border-[#302082]/50 hover:shadow-sm"
                   }`}
-                  onClick={() =>
-                    setSelectedPayment(String(payment.id_payment_info))
-                  }
+                  onClick={() => handlePaymentSelect(payment)}
                 >
                   <div className="flex justify-between mb-2">
                     <div className="font-medium">{payment.card_name}</div>
                     <div className="flex-shrink-0">
                       <div
                         className={`w-5 h-5 rounded-full border ${
-                          selectedPayment === String(payment.id_payment_info)
+                          selectedPayment?.id_payment_info == payment.id_payment_info
                             ? "border-[#302082] bg-[#302082]"
                             : "border-gray-300"
                         } flex items-center justify-center`}
                       >
-                        {selectedPayment ===
-                          String(payment.id_payment_info) && (
+                        {selectedPayment?.id_payment_info == payment.id_payment_info && (
                           <div className="w-2 h-2 rounded-full bg-white" />
                         )}
                       </div>

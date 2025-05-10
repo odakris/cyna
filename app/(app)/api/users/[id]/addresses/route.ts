@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { AddressController } from "@/lib/controllers/AddressController";
+import  {AddressController} from "@/lib/controllers/AddressController";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string, id_address?: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string, id_address?: string }> }) {
   try {
-    const { id, id_address } = params;
+    const { id, id_address } = await params;
     console.log("[Route GET /api/users/[id]/addresses] Appel avec userId:", id, "id_address:", id_address);
 
     if (!id) {
@@ -28,9 +28,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string, 
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     console.log("[Route POST /api/users/[id]/addresses] Appel avec userId:", id);
 
     if (!id) {
@@ -62,9 +62,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string, id_address: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string, id_address: string }> }) {
   try {
-    const { id, id_address } = params;
+    const { id, id_address } = await params;
     console.log("[Route PUT /api/users/[id]/addresses] Appel avec userId:", id, "id_address:", id_address);
 
     if (!id || !id_address) {

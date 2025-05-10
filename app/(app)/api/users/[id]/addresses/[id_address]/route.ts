@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { AddressController } from "@/lib/controllers/AddressController";
 
-export async function GET(req: NextRequest, { params }: { params: { id: string, id_address: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string, id_address: string }> }) {
   try {
-    const { id, id_address } = params;
+    const { id, id_address } = await params; // MODIFIÉ : Attendre params pour accès asynchrone
     console.log("[Route GET /api/users/[id]/addresses/[id_address]] Appel avec userId:", id, "id_address:", id_address);
 
     if (!id || !id_address) {
@@ -24,9 +24,9 @@ export async function GET(req: NextRequest, { params }: { params: { id: string, 
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string, id_address: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string, id_address: string }> }) {
   try {
-    const { id, id_address } = params;
+    const { id, id_address } = await params; // MODIFIÉ : Attendre params pour accès asynchrone
     console.log("[Route PUT /api/users/[id]/addresses/[id_address]] Appel avec userId:", id, "id_address:", id_address);
 
     if (!id || !id_address) {

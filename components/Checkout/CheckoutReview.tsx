@@ -1,3 +1,6 @@
+"use client"
+
+import { useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import {
@@ -34,9 +37,9 @@ interface CartItem {
 
 interface CheckoutReviewProps {
   addresses: Address[]
-  selectedAddress: string | null
+  selectedAddress: Address | null
   paymentInfos: PaymentInfo[]
-  selectedPayment: string | null
+  selectedPayment: PaymentInfo | null
   cart: CartItem[]
   totalCartPrice: number
   taxes: number
@@ -59,12 +62,17 @@ export function CheckoutReview({
   processingPayment,
   error = null,
 }: CheckoutReviewProps) {
-  const selectedAddressObj = addresses.find(
-    a => a.id_address.toString() === selectedAddress
-  )
-  const selectedPaymentObj = paymentInfos.find(
-    p => String(p.id_payment_info) === selectedPayment
-  )
+  useEffect(() => {
+    console.log("[CheckoutReview] Props reçues:", {
+      selectedAddress,
+      selectedPayment,
+      cartLength: cart.length,
+      finalTotal,
+      processingPayment,
+      error,
+      handleProceedToPaymentType: typeof handleProceedToPayment,
+    })
+  }, [selectedAddress, selectedPayment, cart, finalTotal, processingPayment, error, handleProceedToPayment])
 
   return (
     <Card className="border-2 border-gray-100 shadow-md overflow-hidden">
@@ -94,29 +102,29 @@ export function CheckoutReview({
               Adresse de facturation
             </h3>
 
-            {selectedAddressObj && (
+            {selectedAddress ? (
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <div className="space-y-1">
                   <p className="font-medium">
-                    {selectedAddressObj.first_name}{" "}
-                    {selectedAddressObj.last_name}
+                    {selectedAddress.first_name} {selectedAddress.last_name}
                   </p>
-                  <p>{selectedAddressObj.address1}</p>
-                  {selectedAddressObj.address2 && (
-                    <p>{selectedAddressObj.address2}</p>
+                  <p>{selectedAddress.address1}</p>
+                  {selectedAddress.address2 && (
+                    <p>{selectedAddress.address2}</p>
                   )}
                   <p>
-                    {selectedAddressObj.postal_code} {selectedAddressObj.city}
-                    {selectedAddressObj.region &&
-                      `, ${selectedAddressObj.region}`}
+                    {selectedAddress.postal_code} {selectedAddress.city}
+                    {selectedAddress.region && `, ${selectedAddress.region}`}
                   </p>
-                  <p>{selectedAddressObj.country}</p>
+                  <p>{selectedAddress.country}</p>
                   <p className="flex items-center gap-2 pt-1">
                     <Phone className="h-3.5 w-3.5 text-gray-500" />
-                    {selectedAddressObj.mobile_phone}
+                    {selectedAddress.mobile_phone}
                   </p>
                 </div>
               </div>
+            ) : (
+              <p className="text-red-600">Aucune adresse sélectionnée</p>
             )}
 
             <div className="mt-2 text-xs text-right">
@@ -137,17 +145,19 @@ export function CheckoutReview({
               Moyen de paiement
             </h3>
 
-            {selectedPaymentObj && (
+            {selectedPayment ? (
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                 <div className="space-y-1">
-                  <p className="font-medium">{selectedPaymentObj.card_name}</p>
+                  <p className="font-medium">{selectedPayment.card_name}</p>
                   <p className="flex items-center gap-2">
                     <LockKeyhole className="h-3.5 w-3.5 text-gray-500" />
-                    {selectedPaymentObj.brand || "Carte"} ****{" "}
-                    {selectedPaymentObj.last_card_digits}
+                    {selectedPayment.brand || "Carte"} ****{" "}
+                    {selectedPayment.last_card_digits}
                   </p>
                 </div>
               </div>
+            ) : (
+              <p className="text-red-600">Aucun moyen de paiement sélectionné</p>
             )}
 
             <div className="mt-2 text-xs text-right">
@@ -165,8 +175,7 @@ export function CheckoutReview({
           <div>
             <h3 className="text-base font-semibold mb-3 text-[#302082] flex items-center gap-2">
               <ShoppingCart className="h-4 w-4" />
-              Articles ({cart.reduce((count, item) => count + item.quantity, 0)}
-              )
+              Articles ({cart.reduce((count, item) => count + item.quantity, 0)})
             </h3>
 
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 divide-y divide-gray-200">
@@ -232,7 +241,7 @@ export function CheckoutReview({
         <Button
           className="w-full sm:w-auto px-3 text-sm bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white"
           onClick={handleProceedToPayment}
-          disabled={processingPayment}
+          disabled={processingPayment || !selectedAddress || !selectedPayment}
         >
           {processingPayment ? (
             <>

@@ -1,3 +1,6 @@
+"use client"
+
+import { useSession } from "next-auth/react"
 import { formatDate } from "@/lib/utils/format"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -64,12 +67,24 @@ export function OrderDetails({
   handleDownloadInvoice,
   guestEmail,
 }: OrderDetailsProps) {
+  const { data: session, status: sessionStatus } = useSession()
+  const isGuest = !session?.user?.id_user
+
   // Calculate totals
   const subtotal = order.total_amount / 1.2 // Remove 20% VAT
   const tax = order.total_amount - subtotal
 
-  // Utilisez l'email du guest si l'utilisateur est un invité
-  const email = guestEmail || order.user?.email || ""
+  // Sélectionner l'email : prioriser l'email de l'utilisateur connecté si disponible
+  const email = isGuest ? guestEmail || order.user?.email || "" : order.user?.email || guestEmail || ""
+
+  // Log pour déboguer la sélection de l'email
+  console.log("[OrderDetails] Sélection de l'email:", {
+    email,
+    guestEmail,
+    userEmail: order.user?.email,
+    isGuest,
+    sessionStatus,
+  })
 
   return (
     <Card className="border-2 border-gray-100 shadow-md mb-6">
@@ -145,7 +160,7 @@ export function OrderDetails({
                 <p>{order.address.address1}</p>
                 {order.address.address2 && <p>{order.address.address2}</p>}
                 <p>
-                  {order.address.postal_code} {order.address.city},{" "}
+                  {order.address.city},{" "}
                   {order.address.country}
                 </p>
                 {order.address.mobile_phone && (

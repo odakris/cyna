@@ -272,9 +272,9 @@ model ContactMessage {
 // Informations de paiement des utilisateurs
 model PaymentInfo {
     id_payment_info   Int      @id @default(autoincrement())
-    card_name         String   @db.VarChar(100)
-    brand             String   @db.VarChar(50)
-    last_card_digits  String   @db.VarChar(4)
+    card_name         String   @db.VarChar(255)
+    brand             String   @db.VarChar(255)
+    last_card_digits  String   @db.VarChar(255)
     stripe_payment_id String   @db.VarChar(255) // <-- l'ID du paymentMethod chez Stripe
     stripe_customer_id String
     exp_month         Int
@@ -289,15 +289,15 @@ model PaymentInfo {
 // Adresses enregistrées par les utilisateurs
 model Address {
     id_address          Int      @id @default(autoincrement())
-    first_name          String   @db.VarChar(100)
-    last_name           String   @db.VarChar(100)
+    first_name          String   @db.VarChar(255)
+    last_name           String   @db.VarChar(255)
     address1            String   @db.VarChar(255)
     address2            String?  @db.VarChar(255)
-    postal_code         String   @db.VarChar(20)
-    city                String   @db.VarChar(100)
-    region              String   @db.VarChar(100)
-    country             String   @db.VarChar(100)
-    mobile_phone        String   @db.VarChar(20)
+    postal_code         String   @db.VarChar(255)
+    city                String   @db.VarChar(255)
+    region              String   @db.VarChar(255)
+    country             String   @db.VarChar(255)
+    mobile_phone        String   @db.VarChar(255)
     is_default_billing  Boolean  @default(false)
     is_default_shipping Boolean  @default(false)
     created_at          DateTime @default(now())

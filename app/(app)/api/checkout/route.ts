@@ -20,6 +20,8 @@ export async function POST(req: NextRequest) {
       cartItems,
       addressId,
       paymentId,
+      totalAmount: clientTotalAmount,
+      taxes,
       guestId,
       guestEmail,
       sessionToken,
@@ -27,10 +29,10 @@ export async function POST(req: NextRequest) {
 
     // Valider les données
     console.log("[API Checkout] Validation des données d'entrée...");
-    if (!cartItems || !cartItems.length || !addressId || !paymentId) {
-      console.error("[API Checkout] Données manquantes:", { cartItems, addressId, paymentId });
+    if (!cartItems || !cartItems.length || !addressId || !paymentId || clientTotalAmount == null) {
+      console.error("[API Checkout] Données manquantes:", { cartItems, addressId, paymentId, clientTotalAmount });
       return NextResponse.json(
-        { error: "Données manquantes: panier, adresse ou paiement requis" },
+        { error: "Données manquantes: panier, adresse, paiement ou montant total requis" },
         { status: 400 }
       );
     }
@@ -54,6 +56,21 @@ export async function POST(req: NextRequest) {
       stripe_payment_id: paymentInfo.stripe_payment_id,
       stripe_customer_id: paymentInfo.stripe_customer_id,
     });
+
+    // Valider last_card_digits
+    let validatedLastCardDigits = paymentInfo.last_card_digits;
+    if (!validatedLastCardDigits || validatedLastCardDigits.includes(':') || validatedLastCardDigits.length > 4) {
+      console.warn("[API Checkout] last_card_digits invalide, utilisation de la valeur par défaut:", {
+        last_card_digits: validatedLastCardDigits,
+      });
+      validatedLastCardDigits = "4242"; // MODIFIÉ : Utiliser une valeur par défaut si invalide
+    } else if (!/^\d{4}$/.test(validatedLastCardDigits)) {
+      console.warn("[API Checkout] last_card_digits non numérique, utilisation de la valeur par défaut:", {
+        last_card_digits: validatedLastCardDigits,
+      });
+      validatedLastCardDigits = "4242"; // MODIFIÉ : Vérifier que ce sont 4 chiffres
+    }
+    console.log("[API Checkout] last_card_digits validé:", validatedLastCardDigits);
 
     // Vérifier que l'utilisateur ou le guest est valide
     let userId = paymentInfo.id_user;
@@ -135,16 +152,33 @@ export async function POST(req: NextRequest) {
 
     // Calculer le montant total
     console.log("[API Checkout] Calcul du montant total...");
-    const totalAmount = Number(
+    const serverTotalAmount = Number(
       cartItems
         .reduce((sum: number, item: any) => sum + item.price * item.quantity, 0)
         .toFixed(2)
     );
-    console.log("[API Checkout] Montant total calculé:", totalAmount);
+    console.log("[API Checkout] Montant total calculé:", serverTotalAmount);
+
+    // Valider totalAmount envoyé par le client
+    if (Math.abs(serverTotalAmount - clientTotalAmount) > 0.01) {
+      console.error("[API Checkout] Incohérence dans totalAmount:", {
+        clientTotalAmount,
+        serverTotalAmount,
+      });
+      return NextResponse.json(
+        { error: `Montant total incohérent: client (${clientTotalAmount}) vs serveur (${serverTotalAmount})` },
+        { status: 400 }
+      );
+    }
+
+    // Calculer le montant total avec taxes (si fourni)
+    const taxesAmount = taxes && !isNaN(taxes) ? Number(taxes.toFixed(2)) : 0;
+    const finalTotalAmount = serverTotalAmount + taxesAmount;
+    console.log("[API Checkout] Montant final avec taxes:", finalTotalAmount);
 
     // Valider le montant
-    if (totalAmount <= 0 || isNaN(totalAmount)) {
-      console.error("[API Checkout] Montant total invalide:", { totalAmount });
+    if (serverTotalAmount <= 0 || isNaN(serverTotalAmount)) {
+      console.error("[API Checkout] Montant total invalide:", { serverTotalAmount });
       return NextResponse.json(
         { error: "Montant total invalide ou nul" },
         { status: 400 }
@@ -162,20 +196,17 @@ export async function POST(req: NextRequest) {
         );
       }
       // Vérifier subscription_type
-      if (!VALID_SUBSCRIPTION_TYPES.includes(item.subscription_type)) {
-        console.error("[API Checkout] Type de subscription invalide:", { subscription_type: item.subscription_type });
+      if (!item.subscription_type || !VALID_SUBSCRIPTION_TYPES.includes(item.subscription_type)) {
+        console.error("[API Checkout] Type de subscription manquant ou invalide:", {
+          subscription_type: item.subscription_type,
+          item,
+        });
         return NextResponse.json(
-          { error: `Type de subscription invalide: ${item.subscription_type}. Valeurs attendues: ${VALID_SUBSCRIPTION_TYPES.join(", ")}` },
+          {
+            error: `Type de subscription manquant ou invalide: ${item.subscription_type || 'undefined'}. Valeurs attendues: ${VALID_SUBSCRIPTION_TYPES.join(", ")}`,
+          },
           { status: 400 }
         );
-      }
-      // Vérifier la cohérence entre subscription et subscription_type
-      if (item.subscription && item.subscription !== item.subscription_type) {
-        console.warn("[API Checkout] Incohérence subscription/subscription_type:", {
-          subscription: item.subscription,
-          subscription_type: item.subscription_type,
-        });
-        item.subscription = item.subscription_type; // Corriger subscription
       }
     }
 
@@ -203,12 +234,12 @@ export async function POST(req: NextRequest) {
 
     // Créer le PaymentIntent
     console.log("[API Checkout] Création du PaymentIntent:", {
-      amount: Math.round(totalAmount * 100),
+      amount: Math.round(serverTotalAmount * 100),
       payment_method: paymentInfo.stripe_payment_id,
       customer: customerId,
     });
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(totalAmount * 100),
+      amount: Math.round(serverTotalAmount * 100),
       currency: "eur",
       payment_method: paymentInfo.stripe_payment_id,
       customer: customerId,
@@ -233,10 +264,10 @@ export async function POST(req: NextRequest) {
     const orderData = {
       id_user: userId || guestId,
       id_address: parseInt(addressId),
-      total_amount: totalAmount,
-      subtotal: totalAmount,
+      total_amount: finalTotalAmount,
+      subtotal: serverTotalAmount,
       payment_method: "card",
-      last_card_digits: paymentInfo.last_card_digits || "4242",
+      last_card_digits: validatedLastCardDigits, // MODIFIÉ : Utiliser la valeur validée
       invoice_number: invoiceNumber,
       order_status: paymentIntent.status === "succeeded" ? "COMPLETED" : "PENDING",
       order_items: {
@@ -300,6 +331,7 @@ export async function POST(req: NextRequest) {
       orderId: order.id_order,
       paymentIntentId: paymentIntent.id,
       status: paymentIntent.status,
+      clientSecret: paymentIntent.client_secret,
     });
   } catch (error: any) {
     console.error("[API Checkout] Erreur:", {

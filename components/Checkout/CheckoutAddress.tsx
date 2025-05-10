@@ -1,3 +1,6 @@
+"use client"
+
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -26,8 +29,8 @@ export interface Address {
 
 interface CheckoutAddressProps {
   addresses: Address[]
-  selectedAddress: string | null
-  setSelectedAddress: (id: string) => void
+  selectedAddress: Address | null
+  setSelectedAddress: (address: Address | null) => void
   newAddress: {
     first_name: string
     last_name: string
@@ -59,6 +62,25 @@ export function CheckoutAddress({
   loading = false,
   error = null,
 }: CheckoutAddressProps) {
+  useEffect(() => {
+    console.log("[CheckoutAddress] Props reçues:", {
+      addressesCount: addresses.length,
+      selectedAddress,
+    })
+    addresses.forEach((address) => {
+      console.log("[CheckoutAddress] Comparaison radio:", {
+        selectedId: selectedAddress?.id_address,
+        addressId: address.id_address,
+        isChecked: selectedAddress?.id_address == address.id_address,
+      })
+    })
+  }, [addresses, selectedAddress])
+
+  const handleAddressSelect = (address: Address) => {
+    console.log("[CheckoutAddress] Sélection adresse:", address)
+    setSelectedAddress(address)
+  }
+
   return (
     <Card className="border-2 border-gray-100 shadow-md overflow-hidden">
       <CardHeader className="bg-gray-50 border-b pb-4">
@@ -94,13 +116,11 @@ export function CheckoutAddress({
                 <div
                   key={address.id_address}
                   className={`border rounded-lg p-4 cursor-pointer transition-all duration-200 ${
-                    selectedAddress === address.id_address.toString()
+                    selectedAddress?.id_address == address.id_address
                       ? "border-[#302082] bg-[#302082]/5 shadow-md"
                       : "border-gray-200 hover:border-[#302082]/50 hover:shadow-sm"
                   }`}
-                  onClick={() =>
-                    setSelectedAddress(address.id_address.toString())
-                  }
+                  onClick={() => handleAddressSelect(address)}
                 >
                   <div className="flex justify-between mb-2">
                     <div className="font-medium">
@@ -109,12 +129,12 @@ export function CheckoutAddress({
                     <div className="flex-shrink-0">
                       <div
                         className={`w-5 h-5 rounded-full border ${
-                          selectedAddress === address.id_address.toString()
+                          selectedAddress?.id_address == address.id_address
                             ? "border-[#302082] bg-[#302082]"
                             : "border-gray-300"
                         } flex items-center justify-center`}
                       >
-                        {selectedAddress === address.id_address.toString() && (
+                        {selectedAddress?.id_address == address.id_address && (
                           <div className="w-2 h-2 rounded-full bg-white" />
                         )}
                       </div>
@@ -307,7 +327,7 @@ export function CheckoutAddress({
             onClick={handleSaveNewAddress}
             disabled={loading}
           >
-            Ajouter l&apos;adresse
+            Ajouter l'adresse
           </Button>
 
           {selectedAddress && (

@@ -4,6 +4,10 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js"
 import { useCart } from "@/context/CartContext"
 import { useToast } from "@/hooks/use-toast"
+import { v4 as uuidv4 } from "uuid"
+
+// Log pour confirmer le chargement du module
+console.log("[useCheckout] Module chargé")
 
 // Types
 export interface Address {
@@ -48,12 +52,15 @@ const VALID_SUBSCRIPTION_TYPES = [
 
 export function useCheckout() {
   const { data: session, status } = useSession()
-  const { cart, setCart } = useCart()
+  const { cart: contextCart, setCart } = useCart()
   const { toast } = useToast()
   const router = useRouter()
   const searchParams = useSearchParams()
   const stripe = useStripe()
   const elements = useElements()
+
+  // Sécuriser cart pour garantir qu'il est toujours un tableau
+  const cart = Array.isArray(contextCart) ? contextCart : []
 
   // State variables
   const [isGuest, setIsGuest] = useState(false)
@@ -64,8 +71,8 @@ export function useCheckout() {
   >(null)
   const [addresses, setAddresses] = useState<Address[]>([])
   const [paymentInfos, setPaymentInfos] = useState<PaymentInfo[]>([])
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(null)
-  const [selectedPayment, setSelectedPayment] = useState<string | null>(null)
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null)
+  const [selectedPayment, setSelectedPayment] = useState<PaymentInfo | null>(null)
   const [activeTab, setActiveTab] = useState<string>("address")
   const [loading, setLoading] = useState(true)
   const [processingPayment, setProcessingPayment] = useState(false)
@@ -124,10 +131,49 @@ export function useCheckout() {
   const safeParseJson = async (response: Response) => {
     try {
       const text = await response.text()
+      console.log("[useCheckout] Réponse brute pour", response.url, ":", text)
       return text ? JSON.parse(text) : {}
     } catch (err) {
-      console.error("Erreur parsing JSON:", err)
+      console.error("[useCheckout] Erreur parsing JSON:", err)
       return { message: "Réponse serveur invalide" }
+    }
+  }
+
+  // Fetch guest data from localStorage and decrypt
+  const fetchGuestData = async () => {
+    try {
+      const guestAddresses = JSON.parse(localStorage.getItem("guestAddresses") || "[]")
+      const guestPayments = JSON.parse(localStorage.getItem("guestPaymentInfos") || "[]")
+
+      console.log("[useCheckout] Données brutes invité:", { guestAddresses, guestPayments })
+
+      // Appeler l'API pour déchiffrer
+      const decryptResponse = await fetch("/api/guest/decrypt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ addresses: guestAddresses, payments: guestPayments }),
+      })
+
+      if (!decryptResponse.ok) {
+        const errorData = await safeParseJson(decryptResponse)
+        throw new Error(`Erreur lors du déchiffrement des données invité: ${errorData.message || "Erreur inconnue"}`)
+      }
+
+      const { addresses: decryptedAddresses, payments: decryptedPayments } = await decryptResponse.json()
+      console.log("[useCheckout] Données déchiffrées reçues:", { decryptedAddresses, decryptedPayments })
+
+      setAddresses(Array.isArray(decryptedAddresses) ? decryptedAddresses : [])
+      setPaymentInfos(Array.isArray(decryptedPayments) ? decryptedPayments : [])
+
+      if (decryptedAddresses.length > 0) {
+        setSelectedAddress(decryptedAddresses[0])
+      }
+      if (decryptedPayments.length > 0) {
+        setSelectedPayment(decryptedPayments[0])
+      }
+    } catch (err) {
+      console.error("[useCheckout] Erreur dans fetchGuestData:", err)
+      setError(err instanceof Error ? err.message : "Erreur lors du chargement des données invité")
     }
   }
 
@@ -135,22 +181,26 @@ export function useCheckout() {
   const fetchUserData = async (userId: number) => {
     try {
       const [addressResponse, paymentResponse] = await Promise.all([
-        fetch("/api/users/addresses", {
-          headers: { "x-user-id": userId.toString() },
+        fetch(`/api/users/${userId}/addresses`, {
+          headers: { "x-user-id": userId.toString(), "Content-Type": "application/json" },
+          credentials: "include",
         }),
-        fetch("/api/users/payment-infos", {
-          headers: { "x-user-id": userId.toString() },
+        fetch(`/api/users/${userId}/payments`, {
+          headers: { "x-user-id": userId.toString(), "Content-Type": "application/json" },
+          credentials: "include",
         }),
       ])
 
       if (addressResponse.ok) {
         const addressData = await safeParseJson(addressResponse)
+        console.log("[useCheckout] Adresses reçues:", addressData)
         setAddresses(Array.isArray(addressData) ? addressData : [])
         if (addressData.length > 0) {
-          setSelectedAddress(addressData[0].id_address.toString())
+          setSelectedAddress(addressData[0])
         }
       } else {
         const errorData = await safeParseJson(addressResponse)
+        console.error("[useCheckout] Erreur récupération adresses:", errorData)
         setError(
           `Erreur lors du chargement des adresses: ${errorData.message || "Erreur inconnue"}`
         )
@@ -158,17 +208,20 @@ export function useCheckout() {
 
       if (paymentResponse.ok) {
         const paymentData = await safeParseJson(paymentResponse)
+        console.log("[useCheckout] Moyens de paiement reçus:", paymentData)
         setPaymentInfos(Array.isArray(paymentData) ? paymentData : [])
         if (paymentData.length > 0) {
-          setSelectedPayment(String(paymentData[0].id_payment_info))
+          setSelectedPayment(paymentData[0])
         }
       } else {
         const errorData = await safeParseJson(paymentResponse)
+        console.error("[useCheckout] Erreur récupération moyens de paiement:", errorData)
         setError(
           `Erreur lors du chargement des moyens de paiement: ${errorData.message || "Erreur inconnue"}`
         )
       }
-    } catch {
+    } catch (err) {
+      console.error("[useCheckout] Erreur dans fetchUserData:", err)
       setError(
         "Erreur réseau lors du chargement des données utilisateur. Veuillez réessayer."
       )
@@ -183,6 +236,8 @@ export function useCheckout() {
       sessionStatus: status,
       stripeAvailable: !!stripe,
       cartItems: cart.length,
+      cartContent: cart,
+      setProcessingPaymentType: typeof setProcessingPayment,
     })
 
     if (status === "loading") {
@@ -193,11 +248,7 @@ export function useCheckout() {
     if (!session) {
       console.log("[useCheckout] No session, setting guest mode")
       setIsGuest(true)
-      setSelectedAddress(null)
-      setSelectedPayment(null)
-      setAddresses([])
-      setPaymentInfos([])
-      setLoading(false)
+      fetchGuestData()
       return
     }
 
@@ -217,11 +268,7 @@ export function useCheckout() {
     } else {
       console.log("[useCheckout] No userId, setting guest mode")
       setIsGuest(true)
-      setSelectedAddress(null)
-      setSelectedPayment(null)
-      setAddresses([])
-      setPaymentInfos([])
-      setLoading(false)
+      fetchGuestData()
     }
   }, [session, status, cart, stripe])
 
@@ -256,7 +303,8 @@ export function useCheckout() {
       localStorage.setItem("guestUserId", guestUser.id_user.toString())
 
       return guestUser.id_user
-    } catch {
+    } catch (err) {
+      console.error("[useCheckout] Erreur dans createGuestUser:", err)
       setError(
         "Erreur réseau lors de la création de l'utilisateur invité. Vérifiez votre connexion et réessayez."
       )
@@ -294,83 +342,117 @@ export function useCheckout() {
         return
       }
 
-      const response = await fetch("/api/users/addresses", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-user-id": userId ? userId.toString() : "",
-        },
-        body: JSON.stringify({ ...newAddress, userId }),
+      if (isGuest) {
+        // Mode invité : Chiffrer via API
+        const addressWithId = { ...newAddress, id_address: `guest_${uuidv4()}` }
+        const encryptResponse = await fetch("/api/guest/encrypt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ addresses: [addressWithId] }),
+        })
+
+        if (!encryptResponse.ok) {
+          const errorData = await safeParseJson(encryptResponse)
+          throw new Error(`Erreur lors du chiffrement de l'adresse: ${errorData.message || "Erreur inconnue"}`)
+        }
+
+        const { addresses: encryptedAddresses } = await encryptResponse.json()
+        console.log("[useCheckout] Adresse chiffrée:", encryptedAddresses[0])
+
+        const guestAddresses = JSON.parse(localStorage.getItem("guestAddresses") || "[]")
+        guestAddresses.push(encryptedAddresses[0])
+        localStorage.setItem("guestAddresses", JSON.stringify(guestAddresses))
+
+        // Déchiffrer pour affichage
+        const decryptResponse = await fetch("/api/guest/decrypt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ addresses: guestAddresses, payments: [] }),
+        })
+
+        if (!decryptResponse.ok) {
+          const errorData = await safeParseJson(decryptResponse)
+          throw new Error(`Erreur lors du déchiffrement des adresses: ${errorData.message || "Erreur inconnue"}`)
+        }
+
+        const { addresses: decryptedAddresses } = await decryptResponse.json()
+        setAddresses(decryptedAddresses)
+        setSelectedAddress(addressWithId)
+      } else {
+        // Mode connecté
+        const response = await fetch(`/api/users/${userId}/addresses`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-user-id": userId.toString(),
+          },
+          body: JSON.stringify(newAddress),
+          credentials: "include",
+        })
+
+        if (!response.ok) {
+          const errorData = await safeParseJson(response)
+          throw new Error(
+            response.status === 405
+              ? "Méthode POST non autorisée pour /api/users/addresses. Vérifiez la configuration du serveur."
+              : `Erreur lors de l'ajout de l'adresse: ${errorData.message || "Erreur inconnue (code: " + response.status + ")"}`
+          )
+        }
+
+        const savedAddress = await safeParseJson(response)
+        console.log("[useCheckout] Adresse enregistrée:", savedAddress)
+
+        setAddresses([...addresses, savedAddress])
+        setSelectedAddress(savedAddress)
+      }
+
+      toast({
+        title: "Adresse ajoutée",
+        description: "Votre nouvelle adresse a été ajoutée avec succès.",
+        variant: "success",
       })
 
-      if (response.ok) {
-        const savedAddress = await safeParseJson(response)
-        setAddresses([...addresses, savedAddress])
-        setSelectedAddress(savedAddress.id_address.toString())
+      // Reset form and move to payment tab
+      setNewAddress({
+        first_name: "",
+        last_name: "",
+        address1: "",
+        address2: "",
+        postal_code: "",
+        region: "",
+        city: "",
+        country: "",
+        mobile_phone: "",
+      })
 
-        // If guest user, store address in localStorage
-        if (isGuest) {
-          const guestAddresses = JSON.parse(
-            localStorage.getItem("guestAddresses") || "[]"
-          )
-          guestAddresses.push(savedAddress)
-          localStorage.setItem("guestAddresses", JSON.stringify(guestAddresses))
-        }
-
-        toast({
-          title: "Adresse ajoutée",
-          description: "Votre nouvelle adresse a été ajoutée avec succès.",
-          variant: "success",
-        })
-
-        // Reset form and move to payment tab
-        setNewAddress({
-          first_name: "",
-          last_name: "",
-          address1: "",
-          address2: "",
-          postal_code: "",
-          region: "",
-          city: "",
-          country: "",
-          mobile_phone: "",
-        })
-
-        // Advance to payment tab if there are no payment methods
-        if (paymentInfos.length === 0) {
-          setActiveTab("payment")
-        }
-      } else {
-        const errorData = await safeParseJson(response)
-        setError(
-          response.status === 405
-            ? "Méthode POST non autorisée pour /api/users/addresses. Vérifiez la configuration du serveur."
-            : `Erreur lors de l'ajout de l'adresse: ${errorData.message || "Erreur inconnue (code: " + response.status + ")"}`
-        )
+      // Advance to payment tab if there are no payment methods
+      if (paymentInfos.length === 0) {
+        setActiveTab("payment")
       }
-    } catch {
+    } catch (err) {
+      console.error("[useCheckout] Erreur dans handleSaveNewAddress:", err)
       setError(
-        "Erreur réseau lors de l'ajout de l'adresse. Vérifiez votre connexion et réessayez."
+        err instanceof Error ? err.message : "Erreur lors de l'enregistrement de l'adresse"
       )
     }
   }
 
   // Handle saving a new payment method
   const handleSaveNewPayment = async () => {
-    console.log("[CheckoutPage] Sauvegarde nouveau moyen de paiement:", {
+    console.log("[useCheckout] Sauvegarde nouveau moyen de paiement:", {
       card_name: newPayment.card_name,
       userId: session?.user?.id_user || guestUserId || "invité",
     })
     setError(null)
 
     if (!stripe || !elements) {
-      console.error("[CheckoutPage] Stripe non chargé:", { stripe, elements })
+      console.error("[useCheckout] Stripe non chargé:", { stripe, elements })
       setError("Erreur de chargement de Stripe. Veuillez recharger la page.")
       return
     }
 
     if (!newPayment.card_name) {
-      console.error("[CheckoutPage] Nom de carte manquant")
+      console.error("[useCheckout] Nom de carte manquant")
       setError("Veuillez entrer un nom pour la carte")
       return
     }
@@ -444,7 +526,7 @@ export function useCheckout() {
           }
         } catch (error) {
           console.error(
-            "[CheckoutPage] Erreur lors de la récupération/création du customerId:",
+            "[useCheckout] Erreur lors de la récupération/création du customerId:",
             error
           )
           setError("Erreur lors de la configuration du client Stripe")
@@ -453,7 +535,7 @@ export function useCheckout() {
       }
 
       if (!stripeCustomerId) {
-        console.error("[CheckoutPage] stripeCustomerId manquant")
+        console.error("[useCheckout] stripeCustomerId manquant")
         setError("Erreur: client Stripe non configuré")
         return
       }
@@ -461,7 +543,7 @@ export function useCheckout() {
       // Reste du code avec le stripeCustomerId maintenant défini
       const cardElement = elements.getElement(CardElement)
       if (!cardElement) {
-        console.error("[CheckoutPage] CardElement non trouvé")
+        console.error("[useCheckout] CardElement non trouvé")
         setError(
           "Erreur avec le formulaire de paiement. Veuillez recharger la page."
         )
@@ -478,12 +560,12 @@ export function useCheckout() {
       })
 
       if (error) {
-        console.error("[CheckoutPage] Erreur Stripe:", error)
+        console.error("[useCheckout] Erreur Stripe:", error)
         setError(error.message || "Erreur lors de l'ajout du moyen de paiement")
         return
       }
 
-      // Maintenant on envoie le customerId pour tous les utilisateurs
+      // Attacher le paymentMethod au client Stripe
       await fetch("/api/stripe/attach-payment-method", {
         method: "POST",
         headers: {
@@ -492,250 +574,116 @@ export function useCheckout() {
         },
         body: JSON.stringify({
           paymentMethodId: paymentMethod.id,
-          customerId: stripeCustomerId, // Utiliser le customerId récupéré ou créé
+          customerId: stripeCustomerId,
         }),
       })
 
-      console.log(
-        "[CheckoutPage] Données envoyées à /api/users/payment-infos:",
-        {
-          userId,
-          card_name: newPayment.card_name,
-          stripe_payment_id: paymentMethod.id,
-          stripe_customer_id: isGuest ? guestStripeCustomerId : undefined,
-          last_card_digits: paymentMethod.card ? paymentMethod.card.last4 : "",
-          brand: paymentMethod.card?.brand,
-          exp_month: paymentMethod.card?.exp_month,
-          exp_year: paymentMethod.card?.exp_year,
+      const paymentData = {
+        userId,
+        card_name: newPayment.card_name,
+        stripe_payment_id: paymentMethod.id,
+        stripe_customer_id: stripeCustomerId,
+        last_card_digits: paymentMethod.card ? paymentMethod.card.last4 : "",
+        brand: paymentMethod.card?.brand,
+        exp_month: paymentMethod.card?.exp_month,
+        exp_year: paymentMethod.card?.exp_year,
+      }
+
+      console.log("[useCheckout] Données envoyées pour le paiement:", paymentData)
+
+      if (isGuest) {
+        // Mode invité : Chiffrer via API
+        const paymentWithId = {
+          ...paymentData,
+          id_payment_info: `guest_${uuidv4()}`,
         }
-      )
-
-      const response = await fetch("/api/users/payment-infos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-user-id": userId.toString(),
-        },
-        body: JSON.stringify({
-          userId,
-          card_name: newPayment.card_name,
-          stripe_payment_id: paymentMethod.id,
-          stripe_customer_id: isGuest
-            ? guestStripeCustomerId
-            : stripeCustomerId,
-          last_card_digits: paymentMethod.card ? paymentMethod.card.last4 : "",
-          brand: paymentMethod.card?.brand,
-          exp_month: paymentMethod.card?.exp_month,
-          exp_year: paymentMethod.card?.exp_year,
-        }),
-      })
-
-      if (response.ok) {
-        const savedPayment = await safeParseJson(response)
-        setPaymentInfos([...paymentInfos, savedPayment])
-        setSelectedPayment(String(savedPayment.id_payment_info))
-        console.log("[CheckoutPage] Nouveau moyen de paiement sélectionné:", {
-          id_payment_info: savedPayment.id_payment_info,
+        const encryptResponse = await fetch("/api/guest/encrypt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ payments: [paymentWithId] }),
         })
+
+        if (!encryptResponse.ok) {
+          const errorData = await safeParseJson(encryptResponse)
+          throw new Error(`Erreur lors du chiffrement du paiement: ${errorData.message || "Erreur inconnue"}`)
+        }
+
+        const { payments: encryptedPayments } = await encryptResponse.json()
+        console.log("[useCheckout] Paiement chiffré:", encryptedPayments[0])
+
+        const guestPayments = JSON.parse(localStorage.getItem("guestPaymentInfos") || "[]")
+        guestPayments.push(encryptedPayments[0])
+        localStorage.setItem("guestPaymentInfos", JSON.stringify(guestPayments))
+
+        // Déchiffrer pour affichage
+        const decryptResponse = await fetch("/api/guest/decrypt", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ addresses: [], payments: guestPayments }),
+        })
+
+        if (!decryptResponse.ok) {
+          const errorData = await safeParseJson(decryptResponse)
+          throw new Error(`Erreur lors du déchiffrement des paiements: ${errorData.message || "Erreur inconnue"}`)
+        }
+
+        const { payments: decryptedPayments } = await decryptResponse.json()
+        setPaymentInfos(decryptedPayments)
+        setSelectedPayment(paymentWithId)
       } else {
-        const errorData = await safeParseJson(response)
-        console.error("[CheckoutPage] Erreur API:", {
-          status: response.status,
-          statusText: response.statusText,
-          errorData,
-        })
-        setError(
-          response.status === 405
-            ? "Méthode POST non autorisée pour /api/users/payment-infos. Vérifiez la configuration du serveur."
-            : `Erreur lors de l'ajout du moyen de paiement: ${errorData.message || "Erreur inconnue (code: " + response.status + ")"}`
-        )
-      }
-
-      setNewPayment({ card_name: "" })
-      cardElement.clear()
-    } catch (err) {
-      console.error("[CheckoutPage] Erreur réseau:", err)
-      setError(
-        "Erreur réseau lors de l’ajout du moyen de paiement. Vérifiez votre connexion et réessayez."
-      )
-    }
-  }
-
-  // Process payment
-  const handleProceedToPayment = async () => {
-    setError(null)
-    setProcessingPayment(true)
-
-    try {
-      if (!cart || cart.length === 0) {
-        throw new Error("Votre panier est vide")
-      }
-
-      // Normalize cart items
-      const normalizedCart = cart
-        .map(item => {
-          const subscription_type = VALID_SUBSCRIPTION_TYPES.includes(
-            item.subscription || ""
-          )
-            ? item.subscription
-            : "MONTHLY"
-
-          return {
-            id: item.id || "",
-            uniqueId:
-              item.uniqueId || `${item.id}-${subscription_type}-${Date.now()}`,
-            name: item.name || "Produit inconnu",
-            price:
-              typeof item.price === "number" && item.price > 0 ? item.price : 0,
-            quantity:
-              typeof item.quantity === "number" && item.quantity > 0
-                ? Math.floor(item.quantity)
-                : 1,
-            subscription_type,
-            subscription: subscription_type,
-            imageUrl: item.imageUrl || undefined,
-          }
-        })
-        .filter(item => {
-          const isValid =
-            item.id &&
-            item.price > 0 &&
-            item.quantity > 0 &&
-            VALID_SUBSCRIPTION_TYPES.includes(
-              item.subscription_type?.toString() || ""
-            )
-          return isValid
-        })
-
-      if (normalizedCart.length === 0) {
-        throw new Error(
-          "Aucun élément valide dans le panier. Veuillez vérifier votre sélection."
-        )
-      }
-
-      if (
-        !selectedAddress ||
-        !addresses.some(a => a.id_address.toString() === selectedAddress)
-      ) {
-        throw new Error("Veuillez sélectionner une adresse valide")
-      }
-
-      if (
-        !selectedPayment ||
-        !paymentInfos.some(p => String(p.id_payment_info) === selectedPayment)
-      ) {
-        throw new Error("Veuillez sélectionner un moyen de paiement valide")
-      }
-
-      let userId = session?.user?.id_user || guestUserId
-      if (isGuest && !userId) {
-        userId = await createGuestUser()
-        if (!userId) {
-          throw new Error("Utilisateur non identifié")
-        }
-      }
-
-      const selectedPaymentInfo = paymentInfos.find(
-        (p: PaymentInfo) => String(p.id_payment_info) === selectedPayment
-      )
-
-      if (!selectedPaymentInfo || !selectedPaymentInfo.stripe_payment_id) {
-        throw new Error(
-          "Le moyen de paiement sélectionné est invalide ou non configuré. Veuillez en ajouter un nouveau."
-        )
-      }
-
-      const addressIdToSend = parseInt(selectedAddress).toString()
-      const paymentIdToSend = parseInt(selectedPayment).toString()
-
-      // Initiate checkout
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-user-id": userId ? userId.toString() : "",
-        },
-        body: JSON.stringify({
-          cartItems: normalizedCart,
-          addressId: addressIdToSend,
-          paymentId: paymentIdToSend,
-          guestId: isGuest ? userId : undefined,
-          guestEmail: isGuest ? guestEmail : undefined,
-          sessionToken: isGuest ? "guest" : userId ? userId.toString() : "",
-          stripe_payment_id: selectedPaymentInfo.stripe_payment_id,
-        }),
-      })
-
-      const responseData = await safeParseJson(response)
-
-      if (!response.ok) {
-        throw new Error(
-          responseData.message || "Erreur lors du traitement du paiement"
-        )
-      }
-
-      // Process confirmation
-      const confirmationResponse = await fetch(
-        `/api/checkout/confirmation?payment_intent_id=${responseData.paymentIntentId}&addressId=${addressIdToSend}&paymentId=${paymentIdToSend}${
-          isGuest ? `&guestId=${userId}` : ""
-        }`,
-        {
+        // Mode connecté
+        const response = await fetch(`/api/users/${userId}/payments`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-user-id": userId ? userId.toString() : "",
+            "x-user-id": userId.toString(),
           },
-          body: JSON.stringify({
-            cartItems: normalizedCart,
-          }),
-        }
-      )
+          body: JSON.stringify(paymentData),
+          credentials: "include",
+        })
 
-      if (!confirmationResponse.ok) {
-        const errorData = await safeParseJson(confirmationResponse)
-        throw new Error(
-          `Erreur lors de la confirmation de la commande: ${errorData.message || "Erreur inconnue"}`
-        )
+        if (!response.ok) {
+          const errorData = await safeParseJson(response)
+          throw new Error(
+            response.status === 405
+              ? "Méthode POST non autorisée pour /api/users/payments. Vérifiez la configuration du serveur."
+              : `Erreur lors de l'ajout du moyen de paiement: ${errorData.message || "Erreur inconnue (code: " + response.status + ")"}`
+          )
+        }
+
+        const savedPayment = await safeParseJson(response)
+        console.log("[useCheckout] Paiement enregistré:", savedPayment)
+
+        setPaymentInfos([...paymentInfos, savedPayment])
+        setSelectedPayment(savedPayment)
       }
 
-      const confirmationData = await safeParseJson(confirmationResponse)
+      toast({
+        title: "Moyen de paiement ajouté",
+        description: "Votre nouveau moyen de paiement a été ajouté avec succès.",
+        variant: "success",
+      })
 
-      // Download invoice if available
-      try {
-        const invoiceResponse = await fetch(
-          `/api/invoices/${confirmationData.id_order}/download`,
-          {
-            method: "GET",
-          }
-        )
-
-        if (invoiceResponse.ok) {
-          const pdfBlob = await invoiceResponse.blob()
-          const url = window.URL.createObjectURL(pdfBlob)
-          const link = document.createElement("a")
-          link.href = url
-          link.download = `facture-${confirmationData.invoice_number || Date.now()}.pdf`
-          link.click()
-          window.URL.revokeObjectURL(url)
-        }
-      } catch (err) {
-        console.error("Erreur téléchargement facture:", err)
-        // Non-blocking error - continue with checkout
-      }
-
-      // Clear cart and redirect to success page
-      setCart([])
-      router.push(`/checkout/success?orderId=${responseData.orderId}`)
+      setNewPayment({ card_name: "" })
+      cardElement.clear()
+      setActiveTab("review")
     } catch (err) {
+      console.error("[useCheckout] Erreur dans handleSaveNewPayment:", err)
       setError(
-        err instanceof Error
-          ? err.message
-          : "Une erreur est survenue lors du traitement de la commande"
+        err instanceof Error ? err.message : "Erreur lors de l’ajout du moyen de paiement"
       )
-    } finally {
-      setProcessingPayment(false)
     }
   }
+
+  // Log avant le retour pour vérifier les valeurs
+  console.log('[useCheckout] Retour des valeurs:', {
+    setProcessingPaymentType: typeof setProcessingPayment,
+    processingPayment,
+    isGuest,
+    cartLength: cart.length,
+    selectedAddressId: selectedAddress?.id_address,
+    selectedPaymentId: selectedPayment?.id_payment_info,
+  })
 
   return {
     isGuest,
@@ -753,18 +701,20 @@ export function useCheckout() {
     setActiveTab,
     loading,
     processingPayment,
+    setProcessingPayment,
     error,
+    setError,
     newAddress,
     setNewAddress,
     newPayment,
     setNewPayment,
     cart,
+    setCart,
     totalItems,
     totalCartPrice,
     taxes,
     finalTotal,
     handleSaveNewAddress,
     handleSaveNewPayment,
-    handleProceedToPayment,
   }
 }
