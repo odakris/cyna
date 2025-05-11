@@ -19,7 +19,9 @@ export async function POST(req: NextRequest) {
     const {
       cartItems,
       addressId,
+      addressData, // Ajouté pour le mode invité
       paymentId,
+      paymentData,
       totalAmount: clientTotalAmount,
       taxes,
       guestId,
@@ -37,40 +39,75 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Récupérer et valider PaymentInfo
-    console.log("[API Checkout] Récupération de PaymentInfo pour paymentId:", paymentId);
-    const paymentInfo = await prisma.paymentInfo.findUnique({
-      where: { id_payment_info: parseInt(paymentId) },
-      select: { id_user: true, stripe_payment_id: true, stripe_customer_id: true, last_card_digits: true },
-    });
+    // Gérer PaymentInfo en fonction du mode (connecté ou invité)
+    let paymentInfo;
+    let validatedLastCardDigits = "4242"; // Valeur par défaut
 
-    if (!paymentInfo || !paymentInfo.stripe_payment_id || !paymentInfo.stripe_customer_id) {
-      console.error("[API Checkout] PaymentInfo invalide:", { paymentInfo });
-      return NextResponse.json(
-        { error: "Méthode de paiement invalide ou informations Stripe manquantes" },
-        { status: 400 }
-      );
-    }
-    console.log("[API Checkout] PaymentInfo récupéré:", {
-      id_user: paymentInfo.id_user,
-      stripe_payment_id: paymentInfo.stripe_payment_id,
-      stripe_customer_id: paymentInfo.stripe_customer_id,
-    });
+    if (guestId && paymentData) {
+      console.log("[API Checkout] Mode invité, utilisation de paymentData:", paymentData);
+      if (!paymentData.stripe_payment_id || !paymentData.stripe_customer_id) {
+        console.error("[API Checkout] paymentData invalide:", paymentData);
+        return NextResponse.json(
+          { error: "Informations de paiement Stripe manquantes pour l'invité" },
+          { status: 400 }
+        );
+      }
 
-    // Valider last_card_digits
-    let validatedLastCardDigits = paymentInfo.last_card_digits;
-    if (!validatedLastCardDigits || validatedLastCardDigits.includes(':') || validatedLastCardDigits.length > 4) {
-      console.warn("[API Checkout] last_card_digits invalide, utilisation de la valeur par défaut:", {
-        last_card_digits: validatedLastCardDigits,
+      // Créer un PaymentInfo temporaire dans la base de données
+      console.log("[API Checkout] Création d'un PaymentInfo temporaire pour l'invité...");
+      paymentInfo = await prisma.paymentInfo.create({
+        data: {
+          id_user: parseInt(guestId, 10),
+          card_name: paymentData.card_name || "Guest Card",
+          last_card_digits: paymentData.last_card_digits || "4242",
+          stripe_payment_id: paymentData.stripe_payment_id,
+          stripe_customer_id: paymentData.stripe_customer_id,
+          brand: paymentData.brand || "unknown",
+          exp_month: paymentData.exp_month || 12,
+          exp_year: paymentData.exp_year || new Date().getFullYear() + 1,
+        },
       });
-      validatedLastCardDigits = "4242"; // MODIFIÉ : Utiliser une valeur par défaut si invalide
-    } else if (!/^\d{4}$/.test(validatedLastCardDigits)) {
-      console.warn("[API Checkout] last_card_digits non numérique, utilisation de la valeur par défaut:", {
-        last_card_digits: validatedLastCardDigits,
+      console.log("[API Checkout] PaymentInfo temporaire créé:", {
+        id_payment_info: paymentInfo.id_payment_info,
+        stripe_payment_id: paymentInfo.stripe_payment_id,
+        stripe_customer_id: paymentInfo.stripe_customer_id,
       });
-      validatedLastCardDigits = "4242"; // MODIFIÉ : Vérifier que ce sont 4 chiffres
+
+      validatedLastCardDigits = paymentData.last_card_digits || "4242";
+    } else {
+      console.log("[API Checkout] Récupération de PaymentInfo pour paymentId:", paymentId);
+      paymentInfo = await prisma.paymentInfo.findUnique({
+        where: { id_payment_info: parseInt(paymentId) },
+        select: { id_user: true, stripe_payment_id: true, stripe_customer_id: true, last_card_digits: true },
+      });
+
+      if (!paymentInfo || !paymentInfo.stripe_payment_id || !paymentInfo.stripe_customer_id) {
+        console.error("[API Checkout] PaymentInfo invalide:", { paymentInfo });
+        return NextResponse.json(
+          { error: "Méthode de paiement invalide ou informations Stripe manquantes" },
+          { status: 400 }
+        );
+      }
+      console.log("[API Checkout] PaymentInfo récupéré:", {
+        id_user: paymentInfo.id_user,
+        stripe_payment_id: paymentInfo.stripe_payment_id,
+        stripe_customer_id: paymentInfo.stripe_customer_id,
+      });
+
+      validatedLastCardDigits = paymentInfo.last_card_digits;
+      if (!validatedLastCardDigits || validatedLastCardDigits.includes(':') || validatedLastCardDigits.length > 4) {
+        console.warn("[API Checkout] last_card_digits invalide, utilisation de la valeur par défaut:", {
+          last_card_digits: validatedLastCardDigits,
+        });
+        validatedLastCardDigits = "4242";
+      } else if (!/^\d{4}$/.test(validatedLastCardDigits)) {
+        console.warn("[API Checkout] last_card_digits non numérique, utilisation de la valeur par défaut:", {
+          last_card_digits: validatedLastCardDigits,
+        });
+        validatedLastCardDigits = "4242";
+      }
+      console.log("[API Checkout] last_card_digits validé:", validatedLastCardDigits);
     }
-    console.log("[API Checkout] last_card_digits validé:", validatedLastCardDigits);
 
     // Vérifier que l'utilisateur ou le guest est valide
     let userId = paymentInfo.id_user;
@@ -87,7 +124,7 @@ export async function POST(req: NextRequest) {
 
     console.log("[API Checkout] Récupération de l'utilisateur pour userId:", userId || guestId);
     const user = await prisma.user.findUnique({
-      where: { id_user: userId || guestId },
+      where: { id_user: userId || parseInt(guestId, 10) },
       select: { stripeCustomerId: true, email: true, first_name: true },
     });
 
@@ -103,52 +140,97 @@ export async function POST(req: NextRequest) {
     if (!user.stripeCustomerId || user.stripeCustomerId !== customerId) {
       console.log("[API Checkout] Mise à jour de User.stripeCustomerId:", { userId: userId || guestId, newCustomerId: customerId });
       await prisma.user.update({
-        where: { id_user: userId || guestId },
+        where: { id_user: userId || parseInt(guestId, 10) },
         data: { stripeCustomerId: customerId },
       });
     }
 
-    // Valider id_payment_info
-    console.log("[API Checkout] Validation de id_payment_info:", paymentId);
-    const validPaymentInfo = await prisma.paymentInfo.findFirst({
-      where: {
-        id_payment_info: parseInt(paymentId),
-        id_user: userId || guestId,
-      },
-    });
-    if (!validPaymentInfo) {
-      console.error("[API Checkout] id_payment_info non valide pour cet utilisateur:", { paymentId, userId: userId || guestId });
-      return NextResponse.json(
-        { error: "Méthode de paiement non associée à l'utilisateur" },
-        { status: 400 }
-      );
+    // Valider id_payment_info pour le mode connecté uniquement
+    if (!guestId) {
+      console.log("[API Checkout] Validation de id_payment_info:", paymentId);
+      const validPaymentInfo = await prisma.paymentInfo.findFirst({
+        where: {
+          id_payment_info: parseInt(paymentId),
+          id_user: userId,
+        },
+      });
+      if (!validPaymentInfo) {
+        console.error("[API Checkout] id_payment_info non valide pour cet utilisateur:", { paymentId, userId });
+        return NextResponse.json(
+          { error: "Méthode de paiement non associée à l'utilisateur" },
+          { status: 400 }
+        );
+      }
+      console.log("[API Checkout] id_payment_info validé:", paymentId);
     }
-    console.log("[API Checkout] id_payment_info validé:", paymentId);
 
-    // Vérifier que l'adresse existe et récupérer ses détails
-    console.log("[API Checkout] Récupération de l'adresse pour addressId:", addressId);
-    const address = await prisma.address.findUnique({
-      where: { id_address: parseInt(addressId) },
-      select: {
-        id_user: true,
-        address1: true,
-        address2: true,
-        city: true,
-        postal_code: true,
-        country: true,
-        first_name: true,
-        last_name: true,
-      },
-    });
+    // Gérer l'adresse
+    let address;
+    let finalAddressId: number;
 
-    if (!address || ((userId || guestId) && address.id_user !== (userId || guestId))) {
-      console.error("[API Checkout] Adresse invalide:", { addressId, userId: userId || guestId });
-      return NextResponse.json(
-        { error: "Adresse invalide ou non associée à l'utilisateur" },
-        { status: 400 }
-      );
+    if (guestId && addressData) {
+      console.log("[API Checkout] Mode invité, création d'une adresse temporaire avec addressData:", addressData);
+      if (
+        !addressData.first_name ||
+        !addressData.last_name ||
+        !addressData.address1 ||
+        !addressData.postal_code ||
+        !addressData.city ||
+        !addressData.country ||
+        !addressData.mobile_phone
+      ) {
+        console.error("[API Checkout] addressData invalide:", addressData);
+        return NextResponse.json(
+          { error: "Informations d'adresse incomplètes pour l'invité" },
+          { status: 400 }
+        );
+      }
+
+      address = await prisma.address.create({
+        data: {
+          id_user: parseInt(guestId, 10),
+          first_name: addressData.first_name,
+          last_name: addressData.last_name,
+          address1: addressData.address1,
+          address2: addressData.address2 || null,
+          postal_code: addressData.postal_code,
+          city: addressData.city,
+          country: addressData.country,
+          mobile_phone: addressData.mobile_phone,
+          region: addressData.region || null,
+        },
+      });
+      console.log("[API Checkout] Adresse temporaire créée:", {
+        id_address: address.id_address,
+        id_user: address.id_user,
+      });
+      finalAddressId = address.id_address;
+    } else {
+      console.log("[API Checkout] Récupération de l'adresse pour addressId:", addressId);
+      address = await prisma.address.findUnique({
+        where: { id_address: parseInt(addressId) },
+        select: {
+          id_user: true,
+          address1: true,
+          address2: true,
+          city: true,
+          postal_code: true,
+          country: true,
+          first_name: true,
+          last_name: true,
+        },
+      });
+
+      if (!address || (userId && address.id_user !== userId)) {
+        console.error("[API Checkout] Adresse invalide:", { addressId, userId });
+        return NextResponse.json(
+          { error: "Adresse invalide ou non associée à l'utilisateur" },
+          { status: 400 }
+        );
+      }
+      console.log("[API Checkout] Adresse validée:", { addressId, id_user: address.id_user });
+      finalAddressId = parseInt(addressId);
     }
-    console.log("[API Checkout] Adresse validée:", { addressId, id_user: address.id_user });
 
     // Calculer le montant total
     console.log("[API Checkout] Calcul du montant total...");
@@ -195,7 +277,6 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
-      // Vérifier subscription_type
       if (!item.subscription_type || !VALID_SUBSCRIPTION_TYPES.includes(item.subscription_type)) {
         console.error("[API Checkout] Type de subscription manquant ou invalide:", {
           subscription_type: item.subscription_type,
@@ -262,12 +343,12 @@ export async function POST(req: NextRequest) {
 
     // Préparer les données de la commande
     const orderData = {
-      id_user: userId || guestId,
-      id_address: parseInt(addressId),
+      id_user: userId || parseInt(guestId, 10),
+      id_address: finalAddressId,
       total_amount: finalTotalAmount,
       subtotal: serverTotalAmount,
       payment_method: "card",
-      last_card_digits: validatedLastCardDigits, // MODIFIÉ : Utiliser la valeur validée
+      last_card_digits: validatedLastCardDigits,
       invoice_number: invoiceNumber,
       order_status: paymentIntent.status === "succeeded" ? "COMPLETED" : "PENDING",
       order_items: {
@@ -291,7 +372,7 @@ export async function POST(req: NextRequest) {
     } else {
       const emailSent = await orderConfirmationEmailService.sendOrderConfirmationEmail({
         orderId: order.id_order,
-        userId: userId || guestId,
+        userId: userId || parseInt(guestId, 10),
         email: emailToSend,
         firstName: user.first_name || undefined,
         orderItems: order.order_items.map(item => ({

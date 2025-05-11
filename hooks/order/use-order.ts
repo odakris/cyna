@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
+import { useSession } from "next-auth/react"
 
 export interface OrderItem {
   id_product: number
@@ -36,6 +37,7 @@ export interface Order {
 
 export function useOrder(orderId: string | null) {
   const { toast } = useToast()
+  const { data: session, status: sessionStatus } = useSession()
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -48,7 +50,7 @@ export function useOrder(orderId: string | null) {
       const text = await response.text()
       return text ? JSON.parse(text) : {}
     } catch (err) {
-      console.error("Erreur parsing JSON:", err)
+      console.error("[use-order] Erreur parsing JSON:", err)
       return { message: "Réponse serveur invalide" }
     }
   }
@@ -62,6 +64,11 @@ export function useOrder(orderId: string | null) {
         return
       }
 
+      // Attendre que sessionStatus soit résolu
+      if (sessionStatus === "loading") {
+        return
+      }
+
       try {
         // Tenter de récupérer l'email de l'invité depuis localStorage
         const storedGuestEmail =
@@ -72,7 +79,10 @@ export function useOrder(orderId: string | null) {
           setGuestEmail(storedGuestEmail)
         }
 
-        const response = await fetch(`/api/orders/${orderId}`)
+        const response = await fetch(`/api/orders/${orderId}`, {
+          method: "GET",
+          credentials: "include",
+        })
 
         if (!response.ok) {
           const errorData = await safeParseJson(response)
@@ -87,14 +97,14 @@ export function useOrder(orderId: string | null) {
         setOrder(data.order || data)
         setLoading(false)
       } catch (error) {
-        console.error("Erreur réseau lors du chargement de la commande:", error)
+        console.error("[use-order] Erreur réseau lors du chargement de la commande:", error)
         setError("Erreur réseau lors du chargement de la commande")
         setLoading(false)
       }
     }
 
     fetchOrder()
-  }, [orderId])
+  }, [orderId, sessionStatus])
 
   // Handle invoice download
   const handleDownloadInvoice = async () => {
@@ -111,10 +121,44 @@ export function useOrder(orderId: string | null) {
     setDownloadingInvoice(true)
 
     try {
-      const response = await fetch(`/api/invoices/${order.id_order}/download`)
+      const headers: HeadersInit = {}
+      // Récupérer guestUserId depuis localStorage
+      const guestId =
+        typeof window !== "undefined"
+          ? localStorage.getItem("guestUserId")
+          : null
+      // Loguer guestId pour débogage
+      console.log("[use-order] guestId utilisé:", guestId)
+
+      // Ajouter x-guest-id pour les utilisateurs non connectés
+      if (guestId && sessionStatus !== "authenticated") {
+        headers["x-guest-id"] = guestId
+      } else if (sessionStatus !== "authenticated" && !guestId) {
+        console.warn("[use-order] Aucun guestUserId trouvé dans localStorage pour un utilisateur invité")
+      }
+
+      console.log("[use-order] Requête de téléchargement facture:", {
+        orderId: order.id_order,
+        headers,
+        sessionStatus,
+      })
+
+      const response = await fetch(`/api/invoices/${order.id_order}/download`, {
+        method: "GET",
+        headers,
+        credentials: "include",
+      })
 
       if (!response.ok) {
-        throw new Error("Erreur lors du téléchargement de la facture")
+        const errorData = await safeParseJson(response)
+        console.error("[use-order] Échec de la requête:", {
+          status: response.status,
+          statusText: response.statusText,
+          error: errorData,
+        })
+        throw new Error(
+          `Erreur lors du téléchargement de la facture: ${errorData.message || "Erreur inconnue"}`
+        )
       }
 
       const blob = await response.blob()
@@ -127,13 +171,17 @@ export function useOrder(orderId: string | null) {
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
 
+      console.log("[use-order] Facture téléchargée avec succès:", {
+        orderId: order.id_order,
+      })
+
       toast({
         title: "Téléchargement réussi",
         description: "Votre facture a été téléchargée",
         variant: "success",
       })
     } catch (error) {
-      console.error("Erreur téléchargement facture:", error)
+      console.error("[use-order] Erreur téléchargement facture:", error)
       toast({
         title: "Erreur",
         description: "Erreur lors du téléchargement de la facture",

@@ -139,7 +139,7 @@ export function useCheckout() {
     }
   }
 
-  // Fetch guest data from localStorage and decrypt
+  // Fetch guest data from localStorage
   const fetchGuestData = async () => {
     try {
       const guestAddresses = JSON.parse(localStorage.getItem("guestAddresses") || "[]")
@@ -147,33 +147,20 @@ export function useCheckout() {
 
       console.log("[useCheckout] Données brutes invité:", { guestAddresses, guestPayments })
 
-      // Appeler l'API pour déchiffrer
-      const decryptResponse = await fetch("/api/guest/decrypt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ addresses: guestAddresses, payments: guestPayments }),
-      })
+      setAddresses(Array.isArray(guestAddresses) ? guestAddresses : [])
+      setPaymentInfos(Array.isArray(guestPayments) ? guestPayments : [])
 
-      if (!decryptResponse.ok) {
-        const errorData = await safeParseJson(decryptResponse)
-        throw new Error(`Erreur lors du déchiffrement des données invité: ${errorData.message || "Erreur inconnue"}`)
+      if (guestAddresses.length > 0) {
+        setSelectedAddress(guestAddresses[0])
       }
-
-      const { addresses: decryptedAddresses, payments: decryptedPayments } = await decryptResponse.json()
-      console.log("[useCheckout] Données déchiffrées reçues:", { decryptedAddresses, decryptedPayments })
-
-      setAddresses(Array.isArray(decryptedAddresses) ? decryptedAddresses : [])
-      setPaymentInfos(Array.isArray(decryptedPayments) ? decryptedPayments : [])
-
-      if (decryptedAddresses.length > 0) {
-        setSelectedAddress(decryptedAddresses[0])
-      }
-      if (decryptedPayments.length > 0) {
-        setSelectedPayment(decryptedPayments[0])
+      if (guestPayments.length > 0) {
+        setSelectedPayment(guestPayments[0])
       }
     } catch (err) {
       console.error("[useCheckout] Erreur dans fetchGuestData:", err)
       setError(err instanceof Error ? err.message : "Erreur lors du chargement des données invité")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -343,40 +330,13 @@ export function useCheckout() {
       }
 
       if (isGuest) {
-        // Mode invité : Chiffrer via API
+        // Mode invité : Stocker directement
         const addressWithId = { ...newAddress, id_address: `guest_${uuidv4()}` }
-        const encryptResponse = await fetch("/api/guest/encrypt", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ addresses: [addressWithId] }),
-        })
-
-        if (!encryptResponse.ok) {
-          const errorData = await safeParseJson(encryptResponse)
-          throw new Error(`Erreur lors du chiffrement de l'adresse: ${errorData.message || "Erreur inconnue"}`)
-        }
-
-        const { addresses: encryptedAddresses } = await encryptResponse.json()
-        console.log("[useCheckout] Adresse chiffrée:", encryptedAddresses[0])
-
         const guestAddresses = JSON.parse(localStorage.getItem("guestAddresses") || "[]")
-        guestAddresses.push(encryptedAddresses[0])
+        guestAddresses.push(addressWithId)
         localStorage.setItem("guestAddresses", JSON.stringify(guestAddresses))
 
-        // Déchiffrer pour affichage
-        const decryptResponse = await fetch("/api/guest/decrypt", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ addresses: guestAddresses, payments: [] }),
-        })
-
-        if (!decryptResponse.ok) {
-          const errorData = await safeParseJson(decryptResponse)
-          throw new Error(`Erreur lors du déchiffrement des adresses: ${errorData.message || "Erreur inconnue"}`)
-        }
-
-        const { addresses: decryptedAddresses } = await decryptResponse.json()
-        setAddresses(decryptedAddresses)
+        setAddresses([...guestAddresses])
         setSelectedAddress(addressWithId)
       } else {
         // Mode connecté
@@ -545,7 +505,7 @@ export function useCheckout() {
       if (!cardElement) {
         console.error("[useCheckout] CardElement non trouvé")
         setError(
-          "Erreur avec le formulaire de paiement. Veuillez recharger la page."
+          "Erreur avec |le formulaire de paiement. Veuillez recharger la page."
         )
         return
       }
@@ -592,43 +552,16 @@ export function useCheckout() {
       console.log("[useCheckout] Données envoyées pour le paiement:", paymentData)
 
       if (isGuest) {
-        // Mode invité : Chiffrer via API
+        // Mode invité : Stocker directement
         const paymentWithId = {
           ...paymentData,
           id_payment_info: `guest_${uuidv4()}`,
         }
-        const encryptResponse = await fetch("/api/guest/encrypt", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ payments: [paymentWithId] }),
-        })
-
-        if (!encryptResponse.ok) {
-          const errorData = await safeParseJson(encryptResponse)
-          throw new Error(`Erreur lors du chiffrement du paiement: ${errorData.message || "Erreur inconnue"}`)
-        }
-
-        const { payments: encryptedPayments } = await encryptResponse.json()
-        console.log("[useCheckout] Paiement chiffré:", encryptedPayments[0])
-
         const guestPayments = JSON.parse(localStorage.getItem("guestPaymentInfos") || "[]")
-        guestPayments.push(encryptedPayments[0])
+        guestPayments.push(paymentWithId)
         localStorage.setItem("guestPaymentInfos", JSON.stringify(guestPayments))
 
-        // Déchiffrer pour affichage
-        const decryptResponse = await fetch("/api/guest/decrypt", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ addresses: [], payments: guestPayments }),
-        })
-
-        if (!decryptResponse.ok) {
-          const errorData = await safeParseJson(decryptResponse)
-          throw new Error(`Erreur lors du déchiffrement des paiements: ${errorData.message || "Erreur inconnue"}`)
-        }
-
-        const { payments: decryptedPayments } = await decryptResponse.json()
-        setPaymentInfos(decryptedPayments)
+        setPaymentInfos([...guestPayments])
         setSelectedPayment(paymentWithId)
       } else {
         // Mode connecté

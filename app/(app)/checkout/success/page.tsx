@@ -177,8 +177,6 @@ export default function SuccessPage() {
       decryptError,
       orderExists: !!order,
       guestEmail,
-      userEmail: order?.user?.email,
-      selectedEmail: isGuest ? guestEmail : order?.user?.email,
       decryptedAddress,
       decryptedLastCardDigits,
       searchParams: Object.fromEntries(searchParams.entries()),
@@ -186,8 +184,8 @@ export default function SuccessPage() {
     })
   }, [orderId, loading, error, order, guestEmail, decryptedAddress, decryptedLastCardDigits, decryptError, searchParams, sessionStatus])
 
-  // Sélectionner l'email : prioriser l'email de l'utilisateur connecté si disponible
-  const email = isGuest ? guestEmail || order?.user?.email || "" : order?.user?.email || guestEmail || ""
+  // Récupère l'email soit du guest, soit de l'utilisateur connecté
+  const email = guestEmail || order?.user?.email || ""
 
   if (sessionStatus === "loading" || loading) {
     return <LoadingState message="Chargement des détails de votre commande..." />
