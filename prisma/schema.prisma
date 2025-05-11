@@ -295,7 +295,7 @@ model Address {
     address2            String?  @db.VarChar(255)
     postal_code         String   @db.VarChar(255)
     city                String   @db.VarChar(255)
-    region              String   @db.VarChar(255)
+    region              String?   @db.VarChar(255)
     country             String   @db.VarChar(255)
     mobile_phone        String   @db.VarChar(255)
     is_default_billing  Boolean  @default(false)

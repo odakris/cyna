@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import  {AddressController} from "@/lib/controllers/AddressController";
+import { AddressController } from "@/lib/controllers/AddressController";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string, id_address?: string }> }) {
   try {

@@ -35,18 +35,20 @@ export class AddressRepository {
                     address2: data.address2 || null,
                     postal_code: data.postal_code,
                     city: data.city,
-                    region: data.region,
+                    region: data.region || null,
                     country: data.country,
                     mobile_phone: data.mobile_phone,
                     is_default_billing: !!data.is_default_billing,
                     is_default_shipping: !!data.is_default_shipping,
-                    id_user: parseInt(userId),
+                    user: {
+                        connect: { id_user: parseInt(userId) },
+                    },
                 },
             });
 
             return newAddress;
         } catch (error) {
-            console.error("Erreur Prisma:", error);
+            console.error("[AddressRepository createAddress] Erreur Prisma:", error);
             throw error; // Pour continuer la propagation si nécessaire
         }
     }
@@ -55,16 +57,17 @@ export class AddressRepository {
     static async updateAddress(userId: string, addressId: string, data: any) {
         const updatedAddress = await prisma.address.update({
             where: {
-                id_address: parseInt(addressId), // Trouver l'adresse par son ID
+                id_address: parseInt(addressId),
+                id_user: parseInt(userId), // Vérifie que l'adresse appartient à l'utilisateur
             },
             data: {
                 first_name: data.first_name,
                 last_name: data.last_name,
                 address1: data.address1,
-                address2: data.address2,
+                address2: data.address2 || null,
                 postal_code: data.postal_code,
                 city: data.city,
-                region: data.region || "",
+                region: data.region || null,
                 country: data.country,
                 mobile_phone: data.mobile_phone,
                 is_default_billing: !!data.is_default_billing,
@@ -79,8 +82,8 @@ export class AddressRepository {
         return await prisma.address.delete({
             where: {
                 id_address: parseInt(addressId),
+                id_user: parseInt(userId), // Vérifie que l'adresse appartient à l'utilisateur
             },
-        })
+        });
     }
-
 }

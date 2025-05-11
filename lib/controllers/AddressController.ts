@@ -190,9 +190,8 @@ export class AddressController {
     });
   }
 
-  static async createAddress(req: NextRequest, userId: string) {
+  static async createAddress(req: NextRequest, userId: string, data: any) {
     const id = parseInt(userId, 10);
-    const data = await req.json();
     if (isNaN(id) || !data) {
       console.error("[AddressController createAddress] ID utilisateur ou données manquantes", { userId, data });
       return NextResponse.json(
@@ -201,7 +200,7 @@ export class AddressController {
       );
     }
 
-    return withAuth(req, id, async (userId: number) => {
+    return withAuth(req, id, async (userId: number, data: any) => {
       console.log("[AddressController createAddress] Création d'adresse pour userId:", userId);
       console.log("[AddressController createAddress] Données reçues:", data);
 
@@ -269,6 +268,20 @@ export class AddressController {
           );
         }
 
+        // Si l'adresse est définie comme par défaut, désactiver les autres adresses par défaut
+        if (data.is_default_billing) {
+          await prisma.address.updateMany({
+            where: { id_user: userId, is_default_billing: true },
+            data: { is_default_billing: false },
+          });
+        }
+        if (data.is_default_shipping) {
+          await prisma.address.updateMany({
+            where: { id_user: userId, is_default_shipping: true },
+            data: { is_default_shipping: false },
+          });
+        }
+
         const created = await AddressService.createAddress(userId.toString(), encryptedData);
 
         if (!created) {
@@ -299,13 +312,12 @@ export class AddressController {
           { status: 500 }
         );
       }
-    });
+    }, data);
   }
 
-  static async updateAddress(req: NextRequest, id: string, id_address: string) {
+  static async updateAddress(req: NextRequest, id: string, id_address: string, data: any) {
     const userId = parseInt(id, 10);
     const addressId = parseInt(id_address, 10);
-    const data = await req.json();
     if (isNaN(userId) || isNaN(addressId) || !data) {
       console.error("[AddressController updateAddress] ID utilisateur, ID adresse ou données manquantes", { id, id_address, data });
       return NextResponse.json(
@@ -314,7 +326,7 @@ export class AddressController {
       );
     }
 
-    return withAuth(req, userId, async (userId: number) => {
+    return withAuth(req, userId, async (userId: number, data: any) => {
       try {
         // Valider les champs requis et les longueurs
         const requiredFields = ['first_name', 'last_name', 'address1', 'postal_code', 'city', 'country', 'mobile_phone'];
@@ -367,6 +379,20 @@ export class AddressController {
 
         console.log("[AddressController updateAddress] Données chiffrées:", encryptedData);
 
+        // Si l'adresse est définie comme par défaut, désactiver les autres adresses par défaut
+        if (data.is_default_billing) {
+          await prisma.address.updateMany({
+            where: { id_user: userId, is_default_billing: true },
+            data: { is_default_billing: false },
+          });
+        }
+        if (data.is_default_shipping) {
+          await prisma.address.updateMany({
+            where: { id_user: userId, is_default_shipping: true },
+            data: { is_default_shipping: false },
+          });
+        }
+
         const updatedAddress = await AddressService.updateAddress(userId.toString(), id_address, encryptedData);
         if (!updatedAddress) {
           console.log("[AddressController updateAddress] Adresse non trouvée:", { userId, addressId });
@@ -399,7 +425,7 @@ export class AddressController {
           { status: 500 }
         );
       }
-    });
+    }, data);
   }
 
   static async deleteAddress(req: NextRequest, userId: string, addressId: string) {
