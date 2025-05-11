@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
+import { encode } from 'next-auth/jwt';
+import { cookies } from 'next/headers';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
   apiVersion: '2024-10-28.acacia',
@@ -41,12 +43,45 @@ export async function POST(request: NextRequest) {
         active: true,
         role: 'CUSTOMER',
         stripeCustomerId: stripeCustomer.id,
+        first_name: '', // Valeur par défaut
+        last_name: '', // Valeur par défaut
         created_at: new Date(),
         updated_at: new Date(),
       },
     });
 
-    console.log('[GuestRoute] Utilisateur invité créé:', { id_user: guestUser.id_user, email, stripeCustomerId: stripeCustomer.id });
+    // Créer un token de session NextAuth pour l'utilisateur invité
+    const token = {
+      id_user: guestUser.id_user,
+      email: guestUser.email,
+      first_name: guestUser.first_name || '',
+      last_name: guestUser.last_name || '',
+      role: guestUser.role,
+      isGuest: guestUser.isGuest,
+      iat: Math.floor(Date.now() / 1000),
+      exp: Math.floor(Date.now() / 1000) + (2 * 60 * 60), // 2 heures
+    };
+
+    const encodedToken = await encode({
+      token,
+      secret: process.env.NEXTAUTH_SECRET!,
+    });
+
+    // Définir le cookie next-auth.session-token
+    cookies().set('next-auth.session-token', encodedToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 2 * 60 * 60, // 2 heures
+      path: '/',
+      sameSite: 'lax',
+    });
+
+    console.log('[GuestRoute] Utilisateur invité créé et session établie:', {
+      id_user: guestUser.id_user,
+      email,
+      stripeCustomerId: stripeCustomer.id,
+    });
+
     return NextResponse.json(guestUser, { status: 201 });
   } catch (error: any) {
     console.error('[GuestRoute] Erreur:', {

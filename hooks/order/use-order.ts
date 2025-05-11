@@ -70,13 +70,9 @@ export function useOrder(orderId: string | null) {
       }
 
       try {
-        // Tenter de récupérer l'email de l'invité depuis localStorage
-        const storedGuestEmail =
-          typeof window !== "undefined"
-            ? localStorage.getItem("guestEmail")
-            : null
-        if (storedGuestEmail) {
-          setGuestEmail(storedGuestEmail)
+        // Tenter de récupérer l'email de l'invité depuis la session
+        if (session?.user?.isGuest && session.user.email) {
+          setGuestEmail(session.user.email)
         }
 
         const response = await fetch(`/api/orders/${orderId}`, {
@@ -121,31 +117,14 @@ export function useOrder(orderId: string | null) {
     setDownloadingInvoice(true)
 
     try {
-      const headers: HeadersInit = {}
-      // Récupérer guestUserId depuis localStorage
-      const guestId =
-        typeof window !== "undefined"
-          ? localStorage.getItem("guestUserId")
-          : null
-      // Loguer guestId pour débogage
-      console.log("[use-order] guestId utilisé:", guestId)
-
-      // Ajouter x-guest-id pour les utilisateurs non connectés
-      if (guestId && sessionStatus !== "authenticated") {
-        headers["x-guest-id"] = guestId
-      } else if (sessionStatus !== "authenticated" && !guestId) {
-        console.warn("[use-order] Aucun guestUserId trouvé dans localStorage pour un utilisateur invité")
-      }
-
       console.log("[use-order] Requête de téléchargement facture:", {
         orderId: order.id_order,
-        headers,
         sessionStatus,
+        isGuest: session?.user?.isGuest,
       })
 
       const response = await fetch(`/api/invoices/${order.id_order}/download`, {
         method: "GET",
-        headers,
         credentials: "include",
       })
 

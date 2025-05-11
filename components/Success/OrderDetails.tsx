@@ -1,6 +1,8 @@
 "use client"
 
+import { useEffect } from "react"
 import { useSession } from "next-auth/react"
+import { signOut } from "next-auth/react"
 import { formatDate } from "@/lib/utils/format"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -68,7 +70,15 @@ export function OrderDetails({
   guestEmail,
 }: OrderDetailsProps) {
   const { data: session, status: sessionStatus } = useSession()
-  const isGuest = !session?.user?.id_user
+  const isGuest = session?.user?.isGuest || false
+
+  // Déconnexion automatique pour les invités après le rendu
+  useEffect(() => {
+    if (isGuest) {
+      signOut({ redirect: false })
+      console.log('[OrderDetails] Session invité déconnectée')
+    }
+  }, [isGuest])
 
   // Calculate totals
   const subtotal = order.total_amount / 1.2 // Remove 20% VAT

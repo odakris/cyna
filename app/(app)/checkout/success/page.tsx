@@ -35,7 +35,7 @@ export default function SuccessPage() {
   const { data: session, status: sessionStatus } = useSession()
   console.log("[SuccessPage] Session data:", { session, sessionStatus })
 
-  const isGuest = !session?.user?.id_user
+  const isGuest = session?.user?.isGuest || false
   const userId = session?.user?.id_user
 
   const {
@@ -72,33 +72,18 @@ export default function SuccessPage() {
           return
         }
 
-        if (isGuest) {
-          // Mode invité : Récupérer les données depuis localStorage
-          const guestAddresses = JSON.parse(localStorage.getItem("guestAddresses") || "[]")
-          const guestPayments = JSON.parse(localStorage.getItem("guestPaymentInfos") || "[]")
-          if (isAddressEncrypted) {
-            addresses = guestAddresses.filter((addr: Address) => addr.id_address === order.id_address)
-          }
-          if (isPaymentEncrypted && order.last_card_digits) {
-            payments = guestPayments
-          }
-        } else {
-          // Mode connecté : Préparer les données à déchiffrer
-          if (!userId) {
-            throw new Error("ID utilisateur manquant dans la session")
-          }
-          if (isAddressEncrypted) {
-            addresses = [order.address]
-          }
-          if (isPaymentEncrypted && order.last_card_digits) {
-            payments = [
-              {
-                id_payment_info: order.id_order.toString(),
-                card_name: "",
-                last_card_digits: order.last_card_digits,
-              },
-            ]
-          }
+        // Préparer les données à déchiffrer
+        if (isAddressEncrypted) {
+          addresses = [order.address]
+        }
+        if (isPaymentEncrypted && order.last_card_digits) {
+          payments = [
+            {
+              id_payment_info: order.id_order.toString(),
+              card_name: "",
+              last_card_digits: order.last_card_digits,
+            },
+          ]
         }
 
         console.log("[SuccessPage] Données à déchiffrer:", { addresses, payments })
@@ -112,17 +97,15 @@ export default function SuccessPage() {
 
         // Appeler l'API de déchiffrement
         const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'
-        const decryptRoute = isGuest ? '/api/crypt/guest/decrypt' : '/api/crypt/user/decrypt'
+        const decryptRoute = '/api/crypt/user/decrypt'
         console.log("[SuccessPage] Envoi de la requête à:", decryptRoute, { userId, isGuest })
         const response = await fetch(`${baseUrl}${decryptRoute}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            ...(userId && !isGuest ? { "x-user-id": userId.toString() } : {}),
-            ...(isGuest && localStorage.getItem("guestUserId") ? {
-              "x-guest-id": localStorage.getItem("guestUserId")!,
-            } : {}),
+            ...(userId ? { "x-user-id": userId.toString() } : {}),
           },
+          credentials: "include",
           body: JSON.stringify({ addresses, payments }),
         })
 
