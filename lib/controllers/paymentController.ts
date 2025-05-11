@@ -199,6 +199,7 @@ export const paymentController = {
           brand,
           exp_month,
           exp_year,
+          is_default = false,
         } = body;
 
         // Valider les données
@@ -243,7 +244,7 @@ export const paymentController = {
           );
         }
 
-        let finalStripeCustomerId = user.stripeCustomerId;
+        let stripeCustomerId = user.stripeCustomerId;
 
         // Vérifier stripe_customer_id du corps
         if (stripe_customer_id) {
@@ -257,39 +258,39 @@ export const paymentController = {
               { status: 400 }
             );
           }
-          finalStripeCustomerId = stripe_customer_id;
+          stripeCustomerId = stripe_customer_id;
         }
 
         // Si stripeCustomerId est absent, en créer un
-        if (!finalStripeCustomerId) {
+        if (!stripeCustomerId) {
           const stripeCustomer = await stripe.customers.create({
             email: user.email,
             name: `${user.first_name || ""} ${user.last_name || ""}`.trim(),
             metadata: { userId: user.id_user.toString() },
           });
 
-          finalStripeCustomerId = stripeCustomer.id;
+          stripeCustomerId = stripeCustomer.id;
 
           // Mettre à jour l'utilisateur
           await prisma.user.update({
             where: { id_user: userId },
-            data: { stripeCustomerId: finalStripeCustomerId },
+            data: { stripeCustomerId: stripeCustomerId },
           });
 
           console.log("[PaymentController createPaymentMethod] Client Stripe créé:", {
             userId,
-            stripeCustomerId: finalStripeCustomerId,
+            stripeCustomerId: stripeCustomerId,
           });
         }
 
         // Attacher le payment_method au client Stripe
         try {
           await stripe.paymentMethods.attach(stripe_payment_id, {
-            customer: finalStripeCustomerId,
+            customer: stripeCustomerId,
           });
           console.log("[PaymentController createPaymentMethod] Payment method attaché:", {
             stripe_payment_id,
-            stripeCustomerId: finalStripeCustomerId,
+            stripeCustomerId: stripeCustomerId,
           });
         } catch (error: any) {
           console.error("[PaymentController createPaymentMethod] Erreur lors de l'attachement du payment method:", error);
@@ -302,15 +303,30 @@ export const paymentController = {
           );
         }
 
-        // Préparer les données pour paymentService.addPayment avec chiffrement
+        // Si is_default est true, désactiver is_default pour les autres méthodes de paiement
+        if (is_default) {
+          await prisma.paymentInfo.updateMany({
+            where: {
+              id_user: userId,
+              is_default: true,
+            },
+            data: {
+              is_default: false,
+            },
+          })
+          console.log("[PaymentController createPaymentMethod] Autres méthodes par défaut désactivées pour userId:", userId)
+        }
+
+        // Préparer les données pour paymentService.addPayment
         const paymentData = {
           card_name: encrypt(card_name),
           stripe_payment_id,
-          stripe_customer_id: finalStripeCustomerId,
+          stripe_customer_id: stripeCustomerId,
           last_card_digits: encrypt(last_card_digits),
           brand: brand || null,
           exp_month: exp_month || null,
           exp_year: exp_year || null,
+          is_default,
         };
 
         console.log("[PaymentController createPaymentMethod] Données chiffrées:", paymentData);
@@ -320,7 +336,7 @@ export const paymentController = {
         console.log("[PaymentController createPaymentMethod] Moyen de paiement créé:", {
           id_payment_info: newPayment.id_payment_info,
           stripe_payment_id,
-          stripe_customer_id: finalStripeCustomerId,
+          stripe_customer_id: stripeCustomerId,
         });
 
         // Déchiffrer pour la réponse
