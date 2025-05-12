@@ -50,6 +50,19 @@ interface CheckoutReviewProps {
   error?: string | null
 }
 
+const getUnitPrice = (item: CartItem): number => {
+  switch (item.subscription || "MONTHLY") {
+    case "MONTHLY":
+      return 49.99
+    case "YEARLY":
+      return 41.66 // Prix mensuel pour YEARLY
+    case "PER_MACHINE":
+      return 19.99
+    default:
+      return item.price
+  }
+}
+
 export function CheckoutReview({
   addresses,
   selectedAddress,
@@ -64,15 +77,31 @@ export function CheckoutReview({
 }: CheckoutReviewProps) {
   useEffect(() => {
     console.log("[CheckoutReview] Props reçues:", {
-      selectedAddress,
-      selectedPayment,
-      cartLength: cart.length,
+      selectedAddress: selectedAddress
+        ? { ...selectedAddress, mobile_phone: "..." }
+        : null,
+      selectedPayment: selectedPayment
+        ? { ...selectedPayment, last_card_digits: "..." }
+        : null,
+      cart: cart.map(item => ({
+        ...item,
+        id: typeof item.id,
+        subscription: item.subscription || "MONTHLY",
+      })),
       finalTotal,
       processingPayment,
       error,
       handleProceedToPaymentType: typeof handleProceedToPayment,
     })
-  }, [selectedAddress, selectedPayment, cart, finalTotal, processingPayment, error, handleProceedToPayment])
+  }, [
+    selectedAddress,
+    selectedPayment,
+    cart,
+    finalTotal,
+    processingPayment,
+    error,
+    handleProceedToPayment,
+  ])
 
   return (
     <Card className="border-2 border-gray-100 shadow-md overflow-hidden">
@@ -95,7 +124,6 @@ export function CheckoutReview({
         )}
 
         <div className="space-y-6">
-          {/* Address summary */}
           <div>
             <h3 className="text-base font-semibold mb-3 text-[#302082] flex items-center gap-2">
               <MapPin className="h-4 w-4" />
@@ -119,7 +147,7 @@ export function CheckoutReview({
                   <p>{selectedAddress.country}</p>
                   <p className="flex items-center gap-2 pt-1">
                     <Phone className="h-3.5 w-3.5 text-gray-500" />
-                    {selectedAddress.mobile_phone}
+                    {selectedAddress.mobile_phone || "Non fourni"}
                   </p>
                 </div>
               </div>
@@ -138,7 +166,6 @@ export function CheckoutReview({
             </div>
           </div>
 
-          {/* Payment method summary */}
           <div>
             <h3 className="text-base font-semibold mb-3 text-[#302082] flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
@@ -157,7 +184,9 @@ export function CheckoutReview({
                 </div>
               </div>
             ) : (
-              <p className="text-red-600">Aucun moyen de paiement sélectionné</p>
+              <p className="text-red-600">
+                Aucun moyen de paiement sélectionné
+              </p>
             )}
 
             <div className="mt-2 text-xs text-right">
@@ -171,25 +200,18 @@ export function CheckoutReview({
             </div>
           </div>
 
-          {/* Cart items summary */}
           <div>
             <h3 className="text-base font-semibold mb-3 text-[#302082] flex items-center gap-2">
               <ShoppingCart className="h-4 w-4" />
-              Articles ({cart.reduce((count, item) => count + item.quantity, 0)})
+              Articles ({cart.reduce((count, item) => count + item.quantity, 0)}
+              )
             </h3>
 
             <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 divide-y divide-gray-200">
               {cart.map(item => {
-                const unitPrice = (() => {
-                  switch (item.subscription || "MONTHLY") {
-                    case "YEARLY":
-                      return item.price * 12
-                    default:
-                      return item.price
-                  }
-                })()
-
-                const itemTotal = unitPrice * item.quantity
+                const unitPrice = getUnitPrice(item)
+                const multiplier = item.subscription === "YEARLY" ? 12 : 1
+                const itemTotal = unitPrice * multiplier * item.quantity
 
                 return (
                   <div

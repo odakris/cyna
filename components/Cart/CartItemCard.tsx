@@ -13,27 +13,20 @@ import {
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, Minus, Plus, Clock, Tag } from "lucide-react"
-
-interface CartItem {
-  uniqueId: string
-  name: string
-  price: number
-  subscription: string
-  quantity: number
-  imageUrl?: string
-}
+import { useCart, CartItem } from "@/context/CartContext"
 
 interface CartItemCardProps {
   item: CartItem
-  onUpdate?: (changes: { subscription?: string; quantity?: number }) => void
-  onRemove?: () => void
-  disableRemove?: boolean
 }
 
 const getUnitPrice = (item: CartItem): number => {
   switch (item.subscription || "MONTHLY") {
+    case "MONTHLY":
+      return 49.99
     case "YEARLY":
-      return item.price * 12
+      return 499.9 / 12 // ≈ 41.66
+    case "PER_MACHINE":
+      return 19.99
     default:
       return item.price
   }
@@ -54,12 +47,8 @@ const getSubscriptionLabel = (type: string): string => {
   }
 }
 
-const CartItemCard: React.FC<CartItemCardProps> = ({
-  item,
-  onUpdate,
-  onRemove,
-  disableRemove,
-}) => {
+const CartItemCard: React.FC<CartItemCardProps> = ({ item }) => {
+  const { updateCartItem, decreaseQuantity, removeFromCart } = useCart()
   const [isRemoving, setIsRemoving] = React.useState(false)
 
   const unitPrice = getUnitPrice(item)
@@ -74,26 +63,35 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
 
   const handleSubscriptionChange = (value: string) => {
     console.log("[CartItemCard] Subscription type changed to:", value)
-    onUpdate?.({ subscription: value })
+    const newPrice = getUnitPrice({ ...item, subscription: value })
+    // Mettre à jour uniqueId pour refléter le nouveau type d'abonnement
+    const newUniqueId = `${item.id}-${value}-${Date.now()}`
+    updateCartItem(item.uniqueId, {
+      subscription: value,
+      price: newPrice,
+      uniqueId: newUniqueId,
+    })
   }
 
   const handleQuantityIncrement = () => {
     console.log("[CartItemCard] Incrementing quantity for item:", item.uniqueId)
-    onUpdate?.({ quantity: item.quantity + 1 })
+    updateCartItem(item.uniqueId, { quantity: item.quantity + 1 })
   }
 
   const handleQuantityDecrement = () => {
     console.log("[CartItemCard] Decrementing quantity for item:", item.uniqueId)
     if (item.quantity > 1) {
-      onUpdate?.({ quantity: item.quantity - 1 })
+      updateCartItem(item.uniqueId, { quantity: item.quantity - 1 })
+    } else {
+      decreaseQuantity(item.uniqueId) // Supprime si quantité atteint 0
     }
   }
 
   const handleRemove = () => {
-    if (isRemoving || disableRemove) return
+    if (isRemoving) return
     console.log("[CartItemCard] Removing item:", item.uniqueId)
     setIsRemoving(true)
-    onRemove?.()
+    removeFromCart(item.uniqueId)
     setTimeout(() => setIsRemoving(false), 1000)
   }
 
@@ -113,10 +111,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
                 />
               </div>
             ) : (
-              <div
-                className="flex items-center compile
-                justify-center h-full w-full bg-gray-100 text-gray-400 text-sm"
-              >
+              <div className="flex items-center justify-center h-full w-full bg-gray-100 text-gray-400 text-sm">
                 Image non disponible
               </div>
             )}
@@ -134,17 +129,15 @@ const CartItemCard: React.FC<CartItemCardProps> = ({
               <h3 className="text-lg font-bold text-[#302082] group-hover:text-[#FF6B00] transition-colors">
                 {item.name}
               </h3>
-              {!disableRemove && (
-                <Button
-                  onClick={handleRemove}
-                  variant="ghost"
-                  size="sm"
-                  className="text-gray-400 hover:text-red-600 hover:bg-red-50 -mt-1 -mr-1 h-8 w-8 rounded-full p-0"
-                  disabled={isRemoving}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
+              <Button
+                onClick={handleRemove}
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 hover:text-red-600 hover:bg-red-50 -mt-1 -mr-1 h-8 w-8 rounded-full p-0"
+                disabled={isRemoving}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
 
             <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     const {
       cartItems,
       addressId,
-      addressData, // Ajouté pour le mode invité
+      addressData,
       paymentId,
       paymentData,
       totalAmount: clientTotalAmount,
@@ -39,9 +39,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Gérer PaymentInfo en fonction du mode (connecté ou invité)
+    // Gérer PaymentInfo
     let paymentInfo;
-    let validatedLastCardDigits = "4242"; // Valeur par défaut
+    let validatedLastCardDigits = "4242";
 
     if (guestId && paymentData) {
       console.log("[API Checkout] Mode invité, utilisation de paymentData:", paymentData);
@@ -53,7 +53,6 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      // Créer un PaymentInfo temporaire dans la base de données
       console.log("[API Checkout] Création d'un PaymentInfo temporaire pour l'invité...");
       paymentInfo = await prisma.paymentInfo.create({
         data: {
@@ -109,7 +108,7 @@ export async function POST(req: NextRequest) {
       console.log("[API Checkout] last_card_digits validé:", validatedLastCardDigits);
     }
 
-    // Vérifier que l'utilisateur ou le guest est valide
+    // Vérifier utilisateur ou guest
     let userId = paymentInfo.id_user;
     let customerId = paymentInfo.stripe_customer_id;
 
@@ -136,7 +135,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Si User.stripeCustomerId est manquant ou différent, le mettre à jour
     if (!user.stripeCustomerId || user.stripeCustomerId !== customerId) {
       console.log("[API Checkout] Mise à jour de User.stripeCustomerId:", { userId: userId || guestId, newCustomerId: customerId });
       await prisma.user.update({
@@ -145,7 +143,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Valider id_payment_info pour le mode connecté uniquement
     if (!guestId) {
       console.log("[API Checkout] Validation de id_payment_info:", paymentId);
       const validPaymentInfo = await prisma.paymentInfo.findFirst({
@@ -236,16 +233,24 @@ export async function POST(req: NextRequest) {
     console.log("[API Checkout] Calcul du montant total...");
     const serverTotalAmount = Number(
       cartItems
-        .reduce((sum: number, item: any) => sum + item.price * item.quantity, 0)
+        .reduce((sum: number, item: any) => {
+          const unitPrice = item.unit_price;
+          if (!unitPrice || isNaN(unitPrice)) {
+            throw new Error(`Prix unitaire invalide pour l'article ${item.id_product}`);
+          }
+          const multiplier = item.subscription_type === "YEARLY" ? 12 : 1;
+          return sum + unitPrice * item.quantity * multiplier;
+        }, 0)
         .toFixed(2)
     );
     console.log("[API Checkout] Montant total calculé:", serverTotalAmount);
 
     // Valider totalAmount envoyé par le client
-    if (Math.abs(serverTotalAmount - clientTotalAmount) > 0.01) {
+    if (Math.abs(serverTotalAmount - clientTotalAmount) > 0.05) {
       console.error("[API Checkout] Incohérence dans totalAmount:", {
         clientTotalAmount,
         serverTotalAmount,
+        cartItems,
       });
       return NextResponse.json(
         { error: `Montant total incohérent: client (${clientTotalAmount}) vs serveur (${serverTotalAmount})` },
@@ -253,7 +258,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Calculer le montant total avec taxes (si fourni)
+    // Calculer le montant total avec taxes
     const taxesAmount = taxes && !isNaN(taxes) ? Number(taxes.toFixed(2)) : 0;
     const finalTotalAmount = serverTotalAmount + taxesAmount;
     console.log("[API Checkout] Montant final avec taxes:", finalTotalAmount);
@@ -270,8 +275,8 @@ export async function POST(req: NextRequest) {
     // Valider les ID des produits et subscription_type
     console.log("[API Checkout] Validation des produits et subscriptions...");
     for (const item of cartItems) {
-      if (!item.id || isNaN(parseInt(item.id))) {
-        console.error("[API Checkout] ID produit invalide:", { itemId: item.id });
+      if (!item.id_product || isNaN(parseInt(item.id_product))) {
+        console.error("[API Checkout] ID produit invalide:", { itemId: item.id_product });
         return NextResponse.json(
           { error: "ID produit invalide dans le panier" },
           { status: 400 }
@@ -289,21 +294,28 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
+      if (!item.unit_price || isNaN(item.unit_price)) {
+        console.error("[API Checkout] Prix unitaire manquant ou invalide:", { item });
+        return NextResponse.json(
+          { error: `Prix unitaire manquant ou invalide pour l'article ${item.id_product}` },
+          { status: 400 }
+        );
+      }
     }
 
     // Consolider les orderItems
     console.log("[API Checkout] Consolidation des orderItems...");
     const consolidatedItems = cartItems.reduce((acc: any[], item: any) => {
       const existing = acc.find(
-        (i: any) => i.id_product === parseInt(item.id) && i.subscription_type === item.subscription_type
+        (i: any) => i.id_product === parseInt(item.id_product) && i.subscription_type === item.subscription_type
       );
       if (existing) {
         existing.quantity += item.quantity;
       } else {
         acc.push({
-          id_product: parseInt(item.id),
+          id_product: parseInt(item.id_product),
           quantity: item.quantity,
-          unit_price: item.price,
+          unit_price: item.unit_price,
           subscription_type: item.subscription_type as SubscriptionType,
           subscription_status: "ACTIVE",
           subscription_duration: item.subscription_type === "MONTHLY" ? 12 : item.subscription_type === "YEARLY" ? 1 : 1,
@@ -315,12 +327,12 @@ export async function POST(req: NextRequest) {
 
     // Créer le PaymentIntent
     console.log("[API Checkout] Création du PaymentIntent:", {
-      amount: Math.round(serverTotalAmount * 100),
+      amount: Math.round(finalTotalAmount * 100),
       payment_method: paymentInfo.stripe_payment_id,
       customer: customerId,
     });
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(serverTotalAmount * 100),
+      amount: Math.round(finalTotalAmount * 100),
       currency: "eur",
       payment_method: paymentInfo.stripe_payment_id,
       customer: customerId,
