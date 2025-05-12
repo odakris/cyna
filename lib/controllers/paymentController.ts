@@ -18,10 +18,10 @@ async function withAuth(
   ...args: any
 ) {
   try {
-    console.log("[PaymentController withAuth] Début vérification pour userId:", userId);
+    // console.log("[PaymentController withAuth] Début vérification pour userId:", userId);
     const session = await getServerSession(authOptions);
     const xUserId = req.headers.get("x-user-id");
-    console.log("[PaymentController withAuth] En-têtes reçus:", { xUserId, sessionExists: !!session });
+    // console.log("[PaymentController withAuth] En-têtes reçus:", { xUserId, sessionExists: !!session });
 
     if (!session?.user?.id_user && !xUserId) {
       console.error("[PaymentController withAuth] Aucune session ou x-user-id pour userId:", userId);
@@ -34,11 +34,11 @@ async function withAuth(
     const sessionUserId = session?.user?.id_user ? parseInt(session.user.id_user) : null;
     const headerUserId = xUserId ? parseInt(xUserId) : null;
 
-    console.log("[PaymentController withAuth] IDs comparés:", {
+    /*console.log("[PaymentController withAuth] IDs comparés:", {
       sessionUserId,
       headerUserId,
       requestedUserId: userId,
-    });
+    }); */
 
     if (
       (sessionUserId && isNaN(sessionUserId)) ||
@@ -69,7 +69,7 @@ async function withAuth(
       );
     }
 
-    console.log("[PaymentController withAuth] Authentification réussie pour userId:", userId);
+    // console.log("[PaymentController withAuth] Authentification réussie pour userId:", userId);
     return await handler(userId, ...args);
   } catch (error: any) {
     console.error("[PaymentController withAuth] Erreur:", {
@@ -140,9 +140,9 @@ export const paymentController = {
 
     return withAuth(req, userId, async (userId: number) => {
       try {
-        console.log("[PaymentController getPayments] Début récupération des paiements pour userId:", userId);
+        // console.log("[PaymentController getPayments] Début récupération des paiements pour userId:", userId);
         const payments = await paymentService.fetchPayments(userId);
-        console.log("[PaymentController getPayments] Paiements bruts:", payments);
+        // console.log("[PaymentController getPayments] Paiements bruts:", payments);
 
         if (payments.length === 0) {
           console.log("[PaymentController getPayments] Aucun paiement trouvé pour userId:", userId);
@@ -152,19 +152,19 @@ export const paymentController = {
         // Déchiffrer les champs sensibles
         const decryptedPayments = payments.map(payment => {
           try {
-            console.log("[PaymentController getPayments] Déchiffrement pour paymentId:", payment.id_payment_info);
+            // console.log("[PaymentController getPayments] Déchiffrement pour paymentId:", payment.id_payment_info);
             return {
               ...payment,
               card_name: decrypt(payment.card_name),
               last_card_digits: decrypt(payment.last_card_digits),
             };
           } catch (error) {
-            console.error(`[PaymentController getPayments] Échec du déchiffrement pour paymentId: ${payment.id_payment_info}`, error);
+            //   console.error(`[PaymentController getPayments] Échec du déchiffrement pour paymentId: ${payment.id_payment_info}`, error);
             throw error;
           }
         });
 
-        console.log("[PaymentController getPayments] Paiements déchiffrés:", { userId, count: decryptedPayments.length });
+        //  console.log("[PaymentController getPayments] Paiements déchiffrés:", { userId, count: decryptedPayments.length });
         return NextResponse.json(decryptedPayments, { status: 200 });
       } catch (error: any) {
         console.error("[PaymentController getPayments] Erreur:", error);

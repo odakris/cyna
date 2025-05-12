@@ -436,7 +436,7 @@ export const getUserOrderHistory = async (
       ...categoryFilter,
     }
 
-    console.log("[OrderService] Where clause:", JSON.stringify(whereClause, null, 2))
+    //  console.log("[OrderService] Where clause:", JSON.stringify(whereClause, null, 2))
 
     const orders: OrderWithRelations[] = await prisma.order.findMany({
       where: whereClause,
@@ -456,11 +456,11 @@ export const getUserOrderHistory = async (
       },
     })
 
-    console.log("[OrderService] Orders found:", orders.length, "Details:", JSON.stringify(orders.map(o => ({
-      id_order: o.id_order,
-      order_date: o.order_date.toISOString(),
-      subscriptions: o.order_items.map(i => i.product?.name),
-    })), null, 2))
+    /* console.log("[OrderService] Orders found:", orders.length, "Details:", JSON.stringify(orders.map(o => ({
+       id_order: o.id_order,
+       order_date: o.order_date.toISOString(),
+       subscriptions: o.order_items.map(i => i.product?.name),
+     })), null, 2))*/
 
     if (!orders || orders.length === 0) {
       return []

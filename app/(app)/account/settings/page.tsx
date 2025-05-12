@@ -371,7 +371,19 @@ export default function AccountSettingsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button variant="default">Mettre à jour</Button>
+                    <Link href={`/account/subscriptions/${sub.id_order_item}`}>
+                      <Button
+                        variant="default"
+                        onClick={() => {
+                          console.log(
+                            "[AccountSettings] Navigating to update subscription:",
+                            sub.id_order_item
+                          )
+                        }}
+                      >
+                        Mettre à jour
+                      </Button>
+                    </Link>
                   </TableCell>
                   <TableCell>
                     <Button variant="destructive">Résilier</Button>

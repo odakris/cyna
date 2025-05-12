@@ -4,7 +4,7 @@ import { AddressController } from "@/lib/controllers/AddressController";
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string, id_address: string }> }) {
   try {
     const { id, id_address } = await params; // MODIFIÉ : Attendre params pour accès asynchrone
-    console.log("[Route GET /api/users/[id]/addresses/[id_address]] Appel avec userId:", id, "id_address:", id_address);
+    // console.log("[Route GET /api/users/[id]/addresses/[id_address]] Appel avec userId:", id, "id_address:", id_address);
 
     if (!id || !id_address) {
       console.error("[Route GET /api/users/[id]/addresses/[id_address]] ID utilisateur ou adresse manquant", { id, id_address });
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string, id_address: string }> }) {
   try {
     const { id, id_address } = await params; // MODIFIÉ : Attendre params pour accès asynchrone
-    console.log("[Route PUT /api/users/[id]/addresses/[id_address]] Appel avec userId:", id, "id_address:", id_address);
+    // console.log("[Route PUT /api/users/[id]/addresses/[id_address]] Appel avec userId:", id, "id_address:", id_address);
 
     if (!id || !id_address) {
       console.error("[Route PUT /api/users/[id]/addresses/[id_address]] ID utilisateur ou adresse manquant", { id, id_address });

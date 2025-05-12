@@ -191,8 +191,63 @@ export default function OrdersPage() {
         const data = await res.json()
 
         if (res.ok) {
-          setOrders(data)
-          setError(null)
+          // Préparer les adresses à déchiffrer
+          const addressesToDecrypt = data
+            .filter((order: Order) => order.billing_address)
+            .map((order: Order) => ({
+              id_address: order.id_order.toString(), // Utiliser id_order comme identifiant unique
+              first_name: "", // Non utilisé ici, mais requis par l'API
+              last_name: "", // Non utilisé
+              address1: order.billing_address?.address1 || "",
+              address2: order.billing_address?.address2 || null,
+              postal_code: order.billing_address?.postal_code || "",
+              city: order.billing_address?.city || "",
+              country: order.billing_address?.country || "",
+              mobile_phone: "", // Non utilisé
+            }))
+
+          // Appeler l'API de déchiffrement
+          const decryptRes = await fetch("/api/crypt/user/decrypt", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-user-id": session.user.id_user.toString(),
+            },
+            body: JSON.stringify({
+              addresses: addressesToDecrypt,
+              payments: [], // Pas de paiement à déchiffrer ici
+            }),
+          })
+
+          const decryptData = await decryptRes.json()
+
+          if (decryptRes.ok) {
+            // Mettre à jour les commandes avec les adresses déchiffrées
+            const decryptedOrders = data.map((order: Order) => {
+              const decryptedAddress = decryptData.addresses.find(
+                (addr: any) => addr.id_address === order.id_order.toString()
+              )
+              return {
+                ...order,
+                billing_address: decryptedAddress
+                  ? {
+                      address1: decryptedAddress.address1,
+                      address2: decryptedAddress.address2,
+                      postal_code: decryptedAddress.postal_code,
+                      city: decryptedAddress.city,
+                      country: decryptedAddress.country,
+                    }
+                  : order.billing_address,
+              }
+            })
+
+            setOrders(decryptedOrders)
+            setError(null)
+          } else {
+            console.error("Erreur lors du déchiffrement:", decryptData.message)
+            setOrders(data) // Fallback : utiliser les données non déchiffrées
+            setError("Erreur lors du déchiffrement des adresses")
+          }
         } else {
           setError(data.error || "Erreur lors de la récupération des commandes")
           setOrders([])
@@ -556,7 +611,7 @@ export default function OrdersPage() {
 
             <div className="mt-4">
               <a
-                href={`/api/invoices/${selectedOrder.id_order}`}
+                href={`/api/invoices/${selectedOrder.id_order}/download`}
                 className="text-blue-600 hover:underline text-sm"
                 download
               >

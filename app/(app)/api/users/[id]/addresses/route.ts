@@ -4,7 +4,7 @@ import { AddressController } from "@/lib/controllers/AddressController";
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string, id_address?: string }> }) {
   try {
     const { id, id_address } = await params;
-    console.log("[Route GET /api/users/[id]/addresses] Appel avec userId:", id, "id_address:", id_address);
+    // console.log("[Route GET /api/users/[id]/addresses] Appel avec userId:", id, "id_address:", id_address);
 
     if (!id) {
       console.error("[Route GET /api/users/[id]/addresses] ID utilisateur manquant");
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    console.log("[Route POST /api/users/[id]/addresses] Appel avec userId:", id);
+    //  console.log("[Route POST /api/users/[id]/addresses] Appel avec userId:", id);
 
     if (!id) {
       console.error("[Route POST /api/users/[id]/addresses] ID utilisateur manquant");
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string, id_address: string }> }) {
   try {
     const { id, id_address } = await params;
-    console.log("[Route PUT /api/users/[id]/addresses] Appel avec userId:", id, "id_address:", id_address);
+    // console.log("[Route PUT /api/users/[id]/addresses] Appel avec userId:", id, "id_address:", id_address);
 
     if (!id || !id_address) {
       console.error("[Route PUT /api/users/[id]/addresses] ID utilisateur ou adresse manquant", { id, id_address });
@@ -100,7 +100,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   try {
     const { id } = await params;
     const id_address = req.nextUrl.searchParams.get('addressId');
-    console.log("[Route DELETE /api/users/[id]/addresses] Appel avec userId:", id, "id_address:", id_address);
+    // console.log("[Route DELETE /api/users/[id]/addresses] Appel avec userId:", id, "id_address:", id_address);
 
     if (!id || !id_address) {
       console.error("[Route DELETE /api/users/[id]/addresses] ID utilisateur ou adresse manquant", { id, id_address });

@@ -13,7 +13,7 @@ async function withAuth(
   ...handlerArgs: any
 ) {
   try {
-    console.log("[AddressController withAuth] Vérification pour userId:", userId);
+    // console.log("[AddressController withAuth] Vérification pour userId:", userId);
     const session = await getServerSession(authOptions);
     const xUserId = req.headers.get("x-user-id");
 
@@ -57,7 +57,7 @@ async function withAuth(
       );
     }
 
-    console.log("[AddressController withAuth] Authentification réussie pour userId:", userId);
+    // console.log("[AddressController withAuth] Authentification réussie pour userId:", userId);
     return await handler(userId, ...handlerArgs);
   } catch (error: any) {
     console.error("[AddressController withAuth] Erreur", {
@@ -85,7 +85,7 @@ export class AddressController {
     return withAuth(req, userId, async (userId: number) => {
       try {
         const addresses = await AddressService.getUserAddresses(userId.toString());
-        console.log("[AddressController getUserAddresses] Adresses brutes:", addresses);
+        // console.log("[AddressController getUserAddresses] Adresses brutes:", addresses);
 
         if (addresses.length === 0) {
           console.log("[AddressController getUserAddresses] Aucune adresse trouvée pour userId:", userId);
@@ -120,7 +120,7 @@ export class AddressController {
           return decryptedAddress;
         });
 
-        console.log("[AddressController getUserAddresses] Adresses déchiffrées:", { userId, count: decryptedAddresses.length });
+        // console.log("[AddressController getUserAddresses] Adresses déchiffrées:", { userId, count: decryptedAddresses.length });
         return NextResponse.json(decryptedAddresses, { status: 200 });
       } catch (error: any) {
         console.error("[AddressController getUserAddresses] Erreur lors de la récupération:", error);
