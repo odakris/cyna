@@ -1,7 +1,6 @@
 "use client"
 
 import React from "react"
-import { CartItem, useCart } from "@/context/CartContext"
 import Image from "next/image"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -14,6 +13,7 @@ import {
 } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Trash2, Minus, Plus, Clock, Tag } from "lucide-react"
+import { useCart, CartItem } from "@/context/CartContext"
 
 interface CartItemCardProps {
   item: CartItem
@@ -21,8 +21,12 @@ interface CartItemCardProps {
 
 const getUnitPrice = (item: CartItem): number => {
   switch (item.subscription || "MONTHLY") {
+    case "MONTHLY":
+      return 49.99
     case "YEARLY":
-      return item.price * 12
+      return 499.9 / 12 // ≈ 41.66
+    case "PER_MACHINE":
+      return 19.99
     default:
       return item.price
   }
@@ -50,7 +54,6 @@ const CartItemCard: React.FC<CartItemCardProps> = ({ item }) => {
   const unitPrice = getUnitPrice(item)
   const totalPrice = unitPrice * item.quantity
 
-  // Style du badge selon le type d'abonnement
   const badgeStyles: Record<string, string> = {
     MONTHLY: "bg-blue-100 text-blue-700 border-blue-200",
     YEARLY: "bg-green-100 text-green-700 border-green-200",
@@ -59,19 +62,34 @@ const CartItemCard: React.FC<CartItemCardProps> = ({ item }) => {
   }
 
   const handleSubscriptionChange = (value: string) => {
-    updateCartItem(item.uniqueId, { subscription: value })
+    console.log("[CartItemCard] Subscription type changed to:", value)
+    const newPrice = getUnitPrice({ ...item, subscription: value })
+    // Mettre à jour uniqueId pour refléter le nouveau type d'abonnement
+    const newUniqueId = `${item.id}-${value}-${Date.now()}`
+    updateCartItem(item.uniqueId, {
+      subscription: value,
+      price: newPrice,
+      uniqueId: newUniqueId,
+    })
   }
 
   const handleQuantityIncrement = () => {
+    console.log("[CartItemCard] Incrementing quantity for item:", item.uniqueId)
     updateCartItem(item.uniqueId, { quantity: item.quantity + 1 })
   }
 
   const handleQuantityDecrement = () => {
-    decreaseQuantity(item.uniqueId)
+    console.log("[CartItemCard] Decrementing quantity for item:", item.uniqueId)
+    if (item.quantity > 1) {
+      updateCartItem(item.uniqueId, { quantity: item.quantity - 1 })
+    } else {
+      decreaseQuantity(item.uniqueId) // Supprime si quantité atteint 0
+    }
   }
 
   const handleRemove = () => {
     if (isRemoving) return
+    console.log("[CartItemCard] Removing item:", item.uniqueId)
     setIsRemoving(true)
     removeFromCart(item.uniqueId)
     setTimeout(() => setIsRemoving(false), 1000)
@@ -127,7 +145,7 @@ const CartItemCard: React.FC<CartItemCardProps> = ({ item }) => {
               <div className="space-y-1.5">
                 <label className="text-sm text-gray-600 font-medium flex items-center">
                   <Clock className="mr-1.5 h-3.5 w-3.5 text-gray-400" />
-                  Type d&apos;abonnement
+                  Type d'abonnement
                 </label>
                 <Select
                   value={item.subscription || "MONTHLY"}

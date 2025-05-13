@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   Table,
@@ -15,7 +16,6 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { useRouter } from "next/navigation"
 import {
   Dialog,
   DialogContent,
@@ -25,15 +25,33 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { useCart, CartItem } from "@/context/CartContext"
+import { useToast } from "@/hooks/use-toast"
 import { User } from "next-auth"
 import { Address, Order } from "@prisma/client"
 import { PaymentMethod } from "@stripe/stripe-js"
 
+interface ExtendedOrder extends Order {
+  subscriptions: Array<{
+    id_order_item: number
+    service_name: string
+    subscription_type: string
+    unit_price: number
+    quantity: number
+    renewal_date: string | null
+    subscription_status: string
+    id_product: number
+    imageUrl?: string
+  }>
+}
+
 export default function AccountSettingsPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { addToCart } = useCart()
+  const { toast } = useToast()
   const [clientInfo, setClientInfo] = useState<User | null>(null)
-  const [orders, setOrders] = useState<Order[]>([])
+  const [orders, setOrders] = useState<ExtendedOrder[]>([])
   const [addresses, setAddresses] = useState<Address[]>([])
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([])
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -44,7 +62,7 @@ export default function AccountSettingsPage() {
     useState(false)
   const [paymentToDelete, setPaymentToDelete] = useState<number | null>(null)
   const [modalError, setModalError] = useState<string | null>(null)
-  const [password, setPassword] = useState<string>("") // Nouvel état pour le mot de passe
+  const [password, setPassword] = useState<string>("")
   const [passwordError, setPasswordError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -60,80 +78,51 @@ export default function AccountSettingsPage() {
         ] = await Promise.all([
           fetch(`/api/users/${session.user.id_user}`, {
             credentials: "include",
-          }).then(async res => ({
-            ok: res.ok,
-            status: res.status,
-            data: res.ok ? await res.json() : null,
-            error: !res.ok
-              ? await res.json().catch(() => ({ message: "Erreur inconnue" }))
-              : null,
-          })),
+          }),
           fetch(`/api/users/${session.user.id_user}/orders`, {
             credentials: "include",
-          }).then(async res => ({
-            ok: res.ok,
-            status: res.status,
-            data: res.ok ? await res.json() : null,
-            error: !res.ok
-              ? await res.json().catch(() => ({ message: "Erreur inconnue" }))
-              : null,
-          })),
+          }),
           fetch(`/api/users/${session.user.id_user}/addresses`, {
             credentials: "include",
-          }).then(async res => ({
-            ok: res.ok,
-            status: res.status,
-            data: res.ok ? await res.json() : null,
-            error: !res.ok
-              ? await res.json().catch(() => ({ message: "Erreur inconnue" }))
-              : null,
-          })),
+          }),
           fetch(`/api/users/${session.user.id_user}/payments`, {
             credentials: "include",
-          }).then(async res => ({
-            ok: res.ok,
-            status: res.status,
-            data: res.ok ? await res.json() : null,
-            error: !res.ok
-              ? await res.json().catch(() => ({ message: "Erreur inconnue" }))
-              : null,
-          })),
+          }),
         ])
 
-        console.log("User Response:", userResponse)
-        console.log("Orders Response:", ordersResponse)
-        console.log("Addresses Response:", addressesResponse)
-        console.log("Payments Response:", paymentsResponse)
+        const userData = await userResponse.json()
+        const ordersData = await ordersResponse.json()
+        const addressesData = await addressesResponse.json()
+        const paymentsData = await paymentsResponse.json()
 
-        if (userResponse.ok) setClientInfo(userResponse.data)
+        if (userResponse.ok) setClientInfo(userData)
         else
           setErrorMessage(
-            userResponse.error?.message ||
+            userData.message ||
               "Erreur lors de la récupération des informations utilisateur"
           )
 
-        if (ordersResponse.ok) setOrders(ordersResponse.data)
+        if (ordersResponse.ok) setOrders(ordersData)
         else
           setErrorMessage(
-            ordersResponse.error?.message ||
-              "Erreur lors de la récupération des commandes"
+            ordersData.message || "Erreur lors de la récupération des commandes"
           )
 
-        if (addressesResponse.ok) setAddresses(addressesResponse.data)
+        if (addressesResponse.ok) setAddresses(addressesData)
         else
           setErrorMessage(
-            addressesResponse.error?.message ||
+            addressesData.message ||
               "Erreur lors de la récupération des adresses"
           )
 
-        if (paymentsResponse.ok) setPaymentMethods(paymentsResponse.data)
+        if (paymentsResponse.ok) setPaymentMethods(paymentsData)
         else
           setErrorMessage(
-            paymentsResponse.error?.message ||
+            paymentsData.message ||
               "Erreur lors de la récupération des méthodes de paiement"
           )
       } catch (error) {
-        console.error("Erreur générale dans fetchClientData:", error)
+        console.error("Erreur fetchClientData:", error)
         setErrorMessage(
           "Une erreur est survenue lors de la récupération des données."
         )
@@ -147,20 +136,14 @@ export default function AccountSettingsPage() {
     try {
       const response = await fetch("/api/check-password", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password, userId: session?.user?.id_user }),
       })
-
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error("Erreur lors de la vérification du mot de passe.")
-      }
-
       const data = await response.json()
       return data.isValid
     } catch (err) {
-      console.error("Erreur lors de la vérification du mot de passe:", err)
       setPasswordError("Erreur lors de la vérification du mot de passe.")
       return false
     }
@@ -173,13 +156,10 @@ export default function AccountSettingsPage() {
       )
       return
     }
-
     if (!password) {
       setPasswordError("Veuillez entrer votre mot de passe actuel.")
       return
     }
-
-    // Vérifier le mot de passe
     const isPasswordValid = await checkPassword(password)
     if (!isPasswordValid) {
       setPasswordError("Mot de passe incorrect.")
@@ -194,37 +174,26 @@ export default function AccountSettingsPage() {
           credentials: "include",
         }
       )
-
       if (!response.ok) {
-        const errorData = await response
-          .json()
-          .catch(() => ({ message: "Erreur inconnue" }))
+        const errorData = await response.json()
         throw new Error(
           errorData.message ||
             "Erreur lors de la suppression de la méthode de paiement."
         )
       }
-
       setPaymentMethods(prev =>
         prev.filter(payment => payment.id_payment_info !== paymentId)
       )
       setModalError(null)
-      setPassword("") // Réinitialiser le mot de passe après succès
+      setPassword("")
+      setIsDeletePaymentModalOpen(false)
+      setPaymentToDelete(null)
+      setPasswordError(null)
     } catch (err: any) {
-      console.error(
-        "Erreur lors de la suppression de la méthode de paiement:",
-        err
-      )
       setModalError(
         err.message ||
-          "Une erreur est survenue lors de la suppression de la méthode de paiement."
+          "Erreur lors de la suppression de la méthode de paiement."
       )
-    } finally {
-      if (!modalError) {
-        setIsDeletePaymentModalOpen(false)
-        setPaymentToDelete(null)
-        setPasswordError(null)
-      }
     }
   }
 
@@ -233,7 +202,6 @@ export default function AccountSettingsPage() {
       setModalError("Vous devez être connecté pour supprimer une adresse.")
       return
     }
-
     try {
       const res = await fetch(
         `/api/users/${session.user.id_user}/addresses?addressId=${addressId}`,
@@ -242,46 +210,100 @@ export default function AccountSettingsPage() {
           credentials: "include",
         }
       )
-
       if (!res.ok) {
-        const errorData = await res
-          .json()
-          .catch(() => ({ message: "Erreur inconnue" }))
+        const errorData = await res.json()
         throw new Error(
           errorData.message || "Erreur lors de la suppression de l'adresse."
         )
       }
-
       setAddresses(prev => prev.filter(a => a.id_address !== addressId))
       setModalError(null)
+      setIsDeleteAddressModalOpen(false)
+      setAddressToDelete(null)
     } catch (err: any) {
-      console.error("Erreur lors de la suppression de l'adresse:", err)
       setModalError(
-        err.message ||
-          "Une erreur est survenue lors de la suppression de l'adresse."
+        err.message || "Erreur lors de la suppression de l'adresse."
       )
-    } finally {
-      if (!modalError) {
-        setIsDeleteAddressModalOpen(false)
-        setAddressToDelete(null)
-      }
     }
   }
 
-  if (status === "loading") {
-    return <div>Chargement...</div>
+  const handleUpdateSubscription = async (
+    sub: ExtendedOrder["subscriptions"][0]
+  ) => {
+    if (!session?.user?.id_user) {
+      setErrorMessage("Vous devez être connecté pour modifier un abonnement.")
+      return
+    }
+
+    try {
+      // Annuler l'abonnement
+      const response = await fetch(
+        `/api/users/${session.user.id_user}/subscriptions/${sub.id_order_item}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({}),
+          credentials: "include",
+        }
+      )
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(
+          errorData.message || "Échec de l'annulation de l'abonnement"
+        )
+      }
+
+      // Ajouter au panier
+      const price =
+        sub.subscription_type === "MONTHLY"
+          ? 49.99
+          : sub.subscription_type === "YEARLY"
+            ? 499.9 / 12
+            : sub.subscription_type === "PER_MACHINE"
+              ? 19.99
+              : sub.unit_price
+
+      const cartItem: CartItem = {
+        id: sub.id_product.toString(),
+        name: sub.service_name,
+        price,
+        quantity: sub.quantity,
+        subscription: sub.subscription_type,
+        uniqueId: `${sub.id_product}-${sub.subscription_type}-${Date.now()}`,
+        imageUrl: sub.imageUrl,
+      }
+
+      addToCart(cartItem)
+
+      // Notification et redirection
+      toast({
+        title: "Abonnement annulé",
+        description:
+          "L'abonnement a été annulé et ajouté au panier pour modification.",
+        variant: "success",
+      })
+      router.push("/panier")
+    } catch (err: any) {
+      setErrorMessage(
+        err.message || "Erreur lors de la mise à jour de l'abonnement."
+      )
+      toast({
+        title: "Erreur",
+        description: err.message || "Une erreur s'est produite.",
+        variant: "destructive",
+      })
+    }
   }
 
-  if (!session?.user) {
-    return <div>Accès refusé. Veuillez vous connecter.</div>
-  }
+  if (status === "loading") return <div>Chargement...</div>
+  if (!session?.user) return <div>Accès refusé. Veuillez vous connecter.</div>
 
   return (
     <div className="p-6 space-y-12">
       {errorMessage && (
         <div className="text-red-600 text-sm mb-4">{errorMessage}</div>
       )}
-      {/* Section Informations personnelles */}
+      {/* Informations personnelles */}
       <div className="space-y-4">
         <h1 className="text-2xl font-bold text-center">
           Informations personnelles
@@ -293,9 +315,7 @@ export default function AccountSettingsPage() {
                 src={clientInfo?.avatar_url}
                 alt={`${clientInfo?.first_name} ${clientInfo?.last_name}`}
               />
-              <AvatarFallback>
-                {`${clientInfo?.first_name?.charAt(0) ?? "?"}${clientInfo?.last_name?.charAt(0) ?? "?"}`}
-              </AvatarFallback>
+              <AvatarFallback>{`${clientInfo?.first_name?.charAt(0) ?? "?"}${clientInfo?.last_name?.charAt(0) ?? "?"}`}</AvatarFallback>
             </Avatar>
             <div>
               <p>
@@ -318,7 +338,7 @@ export default function AccountSettingsPage() {
         </div>
       </div>
 
-      {/* Section Abonnements */}
+      {/* Abonnements */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-center">Abonnements</h2>
         <Table className="min-w-full">
@@ -371,7 +391,13 @@ export default function AccountSettingsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button variant="default">Mettre à jour</Button>
+                    <Button
+                      variant="default"
+                      onClick={() => handleUpdateSubscription(sub)}
+                      disabled={sub.subscription_status === "CANCELLED"}
+                    >
+                      Mettre à jour
+                    </Button>
                   </TableCell>
                   <TableCell>
                     <Button variant="destructive">Résilier</Button>
@@ -383,7 +409,7 @@ export default function AccountSettingsPage() {
         </Table>
       </div>
 
-      {/* Section Carnet d’adresses */}
+      {/* Carnet d’adresses */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-center">Carnet d’adresses</h2>
         <Link href="/account/addresses/add">
@@ -457,10 +483,8 @@ export default function AccountSettingsPage() {
                         <DialogHeader>
                           <DialogTitle>Confirmer la suppression</DialogTitle>
                           <DialogDescription>
-                            Êtes-vous sûr de vouloir supprimer l&apos;adresse
-                            &quot;
-                            {address.address1}, {address.city}&quot; ? Cette
-                            action est irréversible.
+                            Êtes-vous sûr de vouloir supprimer l&apos;adresse &quot;
+                            {address.address1}, {address.city}&quot; ?
                           </DialogDescription>
                         </DialogHeader>
                         {modalError && (
@@ -504,7 +528,7 @@ export default function AccountSettingsPage() {
         </Table>
       </div>
 
-      {/* Section Méthodes de paiement */}
+      {/* Méthodes de paiement */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-center">Méthodes de paiement</h2>
         <Link href="/account/payments/add">
@@ -571,8 +595,7 @@ export default function AccountSettingsPage() {
                           <DialogDescription>
                             Êtes-vous sûr de vouloir supprimer la méthode de
                             paiement se terminant par {payment.last_card_digits}{" "}
-                            ? Cette action est irréversible. Veuillez entrer
-                            votre mot de passe actuel pour confirmer.
+                            ? Veuillez entrer votre mot de passe.
                           </DialogDescription>
                         </DialogHeader>
                         <div>
