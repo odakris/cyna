@@ -39,7 +39,6 @@ const generateUniqueId = (id: string, subscription?: string): string => {
 
 // Charger le panier initial depuis localStorage (sûr pour SSR)
 const getInitialCart = (): CartItem[] => {
-  // Vérifier si nous sommes côté client
   if (typeof window === "undefined") {
     return []
   }
@@ -72,17 +71,15 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
   const [cart, setCart] = useState<CartItem[]>(getInitialCart())
   const [isAdding, setIsAdding] = useState(false)
 
-  // Log du chargement initial
   useEffect(() => {
     // console.log("Cart initial chargé:", cart);
   }, [])
 
-  // Sauvegarder le panier dans localStorage à chaque modification (côté client uniquement)
   useEffect(() => {
     if (typeof window === "undefined") return
     try {
       localStorage.setItem("cart", JSON.stringify(cart))
-      //   console.log("Panier sauvegardé dans localStorage:", cart);
+      // console.log("Panier sauvegardé dans localStorage:", cart);
     } catch (error) {
       console.error("Erreur lors de la sauvegarde dans localStorage:", error)
     }
@@ -102,22 +99,18 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
     console.log("Produit reçu dans addToCart:", product)
     setCart(prevCart => {
       const subscription = product.subscription || "MONTHLY"
-      const uniqueId =
-        product.uniqueId || generateUniqueId(product.id, subscription)
-      const productWithUniqueId = {
-        ...product,
-        uniqueId,
-        subscription,
-        quantity: product.quantity || 1,
-      }
+      // Vérifier si un produit avec le même id et subscription existe
+      const existingItem = prevCart.find(
+        item => item.id === product.id && item.subscription === subscription
+      )
 
-      const existingItem = prevCart.find(item => item.uniqueId === uniqueId)
       if (existingItem) {
+        // Augmenter la quantité de l'élément existant
         const updatedCart = prevCart.map(item =>
-          item.uniqueId === uniqueId
+          item.uniqueId === existingItem.uniqueId
             ? {
                 ...item,
-                quantity: item.quantity + productWithUniqueId.quantity,
+                quantity: item.quantity + (product.quantity || 1),
               }
             : item
         )
@@ -126,6 +119,14 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
         return updatedCart
       }
 
+      // Ajouter un nouvel élément si aucun produit correspondant n'existe
+      const uniqueId = generateUniqueId(product.id, subscription)
+      const productWithUniqueId = {
+        ...product,
+        uniqueId,
+        subscription,
+        quantity: product.quantity || 1,
+      }
       const updatedCart = [...prevCart, productWithUniqueId]
       console.log("Nouveau produit ajouté:", updatedCart)
       setIsAdding(false)
