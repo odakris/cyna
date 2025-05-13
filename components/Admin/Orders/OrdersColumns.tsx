@@ -244,36 +244,36 @@ export const OrderColumns: ColumnDef<OrderWithItems>[] = [
     },
     enableSorting: true,
   },
-  {
-    accessorKey: "payment_method",
-    header: ({ column }) => (
-      <div className="text-center">
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="px-2"
-        >
-          <CreditCard className="mr-2 h-4 w-4 text-muted-foreground" />
-          Paiement
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-    ),
-    cell: ({ row }) => {
-      const paymentMethod = row.getValue("payment_method") as string
-      const lastCardDigits = row.original.last_card_digits
+  // {
+  //   accessorKey: "payment_method",
+  //   header: ({ column }) => (
+  //     <div className="text-center">
+  //       <Button
+  //         variant="ghost"
+  //         onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+  //         className="px-2"
+  //       >
+  //         <CreditCard className="mr-2 h-4 w-4 text-muted-foreground" />
+  //         Paiement
+  //         <ArrowUpDown className="ml-2 h-4 w-4" />
+  //       </Button>
+  //     </div>
+  //   ),
+  //   cell: ({ row }) => {
+  //     const paymentMethod = row.getValue("payment_method") as string
+  //     const lastCardDigits = row.original.last_card_digits
 
-      return (
-        <div className="text-center">
-          <Badge variant="outline" className="font-medium">
-            {paymentMethod}
-            {lastCardDigits && ` *${lastCardDigits}`}
-          </Badge>
-        </div>
-      )
-    },
-    enableSorting: true,
-  },
+  //     return (
+  //       <div className="text-center">
+  //         <Badge variant="outline" className="font-medium">
+  //           {paymentMethod}
+  //           {lastCardDigits && ` *${lastCardDigits}`}
+  //         </Badge>
+  //       </div>
+  //     )
+  //   },
+  //   enableSorting: true,
+  // },
   {
     accessorKey: "order_status",
     header: ({ column }) => (
@@ -366,7 +366,7 @@ export const ordersColumnNamesInFrench: Record<string, string> = {
   user: "Client",
   total_amount: "Montant",
   order_items: "Articles",
-  payment_method: "Paiement",
+  // payment_method: "Paiement",
   order_status: "Status",
   actions: "Actions",
 }
@@ -397,13 +397,13 @@ export const globalFilterFunction = (
     }
   }
 
-  // Recherche dans la méthode de paiement
-  if (
-    row.getValue("payment_method") &&
-    String(row.getValue("payment_method")).toLowerCase().includes(searchTerm)
-  ) {
-    return true
-  }
+  // // Recherche dans la méthode de paiement
+  // if (
+  //   row.getValue("payment_method") &&
+  //   String(row.getValue("payment_method")).toLowerCase().includes(searchTerm)
+  // ) {
+  //   return true
+  // }
 
   // Recherche dans le numéro de facture
   if (

@@ -42,8 +42,8 @@ export default function OrderPaymentInfo({
               <CreditCard className="mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
               <span className="text-sm">
                 {order.payment_method}
-                {order.last_card_digits &&
-                  ` (**** **** **** ${order.last_card_digits})`}
+                {/* {order.last_card_digits &&
+                  ` (**** **** **** ${order.last_card_digits})`} */}
               </span>
             </div>
           </div>

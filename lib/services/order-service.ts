@@ -24,7 +24,7 @@ type OrderWithRelations = Prisma.OrderGetPayload<{
 
 type OrderForInvoice = {
   id_order: number
-  id_user: number // Ajout pour vérifier l'appartenance
+  id_user: number
   order_date: string
   total_amount: number
   subtotal: number
