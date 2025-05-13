@@ -66,6 +66,11 @@ export default function AccountSettingsPage() {
   const [subscriptionToCancel, setSubscriptionToCancel] = useState<
     number | null
   >(null)
+  const [isUpdateSubscriptionModalOpen, setIsUpdateSubscriptionModalOpen] =
+    useState(false)
+  const [subscriptionToUpdate, setSubscriptionToUpdate] = useState<
+    ExtendedOrder["subscriptions"][0] | null
+  >(null)
   const [modalError, setModalError] = useState<string | null>(null)
   const [password, setPassword] = useState<string>("")
   const [passwordError, setPasswordError] = useState<string | null>(null)
@@ -127,7 +132,6 @@ export default function AccountSettingsPage() {
               "Erreur lors de la récupération des méthodes de paiement"
           )
       } catch (error) {
-        // console.error("Erreur fetchClientData:", error)
         setErrorMessage(
           "Une erreur est survenue lors de la récupération des données."
         )
@@ -401,7 +405,7 @@ export default function AccountSettingsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Nom du service</TableHead>
-              <TableHead>Type d&apos;abonnement</TableHead>
+              <TableHead>Type d'abonnement</TableHead>
               <TableHead>Prix</TableHead>
               <TableHead>Date de renouvellement</TableHead>
               <TableHead>Status</TableHead>
@@ -451,17 +455,76 @@ export default function AccountSettingsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Button
-                      variant="default"
-                      onClick={() => handleUpdateSubscription(sub)}
-                      disabled={
-                        sub.subscription_status === "CANCELLED" ||
-                        sub.subscription_status === "SUSPENDED" ||
-                        sub.subscription_status === "EXPIRED"
+                    <Dialog
+                      open={
+                        isUpdateSubscriptionModalOpen &&
+                        subscriptionToUpdate?.id_order_item ===
+                          sub.id_order_item
                       }
+                      onOpenChange={open => {
+                        setIsUpdateSubscriptionModalOpen(open)
+                        setModalError(null)
+                        if (!open) setSubscriptionToUpdate(null)
+                      }}
                     >
-                      Mettre à jour
-                    </Button>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="default"
+                          onClick={() => {
+                            setSubscriptionToUpdate(sub)
+                            setIsUpdateSubscriptionModalOpen(true)
+                          }}
+                          disabled={
+                            sub.subscription_status === "CANCELLED" ||
+                            sub.subscription_status === "SUSPENDED" ||
+                            sub.subscription_status === "EXPIRED"
+                          }
+                        >
+                          Mettre à jour
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>
+                            Confirmer la mise à jour de l'abonnement
+                          </DialogTitle>
+                          <DialogDescription>
+                            En mettant à jour l'abonnement à "{sub.service_name}
+                            ", l'abonnement actuel sera résilié et conservé dans
+                            votre historique. Vous serez redirigé vers le
+                            processus de commande pour configurer une nouvelle
+                            version de cet abonnement.
+                          </DialogDescription>
+                        </DialogHeader>
+                        {modalError && (
+                          <div className="text-red-600 text-sm mb-4">
+                            {modalError}
+                          </div>
+                        )}
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setIsUpdateSubscriptionModalOpen(false)
+                              setSubscriptionToUpdate(null)
+                              setModalError(null)
+                            }}
+                          >
+                            Annuler
+                          </Button>
+                          <Button
+                            variant="default"
+                            onClick={() => {
+                              handleUpdateSubscription(sub)
+                              setIsUpdateSubscriptionModalOpen(false)
+                              setSubscriptionToUpdate(null)
+                            }}
+                          >
+                            Confirmer
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </TableCell>
                   <TableCell>
                     <Dialog
@@ -493,10 +556,10 @@ export default function AccountSettingsPage() {
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Confirmer l&apos;annulation</DialogTitle>
+                          <DialogTitle>Confirmer l'annulation</DialogTitle>
                           <DialogDescription>
-                            Êtes-vous sûr de vouloir annuler l&apos;abonnement à &quot;
-                            {sub.service_name}&quot; ? Cette action est irréversible.
+                            Êtes-vous sûr de vouloir annuler l'abonnement à "
+                            {sub.service_name}" ? Cette action est irréversible.
                           </DialogDescription>
                         </DialogHeader>
                         {modalError && (
@@ -521,7 +584,7 @@ export default function AccountSettingsPage() {
                               handleCancelSubscription(sub.id_order_item)
                             }
                           >
-                            Annuler l&apos;abonnement
+                            Annuler l'abonnement
                           </Button>
                         </DialogFooter>
                       </DialogContent>
@@ -607,8 +670,8 @@ export default function AccountSettingsPage() {
                         <DialogHeader>
                           <DialogTitle>Confirmer la suppression</DialogTitle>
                           <DialogDescription>
-                            Êtes-vous sûr de vouloir supprimer l&apos;adresse &quot;
-                            {address.address1}, {address.city}&quot; ?
+                            Êtes-vous sûr de vouloir supprimer l'adresse "
+                            {address.address1}, {address.city}" ?
                           </DialogDescription>
                         </DialogHeader>
                         {modalError && (
