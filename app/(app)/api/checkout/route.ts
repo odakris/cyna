@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     // Valider les données
     console.log("[API Checkout] Validation des données d'entrée...");
     if (!cartItems || !Array.isArray(cartItems) || !cartItems.length || !addressId || !paymentId || clientTotalAmount == null) {
-      // console.error("[API Checkout] Données manquantes:", { cartItems, addressId, paymentId, clientTotalAmount });
+      console.error("[API Checkout] Données manquantes:", { cartItems, addressId, paymentId, clientTotalAmount });
       return NextResponse.json(
         { error: "Données manquantes: panier, adresse, paiement ou montant total requis" },
         { status: 400 }
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     if (guestId && paymentData) {
       console.log("[API Checkout] Mode invité, utilisation de paymentData:", paymentData);
       if (!paymentData.stripe_payment_id || !paymentData.stripe_customer_id) {
-        // console.error("[API Checkout] paymentData invalide:", paymentData);
+        console.error("[API Checkout] paymentData invalide:", paymentData);
         return NextResponse.json(
           { error: "Informations de paiement Stripe manquantes pour l'invité" },
           { status: 400 }
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
       });
 
       if (!paymentInfo || !paymentInfo.stripe_payment_id || !paymentInfo.stripe_customer_id) {
-        // console.error("[API Checkout] PaymentInfo invalide:", { paymentInfo });
+        console.error("[API Checkout] PaymentInfo invalide:", { paymentInfo });
         return NextResponse.json(
           { error: "Méthode de paiement invalide ou informations Stripe manquantes" },
           { status: 400 }
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
 
     console.log("[API Checkout] Validation de l'utilisateur/invité...");
     if (!userId && !guestId) {
-      // console.error("[API Checkout] Aucun utilisateur ou invité spécifié");
+      console.error("[API Checkout] Aucun utilisateur ou invité spécifié");
       return NextResponse.json(
         { error: "Utilisateur ou invité requis" },
         { status: 400 }
@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      // console.error("[API Checkout] Utilisateur introuvable:", { userId: userId || guestId });
+      console.error("[API Checkout] Utilisateur introuvable:", { userId: userId || guestId });
       return NextResponse.json(
         { error: "Utilisateur invalide" },
         { status: 400 }
@@ -162,7 +162,7 @@ export async function POST(req: NextRequest) {
         },
       });
       if (!validPaymentInfo) {
-        // console.error("[API Checkout] id_payment_info non valide pour cet utilisateur:", { paymentId, userId });
+        console.error("[API Checkout] id_payment_info non valide pour cet utilisateur:", { paymentId, userId });
         return NextResponse.json(
           { error: "Méthode de paiement non associée à l'utilisateur" },
           { status: 400 }
@@ -185,7 +185,7 @@ export async function POST(req: NextRequest) {
         !addressData.country ||
         !addressData.mobile_phone
       ) {
-        // console.error("[API Checkout] addressData invalide:", addressData);
+        console.error("[API Checkout] addressData invalide:", addressData);
         return NextResponse.json(
           { error: "Informations d'adresse incomplètes pour l'invité" },
           { status: 400 }
@@ -224,7 +224,7 @@ export async function POST(req: NextRequest) {
       });
 
       if (!address || (userId && address.id_user !== userId)) {
-        // console.error("[API Checkout] Adresse invalide:", { addressId, userId });
+        console.error("[API Checkout] Adresse invalide:", { addressId, userId });
         return NextResponse.json(
           { error: "Adresse invalide ou non associée à l'utilisateur" },
           { status: 400 }
@@ -250,13 +250,13 @@ export async function POST(req: NextRequest) {
     );
     console.log("[API Checkout] Montant total calculé:", serverTotalAmount);
 
-    // Valider totalAmount envoyé par le client
-    if (Math.abs(serverTotalAmount - clientTotalAmount) > 0.05) {
-      /*console.error("[API Checkout] Incohérence dans totalAmount:", {
+    // Valider totalAmount
+    if (Math.abs(serverTotalAmount - clientTotalAmount) > 0.01) {
+      console.error("[API Checkout] Incohérence dans totalAmount:", {
         clientTotalAmount,
         serverTotalAmount,
         cartItems,
-      });*/
+      });
       return NextResponse.json(
         { error: `Montant total incohérent: client (${clientTotalAmount}) vs serveur (${serverTotalAmount})` },
         { status: 400 }
@@ -270,42 +270,11 @@ export async function POST(req: NextRequest) {
 
     // Valider le montant
     if (serverTotalAmount <= 0 || isNaN(serverTotalAmount)) {
-      //console.error("[API Checkout] Montant total invalide:", { serverTotalAmount });
+      console.error("[API Checkout] Montant total invalide:", { serverTotalAmount });
       return NextResponse.json(
         { error: "Montant total invalide ou nul" },
         { status: 400 }
       );
-    }
-
-    // Valider les ID des produits et subscription_type
-    console.log("[API Checkout] Validation des produits et subscriptions...");
-    for (const item of cartItems) {
-      if (!item.id_product || isNaN(parseInt(item.id_product))) {
-        // console.error("[API Checkout] ID produit invalide:", { itemId: item.id_product });
-        return NextResponse.json(
-          { error: "ID produit invalide dans le panier" },
-          { status: 400 }
-        );
-      }
-      if (!item.subscription_type || !VALID_SUBSCRIPTION_TYPES.includes(item.subscription_type)) {
-        /*console.error("[API Checkout] Type de subscription manquant ou invalide:", {
-          subscription_type: item.subscription_type,
-          item,
-        });*/
-        return NextResponse.json(
-          {
-            error: `Type de subscription manquant ou invalide: ${item.subscription_type || 'undefined'}. Valeurs attendues: ${VALID_SUBSCRIPTION_TYPES.join(", ")}`,
-          },
-          { status: 400 }
-        );
-      }
-      if (!item.unit_price || isNaN(item.unit_price)) {
-        // console.error("[API Checkout] Prix unitaire manquant ou invalide:", { item });
-        return NextResponse.json(
-          { error: `Prix unitaire manquant ou invalide pour l'article ${item.id_product}` },
-          { status: 400 }
-        );
-      }
     }
 
     // Consolider les orderItems
@@ -432,11 +401,11 @@ export async function POST(req: NextRequest) {
       clientSecret: paymentIntent.client_secret,
     });
   } catch (error: any) {
-    /*console.error("[API Checkout] Erreur:", {
+    console.error("[API Checkout] Erreur:", {
       message: error.message || "Erreur inconnue",
       stack: error.stack,
       details: JSON.stringify(error, null, 2),
-    });*/
+    });
     return NextResponse.json(
       {
         error: "Erreur lors du traitement du paiement",

@@ -46,16 +46,8 @@ export async function GET(
     console.log("[Invoice] orderId:", orderId)
 
     if (!orderId || isNaN(orderId)) {
-<<<<<<< HEAD
-      console.error("[Invoice] Erreur: orderId invalide ou manquant")
-      return NextResponse.json(
-        { message: "Identifiant de commande requis" },
-        { status: 400 }
-      )
-=======
       // console.error('[Invoice] Erreur: orderId invalide ou manquant');
       return NextResponse.json({ message: 'Identifiant de commande requis' }, { status: 400 });
->>>>>>> 1abc7659a72ff2683d02c2fddf6ca68482d86577
     }
 
     // Récupérer le token JWT (NextAuth)
@@ -84,39 +76,21 @@ export async function GET(
     )
 
     if (!order) {
-<<<<<<< HEAD
-      console.error("[Invoice] Erreur: Commande non trouvée")
-      return NextResponse.json(
-        { message: "Commande introuvable" },
-        { status: 404 }
-      )
-=======
       // console.error('[Invoice] Erreur: Commande non trouvée');
       return NextResponse.json({ message: 'Commande introuvable' }, { status: 404 });
->>>>>>> 1abc7659a72ff2683d02c2fddf6ca68482d86577
     }
 
     // Vérifier l'autorisation
     const isAuthorized = isOrderAuthorized(order, token)
     if (!isAuthorized) {
-<<<<<<< HEAD
       console.error("[Invoice] Erreur: Non autorisé", {
         raison: token ? "Token invalide ou mismatch" : "Aucun token fourni",
-=======
-      /*console.error('[Invoice] Erreur: Non autorisé', {
-        raison: token ? 'Token invalide ou mismatch' : 'Aucun token fourni',
->>>>>>> 1abc7659a72ff2683d02c2fddf6ca68482d86577
         orderUserId: order.id_user,
         orderEmail: order.user.email,
         tokenUserId: token?.id_user,
         tokenEmail: token?.email,
-<<<<<<< HEAD
       })
       return NextResponse.json({ message: "Non autorisé" }, { status: 401 })
-=======
-      });*/
-      return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
->>>>>>> 1abc7659a72ff2683d02c2fddf6ca68482d86577
     }
 
     // Déchiffrer les données de l'adresse si nécessaire
@@ -204,11 +178,7 @@ export async function GET(
       },
     })
   } catch (error) {
-<<<<<<< HEAD
-    console.error("[Invoice] Erreur serveur:", error)
-=======
     // console.error('[Invoice] Erreur serveur:', error);
->>>>>>> 1abc7659a72ff2683d02c2fddf6ca68482d86577
     return NextResponse.json(
       {
         message:

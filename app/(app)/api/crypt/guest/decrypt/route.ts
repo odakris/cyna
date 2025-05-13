@@ -179,15 +179,7 @@ export async function POST(request: NextRequest) {
     console.error("[Decrypt API] Erreur:", {
       message: error.message,
       stack: error.stack,
-<<<<<<< HEAD
     })
-=======
-    });
-    console.log('[GuestDecrypt] Données déchiffrées:', { decryptedAddresses, decryptedPayments });
-    return NextResponse.json({ addresses: decryptedAddresses, payments: decryptedPayments }, { status: 200 });
-  } catch (error) {
-    // console.error('[GuestDecrypt] Erreur:', error);
->>>>>>> 1abc7659a72ff2683d02c2fddf6ca68482d86577
     return NextResponse.json(
       { message: "Erreur lors du déchiffrement", details: error.message },
       { status: 500 }

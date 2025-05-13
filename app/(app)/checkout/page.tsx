@@ -36,7 +36,7 @@ if (process.env.NODE_ENV === "development" && !stripeKey) {
   )
 }
 
-// Initialisation de Stripe
+// Initialisation de Stripe avec des vérifications supplémentaires
 const stripePromise =
   stripeKey && stripeKey.startsWith("pk_") ? loadStripe(stripeKey) : null
 
@@ -67,93 +67,65 @@ interface PaymentInfo {
 }
 
 // Base URL pour les appels API
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000"
-
-// Fonction pour obtenir le prix unitaire
-function getUnitPrice(item: { price: number; subscription?: string }): number {
-  switch (item.subscription || "MONTHLY") {
-    case "MONTHLY":
-      return 49.99
-    case "YEARLY":
-      return 41.66 // Prix mensuel pour YEARLY
-    case "PER_MACHINE":
-      return 19.99
-    default:
-      return item.price
-  }
-}
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000'
 
 // Fonction pour déchiffrer l'adresse
-async function decryptAddress(
-  address: Address,
-  userId?: number,
-  isGuest: boolean = false
-): Promise<Address> {
-  console.log("[Checkout] Vérification du déchiffrement de l'adresse:", {
-    address,
-  })
+async function decryptAddress(address: Address, userId?: number, isGuest: boolean = false): Promise<Address> {
+  console.log("[Checkout] Vérification du déchiffrement de l'adresse:", { address });
 
+  // En mode invité, les adresses ne sont pas chiffrées
   if (isGuest) {
-    console.log("[Checkout] Mode invité, adresse non chiffrée, retour direct")
+    console.log("[Checkout] Mode invité, adresse non chiffrée, retour direct");
     return {
       ...address,
       mobile_phone: address.mobile_phone || "N/A",
       region: address.region || "N/A",
-    }
+    };
   }
 
-  const isEncrypted =
-    address.first_name.includes(":") || address.address1.includes(":")
+  // Vérifier si l'adresse est chiffrée
+  const isEncrypted = address.first_name.includes(":") || address.address1.includes(":");
   if (!isEncrypted) {
-    console.log("[Checkout] Adresse déjà déchiffrée")
+    console.log("[Checkout] Adresse déjà déchiffrée");
     return {
       ...address,
       mobile_phone: address.mobile_phone || "N/A",
-      the_phone: address.region || "N/A",
-    }
+      region: address.region || "N/A",
+    };
   }
 
-  console.log("[Checkout] Début du déchiffrement de l'adresse")
+  console.log("[Checkout] Début du déchiffrement de l'adresse");
   try {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-    }
+    };
     if (userId) {
-      headers["x-user-id"] = userId.toString()
+      headers["x-user-id"] = userId.toString();
     }
 
     const response = await fetch(`${API_BASE_URL}/api/crypt/guest/decrypt`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        addresses: [
-          {
-            ...address,
-            id_address: address.id_address || `order_${Date.now()}`,
-          },
-        ],
+        addresses: [{ ...address, id_address: address.id_address || `order_${Date.now()}` }],
         payments: [],
       }),
-    })
+    });
 
     if (!response.ok) {
-      const errorText = await response.text()
-      /*console.error("[Checkout] Échec du déchiffrement:", {
-        status: response.status,
-        errorText,
-      })*/
-      throw new Error(`Échec du déchiffrement: ${errorText}`)
+      const errorText = await response.text();
+      console.error("[Checkout] Échec du déchiffrement:", { status: response.status, errorText });
+      throw new Error(`Échec du déchiffrement: ${errorText}`);
     }
 
-    const { addresses: decryptedAddresses } = await response.json()
-    const decryptedAddress = decryptedAddresses[0]
+    const { addresses: decryptedAddresses } = await response.json();
+    const decryptedAddress = decryptedAddresses[0];
 
     if (!decryptedAddress) {
-      throw new Error("Aucune adresse déchiffrée retournée")
+      throw new Error("Aucune adresse déchiffrée retournée");
     }
 
-    console.log("[Checkout] Adresse déchiffrée:", decryptedAddress)
+    console.log("[Checkout] Adresse déchiffrée:", decryptedAddress);
     return {
       id_address: decryptedAddress.id_address,
       first_name: decryptedAddress.first_name,
@@ -167,23 +139,24 @@ async function decryptAddress(
       region: decryptedAddress.region || "N/A",
       email: decryptedAddress.email,
       user_id: decryptedAddress.user_id,
-    }
+    };
   } catch (err) {
-    /*console.error("[Checkout] Erreur lors du déchiffrement:", {
+    console.error("[Checkout] Erreur lors du déchiffrement:", {
       message: err instanceof Error ? err.message : "Erreur inconnue",
       stack: err instanceof Error ? err.stack : undefined,
-    })*/
+    });
+    // Retourner une adresse de secours pour éviter de casser le PDF
     return {
       ...address,
-      first_name: "[Déchiffrement échoué]",
-      last_name: "[Déchiffrement échoué]",
-      address1: "[Déchiffrement échoué]",
-      postal_code: "[Déchiffrement échoué]",
-      city: "[Déchiffrement échoué]",
-      country: "[Déchiffrement échoué]",
-      mobile_phone: "N/A",
-      region: "N/A",
-    }
+      first_name: '[Déchiffrement échoué]',
+      last_name: '[Déchiffrement échoué]',
+      address1: '[Déchiffrement échoué]',
+      postal_code: '[Déchiffrement échoué]',
+      city: '[Déchiffrement échoué]',
+      country: '[Déchiffrement échoué]',
+      mobile_phone: 'N/A',
+      region: 'N/A',
+    };
   }
 }
 
@@ -224,9 +197,9 @@ function CheckoutContent() {
     handleSaveNewPayment,
   } = checkoutHook
 
-  // Log des valeurs retournées par useCheckout
+  // Log immédiat des valeurs retournées par useCheckout pour débogage
   useEffect(() => {
-    console.log("[Checkout] Valeurs retournées par useCheckout:", {
+    console.log('[Checkout] Valeurs retournées par useCheckout:', {
       checkoutHookKeys: Object.keys(checkoutHook),
       setProcessingPaymentType: typeof setProcessingPayment,
       isGuest,
@@ -243,7 +216,7 @@ function CheckoutContent() {
 
   // Log des valeurs pour débogage
   useEffect(() => {
-    console.log("[Checkout] État initial:", {
+    console.log('[Checkout] État initial:', {
       loading,
       selectedAddress,
       selectedPayment,
@@ -256,16 +229,10 @@ function CheckoutContent() {
       setProcessingPaymentType: typeof setProcessingPayment,
     })
     if (!loading && addresses.length > 0 && !selectedAddress) {
-      console.warn(
-        "[Checkout] Aucune adresse sélectionnée malgré des adresses disponibles:",
-        addresses
-      )
+      console.warn('[Checkout] Aucune adresse sélectionnée malgré des adresses disponibles:', addresses)
     }
     if (!loading && paymentInfos.length > 0 && !selectedPayment) {
-      console.warn(
-        "[Checkout] Aucun paiement sélectionné malgré des paiements disponibles:",
-        paymentInfos
-      )
+      console.warn('[Checkout] Aucun paiement sélectionné malgré des paiements disponibles:', paymentInfos)
     }
   }, [
     loading,
@@ -280,7 +247,7 @@ function CheckoutContent() {
     setProcessingPayment,
   ])
 
-  // Vérifier Stripe
+  // Vérifier si Stripe est correctement initialisé
   useEffect(() => {
     if (!stripePromise) {
       setStripeError(
@@ -290,7 +257,7 @@ function CheckoutContent() {
   }, [])
 
   const handleProceedToPayment = async () => {
-    console.log("[Checkout] handleProceedToPayment appelé", {
+    console.log('[Checkout] handleProceedToPayment appelé', {
       processingPayment,
       setProcessingPaymentType: typeof setProcessingPayment,
       selectedAddressId: selectedAddress?.id_address,
@@ -304,20 +271,17 @@ function CheckoutContent() {
     });
   
     if (processingPayment) {
-      console.log("[Checkout] Paiement déjà en cours, ignoré")
-      return
+      console.log('[Checkout] Paiement déjà en cours, ignoré');
+      return;
     }
-
-    if (typeof setProcessingPayment !== "function") {
-      /*console.error("[Checkout] setProcessingPayment n’est pas une fonction", {
   
     if (typeof setProcessingPayment !== 'function') {
       console.error('[Checkout] setProcessingPayment n’est pas une fonction', {
         setProcessingPayment,
         checkoutHookKeys: Object.keys(checkoutHook),
-      })*/
-      setError("Erreur interne: impossible de traiter le paiement")
-      return
+      });
+      setError('Erreur interne: impossible de traiter le paiement');
+      return;
     }
   
     setProcessingPayment(true);
@@ -356,30 +320,6 @@ function CheckoutContent() {
       let paymentData = { ...selectedPayment };
   
       // Étape 3 : Chiffrer les données pour les invités
-    })
-
-    if (!selectedAddress?.id_address || !selectedPayment?.id_payment_info) {
-      setError("Veuillez sélectionner une adresse et un moyen de paiement")
-      /*console.error("[Checkout] Validation échouée:", {
-        id_address: selectedAddress?.id_address,
-        id_payment_info: selectedPayment?.id_payment_info,
-      })*/
-      setProcessingPayment(false)
-      return
-    }
-
-    console.log("[Checkout] Début de handleProceedToPayment", {
-      totalCartPrice,
-      taxes,
-      finalTotal,
-      addressId: selectedAddress.id_address,
-      paymentId: selectedPayment.id_payment_info,
-    })
-
-    try {
-      let addressData = selectedAddress
-      let paymentData = selectedPayment
-
       if (isGuest) {
         console.log('[Checkout] Mode invité, chiffrement des données', { guestUserId });
         const headers: Record<string, string> = {
@@ -417,14 +357,8 @@ function CheckoutContent() {
         paymentData = encryptedPayments[0];
         console.log('[Checkout] Données chiffrées:', { addressData, paymentData });
       } else {
-        console.log(
-          "[Checkout] Mode utilisateur connecté, lancement du déchiffrement"
-        )
-        addressData = await decryptAddress(
-          selectedAddress,
-          session?.user?.id_user,
-          false
-        )
+        console.log('[Checkout] Mode utilisateur connecté, lancement du déchiffrement');
+        addressData = await decryptAddress(selectedAddress, session?.user?.id_user, false);
       }
   
       // Étape 4 : Préparer les en-têtes pour /api/checkout
@@ -482,36 +416,26 @@ function CheckoutContent() {
       });
   
       if (!response.ok) {
-        let errorMessage = `Erreur serveur: ${response.statusText}`
+        let errorMessage = `Erreur serveur: ${response.statusText}`;
         try {
-          const errorData = await response.json()
-          // console.error("[Checkout] Détails de l’erreur serveur:", errorData)
-          errorMessage =
-            errorData.error || errorData.message || response.statusText
+          const errorData = await response.json();
+          console.error('[Checkout] Détails de l’erreur serveur:', errorData);
+          errorMessage = errorData.error || errorData.message || response.statusText;
         } catch (jsonError) {
-          /*console.error(
-            "[Checkout] Impossible de parser la réponse:",
-            jsonError
-          )*/
+          console.error('[Checkout] Impossible de parser la réponse:', jsonError);
           if (response.status === 405) {
-            errorMessage =
-              "Méthode non autorisée. Veuillez réessayer ou contacter le support."
+            errorMessage = 'Méthode non autorisée. Veuillez réessayer ou contacter le support.';
           }
         }
-        throw new Error(
-          `Échec de l’initialisation du paiement: ${errorMessage}`
-        )
+        throw new Error(`Échec de l’initialisation du paiement: ${errorMessage}`);
       }
   
       const data = await response.json();
       console.log('[Checkout] Données reçues de /api/checkout:', data);
   
       if (!data.orderId || !data.status) {
-        /*console.error(
-          "[Checkout] orderId ou status manquant dans la réponse:",
-          data
-        )*/
-        throw new Error("Réponse du serveur invalide")
+        console.error('[Checkout] orderId ou status manquant dans la réponse:', data);
+        throw new Error('Réponse du serveur invalide');
       }
   
       console.log('[Checkout] orderId défini:', data.orderId);
@@ -528,40 +452,28 @@ function CheckoutContent() {
         console.log('[Checkout] Paiement réussi, finalisation:', { orderId: data.orderId });
         await finalizeOrder(data.orderId, addressData);
       } else {
-        // console.error("[Checkout] Statut de paiement inattendu:", data.status)
-        throw new Error(`Statut de paiement inattendu: ${data.status}`)
+        console.error('[Checkout] Statut de paiement inattendu:', data.status);
+        throw new Error(`Statut de paiement inattendu: ${data.status}`);
       }
     } catch (err) {
-      /*console.error("[Checkout] Erreur dans handleProceedToPayment:", {
-        message: err instanceof Error ? err.message : "Erreur inconnue",
+      console.error('[Checkout] Erreur dans handleProceedToPayment:', {
+        message: err instanceof Error ? err.message : 'Erreur inconnue',
         stack: err instanceof Error ? err.stack : undefined,
-      })*/
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Une erreur est survenue lors du traitement du paiement"
-      )
+      });
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue lors du traitement du paiement');
     } finally {
-      console.log(
-        "[Checkout] Fin de handleProceedToPayment, mise à jour processingPayment à false"
-      )
-      setProcessingPayment(false)
+      console.log('[Checkout] Fin de handleProceedToPayment, mise à jour processingPayment à false');
+      setProcessingPayment(false);
     }
-  }
+  };
 
   const finalizeOrder = async (orderId: string, address: Address) => {
-    console.log("[Checkout] Début de finalizeOrder:", { orderId })
+    console.log('[Checkout] Début de finalizeOrder:', { orderId })
     try {
-      console.log("[Checkout] Adresse utilisée pour la facture:", address)
+      console.log('[Checkout] Adresse utilisée pour la facture:', address)
 
-      console.log(
-        "[Checkout] Génération du PDF de la facture pour la commande:",
-        orderId
-      )
-      await generateInvoicePDF(
-        { id_order: orderId, total_amount: finalTotal },
-        address
-      )
+      console.log('[Checkout] Génération du PDF de la facture pour la commande:', orderId)
+      await generateInvoicePDF({ id_order: orderId, total_amount: finalTotal }, address)
 
       setCart([])
       if (isGuest) {
@@ -575,28 +487,22 @@ function CheckoutContent() {
       }
 
       const targetUrl = `/checkout/success?orderId=${orderId}`
-      console.log("[Checkout] Redirection vers:", { targetUrl, orderId })
+      console.log('[Checkout] Redirection vers:', { targetUrl, orderId })
       router.push(targetUrl)
     } catch (err) {
-      /*console.error("[Checkout] Erreur dans finalizeOrder:", {
-        message: err instanceof Error ? err.message : "Erreur inconnue",
+      console.error('[Checkout] Erreur dans finalizeOrder:', {
+        message: err instanceof Error ? err.message : 'Erreur inconnue',
         stack: err instanceof Error ? err.stack : undefined,
-      })*/
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Une erreur est survenue lors de la finalisation"
-      )
+      })
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la finalisation')
     }
   }
 
   const generateInvoicePDF = async (order: any, address: Address) => {
-    console.log("[Checkout] Début de generateInvoicePDF", {
-      orderId: order.id_order,
-    })
+    console.log('[Checkout] Début de generateInvoicePDF', { orderId: order.id_order })
     if (!address) {
-      // console.error("[Checkout] Adresse manquante pour générer le PDF")
-      setError("Adresse manquante pour la génération de la facture")
+      console.error('[Checkout] Adresse manquante pour générer le PDF')
+      setError('Adresse manquante pour la génération de la facture')
       return
     }
 
@@ -605,7 +511,7 @@ function CheckoutContent() {
     const { height } = page.getSize()
     const fontSize = 12
 
-    page.drawText("Facture", {
+    page.drawText('Facture', {
       x: 50,
       y: height - 50,
       size: 20,
@@ -624,17 +530,14 @@ function CheckoutContent() {
       size: fontSize,
       color: rgb(0, 0, 0),
     })
-    page.drawText(
-      `Client: ${isGuest ? guestEmail : address.email || "Inconnu"}`,
-      {
-        x: 50,
-        y: height - 120,
-        size: fontSize,
-        color: rgb(0, 0, 0),
-      }
-    )
+    page.drawText(`Client: ${isGuest ? guestEmail : address.email || 'Inconnu'}`, {
+      x: 50,
+      y: height - 120,
+      size: fontSize,
+      color: rgb(0, 0, 0),
+    })
 
-    page.drawText("Articles:", {
+    page.drawText('Articles:', {
       x: 50,
       y: height - 160,
       size: fontSize,
@@ -642,12 +545,10 @@ function CheckoutContent() {
     })
 
     let y = height - 180
-    cart.forEach(item => {
-      const unitPrice = getUnitPrice(item)
-      const multiplier = item.subscription === "YEARLY" ? 12 : 1
-      const itemTotal = unitPrice * multiplier * item.quantity
+    cart.forEach((item) => {
+      const itemTotal = item.price * (item.subscription === 'YEARLY' ? 12 : 1) * item.quantity
       page.drawText(
-        `${item.name} (x${item.quantity}, ${item.subscription || "MONTHLY"}): ${itemTotal.toFixed(2)} €`,
+        `${item.name} (x${item.quantity}, ${item.subscription || 'MONTHLY'}): ${itemTotal.toFixed(2)} €`,
         {
           x: 50,
           y,
@@ -677,7 +578,7 @@ function CheckoutContent() {
       color: rgb(0, 0, 0),
     })
 
-    page.drawText("Adresse de facturation:", {
+    page.drawText('Adresse de facturation:', {
       x: 50,
       y: y - 100,
       size: fontSize,
@@ -707,24 +608,22 @@ function CheckoutContent() {
       addressY -= 20
     }
 
-    page.drawText(
-      `${address.postal_code} ${address.city}, ${address.country}`,
-      {
-        x: 50,
-        y: addressY,
-        size: fontSize,
-        color: rgb(0, 0, 0),
-      }
-    )
+    page.drawText(`${address.postal_code} ${address.city}, ${address.country}`, {
+      x: 50,
+      y: addressY,
+      size: fontSize,
+      color: rgb(0, 0, 0),
+    })
 
     const pdfBytes = await pdfDoc.save()
-    const blob = new Blob([pdfBytes], { type: "application/pdf" })
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' })
     const url = URL.createObjectURL(blob)
     setInvoiceUrl(url)
-    console.log("[Checkout] PDF généré:", { invoiceUrl: url })
+    console.log('[Checkout] PDF généré:', { invoiceUrl: url })
     return url
   }
 
+  // Si la clé Stripe est manquante, afficher un message d'erreur
   if (stripeError) {
     return (
       <div className="max-w-4xl mx-auto p-4 sm:p-6 animate-in fade-in duration-300">
@@ -745,14 +644,17 @@ function CheckoutContent() {
     )
   }
 
+  // Si le panier est vide, rediriger vers la page du panier
   if (cart.length === 0 && !loading) {
     return <EmptyCart />
   }
 
+  // État de chargement
   if (loading) {
     return <LoadingState message="Chargement de votre commande..." />
   }
 
+  // Composant principal de checkout
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-6 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
@@ -772,6 +674,7 @@ function CheckoutContent() {
         </Button>
       </div>
 
+      {/* Message d'erreur si présent */}
       {error && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 text-red-600 flex items-start gap-3 animate-in fade-in zoom-in duration-300">
           <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
@@ -783,7 +686,9 @@ function CheckoutContent() {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Formulaire principal de checkout */}
         <div className="lg:col-span-2 space-y-6">
+          {/* Section invité ou composants d'authentification */}
           {isGuest && (
             <GuestEmailForm
               guestEmail={guestEmail}
@@ -791,6 +696,7 @@ function CheckoutContent() {
             />
           )}
 
+          {/* Étapes du checkout */}
           <Tabs
             value={activeTab}
             onValueChange={setActiveTab}
@@ -825,6 +731,7 @@ function CheckoutContent() {
               </TabsTrigger>
             </TabsList>
 
+            {/* Onglet Adresse */}
             <TabsContent value="address" className="mt-2 space-y-6">
               <CheckoutAddress
                 addresses={addresses}
@@ -840,6 +747,7 @@ function CheckoutContent() {
               />
             </TabsContent>
 
+            {/* Onglet Paiement */}
             <TabsContent value="payment" className="mt-2 space-y-6">
               <CheckoutPayment
                 paymentInfos={paymentInfos}
@@ -855,6 +763,7 @@ function CheckoutContent() {
               />
             </TabsContent>
 
+            {/* Onglet Validation */}
             <TabsContent value="review" className="mt-2 space-y-6">
               <CheckoutReview
                 addresses={addresses}
@@ -881,6 +790,7 @@ function CheckoutContent() {
           </Tabs>
         </div>
 
+        {/* Résumé du panier */}
         <div className="lg:col-span-1 space-y-6">
           <CartSummary
             cart={cart}
@@ -895,6 +805,7 @@ function CheckoutContent() {
 }
 
 export default function CheckoutPage() {
+  // Afficher un message si Stripe n'est pas initialisé
   if (!stripePromise) {
     return (
       <div className="max-w-4xl mx-auto p-4 sm:p-6 animate-in fade-in duration-300">
@@ -903,8 +814,8 @@ export default function CheckoutPage() {
           <div>
             <p className="font-medium">Configuration incomplète</p>
             <p>
-              Le système de paiement n'est pas correctement configuré. Veuillez
-              vérifier la configuration Stripe.
+              Le système de paiement n'est pas correctement configuré.
+              Veuillez vérifier la configuration Stripe.
             </p>
           </div>
         </div>
