@@ -82,10 +82,10 @@ export default function OrdersPage() {
             }))
           setCategories(validCategories)
         } else {
-          console.error("Erreur lors de la récupération des catégories")
+          // console.error("Erreur lors de la récupération des catégories")
         }
       } catch (error) {
-        console.error("Erreur de récupération des catégories :", error)
+        // console.error("Erreur de récupération des catégories :", error)
       }
     }
 
@@ -112,10 +112,10 @@ export default function OrdersPage() {
           ).sort((a, b) => parseInt(b) - parseInt(a))
           setAllAvailableYears(years)
         } else {
-          console.error("Erreur lors de la récupération des années")
+         // console.error("Erreur lors de la récupération des années")
         }
       } catch (error) {
-        console.error("Erreur de récupération des années :", error)
+        // console.error("Erreur de récupération des années :", error)
       }
     }
 
@@ -244,7 +244,7 @@ export default function OrdersPage() {
             setOrders(decryptedOrders)
             setError(null)
           } else {
-            console.error("Erreur lors du déchiffrement:", decryptData.message)
+            // console.error("Erreur lors du déchiffrement:", decryptData.message)
             setOrders(data) // Fallback : utiliser les données non déchiffrées
             setError("Erreur lors du déchiffrement des adresses")
           }
@@ -253,10 +253,10 @@ export default function OrdersPage() {
           setOrders([])
         }
       } catch (error) {
-        console.error(
+        /* console.error(
           "Erreur de récupération de l'historique des commandes :",
           error
-        )
+        )*/
         setError("Erreur lors de la récupération des commandes")
         setOrders([])
       }

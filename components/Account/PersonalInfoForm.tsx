@@ -87,7 +87,7 @@ export default function PersonalInfoForm({ user }: { user: User }) {
         setErrors(fieldErrors)
       } else {
         toast.error((err as Error).message || "Une erreur est survenue")
-        console.error("Erreur:", err)
+        // console.error("Erreur:", err)
       }
     } finally {
       setLoading(false)

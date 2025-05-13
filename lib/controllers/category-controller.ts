@@ -12,7 +12,7 @@ export const getAll = async (): Promise<NextResponse> => {
     const categories = await categoryService.getAllCategories()
     return NextResponse.json(categories)
   } catch (error) {
-    console.error("Erreur lors de la récupération des catégories:", error)
+    // console.error("Erreur lors de la récupération des catégories:", error)
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
@@ -32,10 +32,10 @@ export const getById = async (id: number): Promise<NextResponse> => {
     const category = await categoryService.getCategoryById(id)
     return NextResponse.json(category)
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors de la récupération de la catégorie par ID:",
       error
-    )
+    )*/
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 404 })
@@ -57,7 +57,7 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
     const newCategory = await categoryService.createCategory(data)
     return NextResponse.json(newCategory, { status: 201 })
   } catch (error) {
-    console.error("Erreur lors de la création de la catégorie:", error)
+    // console.error("Erreur lors de la création de la catégorie:", error)
 
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -96,7 +96,7 @@ export const update = async (
     const updatedCategory = await categoryService.updateCategory(id, data)
     return NextResponse.json(updatedCategory)
   } catch (error) {
-    console.error("Erreur lors de la mise à jour de la catégorie:", error)
+    // console.error("Erreur lors de la mise à jour de la catégorie:", error)
 
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -124,7 +124,7 @@ export const remove = async (id: number): Promise<NextResponse> => {
     const result = await categoryService.deleteCategory(id)
     return NextResponse.json(result)
   } catch (error) {
-    console.error("Erreur lors de la suppression de la catégorie:", error)
+    // console.error("Erreur lors de la suppression de la catégorie:", error)
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 404 })
@@ -147,7 +147,7 @@ export const toggleCategoryStatus = async (
     const result = await categoryService.toggleCategoryStatus(id)
     return NextResponse.json(result)
   } catch (error) {
-    console.error("Erreur lors du changement de statut de la catégorie:", error)
+    // console.error("Erreur lors du changement de statut de la catégorie:", error)
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 404 })

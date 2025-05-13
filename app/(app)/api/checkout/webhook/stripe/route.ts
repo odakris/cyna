@@ -21,7 +21,7 @@ export async function POST(request: Request) {
       const orderId = session.metadata?.orderId;
 
       if (!orderId) {
-        console.error('[Webhook] orderId manquant dans metadata');
+        // console.error('[Webhook] orderId manquant dans metadata');
         return NextResponse.json({ error: 'orderId manquant' }, { status: 400 });
       }
 
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
       });
 
       if (!order) {
-        console.error('[Webhook] Commande non trouvée:', orderId);
+        // console.error('[Webhook] Commande non trouvée:', orderId);
         return NextResponse.json({ error: 'Commande non trouvée' }, { status: 400 });
       }
 
@@ -151,7 +151,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ received: true });
   } catch (error: any) {
-    console.error('[Webhook] Erreur:', error);
+    // console.error('[Webhook] Erreur:', error);
     return NextResponse.json({ error: 'Webhook invalide' }, { status: 400 });
   }
 }

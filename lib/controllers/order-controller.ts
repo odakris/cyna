@@ -18,7 +18,7 @@ async function createWithParams(
 
   try {
     if (!data || typeof data !== "object") {
-      console.error("[OrderController] Données data invalides:", { data })
+      // console.error("[OrderController] Données data invalides:", { data })
       return NextResponse.json(
         {
           success: false,
@@ -65,10 +65,10 @@ async function createWithParams(
       { status: 201 }
     )
   } catch (error) {
-    console.error(
+    /*console.error(
       "[OrderController] Erreur lors de la création de la commande:",
       error
-    )
+    )*/
 
     if (error instanceof ZodError) {
       const validationErrors = error.errors
@@ -128,7 +128,7 @@ export const getAll = async (): Promise<NextResponse> => {
     const orders = await orderService.getAllOrders()
     return NextResponse.json({ orders, success: true }, { status: 200 })
   } catch (error) {
-    console.error("Erreur lors de la récupération des commandes:", error)
+    // console.error("Erreur lors de la récupération des commandes:", error)
     return NextResponse.json(
       {
         success: false,
@@ -150,10 +150,10 @@ export const getById = async (id: number): Promise<NextResponse> => {
     const order = await orderService.getOrderById(id)
     return NextResponse.json({ order, success: true }, { status: 200 })
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors de la récupération de la commande par ID:",
       error
-    )
+    )*/
 
     if (error instanceof Error) {
       if (error.message.includes("non trouvée")) {
@@ -203,7 +203,7 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
       { status: 201 }
     )
   } catch (error) {
-    console.error("Erreur lors de la création de la commande:", error)
+    // console.error("Erreur lors de la création de la commande:", error)
 
     if (error instanceof ZodError) {
       const validationErrors = error.errors
@@ -283,10 +283,10 @@ export const update = async (
       { status: 200 }
     )
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur lors de la mise à jour de la commande ID ${id}:`,
       error
-    )
+    )*/
 
     if (error instanceof ZodError) {
       const validationErrors = error.errors
@@ -353,10 +353,10 @@ export const updateStatus = async (
       { status: 200 }
     )
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur lors de la mise à jour du statut de la commande ID ${id}:`,
       error
-    )
+    )*/
 
     if (error instanceof ZodError) {
       const validationErrors = error.errors
@@ -428,10 +428,10 @@ export const remove = async (
       { status: 200 }
     )
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur lors de la suppression de la commande ID ${id}:`,
       error
-    )
+    )*/
 
     if (error instanceof Error && error.message.includes("non trouvée")) {
       return NextResponse.json(
@@ -496,7 +496,7 @@ export const getUserOrders = async (id: string): Promise<NextResponse> => {
 
     return NextResponse.json(orders, { status: 200 })
   } catch (error) {
-    console.error("OrderController Error fetching orders:", error)
+    // console.error("OrderController Error fetching orders:", error)
     return NextResponse.json(
       {
         error: "Erreur lors de la récupération des commandes",
@@ -554,7 +554,7 @@ export const getUserOrderHistoryForDisplay = async (
 
     return NextResponse.json(orders, { status: 200 })
   } catch (error) {
-    console.error("OrderController Error fetching order history:", error)
+    // console.error("OrderController Error fetching order history:", error)
     return NextResponse.json(
       {
         error: "Erreur lors de la récupération de l'historique des commandes",

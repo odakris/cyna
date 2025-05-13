@@ -36,7 +36,7 @@ export default function EditPaymentMethodPage() {
             )
           }
         } catch (err) {
-          console.error("[EditPaymentMethodPage] Erreur lors de la récupération:", err)
+          // console.error("[EditPaymentMethodPage] Erreur lors de la récupération:", err)
           setErrorMessage(
             "Une erreur est survenue lors de la récupération de la méthode de paiement."
           )
@@ -62,7 +62,7 @@ export default function EditPaymentMethodPage() {
       const data = await response.json()
       return data.isValid
     } catch (err) {
-      console.error("[EditPaymentMethodPage] Erreur lors de la vérification du mot de passe:", err)
+      // console.error("[EditPaymentMethodPage] Erreur lors de la vérification du mot de passe:", err)
       return false
     }
   }
@@ -126,7 +126,7 @@ export default function EditPaymentMethodPage() {
       console.log("[EditPaymentMethodPage] Moyen de paiement mis à jour, redirection vers /account/settings");
       router.push("/account/settings")
     } catch (err: any) {
-      console.error("[EditPaymentMethodPage] Erreur dans handleUpdate:", err)
+      // console.error("[EditPaymentMethodPage] Erreur dans handleUpdate:", err)
       setErrorMessage(
         err.message ||
           "Une erreur est survenue lors de la mise à jour de la méthode de paiement."

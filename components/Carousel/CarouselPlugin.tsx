@@ -69,7 +69,7 @@ export function CarouselPlugin() {
 
         setSlides(activeSlides)
       } catch (err) {
-        console.error("Erreur lors du chargement du carousel:", err)
+        // console.error("Erreur lors du chargement du carousel:", err)
         setError("Impossible de charger le carousel")
       } finally {
         setLoading(false)

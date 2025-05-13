@@ -37,7 +37,7 @@ export default function EditAddressPage() {
             setErrorMessage(data.message || "Erreur lors de la récupération de l’adresse.")
           }
         } catch (err) {
-          console.error("[EditAddressPage] Erreur lors de la récupération:", err)
+          // console.error("[EditAddressPage] Erreur lors de la récupération:", err)
           setErrorMessage("Une erreur est survenue lors de la récupération de l’adresse.")
         }
       }
@@ -59,7 +59,7 @@ export default function EditAddressPage() {
       const data = await response.json()
       return data.isValid
     } catch (err) {
-      console.error("[EditAddressPage] Erreur vérification mot de passe:", err)
+      // console.error("[EditAddressPage] Erreur vérification mot de passe:", err)
       return false
     }
   }
@@ -108,7 +108,7 @@ export default function EditAddressPage() {
       console.log("[EditAddressPage] Adresse mise à jour, redirection vers /account/settings")
       router.push("/account/settings")
     } catch (err: any) {
-      console.error("[EditAddressPage] Erreur mise à jour:", err)
+      // console.error("[EditAddressPage] Erreur mise à jour:", err)
       setErrorMessage(err.message || "Erreur mise à jour adresse.")
     }
 

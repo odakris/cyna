@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     const cartItems = await cartService.getCartItems(session.id_session);
     return NextResponse.json(cartItems, { status: 200 });
   } catch (error) {
-    console.error("Erreur lors de la récupération du panier:", error);
+    // console.error("Erreur lors de la récupération du panier:", error);
     const message = error instanceof Error ? error.message : "Une erreur est survenue";
     return NextResponse.json({ error: message }, { status: 500 });
   }
@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     );
     return NextResponse.json(cartItem, { status: 200 });
   } catch (error) {
-    console.error("Erreur lors de l'ajout au panier:", error);
+    // console.error("Erreur lors de l'ajout au panier:", error);
     const message = error instanceof Error ? error.message : "Une erreur est survenue";
     return NextResponse.json({ error: message }, { status: 500 });
   }
@@ -105,7 +105,7 @@ export async function PUT(request: NextRequest) {
     );
     return NextResponse.json(updatedItem, { status: 200 });
   } catch (error) {
-    console.error("Erreur lors de la mise à jour du panier:", error);
+    // console.error("Erreur lors de la mise à jour du panier:", error);
     const message = error instanceof Error ? error.message : "Une erreur est survenue";
     return NextResponse.json({ error: message }, { status: 500 });
   }
@@ -128,7 +128,7 @@ export async function DELETE(request: NextRequest) {
     await cartService.removeFromCart(cartItemId);
     return NextResponse.json({ message: "Élément supprimé du panier" }, { status: 200 });
   } catch (error) {
-    console.error("Erreur lors de la suppression du panier:", error);
+    // console.error("Erreur lors de la suppression du panier:", error);
     const message = error instanceof Error ? error.message : "Une erreur est survenue";
     return NextResponse.json({ error: message }, { status: 500 });
   }

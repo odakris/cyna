@@ -111,10 +111,10 @@ export default function SuccessPage() {
 
         if (!response.ok) {
           const errorText = await response.text()
-          console.error("[SuccessPage] Échec du déchiffrement:", {
+          /*console.error("[SuccessPage] Échec du déchiffrement:", {
             status: response.status,
             errorText,
-          })
+          })*/
           throw new Error(`Échec du déchiffrement: ${response.status} - ${errorText}`)
         }
 
@@ -140,10 +140,10 @@ export default function SuccessPage() {
         setDecryptedAddress(addressData)
         setDecryptedLastCardDigits(paymentData?.last_card_digits || order.last_card_digits)
       } catch (err) {
-        console.error("[SuccessPage] Erreur lors du déchiffrement:", {
+        /*console.error("[SuccessPage] Erreur lors du déchiffrement:", {
           message: err instanceof Error ? err.message : "Erreur inconnue",
           stack: err instanceof Error ? err.stack : undefined,
-        })
+        })*/
         setDecryptError(err instanceof Error ? err.message : "Erreur lors du déchiffrement des données")
       }
     }

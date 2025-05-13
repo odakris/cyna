@@ -75,7 +75,7 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
 
     return NextResponse.json(createdMessage, { status: 201 })
   } catch (error) {
-    console.error("Controller - Error creating contact message:", error)
+    // console.error("Controller - Error creating contact message:", error)
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 })
@@ -134,7 +134,7 @@ export const respond = async (
       data: updatedMessage,
     })
   } catch (error) {
-    console.error("Controller - Error responding to message:", error)
+    // console.error("Controller - Error responding to message:", error)
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 400 })

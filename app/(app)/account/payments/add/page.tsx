@@ -17,7 +17,7 @@ export default function AddPaymentMethod() {
     setErrorMessage(null)
 
     if (!session?.user?.id_user) {
-      console.error("Session utilisateur non trouvée.")
+      // console.error("Session utilisateur non trouvée.")
       setErrorMessage(
         "Vous devez être connecté pour ajouter une méthode de paiement."
       )
@@ -26,9 +26,9 @@ export default function AddPaymentMethod() {
     }
 
     if (!newPaymentMethod || Object.keys(newPaymentMethod).length === 0) {
-      console.error(
+      /* console.error(
         "Les données de la méthode de paiement sont invalides ou manquantes."
-      )
+      ) */
       setErrorMessage(
         "Les données de la méthode de paiement sont invalides ou manquantes."
       )
@@ -50,7 +50,7 @@ export default function AddPaymentMethod() {
 
       if (!response.ok) {
         const errorData = await response.json()
-        console.error("Erreur API:", errorData)
+        // console.error("Erreur API:", errorData)
         throw new Error(
           errorData.message ||
             "Erreur lors de la création de la méthode de paiement."
@@ -59,7 +59,7 @@ export default function AddPaymentMethod() {
 
       router.push("/account/settings")
     } catch (err: any) {
-      console.error("Erreur dans handleCreate:", err)
+      // console.error("Erreur dans handleCreate:", err)
       setErrorMessage(
         err.message ||
           "Une erreur est survenue lors de l'ajout de la méthode de paiement."

@@ -55,7 +55,7 @@ export default function CategoryPage() {
       setShowDeleteDialog(false)
       table.resetRowSelection()
     } catch (error) {
-      console.error("Erreur handleDelete:", error)
+      // console.error("Erreur handleDelete:", error)
       setError("Erreur lors de la suppression des catégories")
     }
   }

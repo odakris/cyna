@@ -51,7 +51,7 @@ export default function HeroCarouselActiveSwitch({
         description: "Le statut a été mis à jour avec succès.",
       })
     } catch (error) {
-      console.error("Erreur lors du changement de statut:", error)
+      // console.error("Erreur lors du changement de statut:", error)
       toast({
         variant: "destructive",
         title: "Erreur",

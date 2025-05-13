@@ -11,7 +11,7 @@ export default function DisconnectButton() {
       await signOut({ callbackUrl: "/auth" });
       console.log("[DisconnectButton] Déconnexion réussie, redirection vers /auth");
     } catch (error) {
-      console.error("[DisconnectButton] Erreur lors de la déconnexion", error);
+      // console.error("[DisconnectButton] Erreur lors de la déconnexion", error);
     }
   };
 

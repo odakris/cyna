@@ -37,7 +37,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       { status: 200 }
     )
   } catch (error) {
-    console.error("Erreur lors de la vérification du token:", error)
+    // console.error("Erreur lors de la vérification du token:", error)
     return NextResponse.json(
       { error: "Une erreur est survenue lors de la vérification du token" },
       { status: 500 }

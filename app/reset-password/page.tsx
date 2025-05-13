@@ -146,7 +146,7 @@ const ResetPasswordPage = () => {
         setIsTokenValid(true)
         setIsVerifying(false)
       } catch (error) {
-        console.error("Erreur lors de la vérification du token:", error)
+        // console.error("Erreur lors de la vérification du token:", error)
         setError(
           "Une erreur est survenue lors de la vérification du lien de réinitialisation."
         )
@@ -187,7 +187,7 @@ const ResetPasswordPage = () => {
         setSuccess(true)
       }
     } catch (error) {
-      console.error("Erreur lors de la réinitialisation:", error)
+      // console.error("Erreur lors de la réinitialisation:", error)
       setError(
         "Une erreur est survenue lors de la réinitialisation du mot de passe."
       )

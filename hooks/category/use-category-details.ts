@@ -27,7 +27,7 @@ export function useCategoryDetails(id: string) {
       setProductCount(categoryData.products?.length || 0)
       setErrorMessage(null)
     } catch (error) {
-      console.error("Erreur fetchData:", error)
+      // console.error("Erreur fetchData:", error)
       setErrorMessage("Erreur lors du chargement des données.")
       toast({
         title: "Erreur",
@@ -68,7 +68,7 @@ export function useCategoryDetails(id: string) {
 
       router.push("/dashboard/categories")
     } catch (error) {
-      console.error("Erreur handleDelete:", error)
+      // console.error("Erreur handleDelete:", error)
       toast({
         title: "Erreur",
         description: error instanceof Error ? error.message : "Erreur inconnue",

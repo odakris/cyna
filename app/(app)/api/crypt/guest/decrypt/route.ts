@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
           mobile_phone: addr.mobile_phone.includes(':') ? decrypt(addr.mobile_phone) : addr.mobile_phone,
         };
       } catch (error) {
-        console.error('[GuestDecrypt] Échec du déchiffrement de l\'adresse:', { address: addr, error });
+        // console.error('[GuestDecrypt] Échec du déchiffrement de l\'adresse:', { address: addr, error });
         throw new Error('Échec du déchiffrement des données d\'adresse');
       }
     });
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
           last_card_digits: pay.last_card_digits.includes(':') ? decrypt(pay.last_card_digits) : pay.last_card_digits,
         };
       } catch (error) {
-        console.error('[GuestDecrypt] Échec du déchiffrement du paiement:', { payment: pay, error });
+        // console.error('[GuestDecrypt] Échec du déchiffrement du paiement:', { payment: pay, error });
         throw new Error('Échec du déchiffrement des données de paiement');
       }
     });
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     console.log('[GuestDecrypt] Données déchiffrées:', { decryptedAddresses, decryptedPayments });
     return NextResponse.json({ addresses: decryptedAddresses, payments: decryptedPayments }, { status: 200 });
   } catch (error) {
-    console.error('[GuestDecrypt] Erreur:', error);
+    // console.error('[GuestDecrypt] Erreur:', error);
     return NextResponse.json(
       { message: error instanceof Error ? error.message : 'Erreur lors du déchiffrement des données invité' },
       { status: 500 }

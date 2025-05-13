@@ -10,7 +10,7 @@ export const getAllCategories = async (): Promise<Category[]> => {
   try {
     return await categoryRepository.findAll()
   } catch (error) {
-    console.error("Erreur lors de la récupération des catégories:", error)
+    // console.error("Erreur lors de la récupération des catégories:", error)
     throw new Error("Erreur lors de la récupération des catégories")
   }
 }
@@ -31,10 +31,10 @@ export const getCategoryById = async (id: number): Promise<Category> => {
 
     return category
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors de la récupération de la catégorie par ID:",
       error
-    )
+    )*/
     throw new Error(`Erreur lors de la récupération de la catégorie ${id}`)
   }
 }
@@ -153,7 +153,7 @@ export const toggleCategoryStatus = async (
       productsUpdated: result.productsUpdated,
     }
   } catch (error) {
-    console.error("Erreur lors du changement de statut de la catégorie:", error)
+    // console.error("Erreur lors du changement de statut de la catégorie:", error)
     throw error
   }
 }

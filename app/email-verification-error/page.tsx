@@ -76,7 +76,7 @@ const EmailVerificationErrorPage = () => {
         "Si cette adresse email est associée à un compte CYNA, un email de vérification a été envoyé."
       )
     } catch (error) {
-      console.error("Erreur:", error)
+      // console.error("Erreur:", error)
       setStatus("error")
       setStatusMessage(
         "Un problème de connexion est survenu. Veuillez vérifier votre connexion internet et réessayer."

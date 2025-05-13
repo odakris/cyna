@@ -104,10 +104,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       categorySales,
     })
   } catch (error) {
-    console.error(
+    /* console.error(
       "Erreur lors de la récupération des ventes par catégorie:",
       error
-    )
+    )*/
     return NextResponse.json(
       {
         success: false,

@@ -932,7 +932,7 @@ export async function processChatbotMessage(
       context: "initial",
     }
   } catch (error) {
-    console.error("Erreur dans processChatbotMessage:", error)
+    // console.error("Erreur dans processChatbotMessage:", error)
     return {
       response:
         "Je rencontre un problème technique. Souhaitez-vous être mis en relation avec un conseiller ?",

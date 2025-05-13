@@ -6,7 +6,7 @@ export const getActiveMessage = async (): Promise<MainMessage | null> => {
   try {
     return await mainMessageRepository.findActiveMessage()
   } catch (error) {
-    console.error("Service - Error getting active message:", error)
+    // console.error("Service - Error getting active message:", error)
     throw error
   }
 }
@@ -15,7 +15,7 @@ export const getAllMessages = async (): Promise<MainMessage[]> => {
   try {
     return await mainMessageRepository.findAll()
   } catch (error) {
-    console.error("Service - Error getting all messages:", error)
+    // console.error("Service - Error getting all messages:", error)
     throw error
   }
 }
@@ -26,7 +26,7 @@ export const getMessageById = async (
   try {
     return await mainMessageRepository.findById(id)
   } catch (error) {
-    console.error(`Service - Error getting message with id ${id}:`, error)
+    // console.error(`Service - Error getting message with id ${id}:`, error)
     throw error
   }
 }
@@ -37,7 +37,7 @@ export const createMessage = async (
   try {
     return await mainMessageRepository.create(data)
   } catch (error) {
-    console.error("Service - Error creating message:", error)
+    // console.error("Service - Error creating message:", error)
     throw error
   }
 }
@@ -54,7 +54,7 @@ export const updateMessage = async (
 
     return await mainMessageRepository.update(id, data)
   } catch (error) {
-    console.error(`Service - Error updating message with id ${id}:`, error)
+    // console.error(`Service - Error updating message with id ${id}:`, error)
     throw error
   }
 }
@@ -78,10 +78,10 @@ export const updatePartialMessage = async (
       return await mainMessageRepository.updatePartial(id, partialData)
     }
   } catch (error) {
-    console.error(
+    /*console.error(
       `Service - Error partially updating message with id ${id}:`,
       error
-    )
+    )*/
     throw error
   }
 }
@@ -95,7 +95,7 @@ export const deleteMessage = async (id: number): Promise<MainMessage> => {
 
     return await mainMessageRepository.remove(id)
   } catch (error) {
-    console.error(`Service - Error deleting message with id ${id}:`, error)
+    // console.error(`Service - Error deleting message with id ${id}:`, error)
     throw error
   }
 }

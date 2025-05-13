@@ -27,7 +27,7 @@ export default function MainMessage() {
         const data = await response.json()
         setMessage(data)
       } catch (err) {
-        console.error("Erreur lors du chargement du message:", err)
+        // console.error("Erreur lors du chargement du message:", err)
         setError("Impossible de charger le message")
       } finally {
         setLoading(false)

@@ -8,7 +8,7 @@ export const getAllMessages = async (): Promise<ContactMessage[]> => {
   try {
     return await contactMessageRepository.findAll()
   } catch (error) {
-    console.error("Service - Error getting all contact messages:", error)
+    // console.error("Service - Error getting all contact messages:", error)
     throw error
   }
 }
@@ -31,10 +31,10 @@ export const getMessageById = async (
 
     return message
   } catch (error) {
-    console.error(
+    /*console.error(
       `Service - Error getting contact message with id ${id}:`,
       error
-    )
+    )*/
     throw error
   }
 }
@@ -43,7 +43,7 @@ export const getUnreadMessages = async (): Promise<ContactMessage[]> => {
   try {
     return await contactMessageRepository.findUnread()
   } catch (error) {
-    console.error("Service - Error getting unread contact messages:", error)
+    // console.error("Service - Error getting unread contact messages:", error)
     throw error
   }
 }
@@ -59,7 +59,7 @@ export const createMessage = async (data: {
   try {
     return await contactMessageRepository.create(data)
   } catch (error) {
-    console.error("Service - Error creating contact message:", error)
+    // console.error("Service - Error creating contact message:", error)
     throw error
   }
 }
@@ -75,10 +75,10 @@ export const markMessageAsRead = async (
 
     return await contactMessageRepository.markAsRead(id)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Service - Error marking message as read with id ${id}:`,
       error
-    )
+    )*/
     throw error
   }
 }
@@ -118,12 +118,12 @@ export const respondToMessage = async (
       })
     } catch (emailError) {
       // Consignez l'erreur mais ne la propagez pas, car nous avons déjà mis à jour la base de données
-      console.error("Erreur lors de l'envoi de l'email de réponse:", emailError)
+      // console.error("Erreur lors de l'envoi de l'email de réponse:", emailError)
     }
 
     return updatedMessage
   } catch (error) {
-    console.error(`Service - Error responding to message:`, error)
+    // console.error(`Service - Error responding to message:`, error)
     throw error
   }
 }
@@ -138,10 +138,10 @@ export const deleteMessage = async (id: number): Promise<ContactMessage> => {
     // Supprimer le message
     return await contactMessageRepository.remove(id)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Service - Error deleting contact message with id ${id}:`,
       error
-    )
+    )*/
     throw error
   }
 }
@@ -155,7 +155,7 @@ export const getMessageStats = async (): Promise<{
   try {
     return await contactMessageRepository.getStats()
   } catch (error) {
-    console.error("Service - Error getting contact message stats:", error)
+    // console.error("Service - Error getting contact message stats:", error)
     throw error
   }
 }

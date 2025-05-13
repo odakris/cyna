@@ -49,7 +49,7 @@ export const ResendVerificationButton = ({
         variant: "success",
       })
     } catch (error) {
-      console.error("Erreur:", error)
+      // console.error("Erreur:", error)
       setStatus("error")
       toast({
         title: "Erreur",

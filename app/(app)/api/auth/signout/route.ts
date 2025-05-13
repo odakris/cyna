@@ -31,10 +31,10 @@ export async function POST(req: Request) {
     console.log("[Auth SignOut] Cookie de session supprimé");
     return response;
   } catch (error: any) {
-    console.error("[Auth SignOut] Erreur lors de la déconnexion", {
+    /* console.error("[Auth SignOut] Erreur lors de la déconnexion", {
       message: error.message,
       stack: error.stack,
-    });
+    }); */
     return NextResponse.json(
       { message: "Erreur lors de la déconnexion" },
       { status: 500 }

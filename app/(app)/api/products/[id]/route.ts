@@ -27,10 +27,10 @@ export async function GET(
 
     return await productController.getById(id)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur non gérée dans la route GET /products/${params.then(p => p.id)}:`,
       error
-    )
+    )*/
     return NextResponse.json(
       { error: "Erreur serveur inattendue" },
       { status: 500 }
@@ -66,10 +66,10 @@ export async function PUT(
 
     return await productController.update(request, id)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur non gérée dans la route PUT /products/${params.then(p => p.id)}:`,
       error
-    )
+    )*/
     return NextResponse.json(
       { error: "Erreur serveur inattendue" },
       { status: 500 }
@@ -105,10 +105,10 @@ export async function DELETE(
 
     return await productController.remove(id)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur non gérée dans la route DELETE /products/${params.then(p => p.id)}:`,
       error
-    )
+    )*/
     return NextResponse.json(
       { error: "Erreur serveur inattendue" },
       { status: 500 }

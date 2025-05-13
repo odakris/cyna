@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     console.log('[API Sessions] Paramètres:', { email });
 
     if (!email) {
-      console.error('[API Sessions] Email manquant');
+      // console.error('[API Sessions] Email manquant');
       return NextResponse.json(
         { error: 'Email requis pour créer une session invité' },
         { status: 400 }
@@ -26,10 +26,10 @@ export async function POST(request: NextRequest) {
     console.log('[API Sessions] Session créée:', session);
     return NextResponse.json(session, { status: 201 });
   } catch (error: any) {
-    console.error('[API Sessions] Erreur:', {
+    /*console.error('[API Sessions] Erreur:', {
       message: error.message,
       stack: error.stack,
-    });
+    });*/
     return NextResponse.json(
       { error: 'Erreur lors de la création de la session', details: error.message },
       { status: 500 }

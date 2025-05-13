@@ -9,10 +9,10 @@ export async function GET(): Promise<NextResponse> {
 
     return await orderController.getAll();
   } catch (error) {
-    console.error(
+    /* console.error(
       "[API Orders] Erreur non gérée lors de la récupération des commandes:",
       error
-    );
+    );*/
     return NextResponse.json(
       {
         success: false,
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     if (!userId && !guestId) {
-      console.error("[API Orders] Aucun identifiant fourni");
+      // console.error("[API Orders] Aucun identifiant fourni");
       return NextResponse.json(
         {
           success: false,
@@ -53,13 +53,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const permissionCheck = await checkPermission("orders:create");
 
       if (permissionCheck) {
-        console.error("[API Orders] Échec de la vérification des permissions", {
+        /*console.error("[API Orders] Échec de la vérification des permissions", {
           userId,
           status: permissionCheck.status,
           response: await permissionCheck.json().catch(() => ({
             error: "Impossible de parser la réponse",
           })),
-        });
+        });*/
         return permissionCheck;
       }
     }
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       body = await request.json();
       console.log("[API Orders] Corps de la requête brut", JSON.stringify(body, null, 2));
     } catch (error) {
-      console.error("[API Orders] Erreur lors de la lecture du corps de la requête", error);
+      // console.error("[API Orders] Erreur lors de la lecture du corps de la requête", error);
       return NextResponse.json(
         {
           success: false,
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return orderResponse;
   } catch (error) {
-    console.error("[API Orders] Erreur non gérée lors de la création de la commande:", error);
+    // console.error("[API Orders] Erreur non gérée lors de la création de la commande:", error);
     return NextResponse.json(
       {
         success: false,

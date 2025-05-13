@@ -104,7 +104,7 @@ export function HeroCarouselForm({
     try {
       await onSubmit(data)
     } catch (error) {
-      console.error("Erreur lors de la soumission du formulaire:", error)
+      // console.error("Erreur lors de la soumission du formulaire:", error)
     } finally {
       setIsSubmitting(false)
     }

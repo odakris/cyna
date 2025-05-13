@@ -8,7 +8,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const token = searchParams.get("token")
 
     if (!token) {
-      console.error("Token manquant dans l'URL de vérification")
+      // console.error("Token manquant dans l'URL de vérification")
       return NextResponse.redirect(
         new URL("/email-verification-error", request.url)
       )
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       )
     }
   } catch (error) {
-    console.error("Erreur lors de la vérification:", error)
+    // console.error("Erreur lors de la vérification:", error)
     return NextResponse.redirect(
       new URL("/email-verification-error", request.url)
     )

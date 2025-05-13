@@ -18,7 +18,7 @@ export const findAll = async (): Promise<User[]> => {
       },
     })
   } catch (error) {
-    console.error("Impossible de récupérer la liste des utilisateurs:", error)
+    // console.error("Impossible de récupérer la liste des utilisateurs:", error)
     throw new Error("Impossible de récupérer la liste des utilisateurs")
   }
 }
@@ -35,7 +35,7 @@ export const findById = async (id: number): Promise<User | null> => {
       include: { orders: true },
     })
   } catch (error) {
-    console.error("Impossible de récupérer l'utilisateur:", error)
+    // console.error("Impossible de récupérer l'utilisateur:", error)
     throw new Error(`Impossible de récupérer l'utilisateur avec l'ID ${id}`)
   }
 }
@@ -52,7 +52,7 @@ export const findByEmail = async (email: string): Promise<User | null> => {
       where: { email },
     })
   } catch (error) {
-    console.error("Impossible de récupérer l'utilisateur:", error)
+    // console.error("Impossible de récupérer l'utilisateur:", error)
     throw new Error(
       `Impossible de trouver un utilisateur avec l'email ${email}`
     )
@@ -97,7 +97,7 @@ export const create = async (data: UserFormValues): Promise<User> => {
     if (error instanceof Error && error.message.startsWith("EMAIL_EXISTS:")) {
       throw error
     }
-    console.error("Impossible de créer l'utilisateur:", error)
+    // console.error("Impossible de créer l'utilisateur:", error)
     throw new Error("Impossible de créer l'utilisateur")
   }
 }
@@ -153,7 +153,7 @@ export const update = async (
       })
     })
   } catch (error) {
-    console.error("Impossible de mettre à jour l'utilisateur:", error)
+    // console.error("Impossible de mettre à jour l'utilisateur:", error)
     throw new Error(`Impossible de mettre à jour l'utilisateur avec l'ID ${id}`)
   }
 }
@@ -188,7 +188,7 @@ export const remove = async (id: number): Promise<User> => {
       })
     })
   } catch (error) {
-    console.error("Impossible de supprimer l'utilisateur:", error)
+    // console.error("Impossible de supprimer l'utilisateur:", error)
     throw new Error(`Impossible de supprimer l'utilisateur avec l'ID ${id}`)
   }
 }
@@ -205,7 +205,7 @@ export const exists = async (id: number): Promise<boolean> => {
     })
     return count > 0
   } catch (error) {
-    console.error("Impossible de vérifier l'existence de l'utilisateur:", error)
+    // console.error("Impossible de vérifier l'existence de l'utilisateur:", error)
     throw new Error(
       `Impossible de vérifier l'existence de l'utilisateur avec l'ID ${id}`
     )
@@ -231,7 +231,7 @@ export const updateActiveStatus = async (
       },
     })
   } catch (error) {
-    console.error("Erreur lors de la mise à jour du statut actif:", error)
+    // console.error("Erreur lors de la mise à jour du statut actif:", error)
     throw error
   }
 }

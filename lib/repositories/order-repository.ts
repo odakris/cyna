@@ -28,7 +28,7 @@ export const findAll = async (): Promise<Order[]> => {
 
     return orders || [] // Assurez-vous de toujours retourner un tableau, même vide
   } catch (error) {
-    console.error("Erreur lors de la récupération des commandes:", error)
+    // console.error("Erreur lors de la récupération des commandes:", error)
 
     // Créer une erreur avec un message plus descriptif
     const errorMessage =
@@ -79,10 +79,10 @@ export const findById = async (id: number): Promise<Order | null> => {
 
     return order
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur lors de la récupération de la commande ID ${id}:`,
       error
-    )
+    )*/
 
     // Vérifier si l'erreur concerne un problème de clé étrangère ou autre erreur spécifique
     const errorMessage =
@@ -227,7 +227,7 @@ export const create = async (data: OrderFormValues): Promise<Order> => {
       })
     })
   } catch (error) {
-    console.error("Error creating order:", error)
+    // console.error("Error creating order:", error)
     throw error instanceof Error ? error : new Error("Failed to create order")
   }
 }
@@ -404,7 +404,7 @@ export const update = async (
       })
     })
   } catch (error) {
-    console.error("Error updating order:", error)
+    // console.error("Error updating order:", error)
     throw error instanceof Error ? error : new Error("Failed to update order")
   }
 }
@@ -437,10 +437,10 @@ export const updateStatus = async (
 
     return updatedOrder
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur lors de la mise à jour du statut de la commande ID ${id}:`,
       error
-    )
+    )*/
     if (
       error instanceof Error &&
       error.message.includes("Record to update not found")
@@ -525,30 +525,30 @@ export const remove = async (id: number): Promise<Order> => {
 
       // Erreurs potentielles de clé étrangère ou de contrainte
       if (error.message.includes("foreign key constraint")) {
-        console.error(
+        /*console.error(
           `Impossible de supprimer la commande ID ${id} car elle est référencée ailleurs:`,
           error
-        )
+        )*/
         throw new Error(
           `Impossible de supprimer la commande ID ${id} car elle est référencée par d'autres entités`
         )
       }
 
       // Autres erreurs techniques
-      console.error(
+      /*console.error(
         `Erreur lors de la suppression de la commande ID ${id}:`,
         error
-      )
+      )*/
       throw new Error(
         `Échec de la suppression de la commande ${id}: ${error.message}`
       )
     }
 
     // Cas générique pour les erreurs non-Error
-    console.error(
+    /*console.error(
       `Erreur inconnue lors de la suppression de la commande ID ${id}:`,
       error
-    )
+    )*/
     throw new Error(`Échec de la suppression de la commande ${id}`)
   }
 }

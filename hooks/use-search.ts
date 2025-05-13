@@ -53,7 +53,7 @@ export function useSearch() {
       const data = (await response.json()) as SearchResult
       setResults(data)
     } catch (error) {
-      console.error("Erreur lors de la recherche:", error)
+      // console.error("Erreur lors de la recherche:", error)
       setResults({ products: [], categories: [] })
     } finally {
       setIsLoading(false)

@@ -134,7 +134,7 @@ const ActionsCell = ({
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
     } catch (error) {
-      console.error("Erreur lors du téléchargement de la facture :", error)
+      // console.error("Erreur lors du téléchargement de la facture :", error)
       const errorMessage =
         error instanceof Error
           ? error.message

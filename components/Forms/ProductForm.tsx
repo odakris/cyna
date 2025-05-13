@@ -201,7 +201,7 @@ export function ProductForm({
         }
       }
     } catch (error) {
-      console.error("Erreur onSubmit:", error)
+      // console.error("Erreur onSubmit:", error)
       toast({
         title: "Erreur",
         description:

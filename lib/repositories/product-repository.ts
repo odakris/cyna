@@ -21,7 +21,7 @@ export const findAll = async (): Promise<Product[]> => {
       orderBy: { priority_order: "asc" },
     })
   } catch (error) {
-    console.error("Impossible de récupérer la liste des produits:", error)
+    // console.error("Impossible de récupérer la liste des produits:", error)
     throw new Error("Impossible de récupérer la liste des produits")
   }
 }
@@ -38,7 +38,7 @@ export const findById = async (id: number): Promise<Product | null> => {
       include: { category: true, product_caroussel_images: true },
     })
   } catch (error) {
-    console.error("Impossible de récupérer le produit:", error)
+    // console.error("Impossible de récupérer le produit:", error)
     throw new Error(`Impossible de récupérer le produit avec l'ID ${id}`)
   }
 }
@@ -95,7 +95,7 @@ export const create = async (data: ProductFormValues): Promise<Product> => {
       })
     })
   } catch (error) {
-    console.error("Erreur lors de la création du produit:", error)
+    // console.error("Erreur lors de la création du produit:", error)
     throw new Error("Impossible de créer le produit")
   }
 }
@@ -189,7 +189,7 @@ export const update = async (
       })
     })
   } catch (error) {
-    console.error("Erreur lors de la mise à jour du produit:", error)
+    // console.error("Erreur lors de la mise à jour du produit:", error)
     throw error
   }
 }
@@ -225,7 +225,7 @@ export const remove = async (id: number): Promise<Product> => {
       })
     })
   } catch (error) {
-    console.error("Erreur lors de la suppression du produit:", error)
+    // console.error("Erreur lors de la suppression du produit:", error)
     throw new Error(`Impossible de supprimer le produit avec l'ID ${id}`)
   }
 }
@@ -242,10 +242,10 @@ export const exists = async (id: number): Promise<boolean> => {
     })
     return count > 0
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors de la vérification de l'existence du produit:",
       error
-    )
+    )*/
     throw new Error(
       `Impossible de vérifier l'existence du produit avec l'ID ${id}`
     )
@@ -275,7 +275,7 @@ export const updateActiveStatus = async (
       },
     })
   } catch (error) {
-    console.error("Erreur lors de la mise à jour du statut actif:", error)
+    // console.error("Erreur lors de la mise à jour du statut actif:", error)
     throw error
   }
 }

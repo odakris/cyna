@@ -24,7 +24,7 @@ async function withAuth(
     // console.log("[PaymentController withAuth] En-têtes reçus:", { xUserId, sessionExists: !!session });
 
     if (!session?.user?.id_user && !xUserId) {
-      console.error("[PaymentController withAuth] Aucune session ou x-user-id pour userId:", userId);
+      // console.error("[PaymentController withAuth] Aucune session ou x-user-id pour userId:", userId);
       return NextResponse.json(
         { message: "Non authentifié. Veuillez vous connecter." },
         { status: 401 }
@@ -46,11 +46,11 @@ async function withAuth(
       (sessionUserId && sessionUserId !== userId) ||
       (headerUserId && headerUserId !== userId)
     ) {
-      console.error("[PaymentController withAuth] Utilisateur non autorisé:", {
+      /*console.error("[PaymentController withAuth] Utilisateur non autorisé:", {
         sessionUserId,
         headerUserId,
         requestedUserId: userId,
-      });
+      });*/
       return NextResponse.json(
         { message: "Non autorisé. Vous ne pouvez pas accéder aux données d'un autre utilisateur." },
         { status: 403 }
@@ -62,7 +62,7 @@ async function withAuth(
       select: { id_user: true },
     });
     if (!user) {
-      console.error("[PaymentController withAuth] Utilisateur non trouvé pour userId:", userId);
+      // console.error("[PaymentController withAuth] Utilisateur non trouvé pour userId:", userId);
       return NextResponse.json(
         { message: "Utilisateur non trouvé" },
         { status: 404 }
@@ -72,10 +72,10 @@ async function withAuth(
     // console.log("[PaymentController withAuth] Authentification réussie pour userId:", userId);
     return await handler(userId, ...args);
   } catch (error: any) {
-    console.error("[PaymentController withAuth] Erreur:", {
+    /*console.error("[PaymentController withAuth] Erreur:", {
       message: error.message,
       stack: error.stack,
-    });
+    });*/
     return NextResponse.json(
       { message: "Erreur interne du serveur" },
       { status: 500 }
@@ -90,7 +90,7 @@ export const paymentController = {
     const paymentId = parseInt(id_payment, 10);
 
     if (isNaN(userId) || isNaN(paymentId)) {
-      console.error("[PaymentController getPayment] ID utilisateur ou paiement invalide:", { userId, paymentId });
+      // console.error("[PaymentController getPayment] ID utilisateur ou paiement invalide:", { userId, paymentId });
       return NextResponse.json(
         { message: "ID utilisateur ou ID de paiement invalide" },
         { status: 400 }
@@ -119,7 +119,7 @@ export const paymentController = {
         console.log("[PaymentController getPayment] Paiement déchiffré:", { userId, paymentId });
         return NextResponse.json(decryptedPayment, { status: 200 });
       } catch (error: any) {
-        console.error("[PaymentController getPayment] Erreur:", error);
+        // console.error("[PaymentController getPayment] Erreur:", error);
         return NextResponse.json(
           { message: `Erreur serveur lors de la récupération du paiement: ${error.message}` },
           { status: 500 }
@@ -131,7 +131,7 @@ export const paymentController = {
   async getPayments(req: NextRequest, { params }: { params: { id: string } }) {
     const userId = parseInt(params.id, 10);
     if (isNaN(userId)) {
-      console.error("[PaymentController getPayments] ID utilisateur invalide:", { userId });
+      // console.error("[PaymentController getPayments] ID utilisateur invalide:", { userId });
       return NextResponse.json(
         { message: "ID utilisateur invalide" },
         { status: 400 }
@@ -159,7 +159,7 @@ export const paymentController = {
               last_card_digits: decrypt(payment.last_card_digits),
             };
           } catch (error) {
-            //   console.error(`[PaymentController getPayments] Échec du déchiffrement pour paymentId: ${payment.id_payment_info}`, error);
+            // console.error(`[PaymentController getPayments] Échec du déchiffrement pour paymentId: ${payment.id_payment_info}`, error);
             throw error;
           }
         });
@@ -167,7 +167,7 @@ export const paymentController = {
         //  console.log("[PaymentController getPayments] Paiements déchiffrés:", { userId, count: decryptedPayments.length });
         return NextResponse.json(decryptedPayments, { status: 200 });
       } catch (error: any) {
-        console.error("[PaymentController getPayments] Erreur:", error);
+        // console.error("[PaymentController getPayments] Erreur:", error);
         return NextResponse.json(
           { message: `Erreur serveur lors de la récupération des paiements: ${error.message}` },
           { status: 500 }
@@ -179,7 +179,7 @@ export const paymentController = {
   async createPaymentMethod(req: NextRequest, { params }: { params: { id: string } }) {
     const userId = parseInt(params.id, 10);
     if (isNaN(userId)) {
-      console.error("[PaymentController createPaymentMethod] ID utilisateur invalide:", { userId });
+      // console.error("[PaymentController createPaymentMethod] ID utilisateur invalide:", { userId });
       return NextResponse.json(
         { message: "ID utilisateur invalide" },
         { status: 400 }
@@ -207,7 +207,7 @@ export const paymentController = {
         const missing = requiredFields.filter((field) => !body[field]);
 
         if (missing.length > 0) {
-          console.error("[PaymentController createPaymentMethod] Champs manquants:", { missing });
+          // console.error("[PaymentController createPaymentMethod] Champs manquants:", { missing });
           return NextResponse.json(
             { message: `Champs manquants : ${missing.join(", ")}` },
             { status: 400 }
@@ -216,14 +216,14 @@ export const paymentController = {
 
         // Valider les longueurs
         if (card_name.length > 50) {
-          console.error("[PaymentController createPaymentMethod] card_name trop long:", { length: card_name.length });
+          // console.error("[PaymentController createPaymentMethod] card_name trop long:", { length: card_name.length });
           return NextResponse.json(
             { message: "Le nom de la carte ne doit pas dépasser 50 caractères" },
             { status: 400 }
           );
         }
         if (last_card_digits.length !== 4) {
-          console.error("[PaymentController createPaymentMethod] last_card_digits invalide:", { length: last_card_digits.length });
+          // console.error("[PaymentController createPaymentMethod] last_card_digits invalide:", { length: last_card_digits.length });
           return NextResponse.json(
             { message: "Les derniers chiffres de la carte doivent être exactement 4" },
             { status: 400 }
@@ -237,7 +237,7 @@ export const paymentController = {
         });
 
         if (!user) {
-          console.error("[PaymentController createPaymentMethod] Utilisateur non trouvé:", { userId });
+          // console.error("[PaymentController createPaymentMethod] Utilisateur non trouvé:", { userId });
           return NextResponse.json(
             { message: "Utilisateur non trouvé" },
             { status: 404 }
@@ -249,10 +249,10 @@ export const paymentController = {
         // Vérifier stripe_customer_id du corps
         if (stripe_customer_id) {
           if (user.stripeCustomerId && stripe_customer_id !== user.stripeCustomerId) {
-            console.error("[PaymentController createPaymentMethod] stripe_customer_id non correspondant:", {
+            /*console.error("[PaymentController createPaymentMethod] stripe_customer_id non correspondant:", {
               provided: stripe_customer_id,
               stored: user.stripeCustomerId,
-            });
+            });*/
             return NextResponse.json(
               { message: "L'identifiant Stripe fourni ne correspond pas à celui de l'utilisateur" },
               { status: 400 }
@@ -293,7 +293,7 @@ export const paymentController = {
             stripeCustomerId: stripeCustomerId,
           });
         } catch (error: any) {
-          console.error("[PaymentController createPaymentMethod] Erreur lors de l'attachement du payment method:", error);
+          // console.error("[PaymentController createPaymentMethod] Erreur lors de l'attachement du payment method:", error);
           return NextResponse.json(
             {
               message: "Erreur lors de l'association du moyen de paiement au client Stripe",
@@ -349,7 +349,7 @@ export const paymentController = {
         console.log("[PaymentController createPaymentMethod] Réponse envoyée:", decryptedPayment);
         return NextResponse.json(decryptedPayment, { status: 201 });
       } catch (error: any) {
-        console.error("[PaymentController createPaymentMethod] Erreur:", error);
+        // console.error("[PaymentController createPaymentMethod] Erreur:", error);
         return NextResponse.json(
           { message: `Erreur serveur lors de la création du paiement: ${error.message}` },
           { status: 500 }
@@ -364,7 +364,7 @@ export const paymentController = {
     const paymentId = parseInt(id_payment, 10);
 
     if (isNaN(userId) || isNaN(paymentId)) {
-      console.error("[PaymentController updatePaymentMethod] ID utilisateur ou paiement invalide:", { userId, paymentId });
+      // console.error("[PaymentController updatePaymentMethod] ID utilisateur ou paiement invalide:", { userId, paymentId });
       return NextResponse.json(
         { message: "ID utilisateur ou ID de paiement invalide" },
         { status: 400 }
@@ -390,7 +390,7 @@ export const paymentController = {
         const missing = requiredFields.filter((field) => !body[field]);
 
         if (missing.length > 0) {
-          console.error("[PaymentController updatePaymentMethod] Champs manquants:", { missing });
+          // console.error("[PaymentController updatePaymentMethod] Champs manquants:", { missing });
           return NextResponse.json(
             { message: `Champs manquants : ${missing.join(", ")}` },
             { status: 400 }
@@ -399,14 +399,14 @@ export const paymentController = {
 
         // Valider les longueurs
         if (card_name.length > 50) {
-          console.error("[PaymentController updatePaymentMethod] card_name trop long:", { length: card_name.length });
+          // console.error("[PaymentController updatePaymentMethod] card_name trop long:", { length: card_name.length });
           return NextResponse.json(
             { message: "Le nom de la carte ne doit pas dépasser 50 caractères" },
             { status: 400 }
           );
         }
         if (last_card_digits.length !== 4) {
-          console.error("[PaymentController updatePaymentMethod] last_card_digits invalide:", { length: last_card_digits.length });
+          // console.error("[PaymentController updatePaymentMethod] last_card_digits invalide:", { length: last_card_digits.length });
           return NextResponse.json(
             { message: "Les derniers chiffres de la carte doivent être exactement 4" },
             { status: 400 }
@@ -420,7 +420,7 @@ export const paymentController = {
         });
 
         if (!user || !user.stripeCustomerId) {
-          console.error("[PaymentController updatePaymentMethod] Utilisateur ou stripeCustomerId non trouvé:", { userId });
+          // console.error("[PaymentController updatePaymentMethod] Utilisateur ou stripeCustomerId non trouvé:", { userId });
           return NextResponse.json(
             { message: "Utilisateur ou identifiant Stripe non trouvé" },
             { status: 404 }
@@ -429,10 +429,10 @@ export const paymentController = {
 
         // Vérifier stripe_customer_id du corps
         if (stripe_customer_id && stripe_customer_id !== user.stripeCustomerId) {
-          console.error("[PaymentController updatePaymentMethod] stripe_customer_id non correspondant:", {
+          /*console.error("[PaymentController updatePaymentMethod] stripe_customer_id non correspondant:", {
             provided: stripe_customer_id,
             stored: user.stripeCustomerId,
-          });
+          });*/
           return NextResponse.json(
             { message: "L'identifiant Stripe fourni ne correspond pas à celui de l'utilisateur" },
             { status: 400 }
@@ -449,7 +449,7 @@ export const paymentController = {
             stripeCustomerId: user.stripeCustomerId,
           });
         } catch (error: any) {
-          console.error("[PaymentController updatePaymentMethod] Erreur lors de l'attachement du payment method:", error);
+          // console.error("[PaymentController updatePaymentMethod] Erreur lors de l'attachement du payment method:", error);
           return NextResponse.json(
             {
               message: "Erreur lors de l'association du moyen de paiement au client Stripe",
@@ -485,7 +485,7 @@ export const paymentController = {
         console.log("[PaymentController updatePaymentMethod] Réponse envoyée:", decryptedPayment);
         return NextResponse.json(decryptedPayment, { status: 200 });
       } catch (error: any) {
-        console.error("[PaymentController updatePaymentMethod] Erreur:", error);
+        // console.error("[PaymentController updatePaymentMethod] Erreur:", error);
         return NextResponse.json(
           { message: `Erreur serveur lors de la mise à jour du paiement: ${error.message}` },
           { status: 500 }
@@ -500,7 +500,7 @@ export const paymentController = {
     const paymentId = parseInt(id_payment, 10);
 
     if (isNaN(userId) || isNaN(paymentId)) {
-      console.error("[PaymentController deletePaymentMethod] ID utilisateur ou paiement invalide:", { userId, paymentId });
+      // console.error("[PaymentController deletePaymentMethod] ID utilisateur ou paiement invalide:", { userId, paymentId });
       return NextResponse.json(
         { message: "ID utilisateur ou ID de paiement invalide" },
         { status: 400 }
@@ -517,7 +517,7 @@ export const paymentController = {
           { status: 200 }
         );
       } catch (error: any) {
-        console.error("[PaymentController deletePaymentMethod] Erreur:", error);
+        // console.error("[PaymentController deletePaymentMethod] Erreur:", error);
         return NextResponse.json(
           { message: `Erreur serveur lors de la suppression du paiement: ${error.message}` },
           { status: 500 }

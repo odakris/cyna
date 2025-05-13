@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     const userId = req.headers.get('x-user-id');
     
     if (!session || !userId || session.user?.id_user !== parseInt(userId)) {
-      console.error('[UserEncrypt] Authentification échouée:', { session, userId });
+      // console.error('[UserEncrypt] Authentification échouée:', { session, userId });
       return NextResponse.json(
         { message: 'Non autorisé' },
         { status: 401 }
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
           mobile_phone: encrypt(addr.mobile_phone),
         };
       } catch (error) {
-        console.error('[UserEncrypt] Échec du chiffrement de l\'adresse:', { address: addr, error });
+        // console.error('[UserEncrypt] Échec du chiffrement de l\'adresse:', { address: addr, error });
         throw new Error('Échec du chiffrement des données d\'adresse');
       }
     });
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
           last_card_digits: encrypt(pay.last_card_digits),
         };
       } catch (error) {
-        console.error('[UserEncrypt] Échec du chiffrement du paiement:', { payment: pay, error });
+        // console.error('[UserEncrypt] Échec du chiffrement du paiement:', { payment: pay, error });
         throw new Error('Échec du chiffrement des données de paiement');
       }
     });
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     console.log('[UserEncrypt] Données chiffrées:', { encryptedAddresses, encryptedPayments });
     return NextResponse.json({ addresses: encryptedAddresses, payments: encryptedPayments }, { status: 200 });
   } catch (error) {
-    console.error('[UserEncrypt] Erreur:', error);
+    // console.error('[UserEncrypt] Erreur:', error);
     return NextResponse.json(
       { message: error instanceof Error ? error.message : 'Erreur lors du chiffrement des données utilisateur' },
       { status: 500 }

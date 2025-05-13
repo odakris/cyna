@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     // Valider les paramètres
     if (!paymentIntentId) {
-      console.error('[API Checkout Confirmation] payment_intent_id manquant');
+      // console.error('[API Checkout Confirmation] payment_intent_id manquant');
       return NextResponse.json(
         { error: 'Identifiant de PaymentIntent requis' },
         { status: 400 }
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!addressId || !paymentId) {
-      console.error('[API Checkout Confirmation] addressId ou paymentId manquant');
+      // console.error('[API Checkout Confirmation] addressId ou paymentId manquant');
       return NextResponse.json(
         { error: 'Adresse et moyen de paiement requis' },
         { status: 400 }
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     // Valider cartItems
     if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
-      console.error('[API Checkout Confirmation] Panier vide ou invalide:', { cartItems });
+      // console.error('[API Checkout Confirmation] Panier vide ou invalide:', { cartItems });
       return NextResponse.json({ error: 'Panier vide' }, { status: 400 });
     }
 
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         typeof item.quantity !== 'number' ||
         !VALID_SUBSCRIPTION_TYPES.includes(item.subscription_type)
       ) {
-        console.error('[API Checkout Confirmation] Élément de panier invalide:', item);
+        // console.error('[API Checkout Confirmation] Élément de panier invalide:', item);
         return NextResponse.json(
           { error: 'Un ou plusieurs éléments du panier sont invalides' },
           { status: 400 }
@@ -76,9 +76,9 @@ export async function POST(request: NextRequest) {
     // Valider le PaymentIntent
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
     if (paymentIntent.status !== 'succeeded') {
-      console.error('[API Checkout Confirmation] Paiement non confirmé:', {
+      /*console.error('[API Checkout Confirmation] Paiement non confirmé:', {
         status: paymentIntent.status,
-      });
+      });*/
       return NextResponse.json(
         { error: 'Paiement non confirmé' },
         { status: 400 }
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     const parsedGuestId = metadata?.guestId ? parseInt(metadata.guestId) : undefined;
 
     if (!sessionToken && !parsedGuestId && !userId) {
-      console.error('[API Checkout Confirmation] sessionToken, guestId ou userId manquant');
+      // console.error('[API Checkout Confirmation] sessionToken, guestId ou userId manquant');
       return NextResponse.json(
         { error: 'Session utilisateur ou invité requise' },
         { status: 400 }
@@ -103,7 +103,7 @@ export async function POST(request: NextRequest) {
     // Déterminer userIdToUse
     let userIdToUse = userId ? parseInt(userId) : parsedGuestId;
     if (!userIdToUse) {
-      console.error('[API Checkout Confirmation] Aucun utilisateur associé');
+      // console.error('[API Checkout Confirmation] Aucun utilisateur associé');
       return NextResponse.json(
         { error: 'Utilisateur non trouvé pour la commande' },
         { status: 400 }
@@ -115,10 +115,10 @@ export async function POST(request: NextRequest) {
       where: { id_payment_info: parseInt(paymentId) },
     });
     if (!paymentInfo || paymentInfo.id_user !== userIdToUse) {
-      console.error('[API Checkout Confirmation] Moyen de paiement non trouvé ou non associé:', {
+      /*console.error('[API Checkout Confirmation] Moyen de paiement non trouvé ou non associé:', {
         paymentId,
         userId: userIdToUse,
-      });
+      });*/
       return NextResponse.json(
         { error: 'Moyen de paiement non trouvé ou non associé à l’utilisateur' },
         { status: 404 }
@@ -130,10 +130,10 @@ export async function POST(request: NextRequest) {
       where: { id_address: parseInt(addressId) },
     });
     if (!address || address.id_user !== userIdToUse) {
-      console.error('[API Checkout Confirmation] Adresse non trouvée ou non associée:', {
+      /*console.error('[API Checkout Confirmation] Adresse non trouvée ou non associée:', {
         addressId,
         userId: userIdToUse,
-      });
+      });*/
       return NextResponse.json(
         { error: 'Adresse non trouvée ou non associée à l’utilisateur' },
         { status: 404 }
@@ -251,11 +251,11 @@ export async function POST(request: NextRequest) {
       })),
     });
   } catch (error: any) {
-    console.error('[API Checkout Confirmation] Erreur:', {
+    /*console.error('[API Checkout Confirmation] Erreur:', {
       message: error.message,
       stack: error.stack,
       details: JSON.stringify(error, null, 2),
-    });
+    });*/
     return NextResponse.json(
       { error: 'Erreur lors de la confirmation de la commande', details: error.message },
       { status: 500 }

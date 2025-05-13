@@ -28,7 +28,7 @@ export function useOrderDetail(orderId: string) {
       setOrder(data.order)
       setError(null)
     } catch (error) {
-      console.error("Erreur lors du chargement de la commande:", error)
+      // console.error("Erreur lors du chargement de la commande:", error)
       setError("Impossible de charger les détails de la commande")
     } finally {
       setLoading(false)
@@ -73,7 +73,7 @@ export function useOrderDetail(orderId: string) {
         description: `La commande est maintenant ${getStatusLabel(updateStatus)}`,
       })
     } catch (error) {
-      console.error("Erreur lors de la mise à jour du statut:", error)
+      // console.error("Erreur lors de la mise à jour du statut:", error)
       toast({
         title: "Erreur",
         description:

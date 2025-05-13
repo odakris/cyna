@@ -50,7 +50,7 @@ export function useCategoriesData() {
 
       setError(null)
     } catch (error: unknown) {
-      console.error("Erreur fetchCategories:", error)
+      // console.error("Erreur fetchCategories:", error)
       setError("Erreur lors du chargement des catégories")
     } finally {
       setLoading(false)
@@ -73,7 +73,7 @@ export function useCategoriesData() {
         if (!response.ok) {
           failedDeletions.push(id)
           const errorData = await response.json()
-          console.error(`Erreur de suppression pour l'ID ${id}:`, errorData)
+          // console.error(`Erreur de suppression pour l'ID ${id}:`, errorData)
         }
       }
 
@@ -89,7 +89,7 @@ export function useCategoriesData() {
 
       return { success: true }
     } catch (error: unknown) {
-      console.error("Erreur deleteCategories:", error)
+      // console.error("Erreur deleteCategories:", error)
       throw error
     }
   }

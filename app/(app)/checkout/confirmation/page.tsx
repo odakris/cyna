@@ -188,10 +188,10 @@ function ConfirmationContent() {
       setAddress(addressData);
       setPaymentInfo(paymentData);
     } catch (err) {
-      console.error('[Confirmation] Erreur dans fetchData', {
+      /*console.error('[Confirmation] Erreur dans fetchData', {
         message: err.message,
         stack: err.stack,
-      });
+      });*/
       setError(err instanceof Error ? err.message : 'Échec du chargement des données. Veuillez réessayer.');
     } finally {
       setLoading(false);
@@ -210,12 +210,12 @@ function ConfirmationContent() {
 
     try {
       if (!paymentId || typeof paymentId !== 'string' || paymentId.trim() === '') {
-        console.error('[Confirmation] paymentId invalide:', paymentId);
+        // console.error('[Confirmation] paymentId invalide:', paymentId);
         throw new Error('L’identifiant de paiement est requis et doit être une chaîne non vide');
       }
 
       if (session && isNaN(parseInt(paymentId))) {
-        console.error('[Confirmation] paymentId non numérique pour utilisateur connecté:', paymentId);
+        // console.error('[Confirmation] paymentId non numérique pour utilisateur connecté:', paymentId);
         throw new Error('L’identifiant de paiement doit être numérique pour les utilisateurs connectés');
       }
 
@@ -271,10 +271,10 @@ function ConfirmationContent() {
         let errorMessage = `Erreur serveur: ${response.statusText}`;
         try {
           const errorData = await response.json();
-          console.error('[Confirmation] Détails de l’erreur serveur:', errorData);
+          // console.error('[Confirmation] Détails de l’erreur serveur:', errorData);
           errorMessage = errorData.message || errorData.error || response.statusText;
         } catch (jsonError) {
-          console.error('[Confirmation] Impossible de parser la réponse:', jsonError);
+          // console.error('[Confirmation] Impossible de parser la réponse:', jsonError);
           if (response.status === 405) {
             errorMessage = 'Méthode non autorisée. Veuillez réessayer ou contacter le support.';
           }
@@ -286,7 +286,7 @@ function ConfirmationContent() {
       console.log('[Confirmation] Données reçues de /api/checkout:', data);
 
       if (!data.orderId || !data.status) {
-        console.error('[Confirmation] orderId ou status manquant dans la réponse:', data);
+        // console.error('[Confirmation] orderId ou status manquant dans la réponse:', data);
         throw new Error('Réponse du serveur invalide');
       }
 
@@ -296,14 +296,14 @@ function ConfirmationContent() {
         console.log('[Confirmation] Paiement réussi, finalisation:', { orderId: data.orderId });
         await finalizeOrder(data.orderId);
       } else {
-        console.error('[Confirmation] Statut de paiement inattendu:', data.status);
+        // console.error('[Confirmation] Statut de paiement inattendu:', data.status);
         throw new Error(`Statut de paiement inattendu: ${data.status}`);
       }
     } catch (err) {
-      console.error('[Confirmation] Erreur dans handleConfirmPurchase:', {
+      /*console.error('[Confirmation] Erreur dans handleConfirmPurchase:', {
         message: err.message,
         stack: err.stack,
-      });
+      });*/
       setError(err instanceof Error ? err.message : 'Erreur réseau');
       router.push(`/checkout?error=${encodeURIComponent(err.message || 'Une erreur est survenue lors du paiement')}`);
     } finally {
@@ -342,7 +342,7 @@ function ConfirmationContent() {
 
       if (!emailResponse.ok) {
         const errorText = await emailResponse.text();
-        console.error('[Confirmation] Échec de l’envoi de l’email:', errorText);
+        // console.error('[Confirmation] Échec de l’envoi de l’email:', errorText);
       }
 
       console.log('[Confirmation] Génération du PDF de la facture pour la commande:', orderId);
@@ -361,10 +361,10 @@ function ConfirmationContent() {
       console.log('[Confirmation] Redirection vers success:', { orderId });
       router.push(`/success?orderId=${orderId}`);
     } catch (err) {
-      console.error('[Confirmation] Erreur dans finalizeOrder:', {
+      /*console.error('[Confirmation] Erreur dans finalizeOrder:', {
         message: err.message,
         stack: err.stack,
-      });
+      });*/
       setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la finalisation');
       router.push(`/checkout?error=${encodeURIComponent(err.message || 'Une erreur est survenue lors de la finalisation')}`);
     }
@@ -373,7 +373,7 @@ function ConfirmationContent() {
   const generateInvoicePDF = async (order: any) => {
     console.log('[Confirmation] Début de generateInvoicePDF', { orderId: order.id_order });
     if (!address) {
-      console.error('[Confirmation] Adresse manquante pour générer le PDF');
+      // console.error('[Confirmation] Adresse manquante pour générer le PDF');
       setError('Adresse manquante pour la génération de la facture');
       return;
     }

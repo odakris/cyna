@@ -10,7 +10,7 @@ export const findActiveMessage = async (): Promise<MainMessage | null> => {
       orderBy: { updated_at: "desc" },
     })
   } catch (error) {
-    console.error("Repository - Error fetching active message:", error)
+    // console.error("Repository - Error fetching active message:", error)
     throw error
   }
 }
@@ -21,7 +21,7 @@ export const findAll = async (): Promise<MainMessage[]> => {
       orderBy: { updated_at: "desc" },
     })
   } catch (error) {
-    console.error("Repository - Error fetching all messages:", error)
+    // console.error("Repository - Error fetching all messages:", error)
     throw error
   }
 }
@@ -32,7 +32,7 @@ export const findById = async (id: number): Promise<MainMessage | null> => {
       where: { id_main_message: id },
     })
   } catch (error) {
-    console.error(`Repository - Error fetching message with id ${id}:`, error)
+    // console.error(`Repository - Error fetching message with id ${id}:`, error)
     throw error
   }
 }
@@ -61,7 +61,7 @@ export const create = async (
       })
     })
   } catch (error) {
-    console.error("Repository - Error creating message:", error)
+    // console.error("Repository - Error creating message:", error)
     throw error
   }
 }
@@ -105,7 +105,7 @@ export const update = async (
       })
     })
   } catch (error) {
-    console.error(`Repository - Error updating message with id ${id}:`, error)
+    // console.error(`Repository - Error updating message with id ${id}:`, error)
     throw error
   }
 }
@@ -167,10 +167,10 @@ export const updatePartial = async (
       })
     })
   } catch (error) {
-    console.error(
+    /*console.error(
       `Repository - Error partially updating message with id ${id}:`,
       error
-    )
+    )*/
     throw error
   }
 }
@@ -192,7 +192,7 @@ export const remove = async (id: number): Promise<MainMessage> => {
       })
     })
   } catch (error) {
-    console.error(`Repository - Error deleting message with id ${id}:`, error)
+    // console.error(`Repository - Error deleting message with id ${id}:`, error)
     throw error
   }
 }

@@ -101,7 +101,7 @@ export function ImageUploader({
         })
       }
     } catch (error) {
-      console.error("Erreur upload image:", error)
+      // console.error("Erreur upload image:", error)
       toast({
         title: "Erreur",
         description:

@@ -31,7 +31,7 @@ export function useMainMessageDetail(messageId: string) {
       setMessage(data)
       setError(null)
     } catch (error) {
-      console.error("Erreur lors du chargement du message:", error)
+      // console.error("Erreur lors du chargement du message:", error)
       setError(
         error instanceof Error ? error.message : "Une erreur est survenue"
       )
@@ -65,7 +65,7 @@ export function useMainMessageDetail(messageId: string) {
       router.push("/dashboard/main-message")
       router.refresh()
     } catch (error) {
-      console.error("Erreur lors de la suppression:", error)
+      // console.error("Erreur lors de la suppression:", error)
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -108,7 +108,7 @@ export function useMainMessageDetail(messageId: string) {
         description: `Le message est maintenant ${newStatus ? "actif" : "inactif"}.`,
       })
     } catch (error) {
-      console.error("Erreur toggleActiveStatus:", error)
+      // console.error("Erreur toggleActiveStatus:", error)
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -147,7 +147,7 @@ export function useMainMessageDetail(messageId: string) {
         description: `L'arrière-plan est maintenant ${newStatus ? "actif" : "inactif"}.`,
       })
     } catch (error) {
-      console.error("Erreur toggleBackgroundStatus:", error)
+      // console.error("Erreur toggleBackgroundStatus:", error)
       toast({
         variant: "destructive",
         title: "Erreur",

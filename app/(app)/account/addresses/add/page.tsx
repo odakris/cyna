@@ -15,7 +15,7 @@ export default function AddAddressPage() {
 
     // Vérifie si newAddress est valide
     if (!newAddress || Object.keys(newAddress).length === 0) {
-      console.error("Les données de l'adresse sont invalides ou manquantes.")
+      // console.error("Les données de l'adresse sont invalides ou manquantes.")
       setLoading(false)
       return
     }
@@ -41,7 +41,7 @@ export default function AddAddressPage() {
 
       router.push("/account/settings")
     } catch (err) {
-      console.error(err)
+      // console.error(err)
     }
 
     setLoading(false)

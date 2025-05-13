@@ -39,7 +39,7 @@ export function useContactMessagesData() {
       setMessages(data)
       setError(null)
     } catch (error: unknown) {
-      console.error("Erreur fetchMessages:", error)
+      // console.error("Erreur fetchMessages:", error)
       setError("Erreur lors du chargement des messages")
     } finally {
       setLoading(false)
@@ -60,7 +60,7 @@ export function useContactMessagesData() {
       const data = await response.json()
       setStats(data)
     } catch (error: unknown) {
-      console.error("Erreur fetchStats:", error)
+      // console.error("Erreur fetchStats:", error)
     }
   }, [])
 
@@ -92,7 +92,7 @@ export function useContactMessagesData() {
 
       return true
     } catch (error: unknown) {
-      console.error("Erreur deleteMessages:", error)
+      // console.error("Erreur deleteMessages:", error)
 
       toast({
         variant: "destructive",

@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       password = json.password
       console.log("[check-password] Mot de passe extrait")
     } catch (parseErr) {
-      console.error("[check-password] Erreur JSON :", parseErr)
+      // console.error("[check-password] Erreur JSON :", parseErr)
       return NextResponse.json({ error: "Invalid JSON" }, { status: 400 })
     }
 
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     }
 
     if (!user.password) {  // Assurez-vous d'utiliser 'password' ici
-      console.error("[check-password] Mot de passe non trouvé pour l'utilisateur")
+      // console.error("[check-password] Mot de passe non trouvé pour l'utilisateur")
       return NextResponse.json({ isValid: false }, { status: 500 })
     }
 
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
     console.log("[check-password] Résultat :", isValid)
     return NextResponse.json({ isValid })
   } catch (err) {
-    console.error("[check-password] Erreur serveur :", err)
+    // console.error("[check-password] Erreur serveur :", err)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

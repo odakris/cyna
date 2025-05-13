@@ -22,7 +22,7 @@ export function useUserDetails(id: string) {
       setUser(userData)
       setErrorMessage(null)
     } catch (error) {
-      console.error("Erreur fetchData:", error)
+      // console.error("Erreur fetchData:", error)
       setErrorMessage("Erreur lors du chargement des données.")
       toast({
         title: "Erreur",
@@ -64,7 +64,7 @@ export function useUserDetails(id: string) {
 
       router.push("/dashboard/users")
     } catch (error) {
-      console.error("Erreur handleDelete:", error)
+      // console.error("Erreur handleDelete:", error)
       toast({
         title: "Erreur",
         description: error instanceof Error ? error.message : "Erreur inconnue",

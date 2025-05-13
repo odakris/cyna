@@ -48,7 +48,7 @@ export class AddressRepository {
 
             return newAddress;
         } catch (error) {
-            console.error("[AddressRepository createAddress] Erreur Prisma:", error);
+            // console.error("[AddressRepository createAddress] Erreur Prisma:", error);
             throw error; // Pour continuer la propagation si nécessaire
         }
     }

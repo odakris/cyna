@@ -61,6 +61,11 @@ export default function AccountSettingsPage() {
   const [isDeletePaymentModalOpen, setIsDeletePaymentModalOpen] =
     useState(false)
   const [paymentToDelete, setPaymentToDelete] = useState<number | null>(null)
+  const [isCancelSubscriptionModalOpen, setIsCancelSubscriptionModalOpen] =
+    useState(false)
+  const [subscriptionToCancel, setSubscriptionToCancel] = useState<
+    number | null
+  >(null)
   const [modalError, setModalError] = useState<string | null>(null)
   const [password, setPassword] = useState<string>("")
   const [passwordError, setPasswordError] = useState<string | null>(null)
@@ -122,7 +127,7 @@ export default function AccountSettingsPage() {
               "Erreur lors de la récupération des méthodes de paiement"
           )
       } catch (error) {
-        console.error("Erreur fetchClientData:", error)
+        // console.error("Erreur fetchClientData:", error)
         setErrorMessage(
           "Une erreur est survenue lors de la récupération des données."
         )
@@ -227,6 +232,62 @@ export default function AccountSettingsPage() {
     }
   }
 
+  const handleCancelSubscription = async (subscriptionId: number) => {
+    if (!session?.user?.id_user) {
+      setModalError("Vous devez être connecté pour annuler un abonnement.")
+      return
+    }
+
+    try {
+      const response = await fetch(
+        `/api/users/${session.user.id_user}/subscriptions/${subscriptionId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ subscription_status: "CANCELLED" }),
+          credentials: "include",
+        }
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(
+          errorData.message || "Échec de l'annulation de l'abonnement."
+        )
+      }
+
+      setOrders(prev =>
+        prev.map(order => ({
+          ...order,
+          subscriptions: order.subscriptions.map(sub =>
+            sub.id_order_item === subscriptionId
+              ? { ...sub, subscription_status: "CANCELLED" }
+              : sub
+          ),
+        }))
+      )
+
+      toast({
+        title: "Abonnement annulé",
+        description: "L'abonnement a été annulé avec succès.",
+        variant: "success",
+      })
+
+      setModalError(null)
+      setIsCancelSubscriptionModalOpen(false)
+      setSubscriptionToCancel(null)
+    } catch (err: any) {
+      setModalError(
+        err.message || "Erreur lors de l'annulation de l'abonnement."
+      )
+      toast({
+        title: "Erreur",
+        description: err.message || "Une erreur s'est produite.",
+        variant: "destructive",
+      })
+    }
+  }
+
   const handleUpdateSubscription = async (
     sub: ExtendedOrder["subscriptions"][0]
   ) => {
@@ -236,13 +297,12 @@ export default function AccountSettingsPage() {
     }
 
     try {
-      // Annuler l'abonnement
       const response = await fetch(
         `/api/users/${session.user.id_user}/subscriptions/${sub.id_order_item}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({}),
+          body: JSON.stringify({ subscription_status: "CANCELLED" }),
           credentials: "include",
         }
       )
@@ -253,7 +313,6 @@ export default function AccountSettingsPage() {
         )
       }
 
-      // Ajouter au panier
       const price =
         sub.subscription_type === "MONTHLY"
           ? 49.99
@@ -275,7 +334,6 @@ export default function AccountSettingsPage() {
 
       addToCart(cartItem)
 
-      // Notification et redirection
       toast({
         title: "Abonnement annulé",
         description:
@@ -303,7 +361,6 @@ export default function AccountSettingsPage() {
       {errorMessage && (
         <div className="text-red-600 text-sm mb-4">{errorMessage}</div>
       )}
-      {/* Informations personnelles */}
       <div className="space-y-4">
         <h1 className="text-2xl font-bold text-center">
           Informations personnelles
@@ -338,7 +395,6 @@ export default function AccountSettingsPage() {
         </div>
       </div>
 
-      {/* Abonnements */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-center">Abonnements</h2>
         <Table className="min-w-full">
@@ -374,9 +430,11 @@ export default function AccountSettingsPage() {
                             ? "secondary"
                             : sub.subscription_status === "EXPIRED"
                               ? "secondary"
-                              : sub.subscription_status === "PENDING"
-                                ? "secondary"
-                                : "default"
+                              : sub.subscription_status === "SUSPENDED"
+                                ? "outline"
+                                : sub.subscription_status === "PENDING"
+                                  ? "secondary"
+                                  : "default"
                       }
                     >
                       {sub.subscription_status === "ACTIVE"
@@ -385,22 +443,89 @@ export default function AccountSettingsPage() {
                           ? "Annulé"
                           : sub.subscription_status === "EXPIRED"
                             ? "Expiré"
-                            : sub.subscription_status === "PENDING"
-                              ? "En attente"
-                              : "Inconnu"}
+                            : sub.subscription_status === "SUSPENDED"
+                              ? "Suspendu"
+                              : sub.subscription_status === "PENDING"
+                                ? "En attente"
+                                : "Inconnu"}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Button
                       variant="default"
                       onClick={() => handleUpdateSubscription(sub)}
-                      disabled={sub.subscription_status === "CANCELLED"}
+                      disabled={
+                        sub.subscription_status === "CANCELLED" ||
+                        sub.subscription_status === "SUSPENDED" ||
+                        sub.subscription_status === "EXPIRED"
+                      }
                     >
                       Mettre à jour
                     </Button>
                   </TableCell>
                   <TableCell>
-                    <Button variant="destructive">Résilier</Button>
+                    <Dialog
+                      open={
+                        isCancelSubscriptionModalOpen &&
+                        subscriptionToCancel === sub.id_order_item
+                      }
+                      onOpenChange={open => {
+                        setIsCancelSubscriptionModalOpen(open)
+                        setModalError(null)
+                        if (!open) setSubscriptionToCancel(null)
+                      }}
+                    >
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="destructive"
+                          onClick={() => {
+                            setSubscriptionToCancel(sub.id_order_item)
+                            setIsCancelSubscriptionModalOpen(true)
+                          }}
+                          disabled={
+                            sub.subscription_status === "CANCELLED" ||
+                            sub.subscription_status === "SUSPENDED" ||
+                            sub.subscription_status === "EXPIRED"
+                          }
+                        >
+                          Résilier
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Confirmer l&apos;annulation</DialogTitle>
+                          <DialogDescription>
+                            Êtes-vous sûr de vouloir annuler l&apos;abonnement à &quot;
+                            {sub.service_name}&quot; ? Cette action est irréversible.
+                          </DialogDescription>
+                        </DialogHeader>
+                        {modalError && (
+                          <div className="text-red-600 text-sm mb-4">
+                            {modalError}
+                          </div>
+                        )}
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setIsCancelSubscriptionModalOpen(false)
+                              setSubscriptionToCancel(null)
+                              setModalError(null)
+                            }}
+                          >
+                            Annuler
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            onClick={() =>
+                              handleCancelSubscription(sub.id_order_item)
+                            }
+                          >
+                            Annuler l&apos;abonnement
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
                   </TableCell>
                 </TableRow>
               ))
@@ -409,7 +534,6 @@ export default function AccountSettingsPage() {
         </Table>
       </div>
 
-      {/* Carnet d’adresses */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-center">Carnet d’adresses</h2>
         <Link href="/account/addresses/add">
@@ -528,7 +652,6 @@ export default function AccountSettingsPage() {
         </Table>
       </div>
 
-      {/* Méthodes de paiement */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-center">Méthodes de paiement</h2>
         <Link href="/account/payments/add">

@@ -11,7 +11,7 @@ export async function GET(): Promise<NextResponse> {
   try {
     return await categoryController.getAll()
   } catch (error) {
-    console.error("Erreur non gérée dans la route GET /categories:", error)
+    // console.error("Erreur non gérée dans la route GET /categories:", error)
     return NextResponse.json(
       { error: "Erreur serveur inattendue" },
       { status: 500 }
@@ -33,7 +33,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return await categoryController.create(request)
   } catch (error) {
-    console.error("Erreur non gérée dans la route POST /categories:", error)
+    // console.error("Erreur non gérée dans la route POST /categories:", error)
     return NextResponse.json(
       { error: "Erreur serveur inattendue" },
       { status: 500 }

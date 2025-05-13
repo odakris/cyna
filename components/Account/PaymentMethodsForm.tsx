@@ -36,7 +36,7 @@ export function PaymentMethodsForm({ initialData = null, onSubmit, loading }) {
       })
 
       if (error) {
-        console.error("Erreur Stripe:", error)
+        // console.error("Erreur Stripe:", error)
         setErrorMessage(
           error.message ||
             "Une erreur est survenue lors de la validation de la carte."

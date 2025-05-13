@@ -122,7 +122,7 @@ export function useAdvancedSearch() {
 
         setFilteredProducts(data)
       } catch (error) {
-        console.error("Erreur lors de la récupération des produits:", error)
+        // console.error("Erreur lors de la récupération des produits:", error)
         setFilteredProducts([])
         setDisplayedProducts([])
       } finally {

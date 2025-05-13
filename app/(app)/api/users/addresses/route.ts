@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       userId = parseInt(userIdHeader);
       console.log('[API Addresses] Utilisateur invité:', { userId });
     } else {
-      console.error('[API Addresses] Utilisateur non identifié');
+      // console.error('[API Addresses] Utilisateur non identifié');
       return NextResponse.json(
         { message: 'Utilisateur non identifié. Veuillez vous connecter ou fournir un ID utilisateur.' },
         { status: 401 }
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     }
 
     if (isNaN(userId)) {
-      console.error('[API Addresses] userId invalide:', { userId });
+      // console.error('[API Addresses] userId invalide:', { userId });
       return NextResponse.json(
         { message: 'ID utilisateur invalide' },
         { status: 400 }
@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     // Vérifier que l'utilisateur existe
     const user = await prisma.user.findUnique({ where: { id_user: userId } });
     if (!user) {
-      console.error('[API Addresses] Utilisateur non trouvé:', { userId });
+      // console.error('[API Addresses] Utilisateur non trouvé:', { userId });
       return NextResponse.json(
         { message: 'Utilisateur non trouvé' },
         { status: 404 }
@@ -64,10 +64,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json(addresses, { status: 200 });
   } catch (error: any) {
-    console.error('[API Addresses] Erreur:', {
+    /*console.error('[API Addresses] Erreur:', {
       message: error.message,
       stack: error.stack,
-    });
+    });*/
     return NextResponse.json(
       { message: 'Erreur lors de la récupération des adresses', error: error.message },
       { status: 500 }
@@ -89,7 +89,7 @@ export async function POST(request: Request) {
       userId = parseInt(userIdHeader);
       console.log('[API Addresses] Utilisateur invité:', { userId });
     } else {
-      console.error('[API Addresses] Utilisateur non identifié');
+      // console.error('[API Addresses] Utilisateur non identifié');
       return NextResponse.json(
         { message: 'Utilisateur non identifié. Veuillez vous connecter ou fournir un ID utilisateur.' },
         { status: 401 }
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
     }
 
     if (isNaN(userId)) {
-      console.error('[API Addresses] userId invalide:', { userId });
+      // console.error('[API Addresses] userId invalide:', { userId });
       return NextResponse.json(
         { message: 'ID utilisateur invalide' },
         { status: 400 }
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
     // Vérifier que l'utilisateur existe
     const user = await prisma.user.findUnique({ where: { id_user: userId } });
     if (!user) {
-      console.error('[API Addresses] Utilisateur non trouvé:', { userId });
+      // console.error('[API Addresses] Utilisateur non trouvé:', { userId });
       return NextResponse.json(
         { message: 'Utilisateur non trouvé' },
         { status: 404 }
@@ -118,7 +118,7 @@ export async function POST(request: Request) {
     const { first_name, last_name, address1, address2, postal_code, region, city, country, mobile_phone } = body;
 
     if (!first_name || !last_name || !address1 || !postal_code || !city || !country || !mobile_phone) {
-      console.error('[API Addresses] Champs obligatoires manquants:', body);
+      // console.error('[API Addresses] Champs obligatoires manquants:', body);
       return NextResponse.json(
         { message: 'Tous les champs obligatoires doivent être remplis' },
         { status: 400 }
@@ -148,10 +148,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json(newAddress, { status: 201 });
   } catch (error: any) {
-    console.error('[API Addresses] Erreur:', {
+    /*console.error('[API Addresses] Erreur:', {
       message: error.message,
       stack: error.stack,
-    });
+    });*/
     return NextResponse.json(
       { message: 'Erreur lors de la création de l’adresse', error: error.message },
       { status: 500 }

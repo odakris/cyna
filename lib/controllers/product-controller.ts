@@ -12,7 +12,7 @@ export const getAll = async (): Promise<NextResponse> => {
     const products = await productService.getAllProducts()
     return NextResponse.json(products)
   } catch (error) {
-    console.error("Erreur lors de la récupération des produits:", error)
+    // console.error("Erreur lors de la récupération des produits:", error)
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
@@ -32,7 +32,7 @@ export const getById = async (id: number): Promise<NextResponse> => {
     const product = await productService.getProductById(id)
     return NextResponse.json(product)
   } catch (error) {
-    console.error("Erreur lors de la récupération du produit par ID:", error)
+    // console.error("Erreur lors de la récupération du produit par ID:", error)
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 404 })
@@ -54,7 +54,7 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
     const newProduct = await productService.createProduct(data)
     return NextResponse.json(newProduct, { status: 201 })
   } catch (error) {
-    console.error("Erreur lors de la création du produit:", error)
+    // console.error("Erreur lors de la création du produit:", error)
 
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -87,7 +87,7 @@ export const update = async (
     const updatedProduct = await productService.updateProduct(id, data)
     return NextResponse.json(updatedProduct)
   } catch (error) {
-    console.error("Erreur lors de la mise à jour du produit:", error)
+    // console.error("Erreur lors de la mise à jour du produit:", error)
 
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -117,7 +117,7 @@ export const remove = async (id: number): Promise<NextResponse> => {
     const result = await productService.deleteProduct(id)
     return NextResponse.json(result)
   } catch (error) {
-    console.error("Erreur lors de la suppression du produit:", error)
+    // console.error("Erreur lors de la suppression du produit:", error)
 
     if (error instanceof Error) {
       return NextResponse.json(
@@ -156,7 +156,7 @@ export const toggleProductStatus = async (
     // Sinon renvoyer le produit mis à jour
     return NextResponse.json(result.product)
   } catch (error) {
-    console.error("Erreur lors du changement de statut du produit:", error)
+    // console.error("Erreur lors du changement de statut du produit:", error)
 
     if (error instanceof Error) {
       return NextResponse.json(

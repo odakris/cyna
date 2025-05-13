@@ -20,10 +20,10 @@ export const fetchDailySales = async (
     const data = await response.json()
     return data.dailySales || []
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors de la récupération des ventes quotidiennes:",
       error
-    )
+    )*/
     throw error
   }
 }
@@ -48,10 +48,10 @@ export const fetchCategorySales = async (
     const data = await response.json()
     return data.categorySales || []
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors de la récupération des ventes par catégorie:",
       error
-    )
+    )*/
     throw error
   }
 }
@@ -76,10 +76,10 @@ export const fetchAverageCartByCategory = async (
     const data = await response.json()
     return data.averageCartByCategory || []
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors de la récupération des paniers moyens par catégorie:",
       error
-    )
+    )*/
     throw error
   }
 }

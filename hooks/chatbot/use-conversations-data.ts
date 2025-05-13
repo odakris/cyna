@@ -59,7 +59,7 @@ export function useConversationsData() {
 
       setError(null)
     } catch (error: unknown) {
-      console.error("Erreur fetchConversations:", error)
+      // console.error("Erreur fetchConversations:", error)
       setError("Erreur lors du chargement des conversations")
 
       toast({
@@ -105,7 +105,7 @@ export function useConversationsData() {
 
       return true
     } catch (error: unknown) {
-      console.error("Erreur deleteConversations:", error)
+      // console.error("Erreur deleteConversations:", error)
 
       toast({
         variant: "destructive",

@@ -18,7 +18,7 @@ async function withAuth(
     const xUserId = req.headers.get("x-user-id");
 
     if (!session?.user?.id_user && !xUserId) {
-      console.error("[AddressController withAuth] Aucune session ou x-user-id", { userId });
+      // console.error("[AddressController withAuth] Aucune session ou x-user-id", { userId });
       return NextResponse.json(
         { message: "Non authentifié. Veuillez vous connecter." },
         { status: 401 }
@@ -34,11 +34,11 @@ async function withAuth(
       (sessionUserId && sessionUserId !== userId) ||
       (headerUserId && headerUserId !== userId)
     ) {
-      console.error("[AddressController withAuth] Utilisateur non autorisé", {
+      /*console.error("[AddressController withAuth] Utilisateur non autorisé", {
         sessionUserId,
         headerUserId,
         requestedUserId: userId,
-      });
+      });*/
       return NextResponse.json(
         { message: "Non autorisé. Vous ne pouvez pas accéder aux données d'un autre utilisateur." },
         { status: 403 }
@@ -50,7 +50,7 @@ async function withAuth(
       select: { id_user: true },
     });
     if (!user) {
-      console.error("[AddressController withAuth] Utilisateur non trouvé", { userId });
+      // console.error("[AddressController withAuth] Utilisateur non trouvé", { userId });
       return NextResponse.json(
         { message: "Utilisateur non trouvé" },
         { status: 404 }
@@ -60,10 +60,10 @@ async function withAuth(
     // console.log("[AddressController withAuth] Authentification réussie pour userId:", userId);
     return await handler(userId, ...handlerArgs);
   } catch (error: any) {
-    console.error("[AddressController withAuth] Erreur", {
+    /*console.error("[AddressController withAuth] Erreur", {
       message: error.message,
       stack: error.stack,
-    });
+    });*/
     return NextResponse.json(
       { message: "Erreur interne du serveur" },
       { status: 500 }
@@ -75,7 +75,7 @@ export class AddressController {
   static async getUserAddresses(req: NextRequest, id: string) {
     const userId = parseInt(id, 10);
     if (isNaN(userId)) {
-      console.error("[AddressController getUserAddresses] ID utilisateur invalide", { id });
+      // console.error("[AddressController getUserAddresses] ID utilisateur invalide", { id });
       return NextResponse.json(
         { message: "ID utilisateur invalide" },
         { status: 400 }
@@ -112,7 +112,7 @@ export class AddressController {
             try {
               decryptedAddress[field] = decrypt(address[field], field === 'postal_code');
             } catch (error) {
-              console.error(`[AddressController getUserAddresses] Échec du déchiffrement du champ ${field} pour addressId: ${address.id_address}`, { value: address[field] });
+              // console.error(`[AddressController getUserAddresses] Échec du déchiffrement du champ ${field} pour addressId: ${address.id_address}`, { value: address[field] });
               throw error;
             }
           }
@@ -123,7 +123,7 @@ export class AddressController {
         // console.log("[AddressController getUserAddresses] Adresses déchiffrées:", { userId, count: decryptedAddresses.length });
         return NextResponse.json(decryptedAddresses, { status: 200 });
       } catch (error: any) {
-        console.error("[AddressController getUserAddresses] Erreur lors de la récupération:", error);
+       // console.error("[AddressController getUserAddresses] Erreur lors de la récupération:", error);
         return NextResponse.json(
           { message: `Erreur serveur lors de la récupération des adresses: ${error.message}` },
           { status: 500 }
@@ -136,7 +136,7 @@ export class AddressController {
     const userId = parseInt(id, 10);
     const addressId = parseInt(id_address, 10);
     if (isNaN(userId) || isNaN(addressId)) {
-      console.error("[AddressController getUserAddressById] ID utilisateur ou adresse invalide", { id, id_address });
+      // console.error("[AddressController getUserAddressById] ID utilisateur ou adresse invalide", { id, id_address });
       return NextResponse.json(
         { message: "ID utilisateur ou ID d'adresse invalide" },
         { status: 400 }
@@ -173,7 +173,7 @@ export class AddressController {
           try {
             decryptedAddress[field] = decrypt(address[field], field === 'postal_code');
           } catch (error) {
-            console.error(`[AddressController getUserAddressById] Échec du déchiffrement du champ ${field} pour addressId: ${addressId}`, { value: address[field] });
+            // console.error(`[AddressController getUserAddressById] Échec du déchiffrement du champ ${field} pour addressId: ${addressId}`, { value: address[field] });
             throw error;
           }
         }
@@ -181,7 +181,7 @@ export class AddressController {
         console.log("[AddressController getUserAddressById] Adresse déchiffrée:", { userId, addressId });
         return NextResponse.json(decryptedAddress, { status: 200 });
       } catch (error: any) {
-        console.error("[AddressController getUserAddressById] Erreur lors de la récupération:", error);
+        // console.error("[AddressController getUserAddressById] Erreur lors de la récupération:", error);
         return NextResponse.json(
           { message: `Erreur serveur lors de la récupération de l'adresse: ${error.message}` },
           { status: 500 }
@@ -193,7 +193,7 @@ export class AddressController {
   static async createAddress(req: NextRequest, userId: string, data: any) {
     const id = parseInt(userId, 10);
     if (isNaN(id) || !data) {
-      console.error("[AddressController createAddress] ID utilisateur ou données manquantes", { userId, data });
+      // console.error("[AddressController createAddress] ID utilisateur ou données manquantes", { userId, data });
       return NextResponse.json(
         { message: "ID utilisateur et données requises" },
         { status: 400 }
@@ -209,7 +209,7 @@ export class AddressController {
         const requiredFields = ['first_name', 'last_name', 'address1', 'postal_code', 'city', 'country', 'mobile_phone'];
         const missingFields = requiredFields.filter(field => !data[field]);
         if (missingFields.length > 0) {
-          console.error("[AddressController createAddress] Champs manquants:", { missingFields });
+          // console.error("[AddressController createAddress] Champs manquants:", { missingFields });
           return NextResponse.json(
             { message: `Champs manquants: ${missingFields.join(", ")}` },
             { status: 400 }
@@ -229,10 +229,10 @@ export class AddressController {
         };
         for (const [field, maxLength] of Object.entries(maxLengths)) {
           if (data[field] && typeof data[field] === 'string' && data[field].length > maxLength) {
-            console.error(`[AddressController createAddress] Champ ${field} trop long`, {
+            /*console.error(`[AddressController createAddress] Champ ${field} trop long`, {
               length: data[field].length,
               maxLength,
-            });
+            });*/
             return NextResponse.json(
               { message: `Le champ ${field} ne doit pas dépasser ${maxLength} caractères` },
               { status: 400 }
@@ -258,10 +258,10 @@ export class AddressController {
 
         // Valider la longueur chiffrée de postal_code
         if (encryptedData.postal_code.length > 80) {
-          console.error("[AddressController createAddress] postal_code chiffré trop long", {
+          /*console.error("[AddressController createAddress] postal_code chiffré trop long", {
             length: encryptedData.postal_code.length,
             maxLength: 80,
-          });
+          });*/
           return NextResponse.json(
             { message: "Le code postal chiffré dépasse la limite de 80 caractères" },
             { status: 400 }
@@ -285,7 +285,7 @@ export class AddressController {
         const created = await AddressService.createAddress(userId.toString(), encryptedData);
 
         if (!created) {
-          console.error("[AddressController createAddress] Création échouée, aucune donnée retournée", { userId });
+          // console.error("[AddressController createAddress] Création échouée, aucune donnée retournée", { userId });
           throw new Error("Création échouée, aucune donnée retournée");
         }
 
@@ -306,7 +306,7 @@ export class AddressController {
         console.log("[AddressController createAddress] Adresse créée:", { userId, addressId: created.id_address });
         return NextResponse.json(decryptedAddress, { status: 201 });
       } catch (error: any) {
-        console.error("[AddressController createAddress] Erreur lors de la création:", error);
+        // console.error("[AddressController createAddress] Erreur lors de la création:", error);
         return NextResponse.json(
           { message: `Erreur serveur lors de la création de l'adresse: ${error.message}` },
           { status: 500 }
@@ -319,7 +319,7 @@ export class AddressController {
     const userId = parseInt(id, 10);
     const addressId = parseInt(id_address, 10);
     if (isNaN(userId) || isNaN(addressId) || !data) {
-      console.error("[AddressController updateAddress] ID utilisateur, ID adresse ou données manquantes", { id, id_address, data });
+      // console.error("[AddressController updateAddress] ID utilisateur, ID adresse ou données manquantes", { id, id_address, data });
       return NextResponse.json(
         { message: "ID utilisateur, ID d'adresse et données requis" },
         { status: 400 }
@@ -332,7 +332,7 @@ export class AddressController {
         const requiredFields = ['first_name', 'last_name', 'address1', 'postal_code', 'city', 'country', 'mobile_phone'];
         const missingFields = requiredFields.filter(field => !data[field]);
         if (missingFields.length > 0) {
-          console.error("[AddressController updateAddress] Champs manquants:", { missingFields });
+          // console.error("[AddressController updateAddress] Champs manquants:", { missingFields });
           return NextResponse.json(
             { message: `Champs manquants: ${missingFields.join(", ")}` },
             { status: 400 }
@@ -352,10 +352,10 @@ export class AddressController {
         };
         for (const [field, maxLength] of Object.entries(maxLengths)) {
           if (data[field] && typeof data[field] === 'string' && data[field].length > maxLength) {
-            console.error(`[AddressController updateAddress] Champ ${field} trop long`, {
+            /*console.error(`[AddressController updateAddress] Champ ${field} trop long`, {
               length: data[field].length,
               maxLength,
-            });
+            });*/
             return NextResponse.json(
               { message: `Le champ ${field} ne doit pas dépasser ${maxLength} caractères` },
               { status: 400 }
@@ -419,7 +419,7 @@ export class AddressController {
         console.log("[AddressController updateAddress] Adresse mise à jour:", { userId, addressId });
         return NextResponse.json(decryptedAddress, { status: 200 });
       } catch (error: any) {
-        console.error("[AddressController updateAddress] Erreur lors de la mise à jour:", error);
+        // console.error("[AddressController updateAddress] Erreur lors de la mise à jour:", error);
         return NextResponse.json(
           { message: `Erreur serveur lors de la mise à jour de l'adresse: ${error.message}` },
           { status: 500 }
@@ -432,7 +432,7 @@ export class AddressController {
     const id = parseInt(userId, 10);
     const addrId = parseInt(addressId, 10);
     if (isNaN(id) || isNaN(addrId)) {
-      console.error("[AddressController deleteAddress] ID utilisateur ou adresse invalide", { userId, addressId });
+      // console.error("[AddressController deleteAddress] ID utilisateur ou adresse invalide", { userId, addressId });
       return NextResponse.json(
         { message: "ID utilisateur ou ID d'adresse invalide" },
         { status: 400 }
@@ -456,7 +456,7 @@ export class AddressController {
           { status: 200 }
         );
       } catch (error: any) {
-        console.error("[AddressController deleteAddress] Erreur lors de la suppression:", error);
+        // console.error("[AddressController deleteAddress] Erreur lors de la suppression:", error);
         return NextResponse.json(
           { message: `Erreur serveur lors de la suppression de l'adresse: ${error.message}` },
           { status: 500 }

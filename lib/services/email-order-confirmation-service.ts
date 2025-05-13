@@ -99,7 +99,7 @@ class OrderConfirmationEmailService {
       console.log("[OrderConfirmationEmailService] Email envoyé avec succès à:", emailToSend)
       return true
     } catch (error) {
-      console.error("Erreur lors de l'envoi de l'email de confirmation de commande:", error)
+      // console.error("Erreur lors de l'envoi de l'email de confirmation de commande:", error)
       return false
     }
   }

@@ -36,7 +36,7 @@ export function useProductDetails(productId: string) {
 
       setErrorMessage(null)
     } catch (error) {
-      console.error("Erreur fetchData:", error)
+      // console.error("Erreur fetchData:", error)
       setErrorMessage("Erreur lors du chargement des données.")
       toast({
         title: "Erreur",
@@ -79,7 +79,7 @@ export function useProductDetails(productId: string) {
 
       router.push("/dashboard/products")
     } catch (error) {
-      console.error("Erreur handleDelete:", error)
+      // console.error("Erreur handleDelete:", error)
       toast({
         title: "Erreur",
         description: error instanceof Error ? error.message : "Erreur inconnue",

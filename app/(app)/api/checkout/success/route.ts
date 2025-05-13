@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id_user;
     if (!userId) {
-      console.error('[API Checkout Success] Utilisateur non authentifié');
+      // console.error('[API Checkout Success] Utilisateur non authentifié');
       return NextResponse.json(
         { error: 'Utilisateur non authentifié' },
         { status: 401 }
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     console.log('[API Checkout Success] Requête de facture:', { invoiceNumber });
 
     if (!invoiceNumber) {
-      console.error('[API Checkout Success] Numéro de facture manquant');
+      // console.error('[API Checkout Success] Numéro de facture manquant');
       return NextResponse.json({ error: 'Numéro de facture requis' }, { status: 400 });
     }
 
@@ -31,12 +31,12 @@ export async function GET(request: NextRequest) {
     });
 
     if (!order || !order.invoice_pdf_url) {
-      console.error('[API Checkout Success] Facture non trouvée:', { invoiceNumber });
+      // console.error('[API Checkout Success] Facture non trouvée:', { invoiceNumber });
       return NextResponse.json({ error: 'Facture non trouvée' }, { status: 404 });
     }
 
     if (order.id_user !== userId) {
-      console.error('[API Checkout Success] Accès non autorisé:', { invoiceNumber, userId });
+      // console.error('[API Checkout Success] Accès non autorisé:', { invoiceNumber, userId });
       return NextResponse.json(
         { error: 'Accès non autorisé à cette commande' },
         { status: 403 }
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!response.ok) {
-      console.error('[API Checkout Success] Erreur lors de la génération du PDF:', { status: response.status });
+      // console.error('[API Checkout Success] Erreur lors de la génération du PDF:', { status: response.status });
       return NextResponse.json(
         { error: 'Erreur lors de la génération de la facture' },
         { status: response.status }
@@ -68,10 +68,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[API Checkout Success] Erreur:', {
+    /*console.error('[API Checkout Success] Erreur:', {
       message: error.message,
       stack: error.stack,
-    });
+    });*/
     return NextResponse.json(
       { error: 'Erreur lors du téléchargement de la facture', details: error.message },
       { status: 500 }

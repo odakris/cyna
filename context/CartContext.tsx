@@ -63,7 +63,7 @@ const getInitialCart = (): CartItem[] => {
     }
     return []
   } catch (error) {
-    console.error("Erreur lors du chargement initial de localStorage:", error)
+    // console.error("Erreur lors du chargement initial de localStorage:", error)
     return []
   }
 }
@@ -84,7 +84,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       localStorage.setItem("cart", JSON.stringify(cart))
       //   console.log("Panier sauvegardé dans localStorage:", cart);
     } catch (error) {
-      console.error("Erreur lors de la sauvegarde dans localStorage:", error)
+      // console.error("Erreur lors de la sauvegarde dans localStorage:", error)
     }
   }, [cart])
 
@@ -94,7 +94,7 @@ export const CartProvider: React.FC<CartProviderProps> = ({ children }) => {
       return
     }
     if (!product || !product.id || !product.name || !product.price) {
-      console.error("Produit invalide passé à addToCart:", product)
+      // console.error("Produit invalide passé à addToCart:", product)
       return
     }
     setIsAdding(true)

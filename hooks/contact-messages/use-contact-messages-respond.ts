@@ -36,7 +36,7 @@ export function useContactMessageRespond(messageId: string) {
       setMessage(data)
       setError(null)
     } catch (error: unknown) {
-      console.error("Erreur fetchMessage:", error)
+      // console.error("Erreur fetchMessage:", error)
       setError("Erreur lors du chargement du message")
     } finally {
       setLoading(false)
@@ -57,7 +57,7 @@ export function useContactMessageRespond(messageId: string) {
       }
       setMessage(prev => (prev ? { ...prev, is_read: true } : null))
     } catch (error: unknown) {
-      console.error("Erreur markAsRead:", error)
+      // console.error("Erreur markAsRead:", error)
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -96,7 +96,7 @@ export function useContactMessageRespond(messageId: string) {
       //   router.push("/dashboard/contact")
       // }, 2000)
     } catch (error) {
-      console.error("Erreur lors de l'envoi:", error)
+      // console.error("Erreur lors de l'envoi:", error)
       toast({
         variant: "destructive",
         title: "Erreur",

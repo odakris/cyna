@@ -7,7 +7,7 @@ export const getAllSlides = async (): Promise<HeroCarouselSlide[]> => {
   try {
     return await heroCarouselRepository.findAll()
   } catch (error) {
-    console.error("Service - Error getting all slides:", error)
+    // console.error("Service - Error getting all slides:", error)
     throw error
   }
 }
@@ -18,7 +18,7 @@ export const getSlideById = async (
   try {
     return await heroCarouselRepository.findById(id)
   } catch (error) {
-    console.error(`Service - Error getting slide with id ${id}:`, error)
+    // console.error(`Service - Error getting slide with id ${id}:`, error)
     throw error
   }
 }
@@ -29,7 +29,7 @@ export const createSlide = async (
   try {
     return await heroCarouselRepository.create(data)
   } catch (error) {
-    console.error("Service - Error creating slide:", error)
+    // console.error("Service - Error creating slide:", error)
     throw error
   }
 }
@@ -47,7 +47,7 @@ export const updateSlide = async (
     console.log("Data to update SERVICE:", data)
     return await heroCarouselRepository.update(id, data)
   } catch (error) {
-    console.error(`Service - Error updating slide with id ${id}:`, error)
+    // console.error(`Service - Error updating slide with id ${id}:`, error)
     throw error
   }
 }
@@ -75,10 +75,10 @@ export const updatePartialSlide = async (
     // Pour les mises à jour partielles, nous utilisons une méthode spécifique du repository
     return await heroCarouselRepository.updatePartial(id, partialData)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Service - Error partially updating slide with id ${id}:`,
       error
-    )
+    )*/
     throw error
   }
 }
@@ -93,7 +93,7 @@ export const deleteSlide = async (id: number): Promise<HeroCarouselSlide> => {
     // Supprimer le slide
     return await heroCarouselRepository.remove(id)
   } catch (error) {
-    console.error(`Service - Error deleting slide with id ${id}:`, error)
+    // console.error(`Service - Error deleting slide with id ${id}:`, error)
     throw error
   }
 }

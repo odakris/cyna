@@ -37,7 +37,7 @@ export async function GET(
     console.log('[Invoice] orderId:', orderId);
 
     if (!orderId || isNaN(orderId)) {
-      console.error('[Invoice] Erreur: orderId invalide ou manquant');
+      // console.error('[Invoice] Erreur: orderId invalide ou manquant');
       return NextResponse.json({ message: 'Identifiant de commande requis' }, { status: 400 });
     }
 
@@ -61,20 +61,20 @@ export async function GET(
     );
 
     if (!order) {
-      console.error('[Invoice] Erreur: Commande non trouvée');
+      // console.error('[Invoice] Erreur: Commande non trouvée');
       return NextResponse.json({ message: 'Commande introuvable' }, { status: 404 });
     }
 
     // Vérifier l'autorisation
     const isAuthorized = isOrderAuthorized(order, token);
     if (!isAuthorized) {
-      console.error('[Invoice] Erreur: Non autorisé', {
+      /*console.error('[Invoice] Erreur: Non autorisé', {
         raison: token ? 'Token invalide ou mismatch' : 'Aucun token fourni',
         orderUserId: order.id_user,
         orderEmail: order.user.email,
         tokenUserId: token?.id_user,
         tokenEmail: token?.email,
-      });
+      });*/
       return NextResponse.json({ message: 'Non autorisé' }, { status: 401 });
     }
 
@@ -158,7 +158,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error('[Invoice] Erreur serveur:', error);
+    // console.error('[Invoice] Erreur serveur:', error);
     return NextResponse.json(
       { message: error instanceof Error ? error.message : 'Erreur lors de la génération de la facture' },
       { status: 500 }

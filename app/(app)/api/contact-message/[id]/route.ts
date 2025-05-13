@@ -21,7 +21,7 @@ export async function GET(
 
     return await contactMessageController.getById(id)
   } catch (error) {
-    console.error("API Route Error:", error)
+    // console.error("API Route Error:", error)
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }
@@ -44,7 +44,7 @@ export async function DELETE(
 
     return await contactMessageController.remove(id)
   } catch (error) {
-    console.error("API Route Error:", error)
+    // console.error("API Route Error:", error)
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }

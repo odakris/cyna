@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
     })
   } catch (error) {
-    console.error("Erreur lors de la recherche des produits :", error)
+    // console.error("Erreur lors de la recherche des produits :", error)
     return NextResponse.json({ message: "Erreur serveur" }, { status: 500 })
   }
 }

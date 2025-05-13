@@ -28,7 +28,7 @@ export async function GET(request: Request, { params }: { params: { id_user: str
 
     return NextResponse.json(addresses, { status: 200 });
   } catch (error: any) {
-    console.error('[API Addresses] Erreur GET:', error.message);
+    // console.error('[API Addresses] Erreur GET:', error.message);
     return NextResponse.json({ message: 'Erreur serveur', error: error.message }, { status: 500 });
   }
 }
@@ -77,7 +77,7 @@ export async function POST(request: Request, { params }: { params: { id_user: st
 
     return NextResponse.json(newAddress, { status: 201 });
   } catch (error: any) {
-    console.error('[API Addresses] Erreur POST:', error.message);
+    // console.error('[API Addresses] Erreur POST:', error.message);
     return NextResponse.json(
       { message: 'Erreur lors de la création de l’adresse', error: error.message },
       { status: 500 }

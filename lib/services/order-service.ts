@@ -63,7 +63,7 @@ export const getAllOrders = async (): Promise<Order[]> => {
     const orders = await orderRepository.findAll()
     return orders
   } catch (error) {
-    console.error("Erreur lors de la récupération des commandes :", error)
+    // console.error("Erreur lors de la récupération des commandes :", error)
     if (error instanceof Error) {
       throw error
     }
@@ -91,10 +91,10 @@ export const getOrderById = async (id: number): Promise<Order> => {
 
     return order
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur lors de la récupération de la commande ID ${id} :`,
       error
-    )
+    )*/
     if (error instanceof Error && error.message.includes("non trouvée")) {
       throw error
     }
@@ -114,7 +114,7 @@ export const createOrder = async (data: OrderInputValues): Promise<Order> => {
     const newOrder = await orderRepository.create(processedData)
     return newOrder
   } catch (error) {
-    console.error("Erreur lors de la création de la commande :", error)
+    // console.error("Erreur lors de la création de la commande :", error)
 
     if (error instanceof ZodError) {
       const validationErrors = error.errors
@@ -175,10 +175,10 @@ export const updateOrder = async (
     const updatedOrder = await orderRepository.update(id, processedData)
     return updatedOrder
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur lors de la mise à jour de la commande ID ${id} :`,
       error
-    )
+    )*/
 
     if (error instanceof ZodError) {
       const validationErrors = error.errors
@@ -223,10 +223,10 @@ export const updateOrderStatus = async (
     const updatedOrder = await orderRepository.updateStatus(id, status)
     return updatedOrder
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur lors de la mise à jour du statut de la commande ID ${id} :`,
       error
-    )
+    )*/
     throw error instanceof Error
       ? error
       : new Error(
@@ -255,10 +255,10 @@ export const deleteOrder = async (id: number): Promise<object> => {
     await orderRepository.remove(id)
     return { success: true, message: `Commande ${id} supprimée avec succès` }
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur lors de la suppression de la commande ID ${id} :`,
       error
-    )
+    )*/
 
     if (error instanceof Error && error.message.includes("non trouvée")) {
       throw error
@@ -499,10 +499,10 @@ export const getUserOrderHistory = async (
       })),
     }))
   } catch (error) {
-    console.error(
+    /*console.error(
       "[OrderService] Erreur lors de la récupération de l'historique des commandes:",
       error
-    )
+    )*/
     throw new Error(
       error instanceof Error
         ? `Erreur lors de la récupération des données: ${error.message}`
@@ -587,7 +587,7 @@ export const getOrderByIdForInvoice = async (
       })),
     }
   } catch (error) {
-    console.error("Error fetching order for invoice:", error)
+    // console.error("Error fetching order for invoice:", error)
     throw error instanceof Error ? error : new Error("Failed to fetch order")
   }
 }

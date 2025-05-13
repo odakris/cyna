@@ -64,7 +64,7 @@ export function useConversationDetails(conversationId: string) {
       setMessages(data.messages)
       setError(null)
     } catch (error: unknown) {
-      console.error("Erreur fetchConversation:", error)
+      // console.error("Erreur fetchConversation:", error)
       setError("Erreur lors du chargement de la conversation")
 
       toast({
@@ -119,7 +119,7 @@ export function useConversationDetails(conversationId: string) {
 
       setUpdateStatus(null)
     } catch (error) {
-      console.error("Erreur updateConversationStatus:", error)
+      // console.error("Erreur updateConversationStatus:", error)
 
       toast({
         variant: "destructive",
@@ -182,7 +182,7 @@ export function useConversationDetails(conversationId: string) {
         description: "Votre réponse a été envoyée avec succès",
       })
     } catch (error) {
-      console.error("Erreur handleSendMessage:", error)
+      // console.error("Erreur handleSendMessage:", error)
 
       toast({
         variant: "destructive",
@@ -221,7 +221,7 @@ export function useConversationDetails(conversationId: string) {
 
       router.push("/dashboard/conversations")
     } catch (error) {
-      console.error("Erreur handleDelete:", error)
+      // console.error("Erreur handleDelete:", error)
 
       toast({
         variant: "destructive",

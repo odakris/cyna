@@ -50,7 +50,7 @@ export default function ConversationPage() {
       setShowDeleteDialog(false)
       table.resetRowSelection()
     } catch (error) {
-      console.error("Erreur handleDelete:", error)
+      // console.error("Erreur handleDelete:", error)
     }
   }
 

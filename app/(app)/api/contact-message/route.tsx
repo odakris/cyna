@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     return await contactMessageController.getAll()
   } catch (error) {
-    console.error("API Route Error:", error)
+    // console.error("API Route Error:", error)
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }
@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     return await contactMessageController.create(request)
   } catch (error) {
-    console.error("API Route Error:", error)
+    // console.error("API Route Error:", error)
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }

@@ -8,7 +8,7 @@ export const getActive = async (): Promise<NextResponse> => {
     const message = await mainMessageService.getActiveMessage()
     return NextResponse.json(message)
   } catch (error) {
-    console.error("Controller - Error getting active message:", error)
+    // console.error("Controller - Error getting active message:", error)
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
@@ -21,7 +21,7 @@ export const getAll = async (): Promise<NextResponse> => {
     const messages = await mainMessageService.getAllMessages()
     return NextResponse.json(messages)
   } catch (error) {
-    console.error("Controller - Error getting all messages:", error)
+    // console.error("Controller - Error getting all messages:", error)
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
@@ -39,7 +39,7 @@ export const getById = async (id: number): Promise<NextResponse> => {
 
     return NextResponse.json(message)
   } catch (error) {
-    console.error(`Controller - Error getting message ${id}:`, error)
+    // console.error(`Controller - Error getting message ${id}:`, error)
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 404 })
     }
@@ -55,7 +55,7 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
 
     return NextResponse.json(createdMessage, { status: 201 })
   } catch (error) {
-    console.error("Controller - Error creating message:", error)
+    // console.error("Controller - Error creating message:", error)
     if (error instanceof ZodError) {
       return NextResponse.json(
         { error: "Données invalides", details: error.errors },
@@ -88,7 +88,7 @@ export const update = async (
 
     return NextResponse.json(updatedMessage)
   } catch (error) {
-    console.error(`Controller - Error updating message ${id}:`, error)
+    // console.error(`Controller - Error updating message ${id}:`, error)
 
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -120,7 +120,7 @@ export const updatePartial = async (
     try {
       body = await request.json()
     } catch (error) {
-      console.error("Controller - Error parsing JSON:", error)
+      // console.error("Controller - Error parsing JSON:", error)
       return NextResponse.json(
         { error: "Corps de requête JSON invalide" },
         { status: 400 }
@@ -135,7 +135,7 @@ export const updatePartial = async (
 
     return NextResponse.json(updatedMessage)
   } catch (error) {
-    console.error(`Controller - Error patching message ${id}:`, error)
+    // console.error(`Controller - Error patching message ${id}:`, error)
 
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -157,7 +157,7 @@ export const remove = async (id: number): Promise<NextResponse> => {
     const deletedMessage = await mainMessageService.deleteMessage(id)
     return NextResponse.json(deletedMessage)
   } catch (error) {
-    console.error(`Controller - Error deleting message ${id}:`, error)
+    // console.error(`Controller - Error deleting message ${id}:`, error)
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 404 })
     }

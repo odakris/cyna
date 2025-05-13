@@ -48,7 +48,7 @@ export function useHeroCarouselForm(slideId?: string) {
       setInitialData(formData)
       setErrorMessage(null)
     } catch (error) {
-      console.error("Erreur fetchData:", error)
+      // console.error("Erreur fetchData:", error)
       setErrorMessage("Erreur lors du chargement des données.")
       toast({
         title: "Erreur",
@@ -142,7 +142,7 @@ export function useHeroCarouselForm(slideId?: string) {
       router.push("/dashboard/hero-carousel")
       router.refresh()
     } catch (error) {
-      console.error("Erreur lors de la soumission du formulaire:", error)
+      // console.error("Erreur lors de la soumission du formulaire:", error)
       toast({
         variant: "destructive",
         title: "Erreur",

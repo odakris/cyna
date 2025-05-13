@@ -49,7 +49,7 @@ export function useProductForm(productId: string) {
         setInitialData(formData)
         setErrorMessage(null)
       } catch (error) {
-        console.error("Erreur fetchData:", error)
+        // console.error("Erreur fetchData:", error)
         setErrorMessage("Erreur lors du chargement des données.")
         toast({
           title: "Erreur",

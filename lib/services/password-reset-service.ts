@@ -84,7 +84,7 @@ class PasswordResetService {
         message: "Si l'email existe, un lien de réinitialisation a été envoyé.",
       }
     } catch (error) {
-      console.error("Erreur lors de la demande de réinitialisation:", error)
+      // console.error("Erreur lors de la demande de réinitialisation:", error)
       return {
         success: false,
         message:
@@ -118,7 +118,7 @@ class PasswordResetService {
         userId: resetToken.id_user,
       }
     } catch (error) {
-      console.error("Erreur lors de la vérification du token:", error)
+      // console.error("Erreur lors de la vérification du token:", error)
       return { isValid: false }
     }
   }
@@ -168,10 +168,10 @@ class PasswordResetService {
         message: "Votre mot de passe a été réinitialisé avec succès.",
       }
     } catch (error) {
-      console.error(
+      /*console.error(
         "Erreur lors de la réinitialisation du mot de passe:",
         error
-      )
+      )*/
       return {
         success: false,
         message:

@@ -51,7 +51,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ message: resetResult.message }, { status: 200 })
   } catch (error) {
-    console.error("Erreur lors de la réinitialisation du mot de passe:", error)
+    // console.error("Erreur lors de la réinitialisation du mot de passe:", error)
     return NextResponse.json(
       {
         error:

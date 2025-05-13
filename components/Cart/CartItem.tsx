@@ -19,7 +19,7 @@ const CartItemComponent: React.FC<CartProps> = ({ item }) => {
   const [isRemoving, setIsRemoving] = useState(false)
 
   if (!item || !item.uniqueId) {
-    console.error("Item invalide reçu dans CartItemComponent:", item)
+    // console.error("Item invalide reçu dans CartItemComponent:", item)
     return null
   }
 

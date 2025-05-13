@@ -59,10 +59,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         messageHistory
       )
     } catch (aiError) {
-      console.error(
+      /*console.error(
         "Erreur Gemini, fallback vers le système standard:",
         aiError
-      )
+      )*/
       // Fallback vers le service standard
       const chatbotService = await import("@/lib/services/chatbot-service")
       response = await chatbotService.processChatbotMessage(content, {
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       collectedData: response.collectedData,
     })
   } catch (error) {
-    console.error("Error processing Gemini request:", error)
+    // console.error("Error processing Gemini request:", error)
     return NextResponse.json(
       { error: "Failed to process message" },
       { status: 500 }

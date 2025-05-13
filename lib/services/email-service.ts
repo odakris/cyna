@@ -103,7 +103,7 @@ class EmailService {
   async sendEmail(props: EmailProps, options?: EmailOptions): Promise<boolean> {
     // Vérification de la configuration de Resend
     if (!resend) {
-      console.error("ERREUR: La clé API Resend n'est pas configurée.")
+      // console.error("ERREUR: La clé API Resend n'est pas configurée.")
       return false
     }
 
@@ -124,14 +124,14 @@ class EmailService {
       })
 
       if (error) {
-        console.error("Erreur Resend:", error)
+        // console.error("Erreur Resend:", error)
         throw new Error(`Échec de l'envoi de l'email: ${error.message}`)
       }
 
       console.log(`Email envoyé avec succès, ID: ${data?.id}`)
       return true
     } catch (error) {
-      console.error("Erreur lors de l'envoi de l'email:", error)
+      // console.error("Erreur lors de l'envoi de l'email:", error)
       return false
     }
   }

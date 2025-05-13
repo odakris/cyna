@@ -20,10 +20,10 @@ export async function GET(
 
     return await mainMessageController.getById(id)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Route - Error in GET /api/main-message/${(await params).id}:`,
       error
-    )
+    )*/
     return NextResponse.json(
       { error: "Une erreur est survenue lors du traitement de la requête" },
       { status: 500 }
@@ -52,10 +52,10 @@ export async function PUT(
 
     return await mainMessageController.update(id, request)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Route - Error in PUT /api/main-message/${(await params).id}:`,
       error
-    )
+    )*/
     return NextResponse.json(
       { error: "Une erreur est survenue lors du traitement de la requête" },
       { status: 500 }
@@ -84,10 +84,10 @@ export async function PATCH(
 
     return await mainMessageController.updatePartial(id, request)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Route - Error in PATCH /api/main-message/${(await params).id}:`,
       error
-    )
+    )*/
     return NextResponse.json(
       { error: "Une erreur est survenue lors du traitement de la requête" },
       { status: 500 }
@@ -116,10 +116,10 @@ export async function DELETE(
 
     return await mainMessageController.remove(id)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Route - Error in DELETE /api/main-message/${(await params).id}:`,
       error
-    )
+    )*/
     return NextResponse.json(
       { error: "Une erreur est survenue lors du traitement de la requête" },
       { status: 500 }

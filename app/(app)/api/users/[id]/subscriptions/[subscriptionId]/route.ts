@@ -1,16 +1,16 @@
-import { NextResponse } from "next/server"
-import { prisma } from "@/lib/prisma"
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: Request,
   context: { params: Promise<{ id: string; subscriptionId: string }> }
 ) {
-  const params = await context.params
+  const params = await context.params;
   try {
-    const userId = parseInt(params.id)
-    const subscriptionId = parseInt(params.subscriptionId)
+    const userId = parseInt(params.id);
+    const subscriptionId = parseInt(params.subscriptionId);
     if (isNaN(userId) || isNaN(subscriptionId)) {
-      return NextResponse.json({ message: "Invalid IDs" }, { status: 400 })
+      return NextResponse.json({ message: "Invalid IDs" }, { status: 400 });
     }
 
     const subscription = await prisma.orderItem.findUnique({
@@ -25,13 +25,13 @@ export async function GET(
           },
         },
       },
-    })
+    });
 
     if (!subscription) {
-      return NextResponse.json({ message: "Subscription not found" }, { status: 404 })
+      return NextResponse.json({ message: "Subscription not found" }, { status: 404 });
     }
     if (subscription.order.id_user !== userId) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 403 })
+      return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
     }
 
     return NextResponse.json({
@@ -44,10 +44,10 @@ export async function GET(
       subscription_status: subscription.subscription_status,
       id_product: subscription.product.id_product,
       imageUrl: subscription.product.main_image || undefined,
-    })
+    });
   } catch (error) {
-    console.error("[SubscriptionsAPI] GET Error:", error)
-    return NextResponse.json({ message: "Server error" }, { status: 500 })
+    // console.error("[SubscriptionsAPI] GET Error:", error);
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }
 
@@ -55,40 +55,62 @@ export async function PATCH(
   req: Request,
   context: { params: Promise<{ id: string; subscriptionId: string }> }
 ) {
-  const params = await context.params
+  const params = await context.params;
   try {
-    const userId = parseInt(params.id)
-    const subscriptionId = parseInt(params.subscriptionId)
+    const userId = parseInt(params.id);
+    const subscriptionId = parseInt(params.subscriptionId);
     if (isNaN(userId) || isNaN(subscriptionId)) {
-      return NextResponse.json({ message: "Invalid IDs" }, { status: 400 })
+      return NextResponse.json({ message: "Invalid IDs" }, { status: 400 });
+    }
+
+    const { subscription_status } = await req.json();
+    if (!subscription_status) {
+      return NextResponse.json({ message: "Subscription status is required" }, { status: 400 });
+    }
+
+    const validStatuses = ["CANCELLED", "SUSPENDED"];
+    if (!validStatuses.includes(subscription_status)) {
+      return NextResponse.json(
+        { message: `Invalid subscription status. Must be one of: ${validStatuses.join(", ")}` },
+        { status: 400 }
+      );
     }
 
     const subscription = await prisma.orderItem.findUnique({
       where: { id_order_item: subscriptionId },
       include: { order: true },
-    })
+    });
 
     if (!subscription) {
-      return NextResponse.json({ message: "Subscription not found" }, { status: 404 })
+      return NextResponse.json({ message: "Subscription not found" }, { status: 404 });
     }
     if (subscription.order.id_user !== userId) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 403 })
+      return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
     }
-    if (subscription.subscription_status === "CANCELLED") {
-      return NextResponse.json({ message: "Already cancelled" }, { status: 400 })
+    if (subscription.subscription_status === subscription_status) {
+      return NextResponse.json(
+        { message: `Subscription is already ${subscription_status.toLowerCase()}` },
+        { status: 400 }
+      );
+    }
+    if (["EXPIRED", "CANCELLED"].includes(subscription.subscription_status)) {
+      return NextResponse.json(
+        { message: `Cannot modify subscription in ${subscription.subscription_status.toLowerCase()} status` },
+        { status: 400 }
+      );
     }
 
     const updatedSubscription = await prisma.orderItem.update({
       where: { id_order_item: subscriptionId },
-      data: { subscription_status: "CANCELLED" },
-    })
+      data: { subscription_status },
+    });
 
     return NextResponse.json({
-      message: "Subscription cancelled",
+      message: `Subscription ${subscription_status.toLowerCase()} successfully`,
       subscription: updatedSubscription,
-    })
+    });
   } catch (error) {
-    console.error("[SubscriptionsAPI] PATCH Error:", error)
-    return NextResponse.json({ message: "Server error" }, { status: 500 })
+    // console.error("[SubscriptionsAPI] PATCH Error:", error);
+    return NextResponse.json({ message: "Server error" }, { status: 500 });
   }
 }

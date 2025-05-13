@@ -24,7 +24,7 @@ export const productService = {
       const products = await response.json()
       return sortProducts(products)
     } catch (error) {
-      console.error("Erreur lors de la récupération des produits:", error)
+      // console.error("Erreur lors de la récupération des produits:", error)
       throw error
     }
   },
@@ -42,10 +42,10 @@ export const productService = {
         isFeatured: true,
       }))
     } catch (error) {
-      console.error(
+      /*console.error(
         "Erreur lors de la récupération des produits vedettes:",
         error
-      )
+      )*/
       throw error
     }
   },
@@ -64,7 +64,7 @@ export const productService = {
 
       return await response.json()
     } catch (error) {
-      console.error(`Erreur lors de la récupération du produit ${id}:`, error)
+      // console.error(`Erreur lors de la récupération du produit ${id}:`, error)
       throw error
     }
   },
@@ -99,7 +99,7 @@ export const productService = {
       const products = await response.json()
       return sortProducts(products) // Appliquer le tri
     } catch (error) {
-      console.error("Erreur lors de la recherche de produits:", error)
+      // console.error("Erreur lors de la recherche de produits:", error)
       throw error
     }
   },
@@ -122,7 +122,7 @@ export const categoryService = {
 
       return await response.json()
     } catch (error) {
-      console.error("Erreur lors de la récupération des catégories:", error)
+      // console.error("Erreur lors de la récupération des catégories:", error)
       throw error
     }
   },
@@ -141,10 +141,10 @@ export const categoryService = {
 
       return await response.json()
     } catch (error) {
-      console.error(
+      /*console.error(
         `Erreur lors de la récupération de la catégorie ${id}:`,
         error
-      )
+      )*/
       throw error
     }
   },
@@ -158,10 +158,10 @@ export const categoryService = {
     try {
       return await productService.searchProducts({ categoryId })
     } catch (error) {
-      console.error(
+      /*console.error(
         `Erreur lors de la récupération des produits de la catégorie ${categoryId}:`,
         error
-      )
+      )*/
       throw error
     }
   },
