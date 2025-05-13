@@ -18,9 +18,6 @@ export default function CartPage() {
   const [error, setError] = useState<string | null>(null)
 
   const handleCheckout = async () => {
-    console.log("[CartPage] Clic sur Passer à la caisse", {
-      cartLength: cart.length,
-    })
     setError(null)
     setIsLoading(true)
 

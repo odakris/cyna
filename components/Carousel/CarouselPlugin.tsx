@@ -180,7 +180,8 @@ export function CarouselPlugin() {
                       <Link href={slide.button_link}>
                         <Button
                           size="lg"
-                          className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-2 border-transparent hover:border-[#FF6B00] transition-colors duration-300 font-semibold"
+                          className="border-2 border-transparent duration-300 font-semibold"
+                          variant={"cyna"}
                         >
                           {slide.button_text}{" "}
                           <ArrowRight className="ml-2 h-5 w-5" />

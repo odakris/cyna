@@ -282,8 +282,9 @@ export default function ProductPage() {
           </div>
           {product.available ? (
             <Button
-              className="w-full bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-2 border-transparent hover:border-[#FF6B00] transition-colors duration-300 h-12 text-lg font-semibold"
+              className="w-ful border-2 border-transparent hover:border-[#FF6B00] transition-colors duration-300 h-12 text-lg font-semibold"
               onClick={handleScrollToPricingTable}
+              variant={"cyna"}
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
               Choisir une formule
@@ -811,8 +812,9 @@ export default function ProductPage() {
 
             <Button
               size="lg"
-              className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white shadow-md sm:min-w-[200px]"
+              className="shadow-md sm:min-w-[200px]"
               onClick={() => handleAddToCart()}
+              variant={"cyna"}
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
               Ajouter au panier

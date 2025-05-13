@@ -273,11 +273,7 @@ export default function CategoryPage() {
           solution adaptée à vos besoins spécifiques
         </p>
         <div className="flex flex-wrap justify-center gap-4">
-          <Button
-            asChild
-            size="lg"
-            className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white shadow-md"
-          >
+          <Button asChild size="lg" className="shadow-md" variant={"cyna"}>
             <Link href="/contact">Demander une démo</Link>
           </Button>
           <Button

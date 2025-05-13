@@ -267,7 +267,8 @@ export default function Home() {
             <Button
               size="lg"
               asChild
-              className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-2 border-transparent hover:border-[#FF6B00] transition-all duration-300 shadow-lg"
+              className="transition-all duration-300 shadow-lg"
+              variant={"cyna"}
             >
               <Link href="/contact">
                 Demander une démo <ArrowRight className="ml-2 h-4 w-4" />

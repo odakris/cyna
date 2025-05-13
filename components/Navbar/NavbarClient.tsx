@@ -39,7 +39,7 @@ export default function NavbarClient({ categories }: NavbarProps) {
       icon: <Tag className="h-4 w-4 mr-2" />,
     },
     {
-      name: "Recherche Avancée",
+      name: "Recherche avancée",
       href: "/produit",
       icon: <Search className="h-4 w-4 mr-2" />,
     },
@@ -311,7 +311,7 @@ export default function NavbarClient({ categories }: NavbarProps) {
                     className="flex items-center px-3 py-2 text-sm text-white rounded-md hover:bg-white/10 transition-colors duration-200"
                   >
                     <Search className="mr-1.5 h-4 w-4" />
-                    Recherche Avancée
+                    Recherche avancée
                   </Link>
                 </NavigationMenuItem>
 
@@ -338,7 +338,8 @@ export default function NavbarClient({ categories }: NavbarProps) {
 
             <Button
               asChild
-              className="bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white border-none transition-colors"
+              className="border-none transition-colors"
+              variant={"cyna"}
             >
               <Link href="/contact">
                 <Shield className="mr-1.5 h-4 w-4" />

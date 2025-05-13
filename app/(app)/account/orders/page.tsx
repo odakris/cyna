@@ -46,8 +46,6 @@ import {
   XCircle,
   CheckCircle,
   Loader2,
-  ChevronDown,
-  ChevronUp,
   Clock,
 } from "lucide-react"
 import Link from "next/link"
@@ -98,7 +96,6 @@ export default function OrdersPage() {
   const [downloadingInvoice, setDownloadingInvoice] = useState(false)
 
   // Filter states
-  const [expanded, setExpanded] = useState(false)
   const [filtersApplied, setFiltersApplied] = useState(false)
   const [selectedYear, setSelectedYear] = useState("all")
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<number[]>([])
@@ -465,28 +462,10 @@ export default function OrdersPage() {
                 Affinez votre recherche par date, catégorie ou statut
               </CardDescription>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setExpanded(!expanded)}
-              className="flex gap-1 items-center"
-            >
-              {expanded ? (
-                <>
-                  Réduire <ChevronUp className="h-4 w-4" />
-                </>
-              ) : (
-                <>
-                  Développer <ChevronDown className="h-4 w-4" />
-                </>
-              )}
-            </Button>
           </div>
         </CardHeader>
 
-        <CardContent
-          className={`pt-4 ${expanded ? "block" : "hidden sm:block"}`}
-        >
+        <CardContent>
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {/* Année */}

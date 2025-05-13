@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
+import { cn } from "@/lib/utils"
 
 interface CategoryActiveSwitchProps {
   categoryId: number
@@ -61,6 +62,11 @@ export default function CategoryActiveSwitch({
       checked={active}
       onCheckedChange={toggleStatus}
       disabled={isLoading}
+      className={cn(
+        active
+          ? "bg-green-500 data-[state=checked]:bg-green-500"
+          : "bg-red-500 data-[state=unchecked]:bg-red-500"
+      )}
     />
   )
 }

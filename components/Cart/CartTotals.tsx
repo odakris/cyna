@@ -130,9 +130,10 @@ const CartTotals: React.FC<CartTotalsProps> = ({
         </div>
 
         <Button
-          className="w-full bg-[#FF6B00] hover:bg-[#FF6B00]/90 text-white h-12 font-medium shadow-sm"
+          className="w-full h-12 font-medium shadow-sm"
           onClick={onCheckout}
           disabled={isLoading || items.length === 0}
+          variant={"cyna"}
         >
           <CreditCard className="mr-2 h-4 w-4" />
           {isLoading ? "Chargement..." : "Passer à la caisse"}
