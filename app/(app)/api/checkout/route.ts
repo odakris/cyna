@@ -7,7 +7,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "", {
   apiVersion: "2024-10-28.acacia",
 });
 
-// Définir les valeurs valides pour SubscriptionType (basé sur schema.prisma)
 const VALID_SUBSCRIPTION_TYPES = ["MONTHLY", "YEARLY", "PER_USER", "PER_MACHINE"] as const;
 type SubscriptionType = (typeof VALID_SUBSCRIPTION_TYPES)[number];
 
@@ -31,7 +30,7 @@ export async function POST(req: NextRequest) {
 
     // Valider les données
     console.log("[API Checkout] Validation des données d'entrée...");
-    if (!cartItems || !cartItems.length || !addressId || !paymentId || clientTotalAmount == null) {
+    if (!cartItems || !Array.isArray(cartItems) || !cartItems.length || !addressId || !paymentId || clientTotalAmount == null) {
       // console.error("[API Checkout] Données manquantes:", { cartItems, addressId, paymentId, clientTotalAmount });
       return NextResponse.json(
         { error: "Données manquantes: panier, adresse, paiement ou montant total requis" },
@@ -39,9 +38,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Valider chaque élément du panier
+    for (const item of cartItems) {
+      if (!item.id || !item.price || isNaN(item.price) || !item.name || !item.quantity || !item.subscription) {
+        console.error("[API Checkout] Article invalide:", item);
+        return NextResponse.json(
+          { error: `Article invalide: ${JSON.stringify(item)}` },
+          { status: 400 }
+        );
+      }
+      if (!VALID_SUBSCRIPTION_TYPES.includes(item.subscription)) {
+        console.error("[API Checkout] Type de subscription invalide:", item.subscription);
+        return NextResponse.json(
+          { error: `Type de subscription invalide: ${item.subscription}` },
+          { status: 400 }
+        );
+      }
+    }
+
     // Gérer PaymentInfo
     let paymentInfo;
-    let validatedLastCardDigits = "4242";
+    let validatedLastCardDigits;
 
     if (guestId && paymentData) {
       console.log("[API Checkout] Mode invité, utilisation de paymentData:", paymentData);
@@ -53,12 +70,20 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      if (!paymentData.last_card_digits || typeof paymentData.last_card_digits !== 'string') {
+        console.error("[API Checkout] last_card_digits invalide:", paymentData.last_card_digits);
+        return NextResponse.json(
+          { error: "last_card_digits doit être une chaîne non vide" },
+          { status: 400 }
+        );
+      }
+
       console.log("[API Checkout] Création d'un PaymentInfo temporaire pour l'invité...");
       paymentInfo = await prisma.paymentInfo.create({
         data: {
           id_user: parseInt(guestId, 10),
           card_name: paymentData.card_name || "Guest Card",
-          last_card_digits: paymentData.last_card_digits || "4242",
+          last_card_digits: paymentData.last_card_digits,
           stripe_payment_id: paymentData.stripe_payment_id,
           stripe_customer_id: paymentData.stripe_customer_id,
           brand: paymentData.brand || "unknown",
@@ -66,13 +91,7 @@ export async function POST(req: NextRequest) {
           exp_year: paymentData.exp_year || new Date().getFullYear() + 1,
         },
       });
-      console.log("[API Checkout] PaymentInfo temporaire créé:", {
-        id_payment_info: paymentInfo.id_payment_info,
-        stripe_payment_id: paymentInfo.stripe_payment_id,
-        stripe_customer_id: paymentInfo.stripe_customer_id,
-      });
-
-      validatedLastCardDigits = paymentData.last_card_digits || "4242";
+      validatedLastCardDigits = paymentData.last_card_digits;
     } else {
       console.log("[API Checkout] Récupération de PaymentInfo pour paymentId:", paymentId);
       paymentInfo = await prisma.paymentInfo.findUnique({
@@ -87,28 +106,17 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
-      console.log("[API Checkout] PaymentInfo récupéré:", {
-        id_user: paymentInfo.id_user,
-        stripe_payment_id: paymentInfo.stripe_payment_id,
-        stripe_customer_id: paymentInfo.stripe_customer_id,
-      });
-
       validatedLastCardDigits = paymentInfo.last_card_digits;
-      if (!validatedLastCardDigits || validatedLastCardDigits.includes(':') || validatedLastCardDigits.length > 4) {
-        console.warn("[API Checkout] last_card_digits invalide, utilisation de la valeur par défaut:", {
-          last_card_digits: validatedLastCardDigits,
-        });
-        validatedLastCardDigits = "4242";
-      } else if (!/^\d{4}$/.test(validatedLastCardDigits)) {
-        console.warn("[API Checkout] last_card_digits non numérique, utilisation de la valeur par défaut:", {
-          last_card_digits: validatedLastCardDigits,
-        });
-        validatedLastCardDigits = "4242";
+      if (!validatedLastCardDigits || typeof validatedLastCardDigits !== 'string') {
+        console.error("[API Checkout] last_card_digits invalide:", validatedLastCardDigits);
+        return NextResponse.json(
+          { error: "last_card_digits doit être une chaîne non vide" },
+          { status: 400 }
+        );
       }
-      console.log("[API Checkout] last_card_digits validé:", validatedLastCardDigits);
     }
 
-    // Vérifier utilisateur ou guest
+    // Vérifier l'utilisateur ou le guest
     let userId = paymentInfo.id_user;
     let customerId = paymentInfo.stripe_customer_id;
 
@@ -135,6 +143,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Mettre à jour stripeCustomerId si nécessaire
     if (!user.stripeCustomerId || user.stripeCustomerId !== customerId) {
       console.log("[API Checkout] Mise à jour de User.stripeCustomerId:", { userId: userId || guestId, newCustomerId: customerId });
       await prisma.user.update({
@@ -143,6 +152,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Valider id_payment_info pour le mode connecté
     if (!guestId) {
       console.log("[API Checkout] Validation de id_payment_info:", paymentId);
       const validPaymentInfo = await prisma.paymentInfo.findFirst({
@@ -158,7 +168,6 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
-      console.log("[API Checkout] id_payment_info validé:", paymentId);
     }
 
     // Gérer l'adresse
@@ -197,10 +206,6 @@ export async function POST(req: NextRequest) {
           region: addressData.region || null,
         },
       });
-      console.log("[API Checkout] Adresse temporaire créée:", {
-        id_address: address.id_address,
-        id_user: address.id_user,
-      });
       finalAddressId = address.id_address;
     } else {
       console.log("[API Checkout] Récupération de l'adresse pour addressId:", addressId);
@@ -225,7 +230,6 @@ export async function POST(req: NextRequest) {
           { status: 400 }
         );
       }
-      console.log("[API Checkout] Adresse validée:", { addressId, id_user: address.id_user });
       finalAddressId = parseInt(addressId);
     }
 
@@ -234,11 +238,12 @@ export async function POST(req: NextRequest) {
     const serverTotalAmount = Number(
       cartItems
         .reduce((sum: number, item: any) => {
-          const unitPrice = item.unit_price;
+          const unitPrice = item.price; // Utiliser 'price' au lieu de 'unit_price'
           if (!unitPrice || isNaN(unitPrice)) {
-            throw new Error(`Prix unitaire invalide pour l'article ${item.id_product}`);
+            console.error("[API Checkout] Prix unitaire invalide:", item);
+            throw new Error(`Prix unitaire invalide pour l'article ${item.id || 'inconnu'}`);
           }
-          const multiplier = item.subscription_type === "YEARLY" ? 12 : 1;
+          const multiplier = item.subscription === "YEARLY" ? 12 : 1; // Utiliser 'subscription' au lieu de 'subscription_type'
           return sum + unitPrice * item.quantity * multiplier;
         }, 0)
         .toFixed(2)
@@ -258,7 +263,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Calculer le montant total avec taxes
+    // Calculer les taxes
     const taxesAmount = taxes && !isNaN(taxes) ? Number(taxes.toFixed(2)) : 0;
     const finalTotalAmount = serverTotalAmount + taxesAmount;
     console.log("[API Checkout] Montant final avec taxes:", finalTotalAmount);
@@ -307,18 +312,18 @@ export async function POST(req: NextRequest) {
     console.log("[API Checkout] Consolidation des orderItems...");
     const consolidatedItems = cartItems.reduce((acc: any[], item: any) => {
       const existing = acc.find(
-        (i: any) => i.id_product === parseInt(item.id_product) && i.subscription_type === item.subscription_type
+        (i: any) => i.id_product === parseInt(item.id) && i.subscription_type === item.subscription
       );
       if (existing) {
         existing.quantity += item.quantity;
       } else {
         acc.push({
-          id_product: parseInt(item.id_product),
+          id_product: parseInt(item.id), // Utiliser 'id' au lieu de 'id_product'
           quantity: item.quantity,
-          unit_price: item.unit_price,
-          subscription_type: item.subscription_type as SubscriptionType,
+          unit_price: item.price, // Utiliser 'price' au lieu de 'unit_price'
+          subscription_type: item.subscription as SubscriptionType, // Utiliser 'subscription'
           subscription_status: "ACTIVE",
-          subscription_duration: item.subscription_type === "MONTHLY" ? 12 : item.subscription_type === "YEARLY" ? 1 : 1,
+          subscription_duration: item.subscription === "MONTHLY" ? 12 : item.subscription === "YEARLY" ? 1 : 1,
         });
       }
       return acc;
@@ -349,7 +354,7 @@ export async function POST(req: NextRequest) {
       status: paymentIntent.status,
     });
 
-    // Générer un invoice_number unique
+    // Générer un invoice_number
     const invoiceNumber = `INV-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
     console.log("[API Checkout] Invoice number généré:", invoiceNumber);
 
