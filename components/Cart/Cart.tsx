@@ -1,7 +1,7 @@
 import React from "react"
 
 interface CartProps {
-  items: { id: number; name: string; price: number; quantity: number }[]
+  items: { id: number; name: string; price: number; quantity: number; uniqueId: string }[]
 }
 
 const Cart = ({ items }: CartProps) => {
@@ -18,7 +18,7 @@ const Cart = ({ items }: CartProps) => {
       ) : (
         <ul>
           {items.map(item => (
-            <li key={item.id} className="flex justify-between">
+            <li key={item.uniqueId} className="flex justify-between">
               <span>{item.name}</span>
               <span>
                 {item.quantity} x {item.price} €
