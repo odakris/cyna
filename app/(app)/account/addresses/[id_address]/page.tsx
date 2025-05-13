@@ -4,10 +4,13 @@ import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { AddressForm } from "../../../../../components/Account/AdresseForm"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { AlertTriangle } from "lucide-react"
 
 export default function EditAddressPage() {
   const { id_address } = useParams()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
 
   const [address, setAddress] = useState(null)
@@ -17,10 +20,15 @@ export default function EditAddressPage() {
   const [passwordError, setPasswordError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth?redirect=/account/addresses")
+    }
+  }, [status, router])
+
+  useEffect(() => {
     const fetchAddress = async () => {
       if (id_address && session?.user?.id_user) {
         try {
-          console.log("[EditAddressPage] Récupération de l'adresse:", { id_address, userId: session.user.id_user })
           const response = await fetch(
             `/api/users/${session.user.id_user}/addresses/${id_address}`,
             {
@@ -30,15 +38,17 @@ export default function EditAddressPage() {
             }
           )
           const data = await response.json()
-          console.log("[EditAddressPage] Réponse API:", { status: response.status, data })
           if (response.ok) {
             setAddress(data)
           } else {
-            setErrorMessage(data.message || "Erreur lors de la récupération de l’adresse.")
+            setErrorMessage(
+              data.message || "Erreur lors de la récupération de l'adresse."
+            )
           }
-        } catch (err) {
-          console.error("[EditAddressPage] Erreur lors de la récupération:", err)
-          setErrorMessage("Une erreur est survenue lors de la récupération de l’adresse.")
+        } catch {
+          setErrorMessage(
+            "Une erreur est survenue lors de la récupération de l'adresse."
+          )
         }
       }
     }
@@ -58,8 +68,7 @@ export default function EditAddressPage() {
 
       const data = await response.json()
       return data.isValid
-    } catch (err) {
-      console.error("[EditAddressPage] Erreur vérification mot de passe:", err)
+    } catch {
       return false
     }
   }
@@ -87,7 +96,6 @@ export default function EditAddressPage() {
     }
 
     try {
-      console.log("[EditAddressPage] Mise à jour de l'adresse:", { id_address, userId: session.user.id_user })
       const response = await fetch(
         `/api/users/${session.user.id_user}/addresses/${id_address}`,
         {
@@ -99,53 +107,91 @@ export default function EditAddressPage() {
         }
       )
 
-      console.log("[EditAddressPage] Réponse API PUT:", { status: response.status })
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(errorData.message || "Échec de la mise à jour.")
       }
 
-      console.log("[EditAddressPage] Adresse mise à jour, redirection vers /account/settings")
       router.push("/account/settings")
-    } catch (err: any) {
-      console.error("[EditAddressPage] Erreur mise à jour:", err)
+    } catch {
       setErrorMessage(err.message || "Erreur mise à jour adresse.")
     }
 
     setLoading(false)
   }
 
-  if (!session) {
-    return <div>Chargement...</div>
+  if (!session?.user) {
+    return (
+      <div className="p-6 space-y-6 max-w-4xl mx-auto">
+        <div className="bg-red-50 border border-red-200 p-4 rounded-lg flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
+          <div>
+            <p className="font-medium text-red-600">Vous devez être connecté</p>
+            <p className="text-sm text-red-600">
+              Connectez-vous pour accéder à cette page
+            </p>
+            <Button
+              asChild
+              variant="default"
+              className="mt-2 bg-[#302082] hover:bg-[#302082]/90"
+            >
+              <Link href="/auth?redirect=/account/settings">Se connecter</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (!address) {
-    return <div>{errorMessage || "Chargement..."}</div>
+    return <div className="p-6">Chargement...</div>
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Modifier l’adresse</h1>
-      {errorMessage && <div className="text-red-600 text-sm mb-4">{errorMessage}</div>}
-      <p className="text-sm text-gray-600">
-        Pour modifier votre adresse, veuillez remplir le formulaire ci-dessous.
-      </p>
+    <div className="py-8 px-4 sm:px-6 max-w-4xl mx-auto">
+      <div className="mb-8">
+        <div className="flex items-center mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#302082] relative pb-2 inline-block">
+            Modifier l&apos;adresse
+            <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
+          </h1>
+        </div>
+        <p className="text-gray-600 max-w-3xl">
+          Mettez à jour les informations de votre adresse. Nous vous demanderons
+          votre mot de passe pour confirmer les modifications.
+        </p>
+      </div>
 
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-          Mot de passe actuel
+      {errorMessage && (
+        <div className="bg-red-50 border border-red-200 p-4 rounded-lg mb-6 text-red-600 text-sm">
+          {errorMessage}
+        </div>
+      )}
+
+      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
+        <label
+          htmlFor="password"
+          className="block text-sm font-medium text-gray-700 mb-1"
+        >
+          Mot de passe actuel <span className="text-red-500">*</span>
         </label>
-        <input
-          id="password"
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-          className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-        />
-        {passwordError && (
-          <div className="text-red-600 text-sm mt-2">{passwordError}</div>
-        )}
+        <div className="relative max-w-md">
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            required
+            className={`mt-1 block w-full border ${passwordError ? "border-red-500" : "border-gray-300"} rounded-md p-2 focus:outline-none focus:ring-[#302082] focus:border-[#302082]`}
+            placeholder="Entrez votre mot de passe actuel"
+          />
+          {passwordError && (
+            <div className="text-red-600 text-xs mt-1 flex items-center gap-1">
+              <AlertTriangle className="h-3.5 w-3.5" />
+              {passwordError}
+            </div>
+          )}
+        </div>
       </div>
 
       <AddressForm

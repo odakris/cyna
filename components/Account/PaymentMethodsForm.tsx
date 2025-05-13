@@ -3,8 +3,32 @@
 import { useState } from "react"
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js"
 import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { AlertCircle, CreditCard, Save } from "lucide-react"
 
-export function PaymentMethodsForm({ initialData = null, onSubmit, loading }) {
+interface PaymentMethodsFormProps {
+  initialData?: {
+    card_name?: string
+    is_default?: boolean
+  } | null
+  onSubmit: (data: any) => void
+  loading?: boolean
+}
+
+export function PaymentMethodsForm({
+  initialData = null,
+  onSubmit,
+  loading = false,
+}: PaymentMethodsFormProps) {
   const [cardName, setCardName] = useState(initialData?.card_name || "")
   const [isDefault, setIsDefault] = useState(initialData?.is_default || false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -17,6 +41,11 @@ export function PaymentMethodsForm({ initialData = null, onSubmit, loading }) {
 
     if (!stripe || !elements) {
       setErrorMessage("Stripe n'est pas initialisé.")
+      return
+    }
+
+    if (!cardName.trim()) {
+      setErrorMessage("Le nom sur la carte est requis.")
       return
     }
 
@@ -36,15 +65,12 @@ export function PaymentMethodsForm({ initialData = null, onSubmit, loading }) {
       })
 
       if (error) {
-        console.error("Erreur Stripe:", error)
         setErrorMessage(
           error.message ||
             "Une erreur est survenue lors de la validation de la carte."
         )
         return
       }
-
-      console.log("PaymentMethod créé:", paymentMethod)
 
       onSubmit({
         stripe_payment_id: paymentMethod.id,
@@ -55,12 +81,7 @@ export function PaymentMethodsForm({ initialData = null, onSubmit, loading }) {
         exp_year: paymentMethod.card?.exp_year,
         is_default: isDefault,
       })
-
-      setCardName("")
-      setIsDefault(false)
-      cardElement.clear()
-    } catch (err) {
-      console.error("Erreur inattendue:", err)
+    } catch {
       setErrorMessage("Une erreur inattendue est survenue.")
     }
   }
@@ -83,57 +104,80 @@ export function PaymentMethodsForm({ initialData = null, onSubmit, loading }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      {errorMessage && (
-        <div className="text-red-600 text-sm mb-2">{errorMessage}</div>
-      )}
-      <div className="bg-gray-100 p-4 rounded-lg space-y-3">
-        <div>
-          <label
-            htmlFor="card_name"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Nom sur la carte
-          </label>
-          <input
-            id="card_name"
-            value={cardName}
-            onChange={e => setCardName(e.target.value)}
-            required
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500"
-          />
-        </div>
-        <div>
-          <label
-            htmlFor="card_element"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Détails de la carte
-          </label>
-          <div className="mt-1 border border-gray-300 rounded-md p-2 bg-white">
-            <CardElement id="card_element" options={cardElementOptions} />
+    <Card className="border-2 border-gray-100 shadow-sm">
+      <CardHeader className="bg-gray-50/50 border-b">
+        <CardTitle className="text-xl font-semibold text-[#302082] flex items-center gap-2">
+          <CreditCard className="h-5 w-5" />
+          {initialData ? "Modifier la carte" : "Ajouter une carte"}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-6">
+        <form onSubmit={handleSubmit} id="payment-form" className="space-y-4">
+          {errorMessage && (
+            <div className="p-3 rounded-md bg-red-50 border border-red-200 text-red-600 text-sm flex items-start gap-2 mb-2">
+              <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
+          <div className="space-y-1.5">
+            <Label htmlFor="card_name" className="text-sm font-medium">
+              Nom sur la carte <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="card_name"
+              value={cardName}
+              onChange={e => setCardName(e.target.value)}
+              required
+              placeholder="Nom inscrit sur la carte"
+              className="focus-visible:ring-[#302082]"
+            />
           </div>
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          id="is_default"
-          checked={isDefault}
-          onChange={e => setIsDefault(e.target.checked)}
-          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-        />
-        <label htmlFor="is_default" className="text-sm text-gray-700">
-          Définir comme carte par défaut
-        </label>
-      </div>
-      <Button
-        type="submit"
-        disabled={loading || !stripe || !elements}
-        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-      >
-        {loading ? "Enregistrement..." : "Enregistrer"}
-      </Button>
-    </form>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="card_element" className="text-sm font-medium">
+              Informations de la carte <span className="text-red-500">*</span>
+            </Label>
+            <div className="mt-1 border border-gray-300 rounded-md p-3 bg-white focus-within:ring-1 focus-within:ring-[#302082] focus-within:border-[#302082]">
+              <CardElement id="card_element" options={cardElementOptions} />
+            </div>
+            <p className="text-xs text-gray-500 mt-1.5">
+              Vos données de paiement sont sécurisées et cryptées.
+            </p>
+          </div>
+
+          <div className="pt-2 flex items-center space-x-2">
+            <Checkbox
+              id="is_default"
+              checked={isDefault}
+              onCheckedChange={val => setIsDefault(!!val)}
+            />
+            <Label htmlFor="is_default" className="text-sm font-normal">
+              Définir comme carte par défaut
+            </Label>
+          </div>
+        </form>
+      </CardContent>
+      <CardFooter className="border-t bg-gray-50/50 flex justify-end">
+        <Button
+          form="payment-form"
+          type="submit"
+          disabled={loading || !stripe || !elements}
+          className="bg-[#302082] hover:bg-[#302082]/90 text-white"
+        >
+          {loading ? (
+            <>
+              <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
+              Enregistrement...
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4 mr-2" />
+              Enregistrer
+            </>
+          )}
+        </Button>
+      </CardFooter>
+    </Card>
   )
 }

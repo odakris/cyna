@@ -5,10 +5,13 @@ import { useRouter, useParams } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { PaymentMethodsForm } from "@/components/Account/PaymentMethodsForm"
 import StripeWrapper from "@/components/StripeWrapper"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { AlertTriangle } from "lucide-react"
 
 export default function EditPaymentMethodPage() {
   const { id_payment } = useParams()
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const router = useRouter()
 
   const [paymentMethod, setPaymentMethod] = useState(null)
@@ -18,15 +21,19 @@ export default function EditPaymentMethodPage() {
   const [passwordError, setPasswordError] = useState<string | null>(null)
 
   useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/auth?redirect=/account/payments")
+    }
+  }, [status, router])
+
+  useEffect(() => {
     const fetchPaymentMethod = async () => {
       if (id_payment && session?.user?.id_user) {
         try {
-          console.log("[EditPaymentMethodPage] Récupération du moyen de paiement:", { id_payment, userId: session.user.id_user });
           const response = await fetch(
             `/api/users/${session.user.id_user}/payments/${id_payment}`
           )
           const data = await response.json()
-          console.log("[EditPaymentMethodPage] Réponse API:", { status: response.status, data });
           if (response.ok) {
             setPaymentMethod(data)
           } else {
@@ -35,8 +42,7 @@ export default function EditPaymentMethodPage() {
                 "Erreur lors de la récupération de la méthode de paiement."
             )
           }
-        } catch (err) {
-          console.error("[EditPaymentMethodPage] Erreur lors de la récupération:", err)
+        } catch {
           setErrorMessage(
             "Une erreur est survenue lors de la récupération de la méthode de paiement."
           )
@@ -61,8 +67,7 @@ export default function EditPaymentMethodPage() {
 
       const data = await response.json()
       return data.isValid
-    } catch (err) {
-      console.error("[EditPaymentMethodPage] Erreur lors de la vérification du mot de passe:", err)
+    } catch {
       return false
     }
   }
@@ -102,7 +107,6 @@ export default function EditPaymentMethodPage() {
     }
 
     try {
-      console.log("[EditPaymentMethodPage] Mise à jour du moyen de paiement:", { id_payment, userId: session.user.id_user });
       const response = await fetch(
         `/api/users/${session.user.id_user}/payments/${id_payment}`,
         {
@@ -114,7 +118,6 @@ export default function EditPaymentMethodPage() {
         }
       )
 
-      console.log("[EditPaymentMethodPage] Réponse API PUT:", { status: response.status });
       if (!response.ok) {
         const errorData = await response.json()
         throw new Error(
@@ -123,57 +126,91 @@ export default function EditPaymentMethodPage() {
         )
       }
 
-      console.log("[EditPaymentMethodPage] Moyen de paiement mis à jour, redirection vers /account/settings");
       router.push("/account/settings")
     } catch (err: any) {
-      console.error("[EditPaymentMethodPage] Erreur dans handleUpdate:", err)
       setErrorMessage(
         err.message ||
           "Une erreur est survenue lors de la mise à jour de la méthode de paiement."
       )
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   if (!session) {
-    return <div>Chargement...</div>
+    return (
+      <div className="p-6 space-y-6 max-w-4xl mx-auto">
+        <div className="bg-red-50 border border-red-200 p-4 rounded-lg flex items-start gap-3">
+          <AlertTriangle className="h-5 w-5 text-red-500 mt-0.5" />
+          <div>
+            <p className="font-medium text-red-600">Vous devez être connecté</p>
+            <p className="text-sm text-red-600">
+              Connectez-vous pour accéder à cette page
+            </p>
+            <Button
+              asChild
+              variant="default"
+              className="mt-2 bg-[#302082] hover:bg-[#302082]/90"
+            >
+              <Link href="/auth?redirect=/account/settings">Se connecter</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (!paymentMethod) {
-    return <div>{errorMessage || "Chargement..."}</div>
+    return <div className="p-6">Chargement...</div>
   }
 
   return (
     <StripeWrapper>
-      <div className="p-6 space-y-6">
-        <h1 className="text-2xl font-bold">Modifier la méthode de paiement</h1>
-        {errorMessage && (
-          <div className="text-red-600 text-sm mb-4">{errorMessage}</div>
-        )}
-        <p className="text-sm text-gray-600">
-          Pour modifier votre carte bancaire, veuillez entrer les nouvelles
-          informations de carte ci-dessous.
-        </p>
+      <div className="py-8 px-4 sm:px-6 max-w-4xl mx-auto">
+        <div className="mb-8">
+          <div className="flex items-center mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#302082] relative pb-2 inline-block">
+              Modifier le moyen de paiement
+              <span className="absolute bottom-0 left-0 w-full h-1 bg-[#302082] rounded"></span>
+            </h1>
+          </div>
+          <p className="text-gray-600 max-w-3xl">
+            Mettez à jour les informations de votre carte bancaire. Pour
+            confirmer, nous vous demanderons votre mot de passe.
+          </p>
+        </div>
 
-        <div>
+        {errorMessage && (
+          <div className="bg-red-50 border border-red-200 p-4 rounded-lg mb-6 text-red-600 text-sm flex gap-2 items-start">
+            <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 mb-6">
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-gray-700 mb-1"
           >
-            Mot de passe actuel
+            Mot de passe actuel <span className="text-red-500">*</span>
           </label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500"
-          />
-          {passwordError && (
-            <div className="text-red-600 text-sm mt-2">{passwordError}</div>
-          )}
+          <div className="relative max-w-md">
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
+              className={`mt-1 block w-full border ${passwordError ? "border-red-500" : "border-gray-300"} rounded-md p-2 focus:outline-none focus:ring-[#302082] focus:border-[#302082]`}
+              placeholder="Entrez votre mot de passe actuel"
+            />
+            {passwordError && (
+              <div className="text-red-600 text-xs mt-1 flex items-center gap-1">
+                <AlertTriangle className="h-3.5 w-3.5" />
+                {passwordError}
+              </div>
+            )}
+          </div>
         </div>
 
         <PaymentMethodsForm
