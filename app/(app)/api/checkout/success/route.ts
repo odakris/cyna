@@ -8,8 +8,17 @@ export async function GET(request: NextRequest) {
     // Récupérer la session de l'utilisateur
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id_user;
-    if (!userId) {
-      console.error('[API Checkout Success] Utilisateur non authentifié');
+    const guestId = request.headers.get('x-guest-id');
+
+    console.log('[Checkout Success API] Requête reçue:', {
+      userId,
+      guestId,
+      headers: Object.fromEntries(request.headers),
+      cookies: request.cookies.getAll(),
+    });
+
+    if (!userId && !guestId) {
+      console.error('[Checkout Success API] Utilisateur non authentifié et aucun guestId fourni');
       return NextResponse.json(
         { error: 'Utilisateur non authentifié' },
         { status: 401 }
@@ -17,26 +26,27 @@ export async function GET(request: NextRequest) {
     }
 
     const invoiceNumber = request.nextUrl.searchParams.get('invoice_number');
-    console.log('[API Checkout Success] Requête de facture:', { invoiceNumber });
+    console.log('[Checkout Success API] Requête de facture:', { invoiceNumber });
 
     if (!invoiceNumber) {
-      console.error('[API Checkout Success] Numéro de facture manquant');
+      console.error('[Checkout Success API] Numéro de facture manquant');
       return NextResponse.json({ error: 'Numéro de facture requis' }, { status: 400 });
     }
 
-    // Vérifier que la commande existe et appartient à l'utilisateur
+    // Vérifier que la commande existe et appartient à l'utilisateur ou à l'invité
     const order = await prisma.order.findUnique({
       where: { invoice_number: invoiceNumber },
-      select: { id_user: true, invoice_pdf_url: true },
+      select: { id_user: true, guest_id: true, invoice_pdf_url: true },
     });
 
     if (!order || !order.invoice_pdf_url) {
-      console.error('[API Checkout Success] Facture non trouvée:', { invoiceNumber });
+      console.error('[Checkout Success API] Facture non trouvée:', { invoiceNumber });
       return NextResponse.json({ error: 'Facture non trouvée' }, { status: 404 });
     }
 
-    if (order.id_user !== userId) {
-      console.error('[API Checkout Success] Accès non autorisé:', { invoiceNumber, userId });
+    const effectiveUserId = userId || guestId;
+    if (order.id_user !== effectiveUserId && order.guest_id !== effectiveUserId) {
+      console.error('[Checkout Success API] Accès non autorisé:', { invoiceNumber, effectiveUserId });
       return NextResponse.json(
         { error: 'Accès non autorisé à cette commande' },
         { status: 403 }
@@ -47,12 +57,12 @@ export async function GET(request: NextRequest) {
     const response = await fetch(`${request.nextUrl.origin}${order.invoice_pdf_url}`, {
       method: 'GET',
       headers: {
-        Cookie: request.headers.get('cookie') || '', // Transférer les cookies pour l'authentification
+        Cookie: request.headers.get('cookie') || '',
       },
     });
 
     if (!response.ok) {
-      console.error('[API Checkout Success] Erreur lors de la génération du PDF:', { status: response.status });
+      console.error('[Checkout Success API] Erreur lors de la génération du PDF:', { status: response.status });
       return NextResponse.json(
         { error: 'Erreur lors de la génération de la facture' },
         { status: response.status }
@@ -68,7 +78,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error: any) {
-    console.error('[API Checkout Success] Erreur:', {
+    console.error('[Checkout Success API] Erreur:', {
       message: error.message,
       stack: error.stack,
     });

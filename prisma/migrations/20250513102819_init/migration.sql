@@ -111,7 +111,7 @@ CREATE TABLE `Order` (
     `subtotal` FLOAT NOT NULL DEFAULT 0,
     `order_status` ENUM('PENDING', 'PROCESSING', 'ACTIVE', 'COMPLETED', 'CANCELLED', 'REFUNDED') NOT NULL DEFAULT 'PENDING',
     `payment_method` VARCHAR(50) NOT NULL,
-    `last_card_digits` VARCHAR(4) NULL,
+    `last_card_digits` VARCHAR(255) NULL,
     `invoice_number` VARCHAR(50) NOT NULL,
     `invoice_pdf_url` VARCHAR(255) NULL,
     `id_user` INTEGER NOT NULL,

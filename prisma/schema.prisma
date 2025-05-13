@@ -167,7 +167,7 @@ model Order {
     subtotal         Float       @default(0) @db.Float
     order_status     OrderStatus @default(PENDING)
     payment_method   String      @db.VarChar(50)
-    last_card_digits String?     @db.VarChar(4)
+    last_card_digits String?     @db.VarChar(255)
     invoice_number   String      @unique @db.VarChar(50)
     invoice_pdf_url  String?     @db.VarChar(255)
     id_user          Int

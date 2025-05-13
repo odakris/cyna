@@ -267,14 +267,23 @@ export function useCheckout() {
     }
 
     try {
+      console.log('[useCheckout] Création utilisateur invité:', { guestEmail })
       const guestUserResponse = await fetch("/api/users/guest", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: guestEmail }),
+        credentials: "include", // Ajout pour s'assurer que le cookie est inclus
+      })
+
+      console.log('[useCheckout] Réponse de /api/users/guest:', {
+        status: guestUserResponse.status,
+        statusText: guestUserResponse.statusText,
+        headers: Object.fromEntries(guestUserResponse.headers.entries()),
       })
 
       if (!guestUserResponse.ok) {
         const errorData = await safeParseJson(guestUserResponse)
+        console.error('[useCheckout] Erreur lors de la création de l’utilisateur invité:', errorData)
         setError(
           `Erreur lors de la création de l'utilisateur invité: ${errorData.message || "Erreur inconnue"}`
         )
@@ -282,8 +291,23 @@ export function useCheckout() {
       }
 
       const guestUser = await safeParseJson(guestUserResponse)
+      console.log('[useCheckout] Utilisateur invité créé:', {
+        id_user: guestUser.id_user,
+        email: guestUser.email,
+        stripeCustomerId: guestUser.stripeCustomerId,
+      })
+
       setGuestUserId(guestUser.id_user)
       setGuestStripeCustomerId(guestUser.stripeCustomerId)
+
+      // Forcer la mise à jour de la session en appelant /api/auth/session
+      console.log('[useCheckout] Forcer la mise à jour de la session')
+      const sessionResponse = await fetch('/api/auth/session', {
+        method: 'GET',
+        credentials: 'include',
+      })
+      const sessionData = await safeParseJson(sessionResponse)
+      console.log('[useCheckout] Résultat de /api/auth/session:', sessionData)
 
       // Store guest email in localStorage to access it later
       localStorage.setItem("guestEmail", guestEmail)
