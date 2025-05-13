@@ -38,7 +38,7 @@ interface Address {
   city: string
   postal_code: string
   country: string
-  mobile_phone?: string
+  mobile_phone?: string | null
 }
 
 interface Order {
@@ -76,7 +76,7 @@ export function OrderDetails({
   useEffect(() => {
     if (isGuest) {
       signOut({ redirect: false })
-      console.log('[OrderDetails] Session invité déconnectée')
+      console.log("[OrderDetails] Session invité déconnectée")
     }
   }, [isGuest])
 
@@ -85,7 +85,9 @@ export function OrderDetails({
   const tax = order.total_amount - subtotal
 
   // Sélectionner l'email : prioriser l'email de l'utilisateur connecté si disponible
-  const email = isGuest ? guestEmail || order.user?.email || "" : order.user?.email || guestEmail || ""
+  const email = isGuest
+    ? guestEmail || order.user?.email || ""
+    : order.user?.email || guestEmail || ""
 
   // Log pour déboguer la sélection de l'email
   console.log("[OrderDetails] Sélection de l'email:", {
@@ -170,8 +172,7 @@ export function OrderDetails({
                 <p>{order.address.address1}</p>
                 {order.address.address2 && <p>{order.address.address2}</p>}
                 <p>
-                  {order.address.city},{" "}
-                  {order.address.country}
+                  {order.address.city}, {order.address.country}
                 </p>
                 {order.address.mobile_phone && (
                   <p>{order.address.mobile_phone}</p>

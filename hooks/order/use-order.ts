@@ -11,6 +11,7 @@ export interface OrderItem {
 }
 
 export interface Address {
+  id_address: string
   first_name: string
   last_name: string
   address1: string
@@ -18,6 +19,7 @@ export interface Address {
   city: string
   postal_code: string
   country: string
+  mobile_phone: string | null
 }
 
 export interface Order {
@@ -93,7 +95,10 @@ export function useOrder(orderId: string | null) {
         setOrder(data.order || data)
         setLoading(false)
       } catch (error) {
-        console.error("[use-order] Erreur réseau lors du chargement de la commande:", error)
+        console.error(
+          "[use-order] Erreur réseau lors du chargement de la commande:",
+          error
+        )
         setError("Erreur réseau lors du chargement de la commande")
         setLoading(false)
       }

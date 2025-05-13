@@ -19,7 +19,7 @@ interface Address {
   postal_code: string
   city: string
   country: string
-  mobile_phone: string
+  mobile_phone: string | null // Modifier cette ligne pour accepter null
 }
 
 interface PaymentInfo {
@@ -53,16 +53,25 @@ export default function SuccessPage() {
   } = useOrder(orderId)
 
   // Récupérer guestEmail et guestId depuis localStorage avec les clés correctes
-  const guestEmailFromStorage = typeof window !== "undefined" ? localStorage.getItem("guest_email") : null
-  const guestIdFromStorage = typeof window !== "undefined" ? localStorage.getItem("guest_id") : null
+  const guestEmailFromStorage =
+    typeof window !== "undefined" ? localStorage.getItem("guest_email") : null
+  const guestIdFromStorage =
+    typeof window !== "undefined" ? localStorage.getItem("guest_id") : null
 
   // Définir isGuest et guestEmail
-  const isGuest = session?.user?.isGuest || !!guestEmailFromStorage || !!orderGuestEmail
+  const isGuest =
+    session?.user?.isGuest || !!guestEmailFromStorage || !!orderGuestEmail
   const guestEmail = guestEmailFromStorage || orderGuestEmail
-  console.log("[SuccessPage] isGuest calculé:", { isGuest, guestEmail, guestId: guestIdFromStorage })
+  console.log("[SuccessPage] isGuest calculé:", {
+    isGuest,
+    guestEmail,
+    guestId: guestIdFromStorage,
+  })
 
   const [decryptedAddress, setDecryptedAddress] = useState<Address | null>(null)
-  const [decryptedLastCardDigits, setDecryptedLastCardDigits] = useState<string | null>(null)
+  const [decryptedLastCardDigits, setDecryptedLastCardDigits] = useState<
+    string | null
+  >(null)
   const [decryptError, setDecryptError] = useState<string | null>(null)
   const [isDecrypting, setIsDecrypting] = useState<boolean>(true)
   const hasDecryptedRef = useRef(false)
@@ -71,7 +80,7 @@ export default function SuccessPage() {
   useEffect(() => {
     if (
       !order ||
-      !order.id_address ||
+      !order.address ||
       sessionStatus === "loading" ||
       !isDecrypting ||
       hasDecryptedRef.current
@@ -80,12 +89,16 @@ export default function SuccessPage() {
     }
 
     const decryptData = async () => {
-      console.log("[SuccessPage] Début du déchiffrement pour orderId:", orderId, {
-        userId,
-        isGuest,
-        guestEmail,
-        guestId: guestIdFromStorage,
-      })
+      console.log(
+        "[SuccessPage] Début du déchiffrement pour orderId:",
+        orderId,
+        {
+          userId,
+          isGuest,
+          guestEmail,
+          guestId: guestIdFromStorage,
+        }
+      )
 
       try {
         // Vérifier si les données sont chiffrées
@@ -112,7 +125,9 @@ export default function SuccessPage() {
         // Si l'utilisateur n'est pas authentifié et pas un invité
         if (!isGuest && !userId && sessionStatus === "unauthenticated") {
           console.error("[SuccessPage] L'utilisateur n'est pas authentifié")
-          setDecryptError("Veuillez vous connecter pour afficher les détails de la commande.")
+          setDecryptError(
+            "Veuillez vous connecter pour afficher les détails de la commande."
+          )
           setIsDecrypting(false)
           hasDecryptedRef.current = true
           return
@@ -123,7 +138,11 @@ export default function SuccessPage() {
 
         // Préparer les données à déchiffrer
         if (isAddressEncrypted) {
-          addresses = [order.address]
+          addresses = [
+            {
+              ...order.address,
+            },
+          ]
         }
         if (isPaymentEncrypted && order.last_card_digits) {
           payments = [
@@ -135,7 +154,10 @@ export default function SuccessPage() {
           ]
         }
 
-        console.log("[SuccessPage] Données à déchiffrer:", { addresses, payments })
+        console.log("[SuccessPage] Données à déchiffrer:", {
+          addresses,
+          payments,
+        })
 
         if (addresses.length === 0 && payments.length === 0) {
           console.log("[SuccessPage] Aucune donnée à déchiffrer")
@@ -147,7 +169,8 @@ export default function SuccessPage() {
         }
 
         // Appeler l'API de déchiffrement
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000"
+        const baseUrl =
+          process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000"
         const decryptRoute = "/api/crypt/guest/decrypt"
         console.log("[SuccessPage] Envoi de la requête à:", decryptRoute, {
           userId,
@@ -159,11 +182,16 @@ export default function SuccessPage() {
         const headers: Record<string, string> = {
           "Content-Type": "application/json",
           ...(userId && !isGuest ? { "x-user-id": userId.toString() } : {}),
-          ...(isGuest && guestIdFromStorage ? { "x-guest-id": guestIdFromStorage } : {}),
+          ...(isGuest && guestIdFromStorage
+            ? { "x-guest-id": guestIdFromStorage }
+            : {}),
         }
 
         // Log des cookies et en-têtes
-        console.log("[SuccessPage] Cookies envoyés:", typeof window !== "undefined" ? document.cookie : "SSR")
+        console.log(
+          "[SuccessPage] Cookies envoyés:",
+          typeof window !== "undefined" ? document.cookie : "SSR"
+        )
         console.log("[SuccessPage] En-têtes envoyés:", headers)
 
         const response = await fetch(`${baseUrl}${decryptRoute}`, {
@@ -179,30 +207,39 @@ export default function SuccessPage() {
             status: response.status,
             errorText,
           })
-          throw new Error(`Échec du déchiffrement: ${response.status} - ${errorText}`)
+          throw new Error(
+            `Échec du déchiffrement: ${response.status} - ${errorText}`
+          )
         }
 
-        const { addresses: decryptedAddresses, payments: decryptedPayments } = await response.json()
+        const { addresses: decryptedAddresses, payments: decryptedPayments } =
+          await response.json()
         console.log("[SuccessPage] Données déchiffrées:", {
           decryptedAddresses,
           decryptedPayments,
         })
 
         // Trouver l'adresse correspondant à id_address
-        const addressData = decryptedAddresses.find(
-          (addr: Address) => addr.id_address === order.id_address
-        )
+        // const addressData = decryptedAddresses.find(
+        //   (addr: Address) => addr.id_address === order.id_address
+        // )
         // Trouver le paiement correspondant (si disponible)
-        const paymentData = decryptedPayments.length > 0 ? decryptedPayments[0] : null
+        const paymentData =
+          decryptedPayments.length > 0 ? decryptedPayments[0] : null
 
-        console.log("[SuccessPage] Données sélectionnées:", { addressData, paymentData })
+        // console.log("[SuccessPage] Données sélectionnées:", {
+        //   addressData,
+        //   paymentData,
+        // })
 
-        if (!addressData) {
+        if (!order.address) {
           throw new Error("Adresse introuvable dans les données déchiffrées")
         }
 
-        setDecryptedAddress(addressData)
-        setDecryptedLastCardDigits(paymentData?.last_card_digits || order.last_card_digits)
+        setDecryptedAddress(order.address)
+        setDecryptedLastCardDigits(
+          paymentData?.last_card_digits || order.last_card_digits
+        )
         setIsDecrypting(false)
         hasDecryptedRef.current = true
       } catch (err) {
@@ -223,7 +260,15 @@ export default function SuccessPage() {
     }
 
     decryptData()
-  }, [order, orderId, isGuest, userId, sessionStatus, guestEmail, guestIdFromStorage])
+  }, [
+    order,
+    orderId,
+    isGuest,
+    userId,
+    sessionStatus,
+    guestEmail,
+    guestIdFromStorage,
+  ])
 
   // Log pour confirmer le chargement de la page
   useEffect(() => {
@@ -260,7 +305,9 @@ export default function SuccessPage() {
   const email = guestEmail || order?.user?.email || ""
 
   if (sessionStatus === "loading" || loading) {
-    return <LoadingState message="Chargement des détails de votre commande..." />
+    return (
+      <LoadingState message="Chargement des détails de votre commande..." />
+    )
   }
 
   if (error || !order) {
@@ -276,7 +323,9 @@ export default function SuccessPage() {
   }
 
   if (!decryptedAddress) {
-    return <ErrorState error="Impossible de récupérer les données de la commande." />
+    return (
+      <ErrorState error="Impossible de récupérer les données de la commande." />
+    )
   }
 
   return (
@@ -286,7 +335,7 @@ export default function SuccessPage() {
       <OrderDetails
         order={{
           ...order,
-          address: decryptedAddress,
+          address: order.address,
           last_card_digits: decryptedLastCardDigits,
         }}
         downloadingInvoice={downloadingInvoice}
