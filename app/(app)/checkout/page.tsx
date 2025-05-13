@@ -103,7 +103,7 @@ async function decryptAddress(address: Address, userId?: number, isGuest: boolea
       headers["x-user-id"] = userId.toString();
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/crypt/user/decrypt`, {
+    const response = await fetch(`${API_BASE_URL}/api/crypt/guest/decrypt`, {
       method: 'POST',
       headers,
       body: JSON.stringify({
@@ -171,6 +171,7 @@ function CheckoutContent() {
   const {
     isGuest,
     guestEmail,
+    guestUserId,
     setGuestEmail,
     addresses,
     paymentInfos,
@@ -203,6 +204,7 @@ function CheckoutContent() {
       setProcessingPaymentType: typeof setProcessingPayment,
       isGuest,
       guestEmail,
+      guestUserId,
       addressesCount: addresses.length,
       paymentInfosCount: paymentInfos.length,
       selectedAddressId: selectedAddress?.id_address,
@@ -222,6 +224,7 @@ function CheckoutContent() {
       paymentInfosCount: paymentInfos.length,
       isGuest,
       guestEmail,
+      guestUserId,
       sessionUserId: session?.user?.id_user,
       setProcessingPaymentType: typeof setProcessingPayment,
     })
@@ -239,6 +242,7 @@ function CheckoutContent() {
     selectedPayment,
     isGuest,
     guestEmail,
+    guestUserId,
     session,
     setProcessingPayment,
   ])
@@ -259,13 +263,18 @@ function CheckoutContent() {
       selectedAddressId: selectedAddress?.id_address,
       selectedPaymentId: selectedPayment?.id_payment_info,
       checkoutHookKeys: Object.keys(checkoutHook),
+      isGuest,
+      guestEmail,
+      guestUserId,
+      sessionUser: session?.user,
+      cookies: document.cookie,
     });
-
+  
     if (processingPayment) {
       console.log('[Checkout] Paiement déjà en cours, ignoré');
       return;
     }
-
+  
     if (typeof setProcessingPayment !== 'function') {
       console.error('[Checkout] setProcessingPayment n’est pas une fonction', {
         setProcessingPayment,
@@ -274,88 +283,100 @@ function CheckoutContent() {
       setError('Erreur interne: impossible de traiter le paiement');
       return;
     }
-
+  
     setProcessingPayment(true);
     console.log('[Checkout] État avant vérification:', {
       selectedAddress,
       selectedPayment,
       hasIdAddress: !!selectedAddress?.id_address,
       hasIdPaymentInfo: !!selectedPayment?.id_payment_info,
+      isGuest,
+      guestEmail,
+      guestUserId,
+      sessionUser: session?.user,
+      cookies: document.cookie,
     });
-
-    if (!selectedAddress?.id_address || !selectedPayment?.id_payment_info) {
-      setError('Veuillez sélectionner une adresse et un moyen de paiement');
-      console.error('[Checkout] Validation échouée:', {
-        id_address: selectedAddress?.id_address,
-        id_payment_info: selectedPayment?.id_payment_info,
-      });
-      setProcessingPayment(false);
-      return;
-    }
-
-    console.log('[Checkout] Début de handleProceedToPayment', {
-      totalCartPrice,
-      taxes,
-      addressId: selectedAddress.id_address,
-      paymentId: selectedPayment.id_payment_info,
-    });
-
+  
     try {
-      let addressData = selectedAddress;
-      let paymentData = selectedPayment;
-
-      // Déchiffrer les données selon le type d'utilisateur
+      // Étape 1 : Vérifier les données nécessaires
+      if (!selectedAddress?.id_address || !selectedPayment?.id_payment_info) {
+        console.error('[Checkout] Données manquantes:', {
+          selectedAddressId: selectedAddress?.id_address,
+          selectedPaymentId: selectedPayment?.id_payment_info,
+        });
+        throw new Error('Veuillez sélectionner une adresse et un moyen de paiement');
+      }
+      if (isGuest && !guestEmail) {
+        console.error('[Checkout] Email invité manquant');
+        throw new Error('Email invité requis pour le paiement');
+      }
+      if (isGuest && !guestUserId) {
+        console.error('[Checkout] Identifiant invité manquant');
+        throw new Error('Identifiant invité requis pour le paiement');
+      }
+  
+      // Étape 2 : Préparer les données d'adresse et de paiement
+      let addressData = { ...selectedAddress };
+      let paymentData = { ...selectedPayment };
+  
+      // Étape 3 : Chiffrer les données pour les invités
       if (isGuest) {
-        console.log('[Checkout] Mode invité, récupération des données brutes');
-        const guestAddresses = JSON.parse(localStorage.getItem('guestAddresses') || '[]');
-        const guestPayments = JSON.parse(localStorage.getItem('guestPaymentInfos') || '[]');
-
-        addressData = guestAddresses.find((addr: Address) => addr.id_address === selectedAddress.id_address);
-        paymentData = guestPayments.find((pay: PaymentInfo) => pay.id_payment_info === selectedPayment.id_payment_info);
-
-        if (!addressData) {
-          throw new Error('Adresse introuvable dans les données invité');
-        }
-        if (!paymentData) {
-          throw new Error(`Moyen de paiement introuvable pour paymentId: ${selectedPayment.id_payment_info}`);
-        }
-
-        // Valider paymentData
-        if (!paymentData.stripe_payment_id || !paymentData.stripe_customer_id) {
-          throw new Error('Informations de paiement Stripe manquantes dans paymentData');
-        }
-        console.log('[Checkout] paymentData envoyé:', paymentData);
-
-        // Valider guestEmail
-        if (!guestEmail) {
-          throw new Error('Email invité requis pour le paiement');
-        }
-
-        // Ajouter des valeurs par défaut pour les champs optionnels
-        addressData = {
-          ...addressData,
-          mobile_phone: addressData.mobile_phone || "N/A",
-          region: addressData.region || "N/A",
+        console.log('[Checkout] Mode invité, chiffrement des données', { guestUserId });
+        const headers: Record<string, string> = {
+          'Content-Type': 'application/json',
+          'x-guest-id': guestUserId.toString(),
         };
+  
+        console.log('[Checkout] En-tête envoyé à /api/crypt/guest/encrypt:', headers);
+  
+        const encryptRes = await fetch('/api/crypt/guest/encrypt', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            addresses: [addressData],
+            payments: [paymentData],
+          }),
+          credentials: 'include', // Inclure les cookies pour la session
+        });
+  
+        console.log('[Checkout] Réponse de /api/crypt/guest/encrypt:', {
+          status: encryptRes.status,
+          statusText: encryptRes.statusText,
+          headers: Object.fromEntries(encryptRes.headers.entries()),
+          responseText: await encryptRes.clone().text(),
+        });
+  
+        if (!encryptRes.ok) {
+          const text = await encryptRes.text();
+          console.error('[Checkout] Échec du chiffrement:', { status: encryptRes.status, text });
+          throw new Error(`Erreur de chiffrement: ${encryptRes.status} - ${text}`);
+        }
+  
+        const { addresses: encryptedAddresses, payments: encryptedPayments } = await encryptRes.json();
+        addressData = encryptedAddresses[0];
+        paymentData = encryptedPayments[0];
+        console.log('[Checkout] Données chiffrées:', { addressData, paymentData });
       } else {
         console.log('[Checkout] Mode utilisateur connecté, lancement du déchiffrement');
         addressData = await decryptAddress(selectedAddress, session?.user?.id_user, false);
       }
-
-      const userId = isGuest ? localStorage.getItem('guestUserId') : session?.user?.id_user;
+  
+      // Étape 4 : Préparer les en-têtes pour /api/checkout
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
-      if (!isGuest && userId) {
-        headers['x-user-id'] = userId.toString();
-        console.log('[Checkout] Envoi de x-user-id:', userId);
-      } else if (isGuest && localStorage.getItem('guestUserId')) {
-        headers['x-guest-id'] = localStorage.getItem('guestUserId')!;
-        console.log('[Checkout] Envoi de x-guest-id:', localStorage.getItem('guestUserId'));
+      if (!isGuest && session?.user?.id_user) {
+        headers['x-user-id'] = session.user.id_user.toString();
+        console.log('[Checkout] Envoi de x-user-id:', session.user.id_user);
+      } else if (isGuest && guestUserId) {
+        headers['x-guest-id'] = guestUserId.toString();
+        console.log('[Checkout] Envoi de x-guest-id:', guestUserId);
       } else {
+        console.error('[Checkout] Aucun ID utilisateur ou invité disponible');
         throw new Error('Aucun ID utilisateur ou invité disponible');
       }
-
+  
+      // Étape 5 : Formater le panier
       const validSubscriptions = ['MONTHLY', 'YEARLY', 'PER_USER', 'PER_MACHINE'];
       const formattedCartItems = cart.map(item => ({
         ...item,
@@ -363,7 +384,8 @@ function CheckoutContent() {
           ? item.subscription || 'MONTHLY'
           : 'MONTHLY',
       }));
-
+  
+      // Étape 6 : Construire le payload pour /api/checkout
       const checkoutPayload = {
         cartItems: formattedCartItems,
         addressId: selectedAddress.id_address,
@@ -372,23 +394,27 @@ function CheckoutContent() {
         paymentData: isGuest ? paymentData : undefined,
         totalAmount: totalCartPrice,
         taxes,
-        guestId: isGuest ? localStorage.getItem('guestUserId') : undefined,
+        guestId: isGuest ? guestUserId : undefined,
         guestEmail: isGuest ? guestEmail : undefined,
+        sessionToken: session?.accessToken,
       };
-
+  
       console.log('[Checkout] Envoi à /api/checkout:', checkoutPayload);
-
+  
+      // Étape 7 : Appeler /api/checkout
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers,
         body: JSON.stringify(checkoutPayload),
+        credentials: 'include', // Inclure les cookies pour la session
       });
-
+  
       console.log('[Checkout] /api/checkout response:', {
         status: response.status,
         statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
       });
-
+  
       if (!response.ok) {
         let errorMessage = `Erreur serveur: ${response.statusText}`;
         try {
@@ -403,17 +429,25 @@ function CheckoutContent() {
         }
         throw new Error(`Échec de l’initialisation du paiement: ${errorMessage}`);
       }
-
+  
       const data = await response.json();
       console.log('[Checkout] Données reçues de /api/checkout:', data);
-
+  
       if (!data.orderId || !data.status) {
         console.error('[Checkout] orderId ou status manquant dans la réponse:', data);
         throw new Error('Réponse du serveur invalide');
       }
-
+  
       console.log('[Checkout] orderId défini:', data.orderId);
-
+  
+      // Étape 8 : Stocker guestEmail et guestId dans localStorage pour les invités
+      if (isGuest) {
+        console.log('[Checkout] Stockage de guest_email et guest_id dans localStorage');
+        localStorage.setItem('guest_email', guestEmail);
+        localStorage.setItem('guest_id', guestUserId.toString());
+      }
+  
+      // Étape 9 : Finaliser la commande
       if (data.status === 'succeeded') {
         console.log('[Checkout] Paiement réussi, finalisation:', { orderId: data.orderId });
         await finalizeOrder(data.orderId, addressData);
@@ -449,6 +483,7 @@ function CheckoutContent() {
         localStorage.removeItem('guestEmail')
         localStorage.removeItem('guestAddresses')
         localStorage.removeItem('guestPaymentInfos')
+        // Ne pas supprimer guest_email et guest_id ici, car nécessaires pour /success
       }
 
       const targetUrl = `/checkout/success?orderId=${orderId}`
