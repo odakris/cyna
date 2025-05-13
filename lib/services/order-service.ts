@@ -1,5 +1,6 @@
 import { prisma } from "../prisma"
 import orderRepository from "../repositories/order-repository"
+import { decrypt } from "../utils/encryption"
 import { OrderInputValues, orderFormSchema } from "../validations/order-schema"
 import { Order, OrderStatus, Prisma } from "@prisma/client"
 import { ZodError } from "zod"
@@ -77,7 +78,7 @@ export const getAllOrders = async (): Promise<Order[]> => {
  * @returns {Promise<Order>} La commande correspondante.
  * @throws {Error} Si la commande n'existe pas ou en cas d'erreur.
  */
-export const getOrderById = async (id: number): Promise<Order> => {
+export const getOrderById = async (id: number): Promise<OrderWithRelations> => {
   if (!id || isNaN(Number(id)) || id <= 0) {
     throw new Error("ID de commande invalide")
   }
@@ -87,6 +88,27 @@ export const getOrderById = async (id: number): Promise<Order> => {
 
     if (!order) {
       throw new Error(`Commande avec l'ID ${id} non trouvée`)
+    }
+
+    // Ajouter le déchiffrement ici
+    if (order.address) {
+      const isAddressEncrypted = order.address.first_name.includes(":")
+      if (isAddressEncrypted) {
+        // Déchiffrer l'adresse
+        order.address = {
+          ...order.address,
+          first_name: await decrypt(order.address.first_name),
+          last_name: await decrypt(order.address.last_name),
+          address1: await decrypt(order.address.address1),
+          address2: order.address.address2?.includes(":")
+            ? await decrypt(order.address.address2)
+            : order.address.address2,
+          postal_code: await decrypt(order.address.postal_code, true), // true pour code postal si votre fonction le supporte
+          city: await decrypt(order.address.city),
+          country: await decrypt(order.address.country),
+          mobile_phone: await decrypt(order.address.mobile_phone),
+        }
+      }
     }
 
     return order
@@ -230,8 +252,8 @@ export const updateOrderStatus = async (
     throw error instanceof Error
       ? error
       : new Error(
-        `Erreur lors de la mise à jour du statut de la commande ID ${id}`
-      )
+          `Erreur lors de la mise à jour du statut de la commande ID ${id}`
+        )
   }
 }
 
@@ -378,11 +400,17 @@ export const getUserOrderHistory = async (
       let gte: Date, lte: Date
 
       if (day && month) {
-        gte = new Date(`${filterYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`)
-        lte = new Date(`${filterYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}T23:59:59.999Z`)
+        gte = new Date(
+          `${filterYear}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`
+        )
+        lte = new Date(
+          `${filterYear}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}T23:59:59.999Z`
+        )
       } else if (month) {
-        gte = new Date(`${filterYear}-${month.toString().padStart(2, '0')}-01`)
-        lte = new Date(`${filterYear}-${month.toString().padStart(2, '0')}-31T23:59:59.999Z`)
+        gte = new Date(`${filterYear}-${month.toString().padStart(2, "0")}-01`)
+        lte = new Date(
+          `${filterYear}-${month.toString().padStart(2, "0")}-31T23:59:59.999Z`
+        )
       } else if (year) {
         gte = new Date(`${filterYear}-01-01`)
         lte = new Date(`${filterYear}-12-31T23:59:59.999Z`)
@@ -478,12 +506,12 @@ export const getUserOrderHistory = async (
       invoice_pdf_url: order.invoice_pdf_url,
       billing_address: order.address
         ? {
-          address1: order.address.address1,
-          address2: order.address.address2,
-          city: order.address.city,
-          postal_code: order.address.postal_code,
-          country: order.address.country,
-        }
+            address1: order.address.address1,
+            address2: order.address.address2,
+            city: order.address.city,
+            postal_code: order.address.postal_code,
+            country: order.address.country,
+          }
         : undefined,
       subscriptions: order.order_items.map(item => ({
         id_order_item: item.id_order_item,
@@ -566,12 +594,12 @@ export const getOrderByIdForInvoice = async (
       invoice_pdf_url: order.invoice_pdf_url,
       billing_address: order.address
         ? {
-          address1: order.address.address1,
-          address2: order.address.address2,
-          city: order.address.city,
-          postal_code: order.address.postal_code,
-          country: order.address.country,
-        }
+            address1: order.address.address1,
+            address2: order.address.address2,
+            city: order.address.city,
+            postal_code: order.address.postal_code,
+            country: order.address.country,
+          }
         : undefined,
       subscriptions: order.order_items.map(item => ({
         id_order_item: item.id_order_item,

@@ -1,8 +1,25 @@
 import { prisma } from "@/lib/prisma"
 import { OrderFormValues } from "@/lib/validations/order-schema"
-import { Order, OrderStatus } from "@prisma/client"
+import { Order, OrderStatus, Prisma } from "@prisma/client"
 import { TransactionClient } from "@/types/Types"
 import { Product } from "@prisma/client"
+
+// Définir un type pour Order avec les relations incluses
+type OrderWithRelations = Prisma.OrderGetPayload<{
+  include: {
+    order_items: {
+      include: {
+        product: {
+          select: {
+            id_category: true
+            name: true
+          }
+        }
+      }
+    }
+    address: true
+  }
+}>
 
 /**
  * Récupère la liste complète des commandes avec leurs produits associés.
@@ -46,7 +63,9 @@ export const findAll = async (): Promise<Order[]> => {
  * @returns {Promise<Order | null>} La commande correspondante ou null si non trouvée.
  * @throws {Error} En cas d'erreur lors de la récupération de la commande.
  */
-export const findById = async (id: number): Promise<Order | null> => {
+export const findById = async (
+  id: number
+): Promise<OrderWithRelations | null> => {
   if (!id || id <= 0) {
     throw new Error("ID de commande invalide")
   }

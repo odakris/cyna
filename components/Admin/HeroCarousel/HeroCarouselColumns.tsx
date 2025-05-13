@@ -224,11 +224,11 @@ export const HeroCarouselColumns: ColumnDef<HeroCarouselSlide>[] = [
         actions={[
           { type: "view", tooltip: "Voir les détails" },
           { type: "edit", tooltip: "Modifier le slide" },
-          { type: "external", tooltip: "Voir sur le site" },
+          { type: "external_main", tooltip: "Voir sur le site" },
         ]}
         basePath="/dashboard/hero-carousel"
         entityId={row.original.id_hero_slide}
-        externalBasePath="/hero-carousel"
+        externalBasePath="/"
       />
     ),
     enableHiding: false,

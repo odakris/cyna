@@ -6,9 +6,11 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { CategoryWithProductCount } from "@/types/frontend-types"
+import { sortActiveCategories } from "@/lib/utils/product-utils"
 
 export function CategoryGrid() {
   const { categories, loading, errorMessage } = useCategories()
+  const filterdCategories = sortActiveCategories(categories)
 
   if (errorMessage) {
     return (
@@ -28,11 +30,9 @@ export function CategoryGrid() {
         ? Array.from({ length: 3 }).map((_, index) => (
             <Skeleton key={index} className="w-full h-60 rounded-lg" />
           ))
-        : categories
-            .filter(cat => cat.active)
-            .map(category => (
-              <CategoryCard key={category.id_category} category={category} />
-            ))}
+        : filterdCategories.map(category => (
+            <CategoryCard key={category.id_category} category={category} />
+          ))}
     </div>
   )
 }

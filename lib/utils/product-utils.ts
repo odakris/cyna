@@ -27,6 +27,19 @@ export const sortActiveProducts = <
     })
 }
 
+export const sortActiveCategories = <
+  T extends { active: boolean; priority_order: number },
+>(
+  categories: T[]
+): T[] => {
+  return [...categories]
+    .filter(category => category.active) // Filtrer les produits inactifs
+    .sort((a, b) => {
+      // Ensuite par priority_order (croissant)
+      return a.priority_order - b.priority_order
+    })
+}
+
 export const sortAllProducts = <
   T extends { active: boolean; available: boolean; priority_order: number },
 >(

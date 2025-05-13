@@ -116,23 +116,32 @@ const ActionsCell = ({
     if (!invoicePdfUrl) return
 
     try {
-      const response = await fetch(invoicePdfUrl)
+      // Corriger l'URL pour inclure /download à la fin si ce n'est pas déjà inclus
+      const url = invoicePdfUrl.endsWith("/download")
+        ? invoicePdfUrl
+        : `${invoicePdfUrl}/download`
+
+      const response = await fetch(url, {
+        method: "GET",
+        credentials: "include", // Ajouter cette ligne pour inclure les cookies d'authentification
+      })
+
       if (!response.ok) {
-        if (response.status === 403) {
+        if (response.status === 403 || response.status === 401) {
           throw new Error("Accès non autorisé à la facture")
         }
         throw new Error("Erreur lors de la récupération de la facture")
       }
 
       const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
+      const url2 = window.URL.createObjectURL(blob)
       const link = document.createElement("a")
-      link.href = url
+      link.href = url2
       link.download = `facture-${entityId}.pdf`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      window.URL.revokeObjectURL(url2)
     } catch (error) {
       console.error("Erreur lors du téléchargement de la facture :", error)
       const errorMessage =

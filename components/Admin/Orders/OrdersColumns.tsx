@@ -352,7 +352,7 @@ export const OrderColumns: ColumnDef<OrderWithItems>[] = [
         ]}
         basePath="/dashboard/orders"
         entityId={row.original.id_order}
-        invoicePdfUrl={`/api/invoices/${row.original.id_order}` || "#"}
+        invoicePdfUrl={`/api/invoices/${row.original.id_order}/download` || "#"}
         externalBasePath="/orders"
       />
     ),
