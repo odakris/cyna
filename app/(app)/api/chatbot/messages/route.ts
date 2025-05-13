@@ -17,7 +17,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     console.log("Données reçues:", { content, conversationId })
 
     if (!content || !conversationId) {
-      console.error("Paramètres manquants:", { content, conversationId })
+      // console.error("Paramètres manquants:", { content, conversationId })
       return NextResponse.json(
         { error: "Message content and conversation ID are required" },
         { status: 400 }
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     })
 
     if (!conversation) {
-      console.error("Conversation non trouvée:", conversationId)
+      // console.error("Conversation non trouvée:", conversationId)
       return NextResponse.json(
         { error: "Conversation not found" },
         { status: 404 }
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         collectedData: response.collectedData,
       })
     } catch (processError) {
-      console.error("Erreur dans processChatbotMessage:", processError)
+      // console.error("Erreur dans processChatbotMessage:", processError)
 
       // Réponse de secours en cas d'erreur
       const fallbackResponse =
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       })
     }
   } catch (error) {
-    console.error("Error processing chatbot message:", error)
+    // console.error("Error processing chatbot message:", error)
     return NextResponse.json(
       { error: "Failed to process message" },
       { status: 500 }
@@ -171,7 +171,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(messages)
   } catch (error) {
-    console.error("Error fetching messages:", error)
+    // console.error("Error fetching messages:", error)
     return NextResponse.json(
       { error: "Failed to fetch messages" },
       { status: 500 }

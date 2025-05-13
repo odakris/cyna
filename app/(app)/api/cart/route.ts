@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     console.log('[API Cart] Paramètres:', { guestId, userId });
 
     if (!guestId && !userId) {
-      console.error('[API Cart] Ni guestId ni userId fourni');
+      // console.error('[API Cart] Ni guestId ni userId fourni');
       return NextResponse.json(
         { error: 'Identifiant utilisateur ou invité requis' },
         { status: 400 }
@@ -48,10 +48,10 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(cartItems);
   } catch (error: any) {
-    console.error('[API Cart] Erreur:', {
+    /*console.error('[API Cart] Erreur:', {
       message: error.message,
       stack: error.stack,
-    });
+    });*/
     return NextResponse.json(
       { error: 'Erreur interne du serveur', details: error.message },
       { status: 500 }

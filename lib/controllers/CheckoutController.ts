@@ -32,7 +32,7 @@ export class CheckoutController {
       );
       return res.status(200).json({ sessionId: stripeSession.id });
     } catch (error) {
-      console.error("Erreur lors de la création de la session:", error);
+      // console.error("Erreur lors de la création de la session:", error);
       return res.status(500).json({ error: "Erreur serveur" });
     }
   }
@@ -43,7 +43,7 @@ export class CheckoutController {
       await this.checkoutService.handleWebhookEvent(event);
       return res.status(200).json({ received: true });
     } catch (error) {
-      console.error("Erreur lors du traitement du webhook:", error);
+      // console.error("Erreur lors du traitement du webhook:", error);
       return res.status(400).json({ error: "Erreur webhook" });
     }
   }

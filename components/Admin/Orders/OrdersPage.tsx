@@ -59,7 +59,7 @@ export default function OrdersHomePage() {
       setShowDeleteDialog(false)
       table.resetRowSelection()
     } catch (error) {
-      console.error("Erreur détaillée:", error)
+      // console.error("Erreur détaillée:", error)
       // Afficher un message d'erreur à l'utilisateur
       toast({
         title: "Erreur",

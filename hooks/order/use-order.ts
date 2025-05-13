@@ -52,7 +52,7 @@ export function useOrder(orderId: string | null) {
       const text = await response.text()
       return text ? JSON.parse(text) : {}
     } catch (err) {
-      console.error("[use-order] Erreur parsing JSON:", err)
+      // console.error("[use-order] Erreur parsing JSON:", err)
       return { message: "Réponse serveur invalide" }
     }
   }
@@ -95,10 +95,14 @@ export function useOrder(orderId: string | null) {
         setOrder(data.order || data)
         setLoading(false)
       } catch (error) {
+<<<<<<< HEAD
         console.error(
           "[use-order] Erreur réseau lors du chargement de la commande:",
           error
         )
+=======
+        // console.error("[use-order] Erreur réseau lors du chargement de la commande:", error)
+>>>>>>> 1abc7659a72ff2683d02c2fddf6ca68482d86577
         setError("Erreur réseau lors du chargement de la commande")
         setLoading(false)
       }
@@ -135,11 +139,11 @@ export function useOrder(orderId: string | null) {
 
       if (!response.ok) {
         const errorData = await safeParseJson(response)
-        console.error("[use-order] Échec de la requête:", {
+        /*console.error("[use-order] Échec de la requête:", {
           status: response.status,
           statusText: response.statusText,
           error: errorData,
-        })
+        })*/
         throw new Error(
           `Erreur lors du téléchargement de la facture: ${errorData.message || "Erreur inconnue"}`
         )
@@ -165,7 +169,7 @@ export function useOrder(orderId: string | null) {
         variant: "success",
       })
     } catch (error) {
-      console.error("[use-order] Erreur téléchargement facture:", error)
+      // console.error("[use-order] Erreur téléchargement facture:", error)
       toast({
         title: "Erreur",
         description: "Erreur lors du téléchargement de la facture",

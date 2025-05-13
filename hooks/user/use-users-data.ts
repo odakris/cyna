@@ -49,7 +49,7 @@ export function useUsersData() {
 
       setError(null)
     } catch (error: unknown) {
-      console.error("Erreur fetchUsers:", error)
+      // console.error("Erreur fetchUsers:", error)
       setError("Erreur lors du chargement des utilisateurs")
     } finally {
       setLoading(false)
@@ -72,7 +72,7 @@ export function useUsersData() {
         if (!response.ok) {
           failedDeletions.push(id)
           const errorData = await response.json()
-          console.error(`Erreur de suppression pour l'ID ${id}:`, errorData)
+          // console.error(`Erreur de suppression pour l'ID ${id}:`, errorData)
         }
       }
 
@@ -88,7 +88,7 @@ export function useUsersData() {
 
       return { success: true }
     } catch (error: unknown) {
-      console.error("Erreur deleteUsers:", error)
+      // console.error("Erreur deleteUsers:", error)
       throw error
     }
   }

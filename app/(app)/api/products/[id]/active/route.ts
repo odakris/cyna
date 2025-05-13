@@ -31,10 +31,10 @@ export async function PATCH(
 
     return await productController.toggleProductStatus(id)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur non gérée dans la route PATCH /products/${params.then(p => p.id)}/active:`,
       error
-    )
+    )*/
     return NextResponse.json(
       { error: "Erreur serveur inattendue" },
       { status: 500 }

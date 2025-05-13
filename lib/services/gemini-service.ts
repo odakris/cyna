@@ -215,7 +215,7 @@ export async function processChatbotMessageWithGemini(
       context: context,
     }
   } catch (error) {
-    console.error("Erreur Gemini:", error)
+    // console.error("Erreur Gemini:", error)
 
     // Fallback vers la méthode originale en cas d'erreur
     const fallbackService = await import("./chatbot-service")

@@ -184,7 +184,7 @@ export function useChatbot() {
         handleMessageResponse(messageData)
       }
     } catch (error) {
-      console.error("Erreur chatbot:", error)
+      // console.error("Erreur chatbot:", error)
 
       // Afficher un message d'erreur à l'utilisateur
       setMessages(prev => [
@@ -285,13 +285,13 @@ export function useChatbot() {
     try {
       // Vérifier que nous avons les informations nécessaires
       if (!email || !subject || !message || !firstName || !lastName) {
-        console.error("Données manquantes pour le formulaire de contact:", {
+        /*console.error("Données manquantes pour le formulaire de contact:", {
           email,
           subject,
           message,
           firstName,
           lastName,
-        })
+        })*/
         return
       }
 
@@ -356,7 +356,7 @@ export function useChatbot() {
 
       if (!response.ok) {
         const errorText = await response.text()
-        console.error("Erreur API:", response.status, errorText)
+        // console.error("Erreur API:", response.status, errorText)
         throw new Error("Erreur lors de l'envoi du formulaire de contact")
       }
 
@@ -385,7 +385,7 @@ export function useChatbot() {
         description: "Votre demande a été transmise à notre équipe.",
       })
     } catch (error) {
-      console.error("Erreur lors de l'envoi du formulaire:", error)
+      // console.error("Erreur lors de l'envoi du formulaire:", error)
 
       setMessages(prev => [
         ...prev,

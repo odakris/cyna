@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       )
     }
   } catch (error) {
-    console.error("Erreur lors de l'envoi de l'email de vérification:", error)
+    // console.error("Erreur lors de l'envoi de l'email de vérification:", error)
     return NextResponse.json(
       { error: "Une erreur est survenue" },
       { status: 500 }

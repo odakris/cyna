@@ -22,9 +22,9 @@ export const checkPermission = async (permission: Permission) => {
   }
 
   if (!hasPermission(session.user.role as Role, permission)) {
-    console.error(
+    /*console.error(
       `Permission ${permission} refusée pour le rôle ${session.user.role}`
-    )
+    )*/
     return NextResponse.json({ error: "Accès non autorisé" }, { status: 401 })
   }
 

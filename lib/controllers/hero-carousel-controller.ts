@@ -42,7 +42,7 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
 
     return NextResponse.json(createdSlide, { status: 201 })
   } catch (error) {
-    console.error("Controller - Error creating slide:", error)
+    // console.error("Controller - Error creating slide:", error)
     if (error instanceof ZodError) {
       return NextResponse.json(
         { error: "Données invalides", details: error.errors },
@@ -75,7 +75,7 @@ export const update = async (
     const updatedSlide = await heroCarouselService.updateSlide(id, data)
     return NextResponse.json(updatedSlide, { status: 200 })
   } catch (error) {
-    console.error(`Controller - Error updating slide ${id}:`, error)
+    // console.error(`Controller - Error updating slide ${id}:`, error)
 
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -109,7 +109,7 @@ export const updatePartial = async (
     try {
       body = await request.json()
     } catch (error) {
-      console.error("Controller - Error parsing JSON:", error)
+      // console.error("Controller - Error parsing JSON:", error)
       return NextResponse.json(
         { error: "Corps de requête JSON invalide" },
         { status: 400 }

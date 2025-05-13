@@ -35,7 +35,7 @@ export async function GET(
         .toString()
         .includes(session.user.role as string) &&
         conversation.id_user !==
-          (session.user.id_user ? session.user.id_user : null))
+        (session.user.id_user ? session.user.id_user : null))
     ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
@@ -51,7 +51,7 @@ export async function GET(
       messages,
     })
   } catch (error) {
-    console.error(`Error fetching conversation ${params.id}:`, error)
+    // console.error(`Error fetching conversation ${params.id}:`, error)
     return NextResponse.json(
       { error: "Failed to fetch conversation" },
       { status: 500 }
@@ -106,7 +106,7 @@ export async function PATCH(
 
     return NextResponse.json(updatedConversation)
   } catch (error) {
-    console.error(`Error updating conversation ${params.id}:`, error)
+    // console.error(`Error updating conversation ${params.id}:`, error)
     return NextResponse.json(
       { error: "Failed to update conversation" },
       { status: 500 }
@@ -150,7 +150,7 @@ export async function DELETE(
     })
     return NextResponse.json(deletedConversation)
   } catch (error) {
-    console.error(`Error deleting conversation ${params.id}:`, error)
+    // console.error(`Error deleting conversation ${params.id}:`, error)
     return NextResponse.json(
       { error: "Failed to delete conversation" },
       { status: 500 }

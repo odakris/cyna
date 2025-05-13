@@ -56,10 +56,10 @@ export default function Dashboard() {
         const cartData = await fetchAverageCartByCategory(timeFrame)
         setAverageCart(cartData)
       } catch (error) {
-        console.error(
+        /*console.error(
           "Erreur lors de la récupération des données du tableau de bord:",
           error
-        )
+        )*/
         toast({
           title: "Erreur de chargement",
           description:

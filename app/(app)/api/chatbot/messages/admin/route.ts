@@ -62,7 +62,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       message: adminMessage,
     })
   } catch (error) {
-    console.error("Error sending admin message:", error)
+    // console.error("Error sending admin message:", error)
     return NextResponse.json(
       { error: "Failed to send message" },
       { status: 500 }

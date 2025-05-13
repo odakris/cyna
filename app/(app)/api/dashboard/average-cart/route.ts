@@ -146,10 +146,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       averageCartByCategory,
     })
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors de la récupération des paniers moyens par catégorie:",
       error
-    )
+    )*/
     return NextResponse.json(
       {
         success: false,

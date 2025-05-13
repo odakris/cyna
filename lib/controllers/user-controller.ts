@@ -12,7 +12,7 @@ export const getAll = async (): Promise<NextResponse> => {
     const users = await userService.getAllUsers()
     return NextResponse.json(users)
   } catch (error) {
-    console.error("Erreur lors de la récupération des utilisateurs:", error)
+    // console.error("Erreur lors de la récupération des utilisateurs:", error)
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
@@ -32,10 +32,10 @@ export const getById = async (id: number): Promise<NextResponse> => {
     const user = await userService.getUserById(id)
     return NextResponse.json(user)
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors de la récupération de l'utilisateur par ID:",
       error
-    )
+    )*/
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 404 })
@@ -50,10 +50,10 @@ export const getByEmail = async (email: string): Promise<NextResponse> => {
     const user = await userService.getUserByEmail(email)
     return NextResponse.json(user)
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors de la récupération de l'utilisateur par email:",
       error
-    )
+    )*/
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 404 })
@@ -75,7 +75,7 @@ export const create = async (request: NextRequest): Promise<NextResponse> => {
     const newUser = await userService.createUser(data)
     return NextResponse.json(newUser, { status: 201 })
   } catch (error) {
-    console.error("Erreur lors de la création de l'utilisateur:", error)
+    // console.error("Erreur lors de la création de l'utilisateur:", error)
 
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -118,7 +118,7 @@ export const update = async (
     const updatedUser = await userService.updateUser(id, data)
     return NextResponse.json(updatedUser)
   } catch (error) {
-    console.error("Erreur lors de la mise à jour de l'utilisateur:", error)
+    // console.error("Erreur lors de la mise à jour de l'utilisateur:", error)
 
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -146,7 +146,7 @@ export const remove = async (id: number): Promise<NextResponse> => {
     const result = await userService.deleteUser(id)
     return NextResponse.json(result)
   } catch (error) {
-    console.error("Erreur lors de la suppression de l'utilisateur:", error)
+    // console.error("Erreur lors de la suppression de l'utilisateur:", error)
 
     if (error instanceof Error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
@@ -181,7 +181,7 @@ export const toggleUserStatus = async (id: number): Promise<NextResponse> => {
     // Sinon renvoyer l'utilisateur mis à jour
     return NextResponse.json(result.user)
   } catch (error) {
-    console.error("Erreur lors du changement de statut l'utilisateur", error)
+    // console.error("Erreur lors du changement de statut l'utilisateur", error)
 
     if (error instanceof Error) {
       return NextResponse.json(

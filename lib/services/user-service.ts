@@ -11,7 +11,7 @@ export const getAllUsers = async (): Promise<User[]> => {
   try {
     return await userRepository.findAll()
   } catch (error) {
-    console.error("Erreur lors de la récupération des utilisateurs:", error)
+    // console.error("Erreur lors de la récupération des utilisateurs:", error)
     throw new Error("Erreur lors de la récupération des utilisateurs")
   }
 }
@@ -32,10 +32,10 @@ export const getUserById = async (id: number): Promise<User> => {
 
     return user
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors de la récupération de l'utilisateur par ID:",
       error
-    )
+    )*/
     throw new Error(`Erreur lors de la récupération de l'utilisateur ${id}`)
   }
 }
@@ -60,10 +60,10 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
     })
     return user
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors de la récupération de l'utilisateur par email:",
       error
-    )
+    )*/
     throw error instanceof Error
       ? error
       : new Error(`Erreur lors de la récupération de l'utilisateur par email`)
@@ -254,10 +254,10 @@ export const toggleUserStatus = async (
     const updatedUser = await userRepository.updateActiveStatus(id, newStatus)
     return { user: updatedUser }
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors du changement de statut de l'utilisateur:",
       error
-    )
+    )*/
     throw error
   }
 }

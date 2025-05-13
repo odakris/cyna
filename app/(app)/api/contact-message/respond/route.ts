@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     // Passer ces informations au service
     return await contactMessageController.respond(request)
   } catch (error) {
-    console.error("API Route Error:", error)
+    // console.error("API Route Error:", error)
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }

@@ -38,7 +38,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       message: result.message,
     })
   } catch (error) {
-    console.error("Erreur lors de la demande de réinitialisation:", error)
+    // console.error("Erreur lors de la demande de réinitialisation:", error)
     return NextResponse.json(
       { error: "Une erreur est survenue" },
       { status: 500 }

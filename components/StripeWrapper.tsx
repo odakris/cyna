@@ -23,7 +23,7 @@ export default function StripeWrapper({
       if (stripe) {
         setIsStripeReady(true)
       } else {
-        console.error("Erreur lors de l'initialisation de Stripe.")
+        // console.error("Erreur lors de l'initialisation de Stripe.")
       }
     })
   }, [])

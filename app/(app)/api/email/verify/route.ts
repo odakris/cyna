@@ -11,7 +11,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       body = await request.json()
       console.log("📨 Corps de la requête:", body)
     } catch (error) {
-      console.error("Erreur de parsing JSON:", error)
+      // console.error("Erreur de parsing JSON:", error)
       return NextResponse.json(
         { success: false, message: "Format de requête invalide" },
         { status: 400 }
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // Vérifier que le token est présent
     if (!body || !body.token) {
-      console.error("Token manquant dans la requête")
+      // console.error("Token manquant dans la requête")
       return NextResponse.json(
         { success: false, message: "Token manquant" },
         { status: 400 }
@@ -42,7 +42,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     })
   } catch (error) {
-    console.error("Erreur lors de la vérification de l'email:", error)
+    // console.error("Erreur lors de la vérification de l'email:", error)
     return NextResponse.json(
       {
         success: false,

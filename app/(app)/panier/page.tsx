@@ -26,14 +26,14 @@ export default function CartPage() {
 
     try {
       if (cart.length === 0) {
-        console.error("[CartPage] Panier vide")
+        // console.error("[CartPage] Panier vide")
         throw new Error("Votre panier est vide.")
       }
 
       console.log("[CartPage] Redirection vers /checkout")
       router.push("/checkout")
     } catch (error: any) {
-      console.error("[CartPage] Erreur dans handleCheckout:", error)
+      // console.error("[CartPage] Erreur dans handleCheckout:", error)
       setError(
         error.message || "Une erreur s'est produite. Veuillez réessayer."
       )

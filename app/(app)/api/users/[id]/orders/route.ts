@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
         return await OrderController.getUserOrderHistoryForDisplay(id);
     } catch (error) {
-        console.error("Error fetching order history in API route:", error || "Unknown error");
+        // console.error("Error fetching order history in API route:", error || "Unknown error");
         return NextResponse.json({ error: "API Error fetching order history" }, { status: 500 });
     }
 }

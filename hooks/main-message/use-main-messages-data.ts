@@ -46,7 +46,7 @@ export function useMainMessagesData() {
 
       setError(null)
     } catch (error: unknown) {
-      console.error("Erreur fetchMessages:", error)
+      // console.error("Erreur fetchMessages:", error)
       setError("Erreur lors du chargement des messages")
     } finally {
       setLoading(false)
@@ -80,7 +80,7 @@ export function useMainMessagesData() {
 
       return true
     } catch (error: unknown) {
-      console.error("Erreur deleteMessages:", error)
+      // console.error("Erreur deleteMessages:", error)
 
       toast({
         variant: "destructive",
@@ -144,7 +144,7 @@ export function useMainMessagesData() {
 
       return true
     } catch (error) {
-      console.error("Erreur toggleMessageActive:", error)
+      // console.error("Erreur toggleMessageActive:", error)
 
       // En cas d'erreur, on recharge les données pour revenir à l'état correct
       await fetchMessages()

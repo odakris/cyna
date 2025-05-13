@@ -12,7 +12,7 @@ export const paymentService = {
       const payment = await paymentRepository.getPaymentById(userId, paymentId);
       return payment;
     } catch (error) {
-      console.error("Erreur lors de la récupération du paiement :", error);
+      // console.error("Erreur lors de la récupération du paiement :", error);
       throw error;
     }
   },
@@ -44,7 +44,7 @@ export const paymentService = {
         });
       }
     } catch (error) {
-      console.error("Erreur lors de l'attachement du PaymentMethod à Stripe:", error);
+      // console.error("Erreur lors de l'attachement du PaymentMethod à Stripe:", error);
       throw new Error("Impossible d'attacher la méthode de paiement à Stripe");
     }
 
@@ -58,7 +58,7 @@ export const paymentService = {
   async deletePayment(userId: number, paymentId: number): Promise<void> {
     const payment = await paymentRepository.getPaymentById(userId, paymentId);
     if (!payment) {
-      console.error(`Méthode de paiement ${paymentId} introuvable pour l'utilisateur ${userId}`);
+      // console.error(`Méthode de paiement ${paymentId} introuvable pour l'utilisateur ${userId}`);
       throw new Error("Méthode de paiement introuvable");
     }
 
@@ -66,7 +66,7 @@ export const paymentService = {
     try {
       await stripe.paymentMethods.detach(payment.stripe_payment_id);
     } catch (error: any) {
-      console.error("Erreur lors de la suppression du PaymentMethod dans Stripe:", error);
+      // console.error("Erreur lors de la suppression du PaymentMethod dans Stripe:", error);
       if (error.code === "resource_missing") {
         console.warn(`La méthode de paiement ${payment.stripe_payment_id} est déjà détachée ou n'existe pas dans Stripe`);
       } else {
@@ -78,7 +78,7 @@ export const paymentService = {
     try {
       await paymentRepository.deletePaymentInDb(userId, paymentId);
     } catch (error) {
-      console.error("Erreur lors de la suppression dans la base de données:", error);
+      // console.error("Erreur lors de la suppression dans la base de données:", error);
       throw new Error("Impossible de supprimer la méthode de paiement dans la base de données");
     }
   },
@@ -111,7 +111,7 @@ export const paymentService = {
         });
       }
     } catch (error) {
-      console.error("Erreur lors de l'attachement du nouveau PaymentMethod à Stripe:", error);
+      // console.error("Erreur lors de l'attachement du nouveau PaymentMethod à Stripe:", error);
       throw new Error("Impossible d'attacher la nouvelle méthode de paiement à Stripe");
     }
 

@@ -1881,7 +1881,7 @@ async function main() {
 
     console.log("Seeding terminé avec succès !")
   } catch (error) {
-    console.error("Erreur durant le seeding :", error)
+    // console.error("Erreur durant le seeding :", error)
     process.exit(1)
   } finally {
     await prisma.$disconnect()

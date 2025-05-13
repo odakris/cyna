@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       try {
         await mkdir(uploadDir, { recursive: true })
       } catch (error) {
-        console.error("Erreur création dossier:", error)
+        // console.error("Erreur création dossier:", error)
         return NextResponse.json(
           { error: "Erreur serveur lors de la création du dossier" },
           { status: 500 }
@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
       filePath: `/uploads/${fileName}`,
     })
   } catch (error) {
-    console.error("Erreur POST upload:", error)
+    // console.error("Erreur POST upload:", error)
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }

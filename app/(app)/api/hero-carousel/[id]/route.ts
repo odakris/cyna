@@ -20,10 +20,10 @@ export async function GET(
 
     return await heroCarouselController.getById(id)
   } catch (error) {
-    console.error(
+    /* console.error(
       `Route - Error in GET /api/hero-carousel/${(await params).id}:`,
       error
-    )
+    ) */
     return NextResponse.json(
       { error: "Une erreur est survenue lors du traitement de la requête" },
       { status: 500 }
@@ -52,10 +52,10 @@ export async function PUT(
 
     return await heroCarouselController.update(id, request)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Route - Error in PUT /api/hero-carousel/${(await params).id}:`,
       error
-    )
+    ) */
     return NextResponse.json(
       { error: "Une erreur est survenue lors du traitement de la requête" },
       { status: 500 }
@@ -86,10 +86,10 @@ export async function PATCH(
     // Pour les mises à jour partielles, on utilise le même contrôleur que pour PUT
     return await heroCarouselController.updatePartial(id, request)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Route - Error in PATCH /api/hero-carousel/${(await params).id}:`,
       error
-    )
+    )*/
     return NextResponse.json(
       { error: "Une erreur est survenue lors du traitement de la requête" },
       { status: 500 }
@@ -118,10 +118,10 @@ export async function DELETE(
 
     return await heroCarouselController.remove(id)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Route - Error in DELETE /api/hero-carousel/${(await params).id}:`,
       error
-    )
+    )*/
     return NextResponse.json(
       { error: "Une erreur est survenue lors du traitement de la requête" },
       { status: 500 }

@@ -30,7 +30,7 @@ export function useProduct(id: string | string[] | null | undefined) {
         setProduct(data)
       } catch (error) {
         setError(error instanceof Error ? error.message : "Erreur inconnue")
-        console.error("Erreur lors de la récupération du produit:", error)
+        // console.error("Erreur lors de la récupération du produit:", error)
       } finally {
         setLoading(false)
       }

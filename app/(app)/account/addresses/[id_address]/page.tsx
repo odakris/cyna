@@ -113,6 +113,8 @@ export default function EditAddressPage() {
       }
 
       router.push("/account/settings")
+    } catch (err: any) {
+      // console.error("[EditAddressPage] Erreur mise à jour:", err)
     } catch {
       setErrorMessage(err.message || "Erreur mise à jour adresse.")
     }

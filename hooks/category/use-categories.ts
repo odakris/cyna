@@ -19,7 +19,7 @@ export function useCategories() {
         setCategories(data)
         setErrorMessage(null)
       } catch (error) {
-        console.error("Erreur fetchCategories:", error)
+        // console.error("Erreur fetchCategories:", error)
         setErrorMessage("Erreur lors du chargement des catégories.")
         toast({
           title: "Erreur",

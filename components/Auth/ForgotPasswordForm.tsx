@@ -86,7 +86,7 @@ const ForgotPasswordForm = () => {
         form.reset()
       }
     } catch (error) {
-      console.error("Erreur lors de la requête:", error)
+      // console.error("Erreur lors de la requête:", error)
       setError(
         "Une erreur est survenue lors de la demande. Veuillez réessayer."
       )

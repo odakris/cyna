@@ -24,7 +24,7 @@ export function useContactMessageDetails(messageId: string) {
       setMessage(data)
       setError(null)
     } catch (error: unknown) {
-      console.error("Erreur fetchMessage:", error)
+      // console.error("Erreur fetchMessage:", error)
       setError("Erreur lors du chargement du message")
     } finally {
       setLoading(false)
@@ -45,7 +45,7 @@ export function useContactMessageDetails(messageId: string) {
       }
       setMessage(prev => (prev ? { ...prev, is_read: true } : null))
     } catch (error: unknown) {
-      console.error("Erreur markAsRead:", error)
+      // console.error("Erreur markAsRead:", error)
       toast({
         variant: "destructive",
         title: "Erreur",
@@ -73,7 +73,7 @@ export function useContactMessageDetails(messageId: string) {
       })
       router.push("/dashboard/contact")
     } catch (error: unknown) {
-      console.error("Erreur handleDelete:", error)
+      // console.error("Erreur handleDelete:", error)
       toast({
         variant: "destructive",
         title: "Erreur",

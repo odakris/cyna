@@ -11,7 +11,7 @@ export const findAll = async (): Promise<HeroCarouselSlide[]> => {
       },
     })
   } catch (error) {
-    console.error("Repository - Error fetching all slides:", error)
+    // console.error("Repository - Error fetching all slides:", error)
     throw error
   }
 }
@@ -24,7 +24,7 @@ export const findById = async (
       where: { id_hero_slide: id },
     })
   } catch (error) {
-    console.error(`Repository - Error fetching slide with id ${id}:`, error)
+    // console.error(`Repository - Error fetching slide with id ${id}:`, error)
     throw error
   }
 }
@@ -37,10 +37,10 @@ export const findByTitle = async (
       where: { title: title.trim() },
     })
   } catch (error) {
-    console.error(
+    /*console.error(
       `Repository - Error fetching slide with title ${title}:`,
       error
-    )
+    )*/
     throw error
   }
 }
@@ -72,7 +72,7 @@ export const create = async (
       })
     })
   } catch (error) {
-    console.error("Repository - Error creating slide:", error)
+    // console.error("Repository - Error creating slide:", error)
     throw error
   }
 }
@@ -110,7 +110,7 @@ export const update = async (
       })
     })
   } catch (error) {
-    console.error(`Repository - Error updating slide with id ${id}:`, error)
+    // console.error(`Repository - Error updating slide with id ${id}:`, error)
     throw error
   }
 }
@@ -175,10 +175,10 @@ export const updatePartial = async (
       })
     })
   } catch (error) {
-    console.error(
+    /*console.error(
       `Repository - Error partially updating slide with id ${id}:`,
       error
-    )
+    )*/
     throw error
   }
 }
@@ -199,7 +199,7 @@ export const remove = async (id: number): Promise<HeroCarouselSlide> => {
       })
     })
   } catch (error) {
-    console.error(`Repository - Error deleting slide with id ${id}:`, error)
+    // console.error(`Repository - Error deleting slide with id ${id}:`, error)
     throw error
   }
 }
@@ -212,7 +212,7 @@ export const exists = async (id: number): Promise<boolean> => {
 
     return slide !== null
   } catch (error) {
-    console.error("Impossible de vérifier l'existence de la slide:", error)
+    // console.error("Impossible de vérifier l'existence de la slide:", error)
     throw error
   }
 }

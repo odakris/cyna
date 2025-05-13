@@ -117,7 +117,7 @@ const RegisterForm = () => {
       const result = await response.json()
 
       if (!response.ok) {
-        console.error("Erreur lors de l'inscription:", result.error)
+        // console.error("Erreur lors de l'inscription:", result.error)
         setSubmitError(
           typeof result.error === "string"
             ? result.error
@@ -140,7 +140,7 @@ const RegisterForm = () => {
         router.push("/auth")
       }, 5000)
     } catch (error) {
-      console.error("Erreur lors de la requête:", error)
+      // console.error("Erreur lors de la requête:", error)
       setSubmitError(
         "Une erreur est survenue lors de l'inscription. Veuillez réessayer."
       )

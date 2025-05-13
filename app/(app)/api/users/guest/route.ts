@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     console.log('[GuestRoute] Création utilisateur invité:', { email });
 
     if (!email || typeof email !== 'string') {
-      console.error('[GuestRoute] E-mail manquant ou invalide');
+      // console.error('[GuestRoute] E-mail manquant ou invalide');
       return NextResponse.json({ error: 'E-mail requis' }, { status: 400 });
     }
 
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingUser) {
-      console.error('[GuestRoute] E-mail déjà utilisé:', { email });
+      // console.error('[GuestRoute] E-mail déjà utilisé:', { email });
       return NextResponse.json({ error: 'Cet e-mail est déjà associé à un compte' }, { status: 400 });
     }
 
@@ -105,10 +105,10 @@ export async function POST(request: NextRequest) {
 
     return response;
   } catch (error: any) {
-    console.error('[GuestRoute] Erreur:', {
+    /*console.error('[GuestRoute] Erreur:', {
       message: error.message,
       stack: error.stack,
-    });
+    });*/
     return NextResponse.json(
       { error: 'Erreur lors de la création de l’utilisateur invité', details: error.message },
       { status: 500 }

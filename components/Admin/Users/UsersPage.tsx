@@ -60,7 +60,7 @@ export default function UsersPage() {
       setShowDeleteDialog(false)
       table.resetRowSelection()
     } catch (error) {
-      console.error("Erreur handleDelete:", error)
+      // console.error("Erreur handleDelete:", error)
       setError(
         "Une erreur est survenue lors de la suppression des utilisateurs."
       )

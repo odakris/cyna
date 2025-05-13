@@ -10,7 +10,7 @@ export async function GET() {
 
     return await contactMessageController.getStats()
   } catch (error) {
-    console.error("API Route Error:", error)
+    // console.error("API Route Error:", error)
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }

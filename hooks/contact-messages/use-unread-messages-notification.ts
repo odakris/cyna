@@ -39,10 +39,10 @@ export function useUnreadMessagesNotification() {
         previousCountRef.current = stats.unread
       }
     } catch (error) {
-      console.error(
+      /*console.error(
         "Erreur lors de la vérification des messages non lus:",
         error
-      )
+      )*/
     }
   }, [toast, pathname]) // Inclure les dépendances de la fonction
 

@@ -74,7 +74,7 @@ export default function ContactForm() {
 
       // setTimeout(() => setIsSubmitted(false), 3000)
     } catch (error) {
-      console.error("Erreur lors de l'envoi:", error)
+      // console.error("Erreur lors de l'envoi:", error)
       toast({
         variant: "destructive",
         title: "Erreur",

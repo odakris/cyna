@@ -134,7 +134,7 @@ export function useCheckout() {
       console.log("[useCheckout] Réponse brute pour", response.url, ":", text)
       return text ? JSON.parse(text) : {}
     } catch (err) {
-      console.error("[useCheckout] Erreur parsing JSON:", err)
+      // console.error("[useCheckout] Erreur parsing JSON:", err)
       return { message: "Réponse serveur invalide" }
     }
   }
@@ -157,7 +157,7 @@ export function useCheckout() {
         setSelectedPayment(guestPayments[0])
       }
     } catch (err) {
-      console.error("[useCheckout] Erreur dans fetchGuestData:", err)
+      // console.error("[useCheckout] Erreur dans fetchGuestData:", err)
       setError(err instanceof Error ? err.message : "Erreur lors du chargement des données invité")
     } finally {
       setLoading(false)
@@ -187,7 +187,7 @@ export function useCheckout() {
         }
       } else {
         const errorData = await safeParseJson(addressResponse)
-        console.error("[useCheckout] Erreur récupération adresses:", errorData)
+        // console.error("[useCheckout] Erreur récupération adresses:", errorData)
         setError(
           `Erreur lors du chargement des adresses: ${errorData.message || "Erreur inconnue"}`
         )
@@ -202,13 +202,13 @@ export function useCheckout() {
         }
       } else {
         const errorData = await safeParseJson(paymentResponse)
-        console.error("[useCheckout] Erreur récupération moyens de paiement:", errorData)
+        // console.error("[useCheckout] Erreur récupération moyens de paiement:", errorData)
         setError(
           `Erreur lors du chargement des moyens de paiement: ${errorData.message || "Erreur inconnue"}`
         )
       }
     } catch (err) {
-      console.error("[useCheckout] Erreur dans fetchUserData:", err)
+      // console.error("[useCheckout] Erreur dans fetchUserData:", err)
       setError(
         "Erreur réseau lors du chargement des données utilisateur. Veuillez réessayer."
       )
@@ -315,7 +315,7 @@ export function useCheckout() {
 
       return guestUser.id_user
     } catch (err) {
-      console.error("[useCheckout] Erreur dans createGuestUser:", err)
+      // console.error("[useCheckout] Erreur dans createGuestUser:", err)
       setError(
         "Erreur réseau lors de la création de l'utilisateur invité. Vérifiez votre connexion et réessayez."
       )
@@ -414,7 +414,7 @@ export function useCheckout() {
         setActiveTab("payment")
       }
     } catch (err) {
-      console.error("[useCheckout] Erreur dans handleSaveNewAddress:", err)
+      // console.error("[useCheckout] Erreur dans handleSaveNewAddress:", err)
       setError(
         err instanceof Error ? err.message : "Erreur lors de l'enregistrement de l'adresse"
       )
@@ -430,13 +430,13 @@ export function useCheckout() {
     setError(null)
 
     if (!stripe || !elements) {
-      console.error("[useCheckout] Stripe non chargé:", { stripe, elements })
+      // console.error("[useCheckout] Stripe non chargé:", { stripe, elements })
       setError("Erreur de chargement de Stripe. Veuillez recharger la page.")
       return
     }
 
     if (!newPayment.card_name) {
-      console.error("[useCheckout] Nom de carte manquant")
+      // console.error("[useCheckout] Nom de carte manquant")
       setError("Veuillez entrer un nom pour la carte")
       return
     }
@@ -509,17 +509,17 @@ export function useCheckout() {
             )
           }
         } catch (error) {
-          console.error(
+          /*console.error(
             "[useCheckout] Erreur lors de la récupération/création du customerId:",
             error
-          )
+          )*/
           setError("Erreur lors de la configuration du client Stripe")
           return
         }
       }
 
       if (!stripeCustomerId) {
-        console.error("[useCheckout] stripeCustomerId manquant")
+        // console.error("[useCheckout] stripeCustomerId manquant")
         setError("Erreur: client Stripe non configuré")
         return
       }
@@ -527,7 +527,7 @@ export function useCheckout() {
       // Reste du code avec le stripeCustomerId maintenant défini
       const cardElement = elements.getElement(CardElement)
       if (!cardElement) {
-        console.error("[useCheckout] CardElement non trouvé")
+        // console.error("[useCheckout] CardElement non trouvé")
         setError(
           "Erreur avec |le formulaire de paiement. Veuillez recharger la page."
         )
@@ -544,7 +544,7 @@ export function useCheckout() {
       })
 
       if (error) {
-        console.error("[useCheckout] Erreur Stripe:", error)
+        // console.error("[useCheckout] Erreur Stripe:", error)
         setError(error.message || "Erreur lors de l'ajout du moyen de paiement")
         return
       }
@@ -625,7 +625,7 @@ export function useCheckout() {
       cardElement.clear()
       setActiveTab("review")
     } catch (err) {
-      console.error("[useCheckout] Erreur dans handleSaveNewPayment:", err)
+      // console.error("[useCheckout] Erreur dans handleSaveNewPayment:", err)
       setError(
         err instanceof Error ? err.message : "Erreur lors de l’ajout du moyen de paiement"
       )

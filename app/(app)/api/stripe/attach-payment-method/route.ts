@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       paymentMethodId: paymentMethod.id,
     });
   } catch (error: any) {
-    console.error('[API Stripe Attach Payment Method] Erreur:', error);
+    // console.error('[API Stripe Attach Payment Method] Erreur:', error);
     return NextResponse.json(
       {
         error: 'Erreur lors de l’attachement du moyen de paiement',

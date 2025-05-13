@@ -54,7 +54,7 @@ export default function OrderConfirmationPage() {
         setOrder(simulatedOrder);
         console.log('[OrderConfirmation] Commande récupérée:', simulatedOrder);
       } catch (err) {
-        console.error('[OrderConfirmation] Erreur lors de la récupération:', err);
+        // console.error('[OrderConfirmation] Erreur lors de la récupération:', err);
         setError(err instanceof Error ? err.message : 'Une erreur est survenue');
       } finally {
         setLoading(false);

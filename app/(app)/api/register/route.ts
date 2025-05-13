@@ -102,9 +102,9 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     // Gestion sécurisée des erreurs
     if (error instanceof Error) {
-      console.error("Erreur lors de l'inscription:", error.message)
+      // console.error("Erreur lors de l'inscription:", error.message)
     } else {
-      console.error("Erreur inconnue lors de l'inscription:", error)
+      // console.error("Erreur inconnue lors de l'inscription:", error)
     }
     return NextResponse.json(
       { error: "Une erreur est survenue lors de l'inscription" },

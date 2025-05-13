@@ -19,7 +19,7 @@ export const findAll = async (): Promise<ContactMessage[]> => {
       },
     })
   } catch (error) {
-    console.error("Repository - Error fetching all contact messages:", error)
+    // console.error("Repository - Error fetching all contact messages:", error)
     throw error
   }
 }
@@ -39,10 +39,10 @@ export const findById = async (id: number): Promise<ContactMessage | null> => {
       },
     })
   } catch (error) {
-    console.error(
+    /*console.error(
       `Repository - Error fetching contact message with id ${id}:`,
       error
-    )
+    )*/
     throw error
   }
 }
@@ -65,7 +65,7 @@ export const findUnread = async (): Promise<ContactMessage[]> => {
       },
     })
   } catch (error) {
-    console.error("Repository - Error fetching unread contact messages:", error)
+    // console.error("Repository - Error fetching unread contact messages:", error)
     throw error
   }
 }
@@ -93,7 +93,7 @@ export const create = async (data: {
       },
     })
   } catch (error) {
-    console.error("Repository - Error creating contact message:", error)
+    // console.error("Repository - Error creating contact message:", error)
     throw error
   }
 }
@@ -107,10 +107,10 @@ export const markAsRead = async (id: number): Promise<ContactMessage> => {
       },
     })
   } catch (error) {
-    console.error(
+    /*console.error(
       `Repository - Error marking message as read with id ${id}:`,
       error
-    )
+    )*/
     throw error
   }
 }
@@ -130,7 +130,7 @@ export const saveResponse = async (data: {
       },
     })
   } catch (error) {
-    console.error(`Repository - Error saving response to message:`, error)
+    // console.error(`Repository - Error saving response to message:`, error)
     throw error
   }
 }
@@ -141,10 +141,10 @@ export const remove = async (id: number): Promise<ContactMessage> => {
       where: { id_message: id },
     })
   } catch (error) {
-    console.error(
+    /*console.error(
       `Repository - Error deleting contact message with id ${id}:`,
       error
-    )
+    )*/
     throw error
   }
 }
@@ -183,7 +183,7 @@ export const getStats = async (): Promise<{
       lastWeek,
     }
   } catch (error) {
-    console.error("Erreur lors du calcul des statistiques:", error)
+    // console.error("Erreur lors du calcul des statistiques:", error)
     throw error
   }
 }

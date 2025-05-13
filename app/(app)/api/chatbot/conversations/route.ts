@@ -38,7 +38,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       conversationId: conversation.id_conversation,
     })
   } catch (error) {
-    console.error("Error creating chatbot conversation:", error)
+    // console.error("Error creating chatbot conversation:", error)
     return NextResponse.json(
       { error: "Failed to create conversation" },
       { status: 500 }
@@ -94,7 +94,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json(conversations)
   } catch (error) {
-    console.error("Error fetching chatbot conversations:", error)
+    // console.error("Error fetching chatbot conversations:", error)
     return NextResponse.json(
       { error: "Failed to fetch conversations" },
       { status: 500 }

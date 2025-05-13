@@ -50,7 +50,7 @@ class EmailVerificationService {
       console.log(`Email de vérification envoyé à ${testEmail} (destinataire original: ${email})`);
       return result;
     } catch (error) {
-      console.error("Erreur lors de l'envoi de l'email de vérification:", error);
+      // console.error("Erreur lors de l'envoi de l'email de vérification:", error);
       return false;
     }
   }
@@ -123,10 +123,10 @@ class EmailVerificationService {
           message: "Votre adresse email a été vérifiée avec succès !",
         };
       } catch (updateError) {
-        console.error(
+        /*console.error(
           "Erreur lors de la mise à jour de l'utilisateur:",
           updateError
-        );
+        );*/
         return {
           success: false,
           message:
@@ -134,7 +134,7 @@ class EmailVerificationService {
         };
       }
     } catch (error) {
-      console.error("Erreur lors de la vérification de l'email:", error);
+      // console.error("Erreur lors de la vérification de l'email:", error);
       return {
         success: false,
         message:
@@ -202,10 +202,10 @@ class EmailVerificationService {
       console.log(`Email de changement d'email envoyé à ${testEmail} (destinataire original: ${newEmail})`);
       return result;
     } catch (error) {
-      console.error(
+      /*console.error(
         "Erreur lors de l'initialisation du changement d'email:",
         error
-      );
+      );*/
       return false;
     }
   }

@@ -101,10 +101,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       dailySales,
     })
   } catch (error) {
-    console.error(
+    /*console.error(
       "Erreur lors de la récupération des ventes quotidiennes:",
       error
-    )
+    )*/
     return NextResponse.json(
       {
         success: false,

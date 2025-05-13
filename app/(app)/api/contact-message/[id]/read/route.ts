@@ -21,7 +21,7 @@ export async function PATCH(
 
     return await contactMessageController.markAsRead(id)
   } catch (error) {
-    console.error("API Route Error:", error)
+    // console.error("API Route Error:", error)
     return NextResponse.json({ error: "Erreur serveur" }, { status: 500 })
   }
 }

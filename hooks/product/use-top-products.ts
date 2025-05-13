@@ -33,7 +33,7 @@ export function useTopProducts(limit: number = 4) {
         setProducts(topProducts)
       } catch (error) {
         setError(error instanceof Error ? error.message : "Erreur inconnue")
-        console.error("Erreur:", error)
+        // console.error("Erreur:", error)
       } finally {
         setLoading(false)
       }

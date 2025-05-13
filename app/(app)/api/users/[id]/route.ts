@@ -22,10 +22,10 @@ export async function GET(
 
     return await userController.getById(id)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur non gérée dans la route GET /users/${params.then(p => p.id)}:`,
       error
-    )
+    )*/
     return NextResponse.json(
       { error: "Erreur serveur inattendue" },
       { status: 500 }
@@ -52,7 +52,7 @@ export async function PUT(
     const session = await getServerSession(authOptions)
     console.log("Session reçue dans PUT /api/users/[id]:", session)
     if (!session?.user?.id_user) {
-      console.error("Session absente ou utilisateur non identifié")
+      // console.error("Session absente ou utilisateur non identifié")
       return NextResponse.json(
         { error: "Vous devez être connecté" },
         { status: 401 }
@@ -85,10 +85,10 @@ export async function PUT(
 
     return await userController.update(request, id)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur non gérée dans la route PUT /users/${params.then(p => p.id)}:`,
       error
-    )
+    )*/
     return NextResponse.json(
       { error: "Erreur serveur inattendue" },
       { status: 500 }
@@ -116,10 +116,10 @@ export async function DELETE(
 
     return await userController.remove(id)
   } catch (error) {
-    console.error(
+    /*console.error(
       `Erreur non gérée dans la route DELETE /users/${params.then(p => p.id)}:`,
       error
-    )
+    )*/
     return NextResponse.json(
       { error: "Erreur serveur inattendue" },
       { status: 500 }

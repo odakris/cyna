@@ -146,8 +146,8 @@ export default function OrdersPage() {
             }))
           setCategories(validCategories)
         }
-      } catch (error) {
-        console.error("Erreur de récupération des catégories :", error)
+      } catch {
+        // console.error("Erreur de récupération des catégories :", error)
       }
     }
 
@@ -174,8 +174,8 @@ export default function OrdersPage() {
           ).sort((a, b) => parseInt(b as string) - parseInt(a as string))
           setAllAvailableYears(years)
         }
-      } catch (error) {
-        console.error("Erreur de récupération des années :", error)
+      } catch {
+        // console.error("Erreur de récupération des années :", error)
       }
     }
 

@@ -35,7 +35,7 @@ export function useCategoryProducts(id: string | string[] | null | undefined) {
         setCategory(data)
       } catch (error) {
         setError(error instanceof Error ? error.message : "Erreur inconnue")
-        console.error("Erreur lors de la récupération de la catégorie:", error)
+        // console.error("Erreur lors de la récupération de la catégorie:", error)
       } finally {
         setLoading(false)
       }

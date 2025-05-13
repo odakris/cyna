@@ -82,7 +82,7 @@ export function useOrdersData() {
 
       setError(null)
     } catch (error: unknown) {
-      console.error("Erreur fetchOrders:", error)
+      // console.error("Erreur fetchOrders:", error)
       setError("Erreur lors du chargement des commandes")
     } finally {
       setLoading(false)
@@ -103,11 +103,11 @@ export function useOrdersData() {
         if (!response.ok) {
           // Analyser la réponse d'erreur
           const errorData = await response.json().catch(() => ({}))
-          console.error(`Erreur suppression commande ${id}:`, {
+          /*console.error(`Erreur suppression commande ${id}:`, {
             status: response.status,
             statusText: response.statusText,
             errorData,
-          })
+          })*/
 
           throw new Error(
             errorData.message ||
@@ -121,7 +121,7 @@ export function useOrdersData() {
       await fetchOrders()
       return true
     } catch (error: unknown) {
-      console.error("Erreur deleteOrders:", error)
+      // console.error("Erreur deleteOrders:", error)
       throw error
     }
   }

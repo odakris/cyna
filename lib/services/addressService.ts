@@ -52,7 +52,7 @@ export class AddressService {
                 is_default_shipping: address.is_default_shipping,
             };
         } catch (error) {
-            console.error("[AddressService getUserAddressById] Erreur lors de la récupération de l'adresse:", error);
+            // console.error("[AddressService getUserAddressById] Erreur lors de la récupération de l'adresse:", error);
             throw new Error("Erreur de récupération de l'adresse");
         }
     }
@@ -62,7 +62,7 @@ export class AddressService {
         try {
             const userIdNum = parseInt(userId, 10);
             if (isNaN(userIdNum)) {
-                console.error("[AddressService createAddress] ID utilisateur invalide:", { userId });
+                // console.error("[AddressService createAddress] ID utilisateur invalide:", { userId });
                 throw new Error("ID utilisateur invalide");
             }
 
@@ -89,7 +89,7 @@ export class AddressService {
             const createdAddress = await AddressRepository.createAddress(userId, addressData);
 
             if (!createdAddress) {
-                console.error("[AddressService createAddress] Création échouée, aucune donnée retournée:", { userId });
+                // console.error("[AddressService createAddress] Création échouée, aucune donnée retournée:", { userId });
                 throw new Error("Création échouée, aucune donnée retournée");
             }
 
@@ -100,10 +100,10 @@ export class AddressService {
 
             return createdAddress;
         } catch (error: any) {
-            console.error("[AddressService createAddress] Erreur lors de la création:", {
+            /*console.error("[AddressService createAddress] Erreur lors de la création:", {
                 message: error.message,
                 stack: error.stack,
-            });
+            });*/
             throw error;
         }
     }
@@ -115,14 +115,14 @@ export class AddressService {
             const requiredFields = ['first_name', 'last_name', 'address1', 'postal_code', 'city', 'country'];
             const missingFields = requiredFields.filter(field => !data[field]);
             if (missingFields.length > 0) {
-                console.error("[AddressService updateAddress] Champs manquants:", { missingFields });
+                // console.error("[AddressService updateAddress] Champs manquants:", { missingFields });
                 throw new Error(`Les champs obligatoires sont manquants: ${missingFields.join(", ")}`);
             }
 
             const userIdNum = parseInt(userId, 10);
             const addressIdNum = parseInt(addressId, 10);
             if (isNaN(userIdNum) || isNaN(addressIdNum)) {
-                console.error("[AddressService updateAddress] ID utilisateur ou adresse invalide:", { userId, addressId });
+                // console.error("[AddressService updateAddress] ID utilisateur ou adresse invalide:", { userId, addressId });
                 throw new Error("ID utilisateur ou ID d'adresse invalide");
             }
 
@@ -146,7 +146,7 @@ export class AddressService {
             const updatedAddress = await AddressRepository.updateAddress(userId, addressId, addressData);
 
             if (!updatedAddress) {
-                console.error("[AddressService updateAddress] Mise à jour échouée, aucune donnée retournée:", { userId, addressId });
+                // console.error("[AddressService updateAddress] Mise à jour échouée, aucune donnée retournée:", { userId, addressId });
                 throw new Error("L'adresse n'a pas pu être mise à jour");
             }
 
@@ -157,10 +157,10 @@ export class AddressService {
 
             return updatedAddress;
         } catch (error: any) {
-            console.error("[AddressService updateAddress] Erreur lors de la mise à jour:", {
+            /*console.error("[AddressService updateAddress] Erreur lors de la mise à jour:", {
                 message: error.message,
                 stack: error.stack,
-            });
+            });*/
             throw error;
         }
     }
@@ -170,14 +170,14 @@ export class AddressService {
             const userIdNum = parseInt(userId, 10);
             const addressIdNum = parseInt(addressId, 10);
             if (isNaN(userIdNum) || isNaN(addressIdNum)) {
-                console.error("[AddressService deleteAddress] ID utilisateur ou adresse invalide:", { userId, addressId });
+                // console.error("[AddressService deleteAddress] ID utilisateur ou adresse invalide:", { userId, addressId });
                 throw new Error("ID utilisateur ou ID d'adresse invalide");
             }
 
             const deletedAddress = await AddressRepository.deleteAddress(userId, addressId);
 
             if (!deletedAddress) {
-                console.error("[AddressService deleteAddress] Suppression échouée, aucune donnée retournée:", { userId, addressId });
+                // console.error("[AddressService deleteAddress] Suppression échouée, aucune donnée retournée:", { userId, addressId });
                 throw new Error("L'adresse n'a pas pu être supprimée");
             }
 
@@ -188,10 +188,10 @@ export class AddressService {
 
             return deletedAddress;
         } catch (error: any) {
-            console.error("[AddressService deleteAddress] Erreur lors de la suppression:", {
+            /*console.error("[AddressService deleteAddress] Erreur lors de la suppression:", {
                 message: error.message,
                 stack: error.stack,
-            });
+            });*/
             throw error;
         }
     }

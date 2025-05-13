@@ -49,7 +49,7 @@ export function useHeroCarouselData() {
 
       setError(null)
     } catch (error: unknown) {
-      console.error("Erreur fetchSlides:", error)
+      // console.error("Erreur fetchSlides:", error)
       setError("Erreur lors du chargement des slides")
     } finally {
       setLoading(false)
@@ -83,7 +83,7 @@ export function useHeroCarouselData() {
 
       return true
     } catch (error: unknown) {
-      console.error("Erreur deleteSlides:", error)
+      // console.error("Erreur deleteSlides:", error)
 
       toast({
         variant: "destructive",

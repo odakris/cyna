@@ -139,10 +139,10 @@ async function decryptAddress(
 
     if (!response.ok) {
       const errorText = await response.text()
-      console.error("[Checkout] Échec du déchiffrement:", {
+      /*console.error("[Checkout] Échec du déchiffrement:", {
         status: response.status,
         errorText,
-      })
+      })*/
       throw new Error(`Échec du déchiffrement: ${errorText}`)
     }
 
@@ -169,10 +169,10 @@ async function decryptAddress(
       user_id: decryptedAddress.user_id,
     }
   } catch (err) {
-    console.error("[Checkout] Erreur lors du déchiffrement:", {
+    /*console.error("[Checkout] Erreur lors du déchiffrement:", {
       message: err instanceof Error ? err.message : "Erreur inconnue",
       stack: err instanceof Error ? err.stack : undefined,
-    })
+    })*/
     return {
       ...address,
       first_name: "[Déchiffrement échoué]",
@@ -307,12 +307,15 @@ function CheckoutContent() {
       console.log("[Checkout] Paiement déjà en cours, ignoré")
       return
     }
+
+    if (typeof setProcessingPayment !== "function") {
+      /*console.error("[Checkout] setProcessingPayment n’est pas une fonction", {
   
     if (typeof setProcessingPayment !== 'function') {
       console.error('[Checkout] setProcessingPayment n’est pas une fonction', {
         setProcessingPayment,
         checkoutHookKeys: Object.keys(checkoutHook),
-      })
+      })*/
       setError("Erreur interne: impossible de traiter le paiement")
       return
     }
@@ -353,6 +356,30 @@ function CheckoutContent() {
       let paymentData = { ...selectedPayment };
   
       // Étape 3 : Chiffrer les données pour les invités
+    })
+
+    if (!selectedAddress?.id_address || !selectedPayment?.id_payment_info) {
+      setError("Veuillez sélectionner une adresse et un moyen de paiement")
+      /*console.error("[Checkout] Validation échouée:", {
+        id_address: selectedAddress?.id_address,
+        id_payment_info: selectedPayment?.id_payment_info,
+      })*/
+      setProcessingPayment(false)
+      return
+    }
+
+    console.log("[Checkout] Début de handleProceedToPayment", {
+      totalCartPrice,
+      taxes,
+      finalTotal,
+      addressId: selectedAddress.id_address,
+      paymentId: selectedPayment.id_payment_info,
+    })
+
+    try {
+      let addressData = selectedAddress
+      let paymentData = selectedPayment
+
       if (isGuest) {
         console.log('[Checkout] Mode invité, chiffrement des données', { guestUserId });
         const headers: Record<string, string> = {
@@ -458,14 +485,14 @@ function CheckoutContent() {
         let errorMessage = `Erreur serveur: ${response.statusText}`
         try {
           const errorData = await response.json()
-          console.error("[Checkout] Détails de l’erreur serveur:", errorData)
+          // console.error("[Checkout] Détails de l’erreur serveur:", errorData)
           errorMessage =
             errorData.error || errorData.message || response.statusText
         } catch (jsonError) {
-          console.error(
+          /*console.error(
             "[Checkout] Impossible de parser la réponse:",
             jsonError
-          )
+          )*/
           if (response.status === 405) {
             errorMessage =
               "Méthode non autorisée. Veuillez réessayer ou contacter le support."
@@ -480,10 +507,10 @@ function CheckoutContent() {
       console.log('[Checkout] Données reçues de /api/checkout:', data);
   
       if (!data.orderId || !data.status) {
-        console.error(
+        /*console.error(
           "[Checkout] orderId ou status manquant dans la réponse:",
           data
-        )
+        )*/
         throw new Error("Réponse du serveur invalide")
       }
   
@@ -501,14 +528,14 @@ function CheckoutContent() {
         console.log('[Checkout] Paiement réussi, finalisation:', { orderId: data.orderId });
         await finalizeOrder(data.orderId, addressData);
       } else {
-        console.error("[Checkout] Statut de paiement inattendu:", data.status)
+        // console.error("[Checkout] Statut de paiement inattendu:", data.status)
         throw new Error(`Statut de paiement inattendu: ${data.status}`)
       }
     } catch (err) {
-      console.error("[Checkout] Erreur dans handleProceedToPayment:", {
+      /*console.error("[Checkout] Erreur dans handleProceedToPayment:", {
         message: err instanceof Error ? err.message : "Erreur inconnue",
         stack: err instanceof Error ? err.stack : undefined,
-      })
+      })*/
       setError(
         err instanceof Error
           ? err.message
@@ -551,10 +578,10 @@ function CheckoutContent() {
       console.log("[Checkout] Redirection vers:", { targetUrl, orderId })
       router.push(targetUrl)
     } catch (err) {
-      console.error("[Checkout] Erreur dans finalizeOrder:", {
+      /*console.error("[Checkout] Erreur dans finalizeOrder:", {
         message: err instanceof Error ? err.message : "Erreur inconnue",
         stack: err instanceof Error ? err.stack : undefined,
-      })
+      })*/
       setError(
         err instanceof Error
           ? err.message
@@ -568,7 +595,7 @@ function CheckoutContent() {
       orderId: order.id_order,
     })
     if (!address) {
-      console.error("[Checkout] Adresse manquante pour générer le PDF")
+      // console.error("[Checkout] Adresse manquante pour générer le PDF")
       setError("Adresse manquante pour la génération de la facture")
       return
     }

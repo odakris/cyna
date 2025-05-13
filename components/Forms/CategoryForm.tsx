@@ -150,7 +150,7 @@ export function CategoryForm({
 
       router.push("/dashboard/categories")
     } catch (error) {
-      console.error("Erreur onSubmit:", error)
+      // console.error("Erreur onSubmit:", error)
       toast({
         title: "Erreur",
         description:

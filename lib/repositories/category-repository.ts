@@ -19,7 +19,7 @@ export const findAll = async (): Promise<Category[]> => {
       orderBy: { name: "asc" },
     })
   } catch (error) {
-    console.error("Impossible de récupérer la liste des catégories:", error)
+    // console.error("Impossible de récupérer la liste des catégories:", error)
     throw new Error("Impossible de récupérer la liste des catégories")
   }
 }
@@ -38,7 +38,7 @@ export const findById = async (id: number): Promise<Category | null> => {
       },
     })
   } catch (error) {
-    console.error("Impossible de récupérer la catégorie:", error)
+    // console.error("Impossible de récupérer la catégorie:", error)
     throw new Error(`Impossible de récupérer la catégorie avec l'ID ${id}`)
   }
 }
@@ -73,7 +73,7 @@ export const create = async (data: CategoryFormValues): Promise<Category> => {
       })
     })
   } catch (error) {
-    console.error("Impossible de créer la catégorie:", error)
+    // console.error("Impossible de créer la catégorie:", error)
     throw new Error("Impossible de créer la catégorie")
   }
 }
@@ -124,7 +124,7 @@ export const update = async (
       })
     })
   } catch (error) {
-    console.error("Impossible de mettre à jour la catégorie:", error)
+    // console.error("Impossible de mettre à jour la catégorie:", error)
     throw new Error(`Impossible de mettre à jour la catégorie avec l'ID ${id}`)
   }
 }
@@ -158,7 +158,7 @@ export const remove = async (id: number): Promise<Category> => {
       })
     })
   } catch (error) {
-    console.error("Impossible de supprimer la catégorie:", error)
+    // console.error("Impossible de supprimer la catégorie:", error)
     throw new Error(`Impossible de supprimer la catégorie avec l'ID ${id}`)
   }
 }
@@ -176,7 +176,7 @@ export const exists = async (id: number): Promise<boolean> => {
 
     return category !== null
   } catch (error) {
-    console.error("Impossible de vérifier l'existence de la catégorie:", error)
+    // console.error("Impossible de vérifier l'existence de la catégorie:", error)
     throw new Error(
       `Impossible de vérifier l'existence de la catégorie avec l'ID ${id}`
     )
@@ -238,10 +238,10 @@ export const updateActiveStatus = async (
       }
     })
   } catch (error) {
-    console.error(
+    /*console.error(
       "Impossible de mettre à jour le statut de la catégorie:",
       error
-    )
+    )*/
     throw new Error(
       `Impossible de mettre à jour le statut de la catégorie avec l'ID ${id}`
     )

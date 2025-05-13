@@ -57,7 +57,7 @@ export function useProductsData() {
       isFirstLoadRef.current = false
       setError(null)
     } catch (error: unknown) {
-      console.error("Erreur fetchProducts:", error)
+      // console.error("Erreur fetchProducts:", error)
       setError("Erreur lors du chargement des produits")
     } finally {
       setLoading(false)
@@ -84,7 +84,7 @@ export function useProductsData() {
       await fetchProducts()
       return true
     } catch (error: unknown) {
-      console.error("Erreur deleteProducts:", error)
+      // console.error("Erreur deleteProducts:", error)
       throw error
     }
   }

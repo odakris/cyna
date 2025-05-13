@@ -30,7 +30,7 @@ export async function POST(request: Request) {
       customerId: customer.id,
     });
   } catch (error: any) {
-    console.error('[API Stripe Create Customer] Erreur:', error);
+    // console.error('[API Stripe Create Customer] Erreur:', error);
     return NextResponse.json(
       {
         error: 'Erreur lors de la création du client Stripe',

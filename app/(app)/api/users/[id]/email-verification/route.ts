@@ -19,7 +19,7 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
   const session = await getServerSession(authOptions)
   console.log("Session:", session ? { user: session.user } : "No session")
   if (!session || session.user.id_user.toString() !== params.id) {
-    console.error("Unauthorized - Session user ID:", session?.user.id_user, "Requested ID:", params.id)
+    // console.error("Unauthorized - Session user ID:", session?.user.id_user, "Requested ID:", params.id)
     return NextResponse.json({ message: "Non autorisé" }, { status: 401 })
   }
 
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
     console.log("Fetching user by ID:", id)
     const user = await userService.getUserById(id)
     if (!user) {
-      console.error("User not found - ID:", id)
+      // console.error("User not found - ID:", id)
       return NextResponse.json({ message: "Utilisateur non trouvé" }, { status: 404 })
     }
     console.log("User found:", { id_user: user.id_user, email: user.email })
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
       // Vérifier que l'ancien mot de passe est correct
       const isPasswordValid = bcrypt.compare(body.currentPassword, user.password)
       if (!isPasswordValid) {
-        console.error("Mot de passe actuel incorrect.")
+        // console.error("Mot de passe actuel incorrect.")
         return NextResponse.json({ message: "Mot de passe actuel incorrect." }, { status: 400 })
       }
 
@@ -62,7 +62,7 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
       console.log("Checking if email is already used:", data.email)
       const existingUser = await userService.getUserByEmail(data.email)
       if (existingUser && existingUser.id_user !== id) {
-        console.error("Email already in use:", data.email)
+        // console.error("Email already in use:", data.email)
         return NextResponse.json({ message: "Cet e-mail est déjà utilisé" }, { status: 400 })
       }
       console.log("Email is available:", data.email)
@@ -91,11 +91,11 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
       console.log("Preparing email verification...")
 
       if (!process.env.RESEND_API_KEY || !process.env.EMAIL_FROM || !process.env.NEXTAUTH_URL) {
-        console.error("Missing environment variables:", {
+        /*console.error("Missing environment variables:", {
           RESEND_API_KEY: !!process.env.RESEND_API_KEY,
           EMAIL_FROM: !!process.env.EMAIL_FROM,
           NEXTAUTH_URL: !!process.env.NEXTAUTH_URL,
-        })
+        })*/
         return NextResponse.json({ message: "Erreur de configuration du serveur" }, { status: 500 })
       }
 
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
       })
 
       if (error) {
-        console.error("Erreur lors de l'envoi de l'e-mail de vérification:", error)
+        // console.error("Erreur lors de l'envoi de l'e-mail de vérification:", error)
         throw new Error(`Erreur lors de l'envoi de l'e-mail: ${error.message}`)
       }
 
@@ -145,7 +145,7 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
     return NextResponse.json({ message: "Informations mises à jour avec succès." })
 
   } catch (error) {
-    console.error("Erreur dans POST /api/users/[id]/email-verification:", error)
+    // console.error("Erreur dans POST /api/users/[id]/email-verification:", error)
     if (error instanceof z.ZodError) {
       return NextResponse.json({ message: "Données invalides", details: error.errors }, { status: 400 })
     }

@@ -19,7 +19,7 @@ export async function GET(request: Request) {
       userId = parseInt(userIdHeader);
       console.log('[API Payment Infos] Utilisateur invité:', { userId });
     } else {
-      console.error('[API Payment Infos] Utilisateur non identifié');
+      // console.error('[API Payment Infos] Utilisateur non identifié');
       return NextResponse.json(
         { message: 'Utilisateur non identifié. Veuillez vous connecter ou fournir un ID utilisateur.' },
         { status: 401 }
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     }
 
     if (isNaN(userId)) {
-      console.error('[API Payment Infos] userId invalide:', { userId });
+      // console.error('[API Payment Infos] userId invalide:', { userId });
       return NextResponse.json(
         { message: 'ID utilisateur invalide' },
         { status: 400 }
@@ -37,7 +37,7 @@ export async function GET(request: Request) {
     // Vérifier que l'utilisateur existe
     const user = await prisma.user.findUnique({ where: { id_user: userId } });
     if (!user) {
-      console.error('[API Payment Infos] Utilisateur non trouvé:', { userId });
+      // console.error('[API Payment Infos] Utilisateur non trouvé:', { userId });
       return NextResponse.json(
         { message: 'Utilisateur non trouvé' },
         { status: 404 }
@@ -62,10 +62,10 @@ export async function GET(request: Request) {
 
     return NextResponse.json(paymentInfos, { status: 200 });
   } catch (error: any) {
-    console.error('[API Payment Infos] Erreur:', {
+    /*console.error('[API Payment Infos] Erreur:', {
       message: error.message,
       stack: error.stack,
-    });
+    });*/
     return NextResponse.json(
       { message: 'Erreur lors de la récupération des moyens de paiement', error: error.message },
       { status: 500 }
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
       userId = parseInt(userIdHeader);
       console.log('[API Payment Infos] Utilisateur invité:', { userId });
     } else {
-      console.error('[API Payment Infos] Utilisateur non identifié');
+      // console.error('[API Payment Infos] Utilisateur non identifié');
       return NextResponse.json(
         { message: 'Utilisateur non identifié. Veuillez vous connecter ou fournir un ID utilisateur.' },
         { status: 401 }
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
     }
 
     if (isNaN(userId)) {
-      console.error('[API Payment Infos] userId invalide:', { userId });
+      // console.error('[API Payment Infos] userId invalide:', { userId });
       return NextResponse.json(
         { message: 'ID utilisateur invalide' },
         { status: 400 }
@@ -105,7 +105,7 @@ export async function POST(request: Request) {
     // Vérifier que l'utilisateur existe
     const user = await prisma.user.findUnique({ where: { id_user: userId } });
     if (!user) {
-      console.error('[API Payment Infos] Utilisateur non trouvé:', { userId });
+      // console.error('[API Payment Infos] Utilisateur non trouvé:', { userId });
       return NextResponse.json(
         { message: 'Utilisateur non trouvé' },
         { status: 404 }
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
     } = await request.json();
 
     if (!card_name || !stripe_payment_id || !stripe_customer_id || !last_card_digits || !brand) {
-      console.error('[API Payment Infos] Données manquantes:', {
+      /*console.error('[API Payment Infos] Données manquantes:', {
         card_name,
         stripe_payment_id,
         stripe_customer_id,
@@ -131,7 +131,7 @@ export async function POST(request: Request) {
         brand,
         exp_month,
         exp_year,
-      });
+      });*/
       return NextResponse.json(
         {
           message: 'Données de paiement incomplètes',
@@ -146,7 +146,7 @@ export async function POST(request: Request) {
     const validatedExpYear = exp_year ? parseInt(exp_year) : null;
 
     if (exp_month && (isNaN(validatedExpMonth) || validatedExpMonth < 1 || validatedExpMonth > 12)) {
-      console.error('[API Payment Infos] exp_month invalide:', { exp_month });
+      // console.error('[API Payment Infos] exp_month invalide:', { exp_month });
       return NextResponse.json(
         { message: 'Mois d’expiration invalide' },
         { status: 400 }
@@ -154,7 +154,7 @@ export async function POST(request: Request) {
     }
 
     if (exp_year && (isNaN(validatedExpYear) || validatedExpYear < new Date().getFullYear())) {
-      console.error('[API Payment Infos] exp_year invalide:', { exp_year });
+      // console.error('[API Payment Infos] exp_year invalide:', { exp_year });
       return NextResponse.json(
         { message: 'Année d’expiration invalide' },
         { status: 400 }
@@ -187,10 +187,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json(paymentInfo, { status: 201 });
   } catch (error: any) {
-    console.error('[API Payment Infos] Erreur:', {
+    /*console.error('[API Payment Infos] Erreur:', {
       message: error.message,
       stack: error.stack,
-    });
+    });*/
     return NextResponse.json(
       { message: 'Erreur lors de l’ajout du moyen de paiement', error: error.message },
       { status: 500 }

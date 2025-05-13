@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     });
 
     if (!cart || cart.length === 0) {
-      console.error('[API Checkout] Panier vide ou invalide');
+      // console.error('[API Checkout] Panier vide ou invalide');
       return NextResponse.json({ message: 'Panier vide ou invalide' }, { status: 400 });
     }
 
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
     if (sessionToken) {
       // Utilisateur connecté
       if (!addressId || !paymentId) {
-        console.error('[API Checkout] Adresse ou moyen de paiement manquant');
+        // console.error('[API Checkout] Adresse ou moyen de paiement manquant');
         return NextResponse.json(
           { message: 'Adresse et moyen de paiement requis' },
           { status: 400 }
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       });
 
       if (!user || !user.stripeCustomerId) {
-        console.error('[API Checkout] Utilisateur ou client Stripe non trouvé');
+        // console.error('[API Checkout] Utilisateur ou client Stripe non trouvé');
         return NextResponse.json({ message: 'Utilisateur invalide' }, { status: 400 });
       }
       customerId = user.stripeCustomerId;
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
         where: { id_address: parseInt(addressId) },
       });
       if (!address) {
-        console.error('[API Checkout] Adresse non trouvée');
+        // console.error('[API Checkout] Adresse non trouvée');
         return NextResponse.json({ message: 'Adresse non trouvée' }, { status: 400 });
       }
       addressData = {
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
         where: { id_payment_info: parseInt(paymentId) },
       });
       if (!paymentInfo || !paymentInfo.stripe_payment_id) {
-        console.error('[API Checkout] Moyen de paiement non trouvé');
+        // console.error('[API Checkout] Moyen de paiement non trouvé');
         return NextResponse.json({ message: 'Moyen de paiement non trouvé' }, { status: 400 });
       }
       paymentMethodId = paymentInfo.stripe_payment_id;
@@ -182,7 +182,7 @@ export async function POST(request: Request) {
         data: { stripeCustomerId: customerId },
       });
     } else {
-      console.error('[API Checkout] Données utilisateur ou invité manquantes');
+      // console.error('[API Checkout] Données utilisateur ou invité manquantes');
       return NextResponse.json(
         { message: 'Données utilisateur ou invité manquantes' },
         { status: 400 }
@@ -260,7 +260,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ clientSecret: session.client_secret }, { status: 200 });
     
   } catch (error: any) {
-    console.error('[API Checkout] Erreur:', error);
+    // console.error('[API Checkout] Erreur:', error);
     return NextResponse.json(
       { message: 'Erreur lors de la création de la session de paiement', error: error.message },
       { status: 500 }

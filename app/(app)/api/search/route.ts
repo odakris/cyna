@@ -104,7 +104,7 @@ export async function GET(
       categories: categories,
     })
   } catch (error) {
-    console.error("Erreur lors de la recherche :", error)
+    // console.error("Erreur lors de la recherche :", error)
     return NextResponse.json(
       { error: "Erreur lors de la recherche" },
       { status: 500 }

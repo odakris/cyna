@@ -35,22 +35,22 @@ export async function POST(req: NextRequest) {
 
     // Vérification de l'authentification
     if (!session) {
-      console.error('[UserDecrypt] Erreur: Aucune session trouvée')
+      // console.error('[UserDecrypt] Erreur: Aucune session trouvée')
       return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
     }
     if (!userId) {
-      console.error('[UserDecrypt] Erreur: En-tête x-user-id manquant')
+      // console.error('[UserDecrypt] Erreur: En-tête x-user-id manquant')
       return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
     }
     if (!session.user.id_user) {
-      console.error('[UserDecrypt] Erreur: session.user.id_user est indéfini')
+      // console.error('[UserDecrypt] Erreur: session.user.id_user est indéfini')
       return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
     }
     if (parseInt(userId) !== session.user.id_user) {
-      console.error('[UserDecrypt] Erreur: userId ne correspond pas', {
+      /*console.error('[UserDecrypt] Erreur: userId ne correspond pas', {
         userId,
         sessionUserId: session.user.id_user,
-      })
+      })*/
       return NextResponse.json({ message: 'Non autorisé' }, { status: 401 })
     }
 
@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ addresses: decryptedAddresses, payments: decryptedPayments })
   } catch (error) {
-    console.error('[UserDecrypt] Erreur serveur:', error)
+    // console.error('[UserDecrypt] Erreur serveur:', error)
     return NextResponse.json(
       { message: error instanceof Error ? error.message : 'Erreur serveur' },
       { status: 500 }

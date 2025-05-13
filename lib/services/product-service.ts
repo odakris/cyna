@@ -13,7 +13,7 @@ export const getAllProducts = async (): Promise<Product[]> => {
     const products = await productRepository.findAll()
     return sortAllProducts(products)
   } catch (error) {
-    console.error("Erreur lors de la récupération des produits:", error)
+    // console.error("Erreur lors de la récupération des produits:", error)
     throw new Error("Erreur lors de la récupération des produits")
   }
 }
@@ -34,7 +34,7 @@ export const getProductById = async (id: number): Promise<Product> => {
 
     return product
   } catch (error) {
-    console.error("Erreur lors de la récupération du produit par ID:", error)
+    // console.error("Erreur lors de la récupération du produit par ID:", error)
     throw new Error(`Erreur lors de la récupération du produit ${id}`)
   }
 }
@@ -195,7 +195,7 @@ export const toggleProductStatus = async (
     )
     return { product: updatedProduct }
   } catch (error) {
-    console.error("Erreur lors du changement de statut du produit:", error)
+    // console.error("Erreur lors du changement de statut du produit:", error)
     throw error
   }
 }
