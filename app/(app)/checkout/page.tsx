@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCheckout } from "@/hooks/order/use-checkout"
 import { AlertTriangle, ArrowLeft } from "lucide-react"
-import { PDFDocument, rgb } from "pdf-lib"
 
 // Components
 import { GuestEmailForm } from "@/components/Checkout/GuestEmailForm"
@@ -589,128 +588,33 @@ function CheckoutContent() {
       return
     }
 
-    const pdfDoc = await PDFDocument.create()
-    const page = pdfDoc.addPage([595, 842])
-    const { height } = page.getSize()
-    const fontSize = 12
+    try {
+      // Importer dynamiquement l'utilitaire
+      const { generateInvoicePDF } = await import("@/lib/invoice-generator")
 
-    page.drawText("Facture", {
-      x: 50,
-      y: height - 50,
-      size: 20,
-      color: rgb(0, 0, 0),
-    })
-
-    page.drawText(`Numéro de commande: ${order.id_order}`, {
-      x: 50,
-      y: height - 80,
-      size: fontSize,
-      color: rgb(0, 0, 0),
-    })
-    page.drawText(`Date: ${new Date().toLocaleDateString()}`, {
-      x: 50,
-      y: height - 100,
-      size: fontSize,
-      color: rgb(0, 0, 0),
-    })
-    page.drawText(
-      `Client: ${isGuest ? guestEmail : address.email || "Inconnu"}`,
-      {
-        x: 50,
-        y: height - 120,
-        size: fontSize,
-        color: rgb(0, 0, 0),
-      }
-    )
-
-    page.drawText("Articles:", {
-      x: 50,
-      y: height - 160,
-      size: fontSize,
-      color: rgb(0, 0, 0),
-    })
-
-    let y = height - 180
-    cart.forEach(item => {
-      const itemTotal =
-        item.price * (item.subscription === "YEARLY" ? 12 : 1) * item.quantity
-      page.drawText(
-        `${item.name} (x${item.quantity}, ${item.subscription || "MONTHLY"}): ${itemTotal.toFixed(2)} €`,
+      // Générer le PDF
+      const pdfBytes = await generateInvoicePDF(
         {
-          x: 50,
-          y,
-          size: fontSize,
-          color: rgb(0, 0, 0),
-        }
+          id_order: order.id_order,
+          total_amount: finalTotal,
+          taxes: taxes,
+        },
+        address,
+        cart,
+        isGuest ? guestEmail : undefined
       )
-      y -= 20
-    })
 
-    page.drawText(`Sous-total: ${totalCartPrice.toFixed(2)} €`, {
-      x: 50,
-      y: y - 20,
-      size: fontSize,
-      color: rgb(0, 0, 0),
-    })
-    page.drawText(`Taxes (20%): ${taxes.toFixed(2)} €`, {
-      x: 50,
-      y: y - 40,
-      size: fontSize,
-      color: rgb(0, 0, 0),
-    })
-    page.drawText(`Total: ${finalTotal.toFixed(2)} €`, {
-      x: 50,
-      y: y - 60,
-      size: fontSize,
-      color: rgb(0, 0, 0),
-    })
-
-    page.drawText("Adresse de facturation:", {
-      x: 50,
-      y: y - 100,
-      size: fontSize,
-      color: rgb(0, 0, 0),
-    })
-    page.drawText(`${address.first_name} ${address.last_name}`, {
-      x: 50,
-      y: y - 120,
-      size: fontSize,
-      color: rgb(0, 0, 0),
-    })
-    page.drawText(address.address1, {
-      x: 50,
-      y: y - 140,
-      size: fontSize,
-      color: rgb(0, 0, 0),
-    })
-
-    let addressY = y - 160
-    if (address.address2) {
-      page.drawText(address.address2, {
-        x: 50,
-        y: addressY,
-        size: fontSize,
-        color: rgb(0, 0, 0),
-      })
-      addressY -= 20
+      // Créer l'URL pour le téléchargement
+      const blob = new Blob([pdfBytes], { type: "application/pdf" })
+      const url = URL.createObjectURL(blob)
+      setInvoiceUrl(url)
+      console.log("[Checkout] PDF généré:", { invoiceUrl: url })
+      return url
+    } catch (err) {
+      console.error("[Checkout] Erreur génération PDF:", err)
+      setError("Erreur lors de la génération de la facture")
+      return null
     }
-
-    page.drawText(
-      `${address.postal_code} ${address.city}, ${address.country}`,
-      {
-        x: 50,
-        y: addressY,
-        size: fontSize,
-        color: rgb(0, 0, 0),
-      }
-    )
-
-    const pdfBytes = await pdfDoc.save()
-    const blob = new Blob([pdfBytes], { type: "application/pdf" })
-    const url = URL.createObjectURL(blob)
-    setInvoiceUrl(url)
-    console.log("[Checkout] PDF généré:", { invoiceUrl: url })
-    return url
   }
 
   // Si la clé Stripe est manquante, afficher un message d'erreur
@@ -727,7 +631,7 @@ function CheckoutContent() {
         <Button asChild className="bg-[#302082] hover:bg-[#302082]/90">
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Retour à l'accueil
+            Retour à l&apos;accueil
           </Link>
         </Button>
       </div>
@@ -904,15 +808,15 @@ export default function CheckoutPage() {
           <div>
             <p className="font-medium">Configuration incomplète</p>
             <p>
-              Le système de paiement n'est pas correctement configuré. Veuillez
-              vérifier la configuration Stripe.
+              Le système de paiement n&apos;est pas correctement configuré.
+              Veuillez vérifier la configuration Stripe.
             </p>
           </div>
         </div>
         <Button asChild className="mt-4 bg-[#302082] hover:bg-[#302082]/90">
           <Link href="/">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Retour à l'accueil
+            Retour à l&apos;accueil
           </Link>
         </Button>
       </div>

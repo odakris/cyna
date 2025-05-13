@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getToken } from "next-auth/jwt"
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib"
 import { prisma } from "@/lib/prisma"
 import { decrypt } from "@/lib/utils/encryption"
 import { hasPermission } from "@/lib/permissions"
+import { generateInvoicePDF } from "@/lib/invoice-generator"
 
 interface Address {
   id_address: string
@@ -46,7 +46,6 @@ export async function GET(
     console.log("[Invoice] orderId:", orderId)
 
     if (!orderId || isNaN(orderId)) {
-      // console.error('[Invoice] Erreur: orderId invalide ou manquant');
       return NextResponse.json(
         { message: "Identifiant de commande requis" },
         { status: 400 }
@@ -61,7 +60,11 @@ export async function GET(
     const order = await prisma.order.findUnique({
       where: { id_order: orderId },
       include: {
-        order_items: true,
+        order_items: {
+          include: {
+            product: true,
+          },
+        },
         address: true,
         user: true,
       },
@@ -79,7 +82,6 @@ export async function GET(
     )
 
     if (!order) {
-      // console.error('[Invoice] Erreur: Commande non trouvée');
       return NextResponse.json(
         { message: "Commande introuvable" },
         { status: 404 }
@@ -120,71 +122,38 @@ export async function GET(
       console.log("[Invoice] Adresse déchiffrée:", decryptedAddress)
     }
 
-    // Génération du PDF
-    const pdfDoc = await PDFDocument.create()
-    const page = pdfDoc.addPage()
-    const { width, height } = page.getSize()
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
-    const fontSize = 12
+    // Formater les données des articles pour le générateur de facture
+    const items = order.order_items.map(item => ({
+      name: item.product?.name || `Produit #${item.id_product}`,
+      price: item.unit_price,
+      quantity: item.quantity,
+      subscription: item.subscription_type,
+    }))
 
-    page.drawText(`Facture #${order.invoice_number}`, {
-      x: 50,
-      y: height - 50,
-      size: 18,
-      font,
-      color: rgb(0, 0, 0),
-    })
-
-    page.drawText(`Client : ${order.user.email}`, {
-      x: 50,
-      y: height - 80,
-      size: fontSize,
-      font,
-    })
-
-    page.drawText(
-      `Adresse : ${decryptedAddress.address1}, ${decryptedAddress.city}, ${decryptedAddress.country}`,
+    // Générer le PDF avec notre nouvel utilitaire
+    const pdfBytes = await generateInvoicePDF(
       {
-        x: 50,
-        y: height - 100,
-        size: fontSize,
-        font,
-      }
+        id_order: order.id_order,
+        invoice_number: order.invoice_number,
+        total_amount: order.total_amount,
+        order_date: order.order_date,
+      },
+      decryptedAddress,
+      items,
+      order.user.email
     )
 
-    let yPosition = height - 140
-    for (const item of order.order_items) {
-      page.drawText(
-        `Produit #${item.id_product} - ${item.quantity} x ${item.unit_price} €`,
-        {
-          x: 50,
-          y: yPosition,
-          size: fontSize,
-          font,
-        }
-      )
-      yPosition -= 20
-    }
-
-    page.drawText(`Total payé : ${order.total_amount} €`, {
-      x: 50,
-      y: yPosition - 20,
-      size: fontSize,
-      font,
-    })
-
-    const pdfBytes = await pdfDoc.save()
     console.log("[Invoice] Facture générée pour orderId:", orderId)
 
     return new NextResponse(pdfBytes, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename=facture_${order.invoice_number}.pdf`,
+        "Content-Disposition": `attachment; filename=facture_${order.invoice_number || order.id_order}.pdf`,
       },
     })
   } catch (error) {
-    // console.error('[Invoice] Erreur serveur:', error);
+    console.error("[Invoice] Erreur serveur:", error)
     return NextResponse.json(
       {
         message:
