@@ -206,15 +206,10 @@ export default function SuccessPage() {
           /*console.error("[SuccessPage] Échec du déchiffrement:", {
             status: response.status,
             errorText,
-<<<<<<< HEAD
-          })
+          })*/
           throw new Error(
             `Échec du déchiffrement: ${response.status} - ${errorText}`
           )
-=======
-          })*/
-          throw new Error(`Échec du déchiffrement: ${response.status} - ${errorText}`)
->>>>>>> 1abc7659a72ff2683d02c2fddf6ca68482d86577
         }
 
         const { addresses: decryptedAddresses, payments: decryptedPayments } =
@@ -262,7 +257,11 @@ export default function SuccessPage() {
         setIsDecrypting(false)
         hasDecryptedRef.current = true
         })*/
-        setDecryptError(err instanceof Error ? err.message : "Erreur lors du déchiffrement des données")
+        setDecryptError(
+          err instanceof Error
+            ? err.message
+            : "Erreur lors du déchiffrement des données"
+        )
       }
     }
 

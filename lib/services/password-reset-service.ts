@@ -15,6 +15,26 @@ class PasswordResetService {
     userId?: number
   ): Promise<{ success: boolean; message: string }> {
     try {
+      // Vérifier les variables d'environnement critiques
+      if (!process.env.RESEND_API_KEY) {
+        console.error(
+          "[PasswordResetService] Erreur: RESEND_API_KEY non configurée"
+        )
+        return {
+          success: false,
+          message: "Erreur serveur: configuration email manquante",
+        }
+      }
+      if (!process.env.NEXT_PUBLIC_APP_URL) {
+        console.error(
+          "[PasswordResetService] Erreur: NEXT_PUBLIC_APP_URL non configurée"
+        )
+        return {
+          success: false,
+          message: "Erreur serveur: configuration URL manquante",
+        }
+      }
+
       // Chercher l'utilisateur par ID si fourni, sinon par email
       const user = userId
         ? await prisma.user.findUnique({
@@ -38,7 +58,6 @@ class PasswordResetService {
 
       // Ne pas révéler si l'utilisateur existe pour des raisons de sécurité
       if (!user || !user.active) {
-        // On retourne un succès même si l'utilisateur n'existe pas, pour des raisons de sécurité
         return {
           success: true,
           message:
@@ -67,24 +86,46 @@ class PasswordResetService {
       // Générer le lien de réinitialisation
       const resetLink = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}`
 
+      // Gestion du mode test/développement
+      let emailToSend = user.email
+      let testModeNote = ""
+      if (process.env.NODE_ENV === "development") {
+        emailToSend = "mcuprojet@gmail.com" // Adresse vérifiée pour le mode test
+        testModeNote = `<p style="color: red; font-weight: bold;">[Mode Test] Cet email était destiné à ${user.email}</p>`
+      }
+
       // Envoyer l'email avec le lien de réinitialisation
       const emailSent = await emailService.sendEmail({
         type: "resetPassword",
-        to: user.email,
+        to: emailToSend,
         firstName: user.first_name || undefined,
         resetLink,
       })
 
       if (!emailSent) {
-        throw new Error("Échec de l'envoi de l'email de réinitialisation")
+        console.warn(
+          "[PasswordResetService] Échec de l'envoi de l'email de réinitialisation à:",
+          emailToSend
+        )
+        return {
+          success: false,
+          message: "Échec de l'envoi de l'email de réinitialisation",
+        }
       }
 
+      console.log(
+        "[PasswordResetService] Email de réinitialisation envoyé avec succès à:",
+        emailToSend
+      )
       return {
         success: true,
         message: "Si l'email existe, un lien de réinitialisation a été envoyé.",
       }
     } catch (error) {
-      // console.error("Erreur lors de la demande de réinitialisation:", error)
+      console.error(
+        "[PasswordResetService] Erreur lors de la demande de réinitialisation:",
+        error
+      )
       return {
         success: false,
         message:
@@ -118,7 +159,10 @@ class PasswordResetService {
         userId: resetToken.id_user,
       }
     } catch (error) {
-      // console.error("Erreur lors de la vérification du token:", error)
+      console.error(
+        "[PasswordResetService] Erreur lors de la vérification du token:",
+        error
+      )
       return { isValid: false }
     }
   }
@@ -168,10 +212,10 @@ class PasswordResetService {
         message: "Votre mot de passe a été réinitialisé avec succès.",
       }
     } catch (error) {
-      /*console.error(
-        "Erreur lors de la réinitialisation du mot de passe:",
+      console.error(
+        "[PasswordResetService] Erreur lors de la réinitialisation du mot de passe:",
         error
-      )*/
+      )
       return {
         success: false,
         message:

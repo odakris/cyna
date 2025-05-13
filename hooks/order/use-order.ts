@@ -95,14 +95,10 @@ export function useOrder(orderId: string | null) {
         setOrder(data.order || data)
         setLoading(false)
       } catch (error) {
-<<<<<<< HEAD
         console.error(
           "[use-order] Erreur réseau lors du chargement de la commande:",
           error
         )
-=======
-        // console.error("[use-order] Erreur réseau lors du chargement de la commande:", error)
->>>>>>> 1abc7659a72ff2683d02c2fddf6ca68482d86577
         setError("Erreur réseau lors du chargement de la commande")
         setLoading(false)
       }

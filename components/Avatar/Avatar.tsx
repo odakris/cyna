@@ -29,14 +29,11 @@ import { signOut, useSession } from "next-auth/react"
 const getInitials = (name: string | null | undefined): string => {
   if (!name) return "CY"
 
-  // Diviser le nom en parties et prendre la première lettre de chaque partie
   const parts = name.trim().split(/\s+/)
   if (parts.length === 1) {
-    // S'il n'y a qu'une partie, prendre les deux premières lettres
     return (parts[0].substring(0, 2) || "CY").toUpperCase()
   }
 
-  // Sinon prendre la première lettre du prénom et du nom
   return (
     (parts[0][0] || "") + (parts[parts.length - 1][0] || "")
   ).toUpperCase()
@@ -47,20 +44,37 @@ export function AvatarDemo() {
   const [initials, setInitials] = useState<string>("CY")
   const [isOpen, setIsOpen] = useState(false)
 
-  // Extraire les initiales lorsque la session change
   useEffect(() => {
     if (session?.user?.name) {
       setInitials(getInitials(session.user.name))
     } else if (session?.user?.email) {
-      // Si seulement l'email est disponible, utiliser la première lettre de l'email
       setInitials(session.user.email.substring(0, 2).toUpperCase())
     } else {
-      setInitials("CY") // Défaut pour invité
+      setInitials("CY")
     }
   }, [session])
 
   const isAuthenticated = status === "authenticated"
   const userName = session?.user?.name || session?.user?.email || "Invité"
+
+  const handleSignOut = async () => {
+    try {
+      console.log("[AvatarDemo] Déclenchement de la déconnexion")
+
+      // Vider le localStorage
+      localStorage.clear() // Vide tout le localStorage
+      // OU, si vous voulez supprimer des clés spécifiques :
+      // localStorage.removeItem("maCleSpecifique");
+
+      console.log("[AvatarDemo] localStorage vidé")
+
+      // Appeler la déconnexion avec next-auth
+      await signOut({ callbackUrl: "/auth" })
+      console.log("[AvatarDemo] Déconnexion réussie, redirection vers /auth")
+    } catch (error) {
+      console.error("[AvatarDemo] Erreur lors de la déconnexion", error)
+    }
+  }
 
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
@@ -71,13 +85,9 @@ export function AvatarDemo() {
           aria-label="Menu utilisateur"
         >
           <Avatar className="h-8 w-8 border-2 border-white/20">
-            {isAuthenticated &&
-              // Si connecté, afficher la photo de profil si disponible
-              (session?.user?.image ? (
-                <AvatarImage src={session.user.image} alt={userName} />
-              ) : null)}
-
-            {/* Fallback avec initiales ou CY */}
+            {isAuthenticated && session?.user?.image ? (
+              <AvatarImage src={session.user.image} alt={userName} />
+            ) : null}
             <AvatarFallback
               className={
                 isAuthenticated
@@ -104,7 +114,6 @@ export function AvatarDemo() {
         <DropdownMenuSeparator />
 
         <DropdownMenuGroup>
-          {/* Options réservées aux utilisateurs connectés */}
           {isAuthenticated && (
             <>
               <DropdownMenuItem asChild>
@@ -117,7 +126,6 @@ export function AvatarDemo() {
                   <span>Mes paramètres</span>
                 </Link>
               </DropdownMenuItem>
-
               <DropdownMenuItem asChild>
                 <Link
                   href="/account/orders"
@@ -128,12 +136,10 @@ export function AvatarDemo() {
                   <span>Mes commandes</span>
                 </Link>
               </DropdownMenuItem>
-
               <DropdownMenuSeparator />
             </>
           )}
 
-          {/* Options pour tous les utilisateurs */}
           <DropdownMenuItem asChild>
             <Link
               href="/mentions-legales"
@@ -144,7 +150,6 @@ export function AvatarDemo() {
               <span>Mentions légales</span>
             </Link>
           </DropdownMenuItem>
-
           <DropdownMenuItem asChild>
             <Link
               href="/mentions-legales#cgu"
@@ -155,7 +160,6 @@ export function AvatarDemo() {
               <span>CGU</span>
             </Link>
           </DropdownMenuItem>
-
           <DropdownMenuItem asChild>
             <Link
               href="/contact"
@@ -166,7 +170,6 @@ export function AvatarDemo() {
               <span>Contact</span>
             </Link>
           </DropdownMenuItem>
-
           <DropdownMenuItem asChild>
             <Link
               href="/about"
@@ -184,10 +187,7 @@ export function AvatarDemo() {
         {isAuthenticated ? (
           <DropdownMenuItem
             className="text-red-500 focus:text-red-500 cursor-pointer"
-            onClick={() => {
-              setIsOpen(false)
-              signOut()
-            }}
+            onClick={handleSignOut}
           >
             <LogOut className="mr-2 h-4 w-4" />
             <span>Se déconnecter</span>
