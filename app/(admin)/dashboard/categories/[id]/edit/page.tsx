@@ -7,7 +7,11 @@ export const metadata: Metadata = {
   description: "Édition des informations d'une catégorie CYNA",
 }
 
-export default async function EditPage({ params }: { params: { id: string } }) {
+export default async function EditPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const resolvedParams = await params
   const id = validateId(resolvedParams.id)
   if (id === null) {

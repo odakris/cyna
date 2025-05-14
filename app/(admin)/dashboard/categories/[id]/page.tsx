@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default async function CategoryPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
   const resolvedParams = await params
   const id = validateId(resolvedParams.id)

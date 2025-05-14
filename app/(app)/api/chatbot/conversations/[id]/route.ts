@@ -35,7 +35,7 @@ export async function GET(
         .toString()
         .includes(session.user.role as string) &&
         conversation.id_user !==
-        (session.user.id_user ? session.user.id_user : null))
+          (session.user.id_user ? session.user.id_user : null))
     ) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }

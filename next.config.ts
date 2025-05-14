@@ -1,8 +1,8 @@
 import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  reactStrictMode: true, // Désactiver temporairement pour le développement
+  reactStrictMode: true,
+  // swcMinify: true, // Utilise le compilateur SWC pour la minification (plus rapide)
   images: {
     remotePatterns: [
       {
@@ -21,6 +21,20 @@ const nextConfig: NextConfig = {
         pathname: "/**",
       },
     ],
+  },
+  // Optimisations de production
+  poweredByHeader: false, // Supprime l'en-tête X-Powered-By pour la sécurité
+  compress: true, // Active la compression
+  compiler: {
+    removeConsole: process.env.NODE_ENV === "production", // Supprime les console.log en production
+  },
+  // Optimisations pour le développement et la production
+  onDemandEntries: {
+    maxInactiveAge: 60 * 60 * 1000, // 1 heure
+    pagesBufferLength: 5,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
   },
 }
 

@@ -510,7 +510,8 @@ export async function processChatbotMessage(
       lowerMessage.includes("bonsoir")
     ) {
       return {
-        response: "Bonjour ! Comment puis-je vous aider aujourd'hui ?",
+        response:
+          "Bonjour ! Je suis l'assistant virtuel de CYNA, spécialiste en cybersécurité. Je peux vous renseigner sur nos solutions de prévention (diagnostic cyber, tests d'intrusion), protection (SOC, EDR, XDR) ou réponse (investigation, gestion de crise). Comment puis-je vous aider aujourd'hui ?",
         needsHumanSupport: false,
         context: "initial",
       }
@@ -726,7 +727,7 @@ export async function processChatbotMessage(
     ) {
       return {
         response:
-          "Nous proposons deux solutions SOC (Security Operations Center) : le Micro SOC adapté aux PME (à partir de 5000€) avec surveillance en heures ouvrées, et le SOC Managé pour les grandes entreprises avec une équipe dédiée 24/7/365 (à partir de 7000€) incluant une chasse proactive aux menaces et une gestion des incidents. Souhaitez-vous discuter avec un conseiller pour déterminer la solution adaptée à vos besoins ?",
+          "Nous proposons deux solutions SOC (Security Operations Center) : le Micro SOC adapté aux PME (à partir de 5000€) avec surveillance en heures ouvrées, et le SOC Managé pour les grandes entreprises avec une équipe dédiée 24/7/365 (à partir de 7000€) incluant une chasse proactive aux menaces et une gestion des incidents. Notre SOC utilise les technologies les plus avancées pour détecter et neutraliser les menaces avant qu'elles n'impactent votre activité. Souhaitez-vous discuter avec un conseiller pour déterminer la solution adaptée à vos besoins ?",
         needsHumanSupport: true,
         context: "info_specific_product",
       }
@@ -774,7 +775,7 @@ export async function processChatbotMessage(
     if (lowerMessage.includes("xdr") || lowerMessage.includes("extended")) {
       return {
         response:
-          "Notre plateforme XDR (Extended Detection and Response) unifie la détection et la réponse à travers tous vos vecteurs d'attaque (endpoints, réseau, cloud, emails). Cette approche holistique permet de détecter les attaques complexes traversant plusieurs systèmes avec une corrélation automatique des alertes et une visualisation complète de la chaîne d'attaque. Prix à partir de 8500€. Souhaitez-vous en savoir plus ?",
+          "Notre plateforme XDR (Extended Detection and Response) unifie la détection et la réponse à travers tous vos vecteurs d'attaque (endpoints, réseau, cloud, emails). Cette approche holistique permet de détecter les attaques complexes traversant plusieurs systèmes avec une corrélation automatique des alertes et une visualisation complète de la chaîne d'attaque. Contrairement aux solutions traditionnelles qui fonctionnent en silos, le XDR offre une vue unifiée de votre sécurité. Prix à partir de 8500€. Souhaitez-vous en savoir plus ?",
         needsHumanSupport: true,
         context: "info_specific_product",
       }
@@ -846,7 +847,7 @@ export async function processChatbotMessage(
     ) {
       return {
         response:
-          "Notre service Red Team reproduit les méthodes d'attaque des adversaires sophistiqués. Contrairement aux tests d'intrusion traditionnels, nos opérations sont des simulations complètes avec ingénierie sociale, exploitation technique et mouvement latéral. Nous testons vos défenses techniques et vos capacités de détection et réponse. Prix à partir de 10000€. Souhaitez-vous échanger avec un expert ?",
+          "Notre service Red Team reproduit les méthodes d'attaque des adversaires sophistiqués. Contrairement aux tests d'intrusion traditionnels, nos opérations sont des simulations complètes avec ingénierie sociale, exploitation technique et mouvement latéral. Nos experts utilisent les mêmes techniques que les attaquants réels pour tester vos défenses techniques et vos capacités de détection et réponse. Nous identifions les vulnérabilités que les tests standards ne peuvent pas détecter. Prix à partir de 10000€. Souhaitez-vous échanger avec un expert ?",
         needsHumanSupport: true,
         context: "info_specific_product",
       }
@@ -927,7 +928,7 @@ export async function processChatbotMessage(
     // RÉPONSE PAR DÉFAUT
     return {
       response:
-        "Je peux vous renseigner sur nos solutions de cybersécurité réparties en 3 catégories : Prévention (Diagnostic, Tests, Formation, RGPD), Protection (SOC, EDR, XDR, Anti-Phishing) et Réponse (Investigation, Gestion de crise, Threat Intelligence, Red Team). Comment puis-je vous aider ?",
+        "Je suis l'assistant virtuel de CYNA, spécialiste en cybersécurité. Je peux vous renseigner sur nos solutions réparties en 3 catégories : Prévention (Diagnostic, Tests d'intrusion, Formation, Audit RGPD), Protection (Micro SOC, SOC Managé, EDR, XDR, Anti-Phishing) et Réponse (Investigation, Gestion de crise, Threat Intelligence, Red Team). Tous nos services sont personnalisables selon vos besoins. Comment puis-je vous aider aujourd'hui ?",
       needsHumanSupport: false,
       context: "initial",
     }

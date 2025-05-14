@@ -448,7 +448,7 @@ class EmailService {
 
   private getOrderConfirmationEmailHtml(
     firstName: string,
-    orderDetails: OrderConfirmationEmailProps['orderDetails']
+    orderDetails: OrderConfirmationEmailProps["orderDetails"]
   ): string {
     const itemsHtml = orderDetails.items
       .map(
@@ -462,15 +462,15 @@ class EmailService {
       </tr>
     `
       )
-      .join('')
+      .join("")
 
     const address2Html = orderDetails.shippingAddress.address2
       ? `<p>${orderDetails.shippingAddress.address2}</p>`
-      : ''
+      : ""
 
     const testModeNoteHtml = orderDetails.testModeNote
       ? orderDetails.testModeNote
-      : ''
+      : ""
 
     return `
       <!DOCTYPE html>
@@ -652,22 +652,22 @@ Cet email a été envoyé automatiquement, merci de ne pas y répondre.
 
   private getOrderConfirmationEmailText(
     firstName: string,
-    orderDetails: OrderConfirmationEmailProps['orderDetails']
+    orderDetails: OrderConfirmationEmailProps["orderDetails"]
   ): string {
     const itemsText = orderDetails.items
       .map(
         item =>
           `- ${item.name}: ${item.quantity} x ${item.unitPrice.toFixed(2)} € (${item.subscriptionType}) = ${item.total.toFixed(2)} €`
       )
-      .join('\n')
+      .join("\n")
 
     const address2Text = orderDetails.shippingAddress.address2
       ? `${orderDetails.shippingAddress.address2}\n`
-      : ''
+      : ""
 
     const testModeNoteText = orderDetails.testModeNote
-      ? `${orderDetails.testModeNote.replace(/<[^>]+>/g, '')}\n\n`
-      : ''
+      ? `${orderDetails.testModeNote.replace(/<[^>]+>/g, "")}\n\n`
+      : ""
 
     return `
 Confirmation de commande #${orderDetails.orderId} - ${CONFIG.appName}

@@ -7,7 +7,11 @@ export const metadata: Metadata = {
   description: "Détails et gestion d'un utilisateur CYNA spécifique",
 }
 
-export default async function UserPage({ params }: { params: { id: string } }) {
+export default async function UserPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
   const resolvedParams = await params
   const id = validateId(resolvedParams.id)
   if (id === null) {
