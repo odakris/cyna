@@ -616,7 +616,7 @@ async function main() {
           image_url:
             "https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?q=80&w=1920",
           button_text: "Découvrir nos solutions",
-          button_link: "/categories",
+          button_link: "/categorie",
           active: true,
           priority_order: 1,
         },
