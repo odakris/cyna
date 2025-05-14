@@ -23,7 +23,7 @@ export default async function EditMessagePage({
 
   return (
     <RoleGuard
-      requiredRole={Role.ADMIN}
+      requiredRole={Role.MANAGER}
       fallback={
         <AccessDenied message="Vous n'avez pas la permission de modifier les messages." />
       }

@@ -36,7 +36,7 @@ export function EditProductPage({ id }: EditProductPageProps) {
 
   return (
     <RoleGuard
-      requiredRole={Role.ADMIN}
+      requiredRole={Role.MANAGER}
       fallback={
         <AccessDenied message="Vous n'avez pas la permission de modifier des produits." />
       }

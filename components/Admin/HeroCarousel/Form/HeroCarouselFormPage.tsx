@@ -77,7 +77,7 @@ export default function HeroCarouselFormPage({
 
   return (
     <RoleGuard
-      requiredRole={Role.ADMIN}
+      requiredRole={Role.MANAGER}
       fallback={
         <AccessDenied
           message={`Vous n'avez pas la permission de ${isEditing ? "modifier" : "créer"} des slides.`}

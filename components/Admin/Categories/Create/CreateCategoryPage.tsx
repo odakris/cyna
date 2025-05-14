@@ -9,7 +9,7 @@ import AccessDenied from "@/components/Auth/AccessDenied"
 export function CreateCategoryPage() {
   return (
     <RoleGuard
-      requiredRole={Role.ADMIN}
+      requiredRole={Role.MANAGER}
       fallback={
         <AccessDenied message="Vous n'avez pas la permission de créer des catégories." />
       }

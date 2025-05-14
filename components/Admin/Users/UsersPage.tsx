@@ -94,7 +94,7 @@ export default function UsersPage() {
 
   return (
     <RoleGuard
-      requiredRole={Role.ADMIN}
+      requiredRole={Role.MANAGER}
       fallback={
         <AccessDenied message="Vous n'avez pas la permission d'accéder à cette page." />
       }

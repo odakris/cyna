@@ -63,7 +63,7 @@ async function loadLogo(
       // Approche serveur - importe dynamiquement fs et path
       try {
         // Import dynamique des modules Node.js
-        const fs = await import("fs").then(module => module.default || module)
+        // const fs = await import("fs").then(module => module.default || module)
         const path = await import("path").then(
           module => module.default || module
         )

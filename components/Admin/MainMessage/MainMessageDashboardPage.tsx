@@ -84,7 +84,7 @@ export default function MainMessageDashboardPage() {
 
   return (
     <RoleGuard
-      requiredRole={Role.ADMIN}
+      requiredRole={Role.MANAGER}
       fallback={
         <AccessDenied message="Vous n'avez pas la permission de gérer les messages." />
       }

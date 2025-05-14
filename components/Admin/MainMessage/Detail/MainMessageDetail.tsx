@@ -61,7 +61,7 @@ export default function MainMessageDetail({ id }: MainMessageDetailProps) {
 
   return (
     <RoleGuard
-      requiredRole={Role.ADMIN}
+      requiredRole={Role.MANAGER}
       fallback={
         <AccessDenied message="Vous n'avez pas la permission de voir les détails des messages." />
       }

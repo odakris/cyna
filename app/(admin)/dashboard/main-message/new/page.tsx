@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function NewMessagePage() {
   return (
     <RoleGuard
-      requiredRole={Role.ADMIN}
+      requiredRole={Role.MANAGER}
       fallback={
         <AccessDenied message="Vous n'avez pas la permission de créer un message." />
       }
