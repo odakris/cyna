@@ -4,15 +4,7 @@ import { ReactNode, useEffect, useState } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useSession } from "next-auth/react"
-import {
-  CreditCard,
-  Home,
-  Package,
-  Settings,
-  User,
-  Loader2,
-  FileText,
-} from "lucide-react"
+import { Package, Settings, User, Loader2 } from "lucide-react"
 
 interface AccountLayoutProps {
   children: ReactNode
@@ -52,28 +44,10 @@ export default function AccountLayout({ children }: AccountLayoutProps) {
       exact: false,
     },
     {
-      name: "Adresses",
-      href: "/account/settings#addresses",
-      icon: <Home className="h-5 w-5" />,
-      exact: false,
-    },
-    {
-      name: "Paiements",
-      href: "/account/settings#payments",
-      icon: <CreditCard className="h-5 w-5" />,
-      exact: false,
-    },
-    {
-      name: "Abonnements",
-      href: "/account/settings#subscriptions",
-      icon: <FileText className="h-5 w-5" />,
-      exact: false,
-    },
-    {
       name: "Paramètres",
       href: "/account/settings",
       icon: <Settings className="h-5 w-5" />,
-      exact: true,
+      exact: false, // Changed to false to match all settings pages
     },
   ]
 
@@ -155,7 +129,7 @@ export default function AccountLayout({ children }: AccountLayoutProps) {
       {/* Mobile bottom navigation */}
       <div className="md:hidden bg-white w-full border-t fixed bottom-0 z-10">
         <nav className="flex justify-around">
-          {navigationItems.slice(0, 5).map(item => (
+          {navigationItems.map(item => (
             <Link
               key={item.name}
               href={item.href}

@@ -50,6 +50,23 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+// Ajout du hook useDebounce
+const useDebounce = (value: string, delay: number) => {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(handler)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
+
 type OrderItem = {
   id_order_item: number
   id_product: number
@@ -105,6 +122,8 @@ export default function OrdersPage() {
     []
   )
   const [search, setSearch] = useState("")
+  // Utilisation du hook useDebounce pour retarder l'exécution de la recherche
+  const debouncedSearch = useDebounce(search, 500) // 500ms de délai
 
   // Refs for order details
   const modalRef = useRef<HTMLDivElement>(null)
@@ -192,7 +211,7 @@ export default function OrdersPage() {
           selectedYear !== "all" ||
           selectedCategoryIds.length > 0 ||
           selectedStatus.length > 0 ||
-          search !== ""
+          debouncedSearch !== "" // Modification ici : use debouncedSearch instead of search
 
         setFiltersApplied(hasFilters)
 
@@ -207,9 +226,10 @@ export default function OrdersPage() {
         }
 
         // Gestion de la recherche
-        if (search) {
+        if (debouncedSearch) {
+          // Modification ici : use debouncedSearch instead of search
           // Nettoyer la saisie
-          const cleanedSearch = search.trim().toLowerCase()
+          const cleanedSearch = debouncedSearch.trim().toLowerCase()
 
           // Essayer de parser comme une date ou des composants de date
           const datePatterns = [
@@ -330,7 +350,13 @@ export default function OrdersPage() {
     }
 
     fetchOrders()
-  }, [session, selectedYear, selectedCategoryIds, selectedStatus, search])
+  }, [
+    session,
+    selectedYear,
+    selectedCategoryIds,
+    selectedStatus,
+    debouncedSearch,
+  ]) // Modification ici : use debouncedSearch instead of search
 
   const handleCategoryChange = (catId: number, checked: boolean) => {
     setSelectedCategoryIds(prev => {
@@ -570,10 +596,6 @@ export default function OrdersPage() {
                   className="pl-9"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Exemples : &quot;9 mai&quot;, &quot;mai 2025&quot;,
-                &quot;Protection&quot;
-              </p>
             </div>
           </div>
         </CardContent>
