@@ -108,18 +108,21 @@ export default function EditAddressPage() {
       )
 
       if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || "Échec de la mise à jour.")
+        try {
+          const errorData = await response.json()
+          throw new Error(errorData.message || "Échec de la mise à jour.")
+        } catch (parseError) {
+          throw new Error("Réponse du serveur invalide. Veuillez réessayer.")
+        }
       }
 
       router.push("/account/settings")
     } catch (err: any) {
-      // console.error("[EditAddressPage] Erreur mise à jour:", err)
-    } catch {
+      console.error("[EditAddressPage] Erreur mise à jour:", err)
       setErrorMessage(err.message || "Erreur mise à jour adresse.")
+    } finally {
+      setLoading(false)
     }
-
-    setLoading(false)
   }
 
   if (!session?.user) {
